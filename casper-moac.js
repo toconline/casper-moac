@@ -18,19 +18,16 @@
   -
  */
 
-import '@polymer/iron-list/iron-list.js';
-import '@polymer/iron-icon/iron-icon.js';
-import '@casper2020/casper-icons/casper-icons.js';
+import '@vaadin/vaadin-grid/vaadin-grid.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
-import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 export class CasperMoac extends PolymerElement {
 
-  static get is() {
+  static get is () {
     return 'casper-moac';
   }
 
-  static get properties() {
+  static get properties () {
     return {
       /**
        * The page that is currently displayed.
@@ -44,7 +41,7 @@ export class CasperMoac extends PolymerElement {
        * Number of results that will be displayed per page.
        * @type {Number}
        */
-      resultsPerPage: {
+      pageSize: {
         type: Number,
         value: 50
       },
@@ -75,7 +72,7 @@ export class CasperMoac extends PolymerElement {
        * URL parameter that will contain the number of results per page.
        * @type {String}
        */
-      resourceResultsPerPageParam: {
+      resourcePageSizeParam: {
         type: String,
         value: 'page[size]'
       },
@@ -98,11 +95,19 @@ export class CasperMoac extends PolymerElement {
       /**
        * URL parameter to sort the results by a specific attribute.
        * @type {String}
-       */
+      */
       resourceSortParam: {
         type: String,
         value: 'sort'
       },
+      /**
+       * URL parameter to filter the results by matching a substring with a specific attribute.
+       * @type {String}
+      */
+     resourceFilterParam: {
+      type: String,
+      value: 'filter'
+    },
       /**
        * The JSON API resource timeout value in ms.
        * @type {Number}
@@ -116,114 +121,61 @@ export class CasperMoac extends PolymerElement {
 
   static get template () {
     return html`
-      <!--Previous Page-->
-      <button id="previousPage" disabled$="[[_previousPageDisabled(page)]]">
-        <iron-icon icon="casper-icons:arrow-left"></iron-icon>
-      </button>
-
-      <dom-repeat items="[[_pagingItems(page, _totalNumberPages)]]" on-dom-change="_bindPagingItemsEvents">
-        <template>
-          <button data-page$="[[item.page]]">
-            [[item.label]]
-          </button>
-        </template>
-      </dom-repeat>
-
-      <!--Next Page-->
-      <button id="nextPage" disabled$="[[_nextPageDisabled(page)]]">
-        <iron-icon icon="casper-icons:arrow-right"></iron-icon>
-      </button>
-
-      Página [[page]] de [[_totalNumberPages]] ([[_totalNumberResults]] resultados)
-
-      <iron-list items="[[_items]]">
-        <slot></slot>
-      </iron-list>
+      <slot name="grid"></slot>
     `;
   }
 
-  static get sortByAscending () { return 'ASC'; }
-  static get sortByDescending () { return 'DESC'; }
+  static get sortByAscending () { return 'asc'; }
+  static get sortByDescending () { return 'desc'; }
 
   ready () {
     super.ready();
-    this._fetchResourceItems();
 
-    this.$.nextPage.addEventListener('click', () => { this._goToNextPage(); });
-    this.$.previousPage.addEventListener('click', () => { this._goToPreviousPage(); });
+    this._vaadinGrid = this.shadowRoot.querySelector('slot').assignedElements().shift();
+
+    // Set the Vaadin Grid options.
+    this._vaadinGrid.pageSize = this.pageSize;
+    this._vaadinGrid.dataProvider = (parameters, callback) => this._fetchResourceItems(parameters, callback);
   }
 
-  _bindPagingItemsEvents () {
-    this.shadowRoot.querySelectorAll('[data-page]').forEach(pagingButton => {
-      pagingButton.addEventListener('click', event => {
-        this._goToPage(parseInt(event.target.dataset.page));
-      })
-    });
-  }
-
-  _pagingItems (page, totalNumberPages) {
-    if (totalNumberPages > 4) {
-      return [
-        { page: 1, label: 1 },
-        { page: 2, label: 2 },
-        { page: null, label: '...' },
-        { page: totalNumberPages - 1, label: totalNumberPages - 1 },
-        { page: totalNumberPages, label: totalNumberPages }
-      ];
-    } else {
-      return Array.from({ length: totalNumberPages }, (value, key) => ({
-        page: key + 1,
-        label: key + 1
-      }));
-    }
-  }
-
-  _goToPage (page) {
-    this.page = page;
-    this._fetchResourceItems();
-  }
-
-  _goToPreviousPage () {
-    this.page--;
-    this._fetchResourceItems();
-  }
-
-  _goToNextPage () {
-    this.page++;
-    this._fetchResourceItems();
-  }
-
-  _previousPageDisabled () {
-    return this.page === 1;
-  }
-
-  _nextPageDisabled () {
-    return this.page === this._totalNumberPages;
-  }
-
-  _fetchResourceItems () {
-    app.socket.getData(this._buildResourceUrl(), this.resourceTimeoutMs, socketResponse => {
+  _fetchResourceItems (parameters, callback) {
+    app.socket.getData(this._buildResourceUrl(parameters), this.resourceTimeoutMs, socketResponse => {
       if (socketResponse.errors) return;
 
-      this._items = socketResponse.data.map(item => ({ id: item.id, ...item.attributes }));
-
-      this._totalNumberResults = parseInt(socketResponse.meta.total);
-      this._totalNumberPages = Math.ceil(this._totalNumberResults / this.resultsPerPage);
+      callback(
+        socketResponse.data.map(item => ({ id: item.id, ...item.attributes })),
+        parseInt(socketResponse.meta.total)
+      );
     });
   }
 
-  _buildResourceUrl () {
+  _buildResourceUrl (parameters) {
     let resourceUrlParams = [
-      this.resourceTotalsMetaParam,                                             // totals=1
-      `${this.resourcePageParam}=${this.page}`,                                 // page[number]=1
-      `${this.resourceResultsPerPageParam}=${this.resultsPerPage}`,             // page[size]=1
-      `fields[${this.resourceName}]=${this.resourceListAttributes.join(',')}`   // fields[general_ledger]=child_count,description
+      this.resourceTotalsMetaParam,                                           // totals=1
+      `${this.resourcePageParam}=${parameters.page + 1}`,                     // page[number]=1
+      `${this.resourcePageSizeParam}=${parameters.pageSize}`,                 // page[size]=1
+      `fields[${this.resourceName}]=${this.resourceListAttributes.join(',')}` // fields[general_ledger]=child_count,description
     ];
 
     // Sort by ascending or descending.
-    resourceUrlParams = this.sortByOrder === CasperMoac.sortByAscending
-      ? [...resourceUrlParams, `${this.resourceSortParam}=${this.sortBy}`]
-      : [...resourceUrlParams, `${this.resourceSortParam}=-${this.sortBy}`];
+    if (parameters.sortOrders.length > 0) {
+      const sortSettings = parameters.sortOrders.shift(); 
+      resourceUrlParams = sortSettings.direction === CasperMoac.sortByAscending
+        ? [...resourceUrlParams, `${this.resourceSortParam}=${sortSettings.path}`]
+        : [...resourceUrlParams, `${this.resourceSortParam}=-${sortSettings.path}`];
+    }
+
+    if (parameters.filters.length > 0) {
+      const resourceFilters = parameters.filters.map(filter => {
+        // Escape special characters that might break the ILIKE clause.
+        let escapedValue = filter.value.replace(/[%\\]/g, '\\$&');
+        escapedValue = escapedValue.replace(/[&]/g, '_');
+
+        return `${filter.path}::TEXT ILIKE '%${escapedValue}%'`;
+      });
+
+      resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${resourceFilters.join(' AND ')}"`]
+    }
 
     // Check if there is already existing filters in the resource name.
     return this.resourceName.indexOf('?') !== -1
@@ -232,4 +184,4 @@ export class CasperMoac extends PolymerElement {
   }
 }
 
-window.customElements.define(CasperMoac.is, CasperMoac);
+customElements.define(CasperMoac.is, CasperMoac);
