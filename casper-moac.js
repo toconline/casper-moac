@@ -18,7 +18,12 @@
   -
  */
 
+import '@casper2020/casper-icons/casper-icons.js';
+import '@casper2020/casper-epaper/casper-epaper.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
+import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
+import '@polymer/iron-icon/iron-icon.js';
+import '@polymer/paper-input/paper-input.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
 export class CasperMoac extends PolymerElement {
@@ -43,20 +48,7 @@ export class CasperMoac extends PolymerElement {
        */
       pageSize: {
         type: Number,
-        value: 50
-      },
-      /**
-       * Attribute that will be used to order the JSON API results.
-       * @type {Array}
-       */
-      sortBy: String,
-      /**
-       * Sort the results in a ascending/descending manner
-       * @type {Array}
-       */
-      sortByOrder: {
-        type: String,
-        value: CasperMoac.sortByAscending
+        value: 250
       },
       /**
        * The JSON API resource name that will be used to build the URL.
@@ -68,6 +60,11 @@ export class CasperMoac extends PolymerElement {
        * @type {Array}
        */
       resourceListAttributes: Array,
+      /**
+       * List of attributes that should be displayed on the iron-list.
+       * @type {Array}
+       */
+      resourceFilterAttributes: Array,
       /**
        * URL parameter that will contain the number of results per page.
        * @type {String}
@@ -104,10 +101,10 @@ export class CasperMoac extends PolymerElement {
        * URL parameter to filter the results by matching a substring with a specific attribute.
        * @type {String}
       */
-     resourceFilterParam: {
-      type: String,
-      value: 'filter'
-    },
+      resourceFilterParam: {
+        type: String,
+        value: 'filter'
+      },
       /**
        * The JSON API resource timeout value in ms.
        * @type {Number}
@@ -116,12 +113,63 @@ export class CasperMoac extends PolymerElement {
         type: Number,
         value: 5000
       },
+      filterInputPlaceholder: {
+        type: String,
+        value: 'Filtrar Resultados'
+      }
     };
   }
 
   static get template () {
     return html`
-      <slot name="grid"></slot>
+      <style>
+        vaadin-split-layout {
+          height: 100%;
+        }
+
+        .right-side-container {
+          width: 65%;
+        }
+
+        .left-side-container {
+          width: 35%;
+          padding: 20px;
+          background-color: white;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .left-side-container .menu-container {
+          display: flex;
+          margin-bottom: 10px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #B3B3B3;
+        }
+
+        .left-side-container .grid-container {
+          flex-grow: 1;
+        }
+
+        .left-side-container .grid-container slot[name="grid"]::slotted(*) {
+          height: 100%;
+        }
+      </style>
+      <vaadin-split-layout>
+        <div class="left-side-container">
+          <div class="menu-container">
+            <slot name="menu"></slot>
+            <paper-input placeholder="[[filterInputPlaceholder]]" id="filterInput">
+              <iron-icon slot="suffix" icon="casper-icons:search"></iron-icon>
+            </paper-input>
+          </div>
+          <div class="grid-container">
+            <slot name="grid"></slot>
+          </div>
+        </div>
+        <div class="right-side-container">
+          <casper-epaper app="[[app]]"></casper-epaper>
+        </div>
+      </vaadin-split-layout>
     `;
   }
 
@@ -131,7 +179,10 @@ export class CasperMoac extends PolymerElement {
   ready () {
     super.ready();
 
-    this._vaadinGrid = this.shadowRoot.querySelector('slot').assignedElements().shift();
+    this._vaadinGrid = this.shadowRoot
+      .querySelector('slot[name="grid"]')
+      .assignedElements()
+      .shift();
 
     // Set the Vaadin Grid options.
     this._vaadinGrid.pageSize = this.pageSize;
@@ -165,10 +216,10 @@ export class CasperMoac extends PolymerElement {
         : [...resourceUrlParams, `${this.resourceSortParam}=-${sortSettings.path}`];
     }
 
-    if (parameters.filters.length > 0) {
+    if (this.resourceFilterAttributes.length > 0 && this.$.filterInput.value) {
       const resourceFilters = parameters.filters.map(filter => {
         // Escape special characters that might break the ILIKE clause.
-        let escapedValue = filter.value.replace(/[%\\]/g, '\\$&');
+        let escapedValue = this.$.filterInput.value.replace(/[%\\]/g, '\\$&');
         escapedValue = escapedValue.replace(/[&]/g, '_');
 
         return `${filter.path}::TEXT ILIKE '%${escapedValue}%'`;
