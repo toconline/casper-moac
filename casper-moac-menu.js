@@ -1,27 +1,10 @@
-/*
-  - Copyright (c) 2014-2016 Cloudware S.A. All rights reserved.
-  -
-  - This file is part of casper-moac.
-  -
-  - casper-moac is free software: you can redistribute it and/or modify
-  - it under the terms of the GNU Affero General Public License as published by
-  - the Free Software Foundation, either version 3 of the License, or
-  - (at your option) any later version.
-  -
-  - casper-moac is distributed in the hope that it will be useful,
-  - but WITHOUT ANY WARRANTY; without even the implied warranty of
-  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  - GNU General Public License for more details.
-  -
-  - You should have received a copy of the GNU Affero General Public License
-  - along with casper-moac.  If not, see <http://www.gnu.org/licenses/>.
-  -
- */
-
+import './casper-moac-menu-items';
+import { CasperMoacMenuItem } from './casper-moac-menu-item';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-button/paper-button.js';
 import '@casper2020/casper-icons/casper-icons.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
+import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 class CasperMoacMenu extends PolymerElement {
 
@@ -32,28 +15,90 @@ class CasperMoacMenu extends PolymerElement {
   static get template () {
     return html`
       <style>
-        paper-button {
+        #menuTrigger {
+          margin: 0;
           padding: 0;
+          z-index: 2;
           width: 55px;
           height: 55px;
-          display: flex;
           min-width: unset;
-          align-items: center;
-          justify-content: center;
           border-radius: 50%;
           background-color: var(--primary-color);
         }
 
-        paper-button iron-icon {
+        #menuTrigger:hover {
+          filter: brightness(90%);
+          transition: filter 200ms linear;
+        }
+
+        #menuTrigger[data-menu-opened] {
+          background-color: white;
+          box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.25);
+        }
+
+        #menuTrigger iron-icon {
           width: 100%;
           height: 100%;
           color: white;
         }
+
+        #menuTrigger[data-menu-opened] iron-icon {
+          color: var(--primary-color);
+        }
+
+        #circleBackground {
+          width: 0;
+          height: 0;
+          z-index: 1;
+          opacity: 0.9;
+          position: absolute;
+          border-radius: 50%;
+          filter: brightness(200%);
+          transform: translate(-40%, -40%);
+          background-color: var(--primary-color);
+          transition: width 200ms ease-in,
+                      height 200ms ease-in;
+        }
+
+        #circleBackground[data-menu-opened] {
+          width: 500px;
+          height: 500px;
+        }
       </style>
-      <paper-button>
-        <iron-icon icon="casper-icons:plus"></iron-icon>
+      <paper-button id="menuTrigger" data-menu-opened$="[[_opened]]">
+        <iron-icon icon="[[_menuIcon(_opened)]]"></iron-icon>
       </paper-button>
+      </div>
+      <casper-moac-menu-items
+        id="menuItems"
+        opened="{{_opened}}"
+        vertical-align="top"
+        horizontal-align="left"
+        no-cancel-on-outside-click>
+        <slot></slot>
+      </casper-moac-menu-items>
+      <div id="circleBackground" data-menu-opened$="[[_opened]]"></div>
     `;
+  }
+
+  ready () {
+    super.ready();
+
+    afterNextRender(this, () => {
+      const menuTriggerDimensions = this.$.menuTrigger.getBoundingClientRect();
+
+      this.$.menuItems.positionTarget = this.$.menuTrigger;
+      this.$.menuItems.verticalOffset = menuTriggerDimensions.height + CasperMoacMenuItem.buttonMargin;
+      this.$.menuItems.horizontalOffset = menuTriggerDimensions.width / 2 - CasperMoacMenuItem.buttonRadius;
+
+      this.$.menuTrigger.addEventListener('click', () => {
+        this.$.menuItems.toggle();
+      });
+    });
+  }
+
+  _menuIcon (opened) {
+    return opened ? 'casper-icons:clear' : 'casper-icons:plus';
   }
 }
 
