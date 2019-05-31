@@ -20,6 +20,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   static get properties () {
     return {
       /**
+       * The list of items to be displayed.
+       * @type {Array}
+       */
+      items: Array,
+      /**
        * The placeholder used in the input where the user can filter the results.
        * @type {String}
        */
@@ -211,6 +216,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
             <vaadin-grid
               id="grid"
               class="moac"
+              items="[[items]]"
               page-size="[[pageSize]]"
               loading="{{_gridLoading}}"
               selected-items="{{_gridSelectedItems}}">
@@ -221,6 +227,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           </div>
         </div>
         <div class="right-side-container">
+          <slot name="right"></slot>
           <casper-epaper app="[[app]]"></casper-epaper>
         </div>
       </vaadin-split-layout>
@@ -253,6 +260,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this._hasSelectedItems = 
       this._gridSelectedItems &&
       this._gridSelectedItems.length > 0 &&
+      this.multiSelectionActions &&
       this.multiSelectionActions.length > 0;
   }
 
