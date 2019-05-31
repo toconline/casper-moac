@@ -33,7 +33,6 @@ export class CasperMoacMenuItem extends PolymerElement {
           padding: 0;
           color: white;
           margin-left: 0;
-          min-width: unset;
           border-radius: 50%;
           margin-right: 10px;
           background-color: var(--primary-color);
@@ -45,9 +44,7 @@ export class CasperMoacMenuItem extends PolymerElement {
         }
       </style>
       <div id="container">
-        <paper-button id="button">
-          <iron-icon icon="[[icon]]"></iron-icon>
-        </paper-button>
+        <paper-icon-button id="button" icon="[[icon]]"></paper-icon-button>
         [[text]]
       </div>
     `;

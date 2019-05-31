@@ -1,7 +1,6 @@
 import './casper-moac-menu-items';
 import { CasperMoacMenuItem } from './casper-moac-menu-item';
-import '@polymer/iron-icon/iron-icon.js';
-import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@casper2020/casper-icons/casper-icons.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
@@ -16,12 +15,11 @@ class CasperMoacMenu extends PolymerElement {
     return html`
       <style>
         #menuTrigger {
-          margin: 0;
           padding: 0;
           z-index: 2;
           width: 55px;
           height: 55px;
-          min-width: unset;
+          color: white;
           border-radius: 50%;
           background-color: var(--primary-color);
         }
@@ -33,31 +31,21 @@ class CasperMoacMenu extends PolymerElement {
 
         #menuTrigger[data-menu-opened] {
           background-color: white;
-          box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.25);
-        }
-
-        #menuTrigger iron-icon {
-          width: 100%;
-          height: 100%;
-          color: white;
-        }
-
-        #menuTrigger[data-menu-opened] iron-icon {
           color: var(--primary-color);
+          box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.25);
         }
 
         #circleBackground {
           width: 0;
           height: 0;
           z-index: 1;
-          opacity: 0.9;
+          opacity: 0.95;
           position: absolute;
           border-radius: 50%;
           filter: brightness(200%);
           transform: translate(-40%, -40%);
           background-color: var(--primary-color);
-          transition: width 200ms ease-in,
-                      height 200ms ease-in;
+          transition: width 200ms ease-in, height 200ms ease-in;
         }
 
         #circleBackground[data-menu-opened] {
@@ -65,10 +53,11 @@ class CasperMoacMenu extends PolymerElement {
           height: 500px;
         }
       </style>
-      <paper-button id="menuTrigger" data-menu-opened$="[[_opened]]">
-        <iron-icon icon="[[_menuIcon(_opened)]]"></iron-icon>
-      </paper-button>
-      </div>
+      <paper-icon-button
+        id="menuTrigger"
+        icon="[[_menuIcon(_opened)]]"
+        data-menu-opened$="[[_opened]]">
+      </paper-icon-button>
       <casper-moac-menu-items
         id="menuItems"
         opened="{{_opened}}"

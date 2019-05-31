@@ -1,3 +1,4 @@
+import { CasperMoacLazyLoadMixin } from './casper-moac-lazy-load-mixin.js';
 import '@casper2020/casper-icons/casper-icons.js';
 import '@casper2020/casper-epaper/casper-epaper.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
@@ -5,11 +6,12 @@ import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-input/iron-input.js';
 import '@polymer/paper-spinner/paper-spinner.js';
+import '@polymer/paper-icon-button/paper-icon-button.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
-export class CasperMoac extends PolymerElement {
+export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
   static get is () {
     return 'casper-moac';
@@ -18,94 +20,37 @@ export class CasperMoac extends PolymerElement {
   static get properties () {
     return {
       /**
-       * Number of results that will be displayed per page.
-       * @type {Number}
-       */
-      pageSize: {
-        type: Number,
-        value: 250
-      },
-      /**
-       * The JSON API resource name that will be used to build the URL.
-       * @type {String}
-       */
-      resourceName: String,
-      /**
-       * List of attributes that should be displayed on the iron-list.
-       * @type {Array}
-       */
-      resourceListAttributes: Array,
-      /**
-       * List of attributes that should be displayed on the iron-list.
-       * @type {Array}
-       */
-      resourceFilterAttributes: Array,
-      /**
-       * Number of milliseconds the UI must wait after the user stopped typing
-       * so that it can fire a new request to the JSONAPI.
-       * @type {Array}
-       */
-      resourceFilterDebounceMs: {
-        type: Number,
-        value: 250
-      },
-      /**
-       * URL parameter that will contain the number of results per page.
-       * @type {String}
-       */
-      resourcePageSizeParam: {
-        type: String,
-        value: 'page[size]'
-      },
-      /**
-       * URL parameter that will contain the current page.
-       * @type {String}
-       */
-      resourcePageParam: {
-        type: String,
-        value: 'page[number]'
-      },
-      /**
-       * URL parameter to obtain the total number of results for the current query.
-       * @type {String}
-       */
-      resourceTotalsMetaParam: {
-        type: String,
-        value: 'totals=1'
-      },
-      /**
-       * URL parameter to sort the results by a specific attribute.
-       * @type {String}
-      */
-      resourceSortParam: {
-        type: String,
-        value: 'sort'
-      },
-      /**
-       * URL parameter to filter the results by matching a substring with a specific attribute.
-       * @type {String}
-      */
-      resourceFilterParam: {
-        type: String,
-        value: 'filter'
-      },
-      /**
-       * The JSON API resource timeout value in ms.
-       * @type {Number}
-       */
-      resourceTimeoutMs: {
-        type: Number,
-        value: 5000
-      },
-      /**
        * The placeholder used in the input where the user can filter the results.
        * @type {String}
        */
       filterInputPlaceholder: {
         type: String,
         value: 'Filtrar Resultados'
+      },
+      /**
+       * The actions that could be applied to several selected items.
+       * @type {Array}
+       */
+      multiSelectionActions: {
+        type: Array,
+        value: []
+      },
+      /**
+       * Flag used to activate the casper-moac's lazy load mode.
+       * @type {Boolean}
+       */
+      lazyLoad: {
+        type: Boolean,
+        value: false
       }
     };
+  }
+
+  static get observers () {
+    return [
+      '_activeItemChanged(_activeItem)',
+      '_gridSelectedItemsChanged(_gridSelectedItems.splices)'
+    ];
   }
 
   static get template () {
@@ -119,7 +64,7 @@ export class CasperMoac extends PolymerElement {
 
         .left-side-container {
           width: 35%;
-          padding: 20px;
+          padding: 15px;
           background-color: white;
           display: flex;
           flex-direction: column;
@@ -168,6 +113,8 @@ export class CasperMoac extends PolymerElement {
         }
 
         .left-side-container .header-container .filters-container #seeAllFilters {
+          margin: 0;
+          width: 100%;
           font-size: 0.85em;
           font-weight: bold;
           text-transform: unset;
@@ -177,6 +124,32 @@ export class CasperMoac extends PolymerElement {
         .left-side-container .grid-container {
           flex-grow: 1;
           position: relative;
+        }
+
+        .left-side-container .grid-multiple-selection-container {
+          display: flex;
+          padding: 10px;
+          align-items: center;
+          background-color: #1A39601A;
+          justify-content: space-between;
+        }
+
+        .left-side-container .grid-multiple-selection-container[hidden] {
+          display: none;
+        }
+
+        .left-side-container .grid-multiple-selection-container .grid-multiple-selection-label {
+          font-size: 0.75em;
+          color: var(--primary-color);
+        }
+
+        .left-side-container .grid-multiple-selection-container paper-icon-button {
+          padding: 0;
+          width: 25px;
+          height: 25px;
+          color: white;
+          border-radius: 50%;
+          background-color: var(--primary-color);
         }
 
         .left-side-container .grid-container vaadin-grid {
@@ -216,16 +189,35 @@ export class CasperMoac extends PolymerElement {
             </div>
           </div>
 
+          <div class="grid-multiple-selection-container" hidden$="[[!_hasSelectedItems]]">
+            <div class="grid-multiple-selection-label">
+              <vaadin-checkbox indeterminate id="deselectAllItems"></vaadin-checkbox>
+              Selecção Múltipla:&nbsp;<strong>[[_gridSelectedItems.length]] documentos</strong>
+            </div>
+            <div>
+              <template is="dom-repeat" items="[[multiSelectionActions]]">
+                <paper-icon-button
+                  icon="[[item.icon]]"
+                  tooltip="[[item.tooltip]]"
+                  data-index$="[[index]]"
+                  on-click="_multipleSelectionActionClicked">
+                </paper-icon-button>
+              </template>
+            </div>
+          </div>
+
           <!--Vaadin grid container-->
           <div class="grid-container">
-            <paper-spinner active$="[[_gridLoading]]"></paper-spinner>
             <vaadin-grid
               id="grid"
               class="moac"
               page-size="[[pageSize]]"
-              loading="{{_gridLoading}}">
+              loading="{{_gridLoading}}"
+              selected-items="{{_gridSelectedItems}}">
               <slot name="grid"></slot>
             </vaadin-grid>
+            <!--Spinner displayed when loading elements-->
+            <paper-spinner active$="[[_gridLoading]]"></paper-spinner>
           </div>
         </div>
         <div class="right-side-container">
@@ -241,11 +233,12 @@ export class CasperMoac extends PolymerElement {
   ready () {
     super.ready();
 
-    // Set the Vaadin Grid options.
-    this.$.grid.dataProvider = (parameters, callback) => this._fetchResourceItems(parameters, callback);
+    if (this.lazyLoad) this._initializeLazyLoad();
 
     // Set event listeners.
     this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
+    this.$.deselectAllItems.addEventListener('change', () => this._deselectAllItems());
+    this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
   }
 
   _filterChanged () {
@@ -256,53 +249,24 @@ export class CasperMoac extends PolymerElement {
     );
   }
 
-  _fetchResourceItems (parameters, callback) {
-    app.socket.getData(this._buildResourceUrl(parameters), this.resourceTimeoutMs, socketResponse => {
-      if (socketResponse.errors) return;
-
-      callback(
-        socketResponse.data.map(item => ({ id: item.id, ...item.attributes })),
-        parseInt(socketResponse.meta.total)
-      );
-    });
+  _gridSelectedItemsChanged () {
+    this._hasSelectedItems = 
+      this._gridSelectedItems &&
+      this._gridSelectedItems.length > 0 &&
+      this.multiSelectionActions.length > 0;
   }
 
-  _buildResourceUrl (parameters) {
-    let resourceUrlParams = [
-      this.resourceTotalsMetaParam,                                           // totals=1
-      `${this.resourcePageParam}=${parameters.page + 1}`,                     // page[number]=1
-      `${this.resourcePageSizeParam}=${parameters.pageSize}`,                 // page[size]=1
-      `fields[${this.resourceName}]=${this.resourceListAttributes.join(',')}` // fields[general_ledger]=child_count,description
-    ];
+  _multipleSelectionActionClicked (event) {
+    const actionIndex = parseInt(event.target.dataset.index);
 
-    // Sort by ascending or descending.
-    if (parameters.sortOrders.length > 0) {
-      const sortSettings = parameters.sortOrders.shift(); 
-      resourceUrlParams = sortSettings.direction === CasperMoac.sortByAscending
-        ? [...resourceUrlParams, `${this.resourceSortParam}=${sortSettings.path}`]
-        : [...resourceUrlParams, `${this.resourceSortParam}=-${sortSettings.path}`];
+    if (this.multiSelectionActions[actionIndex].onClick instanceof Function) {
+      this.multiSelectionActions[actionIndex].onClick(this._gridSelectedItems);
     }
+  }
 
-    // Check if there are attributes that should be filtered and if the input has already been initialized.
-    if (this.resourceFilterAttributes.length > 0 && this.$.filterInput && this.$.filterInput.value !== undefined) {
-      const resourceFilters = this.resourceFilterAttributes.map(filterAttribute => {
-        // Escape special characters that might break the ILIKE clause or the JSONAPI url parsing.
-        let escapedValue = this.$.filterInput.value.replace(/[%\\]/g, '\\$&');
-        escapedValue = escapedValue.replace(/[&]/g, '_');
-
-        return `${filterAttribute}::TEXT ILIKE '%${escapedValue}%'`;
-      });
-
-      resourceUrlParams = [
-        ...resourceUrlParams,
-        `${this.resourceFilterParam}="${resourceFilters.join(' AND ')}"`
-      ];
-    }
-
-    // Check if there is already existing filters in the resource name.
-    return this.resourceName.includes('?')
-      ? `${this.resourceName}&${resourceUrlParams.join('&')}`
-      : `${this.resourceName}?${resourceUrlParams.join('&')}`;
+  _deselectAllItems () {
+    this._gridSelectedItems = [];
+    this.$.deselectAllItems.setAttribute('indeterminate', '');
   }
 }
 
