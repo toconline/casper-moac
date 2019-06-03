@@ -21,11 +21,6 @@ export const CasperMoacLazyLoadMixin = superClass => class CasperMoacLazyLoadMix
        */
       resourceListAttributes: Array,
       /**
-       * List of attributes that should be used to filter.
-       * @type {Array}
-       */
-      resourceFilterAttributes: Array,
-      /**
        * Number of milliseconds the UI must wait after the user stopped typing
        * so that it can fire a new request to the JSONAPI.
        * @type {Array}
@@ -100,6 +95,10 @@ export const CasperMoacLazyLoadMixin = superClass => class CasperMoacLazyLoadMix
 
     // Check if all the required parameters were provided.
     this.$.grid.dataProvider = (parameters, callback) => this._fetchResourceItems(parameters, callback);
+  }
+
+  _filterItemsLazyLoad () {
+    this.$.grid.clearCache();
   }
 
   _fetchResourceItems (parameters, callback) {

@@ -10,6 +10,7 @@ import '@polymer/paper-icon-button/paper-icon-button.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
+import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
@@ -25,6 +26,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
        */
       items: Array,
       /**
+       * List of attributes that should be used to filter.
+       * @type {Array}
+       */
+      resourceFilterAttributes: Array,
+      /**
        * The placeholder used in the input where the user can filter the results.
        * @type {String}
        */
@@ -33,13 +39,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         value: 'Filtrar Resultados'
       },
       /**
-       * The actions that could be applied to several selected items.
-       * @type {Array}
+       * Label that will be used on the header when multiple items are selected in
+       * the vaadin-grid.
        */
-      multiSelectionActions: {
-        type: Array,
-        value: []
-      },
+      multiSelectionLabel: String,
       /**
        * Flag used to activate the casper-moac's lazy load mode.
        * @type {Boolean}
@@ -47,14 +50,38 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       lazyLoad: {
         type: Boolean,
         value: false
+      },
+      /**
+       * A reference to the epaper object so that the page using casper-moac can
+       * use its methods.
+       * @type {Object}
+       */
+      epaper: {
+        type: Object,
+        notify: true
+      },
+      /**
+       * The item that is currently active in the vaadin-grid.
+       * @type {Object}
+       */
+      activeItem: {
+        type: Object,
+        notify: true,
+      },
+      /**
+       * The items that are currently selected in the vaadin-grid.
+       * @type {Array}
+       */
+      selectedItems: {
+        type: Array,
+        notify: true
       }
     };
   }
 
   static get observers () {
     return [
-      '_activeItemChanged(_activeItem)',
-      '_gridSelectedItemsChanged(_gridSelectedItems.splices)'
+      '_selectedItemsChanged(selectedItems.splices)'
     ];
   }
 
@@ -68,7 +95,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         }
 
         .left-side-container {
-          width: 35%;
           padding: 15px;
           background-color: white;
           display: flex;
@@ -148,11 +174,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           color: var(--primary-color);
         }
 
-        .left-side-container .grid-multiple-selection-container paper-icon-button {
-          padding: 0;
+        .left-side-container .grid-multiple-selection-container slot[name="multiple-selected-actions"]::slotted(paper-icon-button) {
+          padding: 3px;
           width: 25px;
           height: 25px;
           color: white;
+          margin-left: 5px;
           border-radius: 50%;
           background-color: var(--primary-color);
         }
@@ -172,8 +199,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           --paper-spinner-stroke-width: 6px;
         }
 
-        .right-side-container {
-          width: 65%;
+        .left-side-container .grid-container paper-spinner:not(active) {
+          width: 0;
+          height: 0;
+        }
+
+        .right-side-container .right-slot-container {
+          padding: 10px;
         }
       </style>
       <vaadin-split-layout>
@@ -197,17 +229,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           <div class="grid-multiple-selection-container" hidden$="[[!_hasSelectedItems]]">
             <div class="grid-multiple-selection-label">
               <vaadin-checkbox indeterminate id="deselectAllItems"></vaadin-checkbox>
-              Selecção Múltipla:&nbsp;<strong>[[_gridSelectedItems.length]] documentos</strong>
+              Selecção Múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
             </div>
             <div>
-              <template is="dom-repeat" items="[[multiSelectionActions]]">
-                <paper-icon-button
-                  icon="[[item.icon]]"
-                  tooltip="[[item.tooltip]]"
-                  data-index$="[[index]]"
-                  on-click="_multipleSelectionActionClicked">
-                </paper-icon-button>
-              </template>
+              <slot name="multiple-selected-actions"></slot>
             </div>
           </div>
 
@@ -216,19 +241,23 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
             <vaadin-grid
               id="grid"
               class="moac"
-              items="[[items]]"
+              theme="row-stripes"
+              loading="{{_loading}}"
               page-size="[[pageSize]]"
-              loading="{{_gridLoading}}"
-              selected-items="{{_gridSelectedItems}}">
+              items="[[_filteredItems]]"
+              active-item="{{activeItem}}"
+              selected-items="{{selectedItems}}">
               <slot name="grid"></slot>
             </vaadin-grid>
             <!--Spinner displayed when loading elements-->
-            <paper-spinner active$="[[_gridLoading]]"></paper-spinner>
+            <paper-spinner active$="[[_loading]]"></paper-spinner>
           </div>
         </div>
         <div class="right-side-container">
-          <slot name="right"></slot>
-          <casper-epaper app="[[app]]"></casper-epaper>
+          <div class="right-slot-container">
+            <slot name="right"></slot>
+          </div>
+          <casper-epaper id="epaper" app="[[app]]"></casper-epaper>
         </div>
       </vaadin-split-layout>
     `;
@@ -240,7 +269,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   ready () {
     super.ready();
 
-    if (this.lazyLoad) this._initializeLazyLoad();
+    this.epaper = this.$.epaper;
+
+    // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
+    this.lazyLoad
+      ? this._initializeLazyLoad()
+      : afterNextRender(this, () => this._filterItems());
 
     // Set event listeners.
     this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
@@ -252,28 +286,50 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this._filterChangedDebouncer = Debouncer.debounce(
       this._filterChangedDebouncer,
       timeOut.after(this.resourceFilterDebounceMs),
-      () => this.$.grid.clearCache()
+      () => {
+        this.lazyLoad
+          ? this._filterItemsLazyLoad()
+          : this._filterItems();
+      }
     );
   }
 
-  _gridSelectedItemsChanged () {
-    this._hasSelectedItems = 
-      this._gridSelectedItems &&
-      this._gridSelectedItems.length > 0 &&
-      this.multiSelectionActions &&
-      this.multiSelectionActions.length > 0;
-  }
+  _filterItems () {
+    if (!this.$.filterInput.value) {
+      this._filteredItems = this.items;
+      return;
+    }
 
-  _multipleSelectionActionClicked (event) {
-    const actionIndex = parseInt(event.target.dataset.index);
+    // Either retrieve the list of filter attributes from the properties or from the item's existing keys.
+    let filterAttributes = this.resourceFilterAttributes;
+    if (!filterAttributes && this.items.length > 0) {
+      filterAttributes = Object.keys(this.items[0]);
+    }
 
-    if (this.multiSelectionActions[actionIndex].onClick instanceof Function) {
-      this.multiSelectionActions[actionIndex].onClick(this._gridSelectedItems);
+    if (filterAttributes && this.items.length > 0) {
+      const filterTerm = this._normalizeVariableForComparison(this.$.filterInput.value);
+
+      this._filteredItems = this.items.filter(item => {
+        return filterAttributes.some(filterAttribute => item[filterAttribute] && this._normalizeVariableForComparison(item[filterAttribute]).includes(filterTerm));
+      });
     }
   }
 
+  _normalizeVariableForComparison (variable) {
+    return variable
+      .toString()
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+  }
+
+  _selectedItemsChanged () {
+    this._hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
+  }
+
   _deselectAllItems () {
-    this._gridSelectedItems = [];
+    this.selectedItems = [];
     this.$.deselectAllItems.setAttribute('indeterminate', '');
   }
 }

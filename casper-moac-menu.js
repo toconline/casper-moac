@@ -1,7 +1,7 @@
 import './casper-moac-menu-items';
 import { CasperMoacMenuItem } from './casper-moac-menu-item';
-import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@casper2020/casper-icons/casper-icons.js';
+import '@polymer/paper-icon-button/paper-icon-button.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
@@ -9,6 +9,20 @@ class CasperMoacMenu extends PolymerElement {
 
   static get is () {
     return 'casper-moac-menu';
+  }
+
+  static get properties () {
+    return {
+      /**
+       * Flag that states if the menu is currently disabled or not.
+       * @type {Boolean}
+       */
+      disabled: {
+        type: Boolean,
+        value: false,
+        observer: '_disabledChanged'
+      }
+    };
   }
 
   static get template () {
@@ -24,7 +38,12 @@ class CasperMoacMenu extends PolymerElement {
           background-color: var(--primary-color);
         }
 
-        #menuTrigger:hover {
+        #menuTrigger[disabled] {
+          color: #A8A8A8;
+          background-color: #EAEAEA;
+        }
+
+        #menuTrigger:not(disabled):hover {
           filter: brightness(90%);
           transition: filter 200ms linear;
         }
@@ -55,6 +74,7 @@ class CasperMoacMenu extends PolymerElement {
       </style>
       <paper-icon-button
         id="menuTrigger"
+        disabled="[[disabled]]"
         icon="[[_menuIcon(_opened)]]"
         data-menu-opened$="[[_opened]]">
       </paper-icon-button>
@@ -88,6 +108,10 @@ class CasperMoacMenu extends PolymerElement {
 
   _menuIcon (opened) {
     return opened ? 'casper-icons:clear' : 'casper-icons:plus';
+  }
+
+  _disabledChanged (disabled) {
+    if (this.disabled) this.$.menuItems.close();
   }
 }
 

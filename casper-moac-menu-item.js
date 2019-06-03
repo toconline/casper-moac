@@ -30,7 +30,7 @@ export class CasperMoacMenuItem extends PolymerElement {
         }
 
         #button {
-          padding: 0;
+          padding: 5px;
           color: white;
           margin-left: 0;
           border-radius: 50%;
@@ -45,7 +45,7 @@ export class CasperMoacMenuItem extends PolymerElement {
       </style>
       <div id="container">
         <paper-icon-button id="button" icon="[[icon]]"></paper-icon-button>
-        [[text]]
+        <slot></slot>
       </div>
     `;
   }
