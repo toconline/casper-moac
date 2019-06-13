@@ -1,6 +1,7 @@
-import { CasperMoacLazyLoadMixin } from './casper-moac-lazy-load-mixin.js';
+import { CasperMoacLazyLoadBehavior } from './casper-moac-lazy-load-mixin.js';
 import '@casper2020/casper-icons/casper-icons.js';
 import '@casper2020/casper-epaper/casper-epaper.js';
+import '@casper2020/casper-select/casper-select.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@polymer/iron-icon/iron-icon.js';
@@ -12,10 +13,17 @@ import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
-export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
+export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
   static get is () {
     return 'casper-moac';
+  }
+
+  static get filterTypes () {
+    return {
+      PAPER_INPUT: 'PAPER_INPUT',
+      CASPER_SELECT: 'CASPER_SELECT'
+    };
   }
 
   static get properties () {
@@ -75,6 +83,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       selectedItems: {
         type: Array,
         notify: true
+      },
+      /**
+       * The array of filters that are available to filter the results presents on the page.
+       * @type {Array}
+       */
+      filters: {
+        type: Array,
+        notify: true
+      },
+      /**
+       * The initial width of the left~side container.
+       * @type {Number}
+       */
+      leftSideInitialWidth: {
+        type: Number,
+        value: 50
       }
     };
   }
@@ -96,9 +120,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
         .left-side-container {
           padding: 15px;
-          background-color: white;
           display: flex;
           flex-direction: column;
+          background-color: white;
         }
 
         .left-side-container .header-container {
@@ -112,13 +136,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           flex: 1;
         }
 
-        .left-side-container .header-container .filters-container {
+        .left-side-container .header-container .generic-filter-container {
           padding: 0 10px;
           text-align: center;
         }
 
         /* Iron input styles */
-        .left-side-container .header-container .filters-container #filterInput {
+        .left-side-container .header-container .generic-filter-container #filterInput {
           height: 35px;
           display: flex;
           padding: 0 10px;
@@ -127,29 +151,63 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           border: 1px solid lightgrey;
         }
 
-        .left-side-container .header-container .filters-container #filterInput:focus {
+        .left-side-container .header-container .generic-filter-container #filterInput:focus {
           border-color: var(--primary-color);
         }
 
-        .left-side-container .header-container .filters-container #filterInput iron-icon {
+        .left-side-container .header-container .generic-filter-container #filterInput iron-icon {
           height: 50%;
           color: var(--moac-light-grey);
         }
 
-        .left-side-container .header-container .filters-container #filterInput input {
+        .left-side-container .header-container .generic-filter-container #filterInput input {
           border: 0;
           flex-grow: 1;
           outline: none;
           font-size: 13px;
         }
 
-        .left-side-container .header-container .filters-container #seeAllFilters {
+        .left-side-container .header-container .generic-filter-container #displayAllFilters {
           margin: 0;
           width: 100%;
           font-size: 0.85em;
           font-weight: bold;
           text-transform: unset;
           color: var(--primary-color);
+        }
+
+        .left-side-container .header-container .active-filters {
+          display: flex;
+          font-size: 0.85em;
+          flex-direction: column;
+        }
+
+        .left-side-container .header-container .active-filters .header {
+          display: flex;
+          margin-bottom: 10px;
+          justify-content: space-between;
+        }
+
+        .left-side-container .header-container .active-filters .active-filters-list {
+          display: flex;
+          flex-wrap: wrap;
+        }
+
+        .left-side-container .header-container .active-filters .active-filters-list .active-filter strong {
+          cursor: pointer;
+          margin-right: 5px;
+          color: var(--primary-color);
+        }
+
+        .left-side-container .header-container .active-filters .active-filters-list .active-filter strong:hover {
+          color: var(--dark-primary-color);
+        }
+
+        .left-side-container .filters-container {
+          display: grid;
+          grid-row-gap: 5px;
+          grid-column-gap: 10px;
+          grid-template-columns: 1fr 1fr;
         }
 
         .left-side-container .grid-container {
@@ -187,48 +245,66 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         .left-side-container .grid-container vaadin-grid {
           height: 100%;
         }
-
-        .left-side-container .grid-container paper-spinner {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          z-index: 1;
-          width: 100px;
-          height: 100px;
-          transform: translate(-50%, -50%);
-          --paper-spinner-stroke-width: 6px;
-        }
-
-        .left-side-container .grid-container paper-spinner:not(active) {
-          width: 0;
-          height: 0;
-        }
-
-        .right-side-container .right-slot-container {
-          padding: 10px;
-        }
       </style>
       <vaadin-split-layout>
         <div class="left-side-container">
           <div class="header-container">
             <!--Casper-moac-menu-->
             <slot name="menu"></slot>
-            <div class="filters-container">
-              <!--Filter input-->
+            <div class="generic-filter-container">
+              <!--Generic Filter input-->
               <iron-input id="filterInput">
                 <input placeholder="[[filterInputPlaceholder]]" />
                 <iron-icon icon="casper-icons:search"></iron-icon>
               </iron-input>
               <!--Show/hide the active filters-->
-              <paper-button id="seeAllFilters">
+              <paper-button id="displayAllFilters" on-click="_toggleDisplayAllFilters">
                 Ver todos os filtros
               </paper-button>
+            </div>
+            <div class="active-filters">
+              <div class="header">
+                <strong>Filtros activos:</strong>
+                [[_filteredItems.length]] resultados
+              </div>
+              <div class="active-filters-list">
+                <template is="dom-repeat" items="[[filters]]" as="filter" id="activeFilters">
+                  <div class="active-filter" hidden$="[[!_filterHasValue(filter)]]">
+                    [[filter.label]]:
+                    <strong>[[_filterValue(filter)]]</strong>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <div hidden$="[[!_displayAllFilters]]">
+            <div class="filters-container">
+              <template is="dom-repeat" items="[[filters]]" as="filter">
+                <!--Casper-Select filter-->
+                <template is="dom-if" if="[[_isFilterCasperSelect(filter.type)]]">
+                  <casper-select
+                    value="{{filter.value}}"
+                    items="[[filter.options]]"
+                    on-value-changed="_updateActiveFilters"
+                    label="[[filter.inputOptions.placeholder]]">
+                  </casper-select>
+                </template>
+
+                <!--Paper-Input filter-->
+                <template is="dom-if" if="[[_isFilterPaperInput(filter.type)]]">
+                  <paper-input
+                    value="{{filter.value}}"
+                    on-value-changed="_updateActiveFilters"
+                    label="[[filter.inputOptions.placeholder]]">
+                  </paper-input>
+                </template>
+              </template>
             </div>
           </div>
 
           <div class="grid-multiple-selection-container" hidden$="[[!_hasSelectedItems]]">
             <div class="grid-multiple-selection-label">
-              <vaadin-checkbox indeterminate id="deselectAllItems"></vaadin-checkbox>
               Selecção Múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
             </div>
             <div>
@@ -249,14 +325,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               selected-items="{{selectedItems}}">
               <slot name="grid"></slot>
             </vaadin-grid>
-            <!--Spinner displayed when loading elements-->
-            <paper-spinner active$="[[_loading]]"></paper-spinner>
           </div>
         </div>
         <div class="right-side-container">
-          <div class="right-slot-container">
-            <slot name="right"></slot>
-          </div>
+          <slot name="right"></slot>
           <casper-epaper id="epaper" app="[[app]]"></casper-epaper>
         </div>
       </vaadin-split-layout>
@@ -266,10 +338,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   static get sortByAscending () { return 'asc'; }
   static get sortByDescending () { return 'desc'; }
 
+  _isFilterPaperInput (itemType) { return itemType === CasperMoac.filterTypes.PAPER_INPUT; }
+  _isFilterCasperSelect (itemType) { return itemType === CasperMoac.filterTypes.CASPER_SELECT; }
+
   ready () {
     super.ready();
 
     this.epaper = this.$.epaper;
+
+    // Calculate the initial width for both the left and right side containers.
+    this.shadowRoot.querySelector('.left-side-container').style.width = `${this.leftSideInitialWidth}%`;
+    this.shadowRoot.querySelector('.right-side-container').style.width = `${100 - parseInt(this.leftSideInitialWidth)}%`;
 
     // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
     this.lazyLoad
@@ -278,7 +357,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
     // Set event listeners.
     this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
-    this.$.deselectAllItems.addEventListener('change', () => this._deselectAllItems());
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
   }
 
@@ -287,10 +365,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       this._filterChangedDebouncer,
       timeOut.after(this.resourceFilterDebounceMs),
       () => {
-        this.lazyLoad
-          ? this._filterItemsLazyLoad()
-          : this._filterItems();
+        this.lazyLoad ? this._filterItemsLazyLoad() : this._filterItems();
       }
+    );
+  }
+
+  _updateActiveFilters () {
+    this._updateActiveFiltersDebouncer = Debouncer.debounce(
+      this._updateActiveFiltersDebouncer,
+      timeOut.after(500),
+      () => { this.$.activeFilters.render(); }
     );
   }
 
@@ -328,9 +412,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this._hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
   }
 
-  _deselectAllItems () {
-    this.selectedItems = [];
-    this.$.deselectAllItems.setAttribute('indeterminate', '');
+  _filterHasValue (filter) {
+    return !!filter.value;
+  }
+
+  _filterValue (filter) {
+    switch (filter.type) {
+      case CasperMoac.filterTypes.PAPER_INPUT:
+        return filter.value;
+      case CasperMoac.filterTypes.CASPER_SELECT:
+        return filter.options.find(option => option.id.toString() === filter.value.toString()).name;
+    }
+  }
+
+  _toggleDisplayAllFilters () {
+    this._displayAllFilters = !this._displayAllFilters;
   }
 }
 

@@ -1,4 +1,4 @@
-export const CasperMoacLazyLoadMixin = superClass => class CasperMoacLazyLoadMixin extends superClass {
+export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoadBehavior extends superClass {
 
   static get properties () {
     return {
