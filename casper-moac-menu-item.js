@@ -9,13 +9,8 @@ export class CasperMoacMenuItem extends PolymerElement {
     return 'casper-moac-menu-item';
   }
 
-  static get buttonRadius () {
-    return 15;
-  }
-
-  static get buttonMargin () {
-    return 20;
-  }
+  static get buttonRadius () { return 15; }
+  static get buttonMargin () { return 20; }
 
   static get template () {
     return html`

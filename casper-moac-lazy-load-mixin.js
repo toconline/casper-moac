@@ -89,11 +89,11 @@ export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoad
       'resourceTotalsMetaParam',
     ].filter(property => !this[property]);
 
+    // Check if all the required parameters were provided.
     if (missingProperties.length > 0) {
       throw new Error(`The following properties are missing to activate the lazy-load mode: ${missingProperties.join(', ')}.`);
     }
 
-    // Check if all the required parameters were provided.
     this.$.grid.dataProvider = (parameters, callback) => this._fetchResourceItems(parameters, callback);
   }
 

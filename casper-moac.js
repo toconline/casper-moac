@@ -468,7 +468,9 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
     switch (filter.type) {
       case CasperMoac.filterTypes.CASPER_SELECT:
-        this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(event.target);
+        !filter.inputOptions.multiSelection
+          ? this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(event.target)
+          : this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(this.$.activeFilters);
         break;
       case CasperMoac.filterTypes.PAPER_INPUT:
         this._displayAllFilters = true;
