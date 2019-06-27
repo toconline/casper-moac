@@ -51,6 +51,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
       /**
        * Label that will be used on the header when multiple items are selected in
        * the vaadin-grid.
+       * @type {String}
        */
       multiSelectionLabel: String,
       /**
@@ -103,6 +104,10 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         type: Number,
         value: 40
       },
+      /**
+       * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
+       * @type {Boolean}
+       */
       _displayAllFilters: {
         type: Boolean,
         value: false
@@ -164,14 +169,14 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
         .left-side-container .header-container .generic-filter-container #filterInput iron-icon {
           height: 50%;
-          color: var(--moac-light-grey);
+
         }
 
         .left-side-container .header-container .generic-filter-container #filterInput input {
           border: 0;
           flex-grow: 1;
           outline: none;
-          font-size: 13px;
+          font-size: 0.75em;
         }
 
         .left-side-container .header-container .generic-filter-container #displayAllFilters {
@@ -254,7 +259,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           color: var(--primary-color);
         }
 
-        .left-side-container .grid-multiple-selection-container slot[name="multiple-selected-actions"]::slotted(paper-icon-button) {
+        .left-side-container .grid-multiple-selection-container slot[name="actions-multiple-selected"]::slotted(paper-icon-button) {
           padding: 3px;
           width: 25px;
           height: 25px;
@@ -284,21 +289,13 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
                 [[_displayOrHideFiltersButtonLabel(_displayAllFilters)]]
               </paper-button>
             </div>
+            <!--Active filters-->
             <div class="active-filters">
               <div class="header">
                 <strong>Filtros activos:</strong>
                 [[_filteredItems.length]] resultados
               </div>
-              <div class="active-filters-list">
-                <template is="dom-repeat" items="[[_filters]]" id="activeFilters">
-                  <div class="active-filter" hidden$="[[!_filterHasValue(item.filter)]]">
-                    [[item.filter.label]]:
-                    <strong data-filter$="[[item.filterKey]]" on-click="_displayInlineFilters">
-                      [[_filterValue(item.filter)]]
-                    </strong>
-                  </div>
-                </template>
-              </div>
+              <div class="active-filters-list" id="activeFilters"></div>
             </div>
           </div>
 
@@ -312,10 +309,14 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
                     <casper-select
                       data-filter$="[[item.filterKey]]"
                       list-width="20vw"
+                      list-height="50vh"
                       value="{{item.filter.value}}"
                       items="[[item.filter.options]]"
                       label="[[item.filter.inputOptions.label]]"
-                      multi-selection$="[[item.filter.inputOptions.multiSelection]]">
+                      multi-selection$="[[item.filter.inputOptions.multiSelection]]"
+                      lazy-load-resource="[[item.filter.inputOptions.lazyLoadResource]]"
+                      lazy-load-callback="[[item.filter.inputOptions.lazyLoadCallback]]"
+                      lazy-load-filter-fields="[[item.filter.inputOptions.lazyLoadFilterFields]]">
                     </casper-select>
                   </template>
 
@@ -346,7 +347,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
               Selecção Múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
             </div>
             <div>
-              <slot name="multiple-selected-actions"></slot>
+              <slot name="actions-multiple-selected"></slot>
             </div>
           </div>
 
@@ -392,8 +393,13 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
       : afterNextRender(this, () => this._filterItems());
 
     // Set event listeners.
-    this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
+    this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
+
+    const filterInput = this.$.filterInput.querySelector('input');
+    filterInput.addEventListener('focus', () => {
+      this.$.filterInput.style.border = '1px solid var(--primary-color)';
+    });
 
     afterNextRender(this, () => {
       this.shadowRoot.querySelectorAll(`
@@ -401,11 +407,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         casper-select[data-filter],
         casper-date-picker[data-filter]`
       ).forEach(input => input.addEventListener('value-changed', () => {
-        this._updateFiltersDebouncer = Debouncer.debounce(
-          this._updateFiltersDebouncer,
-          timeOut.after(200),
-          () => { this.set('filters', { ...this.filters }); }
-        );
+          this.dispatchEvent(new CustomEvent('filters-changed'));
+          this._renderActiveFilters();
       }));
     });
   }
@@ -452,36 +455,6 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     this._hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
   }
 
-  _filterHasValue (filter) {
-    return !!filter.value;
-  }
-
-  _filterValue (filter) {
-    if (!filter.value) return;
-
-    switch (filter.type) {
-      case CasperMoac.filterTypes.PAPER_INPUT:
-      case CasperMoac.filterTypes.CASPER_DATE_PICKER:
-        return filter.value;
-      case CasperMoac.filterTypes.CASPER_SELECT:
-        // Apply this logic manually because in the beginning we don't have access to the casper-select.
-        const keyColumn = filter.inputOptions.keyColumn || 'id';
-        const itemColumn = filter.inputOptions.itemColumn || 'name';
-        const multiSelectionValueSeparator = filter.inputOptions.multiSelectionValueSeparator || ',';
-
-        if (!filter.inputOptions.multiSelection) {
-          const selectedOption = filter.options.find(option => option[keyColumn].toString() === filter.value.toString());
-
-          return selectedOption ? selectedOption[itemColumn] : '';
-        } else {
-          const values = filter.value.toString().split(multiSelectionValueSeparator);
-          const selectedOptions = filter.options.filter(option => values.includes(option[keyColumn].toString()));
-
-          return selectedOptions && selectedOptions.length > 0 ? selectedOptions.map(selectedOption => selectedOption[itemColumn]).join(', ') : '';
-        }
-    }
-  }
-
   _toggleDisplayAllFilters () {
     this._displayAllFilters = !this._displayAllFilters;
   }
@@ -491,8 +464,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
   }
 
   _displayInlineFilters (event) {
-    const filterKey = event.target.dataset.filter
     const filter = this.filters[filterKey];
+    const filterKey = event.target.dataset.filter
 
     switch (filter.type) {
       case CasperMoac.filterTypes.CASPER_SELECT:
@@ -517,6 +490,63 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
       filterKey: filterKey,
       filter: this.filters[filterKey]
     }));
+
+    afterNextRender(this, () => this._renderActiveFilters());
+  }
+
+  _renderActiveFilters () {
+    this.$.activeFilters.innerHTML = '';
+
+    const activeFiltersValues = {};
+    this._filters.forEach(filterItem => {
+      const activeFilterValue = this._renderActiveFilterValue(filterItem);
+      if (activeFilterValue) {
+        activeFiltersValues[filterItem.filterKey] = activeFilterValue;
+      }
+    });
+
+    // This means that it wasn't possible obtain all the values from the filters components and therefore we schedule a new render.
+    if (this._filters.filter(filterItem => !!filterItem.filter.value).length !== Object.keys(activeFiltersValues).length) {
+      afterNextRender(this, () => this._renderActiveFilters());
+      return;
+    }
+
+    this._filters.forEach(filterItem => {
+      if (filterItem.filter.value) {
+        const activeFilter = document.createElement('div');
+        activeFilter.className = 'active-filter';
+
+        const activeFilterLabel = document.createTextNode(`${filterItem.filter.label}:\u00a0`);
+        const activeFilterValue = document.createElement('strong');
+        activeFilterValue.dataset.filter = filterItem.filterKey;
+        activeFilterValue.innerHTML = activeFiltersValues[filterItem.filterKey];
+        activeFilterValue.addEventListener('click', event => this._displayInlineFilters(event));
+
+        activeFilter.appendChild(activeFilterLabel);
+        activeFilter.appendChild(activeFilterValue);
+        this.$.activeFilters.appendChild(activeFilter);
+      }
+    });
+  }
+
+  _renderActiveFilterValue (filterItem) {
+    if (!filterItem.filter.value) return;
+
+    switch (filterItem.filter.type) {
+      case CasperMoac.filterTypes.PAPER_INPUT:
+      case CasperMoac.filterTypes.CASPER_DATE_PICKER:
+        return filterItem.filter.value;
+      case CasperMoac.filterTypes.CASPER_SELECT:
+        const casperSelect = this.shadowRoot.querySelector(`casper-select[data-filter="${filterItem.filterKey}"]`);
+
+        if (!casperSelect || !casperSelect.selectedItems || casperSelect.selectedItems.length === 0) return;
+
+        const casperSelectSelectedItems = casperSelect.multiSelection
+          ? casperSelect.selectedItems
+          : [casperSelect.selectedItems];
+
+        return casperSelectSelectedItems.map(selectedItem => selectedItem[casperSelect.itemColumn]).join(', ');
+    }
   }
 }
 
