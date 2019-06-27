@@ -404,8 +404,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
       this.shadowRoot.querySelectorAll(`
         paper-input[data-filter],
         casper-select[data-filter],
-        casper-date-picker[data-filter]`
-      ).forEach(input => input.addEventListener('value-changed', () => {
+        casper-date-picker[data-filter]
+      `).forEach(input => input.addEventListener('value-changed', () => {
           this.dispatchEvent(new CustomEvent('filters-changed'));
           this._renderActiveFilters();
       }));

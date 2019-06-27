@@ -58,7 +58,7 @@ export class CasperMoacMenuItem extends PolymerElement {
 
     this.$.button.style.width = `${CasperMoacMenuItem.buttonRadius * 2}px`;
     this.$.button.style.height = `${CasperMoacMenuItem.buttonRadius * 2}px`;
-    this.$.container.style.marginBottom = `${CasperMoacMenuItem.buttonMargin}px`;
+    this.$.container.style.padding = `${CasperMoacMenuItem.buttonMargin / 2}px 0`;
   }
 }
 

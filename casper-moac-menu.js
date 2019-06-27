@@ -82,8 +82,7 @@ class CasperMoacMenu extends PolymerElement {
         id="menuItems"
         opened="{{_opened}}"
         vertical-align="top"
-        horizontal-align="left"
-        no-cancel-on-outside-click>
+        horizontal-align="left">
         <slot></slot>
       </casper-moac-menu-items>
       <div id="circleBackground" data-menu-opened$="[[_opened]]"></div>
@@ -97,8 +96,14 @@ class CasperMoacMenu extends PolymerElement {
       const menuTriggerDimensions = this.$.menuTrigger.getBoundingClientRect();
 
       this.$.menuItems.positionTarget = this.$.menuTrigger;
-      this.$.menuItems.verticalOffset = menuTriggerDimensions.height + CasperMoacMenuItem.buttonMargin;
+      this.$.menuItems.verticalOffset = menuTriggerDimensions.height + CasperMoacMenuItem.buttonMargin / 2;
       this.$.menuItems.horizontalOffset = menuTriggerDimensions.width / 2 - CasperMoacMenuItem.buttonRadius;
+      this.$.menuItems.addEventListener('iron-overlay-canceled', event => {
+        // Prevent the default action which would close the overlay and then the below listener would re-open it.
+        if (event.detail.path.includes(this.$.menuTrigger)) {
+          event.preventDefault();
+        }
+      });
 
       this.$.menuTrigger.addEventListener('click', () => {
         this.$.menuItems.toggle();
@@ -111,7 +116,7 @@ class CasperMoacMenu extends PolymerElement {
   }
 
   _disabledChanged (disabled) {
-    if (this.disabled) this.$.menuItems.close();
+    if (disabled) this.$.menuItems.close();
   }
 }
 
