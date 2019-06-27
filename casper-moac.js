@@ -161,6 +161,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           border-radius: 3px;
           align-items: center;
           border: 1px solid lightgrey;
+          transition: border 250ms linear;
         }
 
         .left-side-container .header-container .generic-filter-container #filterInput:focus {
@@ -169,7 +170,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
         .left-side-container .header-container .generic-filter-container #filterInput iron-icon {
           height: 50%;
-
+          color: var(--primary-color);
         }
 
         .left-side-container .header-container .generic-filter-container #filterInput input {
@@ -357,7 +358,6 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
               id="grid"
               class="moac"
               theme="row-stripes"
-              loading="{{_loading}}"
               page-size="[[pageSize]]"
               items="[[_filteredItems]]"
               active-item="{{activeItem}}"
@@ -397,9 +397,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
 
     const filterInput = this.$.filterInput.querySelector('input');
-    filterInput.addEventListener('focus', () => {
-      this.$.filterInput.style.border = '1px solid var(--primary-color)';
-    });
+    filterInput.addEventListener('blur', () => { this.$.filterInput.style.border = ''; });
+    filterInput.addEventListener('focus', () => { this.$.filterInput.style.border = '1px solid var(--primary-color)'; });
 
     afterNextRender(this, () => {
       this.shadowRoot.querySelectorAll(`
@@ -464,8 +463,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
   }
 
   _displayInlineFilters (event) {
-    const filter = this.filters[filterKey];
     const filterKey = event.target.dataset.filter
+    const filter = this.filters[filterKey];
 
     switch (filter.type) {
       case CasperMoac.filterTypes.CASPER_SELECT:
