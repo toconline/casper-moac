@@ -2,6 +2,7 @@ import { CasperMoacLazyLoadBehavior } from './casper-moac-lazy-load-mixin.js';
 import '@casper2020/casper-icons/casper-icons.js';
 import '@casper2020/casper-epaper/casper-epaper.js';
 import '@casper2020/casper-select/casper-select.js';
+import '@casper2020/casper-date-picker/casper-date-picker.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@polymer/iron-icon/iron-icon.js';
@@ -22,7 +23,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
   static get filterTypes () {
     return {
       PAPER_INPUT: 'PAPER_INPUT',
-      CASPER_SELECT: 'CASPER_SELECT'
+      CASPER_SELECT: 'CASPER_SELECT',
+      CASPER_DATE_PICKER: 'CASPER_DATE_PICKER',
     };
   }
 
@@ -89,8 +91,9 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
        * @type {Array}
        */
       filters: {
-        type: Array,
-        notify: true
+        type: Object,
+        notify: true,
+        observer: '_filtersChanged'
       },
       /**
        * The initial width of the left~side container.
@@ -98,7 +101,11 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
        */
       leftSideInitialWidth: {
         type: Number,
-        value: 50
+        value: 40
+      },
+      _displayAllFilters: {
+        type: Boolean,
+        value: false
       }
     };
   }
@@ -208,6 +215,21 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           grid-row-gap: 5px;
           grid-column-gap: 10px;
           grid-template-columns: 1fr 1fr;
+          padding: 15px;
+          margin-bottom: 15px;
+          border-top: 1px solid var(--primary-color);
+          border-bottom: 1px solid var(--primary-color);
+        }
+
+        .left-side-container .filters-container .filter-container span {
+          font-weight: bold;
+          color: var(--primary-color);
+        }
+
+        .left-side-container .filters-container .filter-container paper-input,
+        .left-side-container .filters-container .filter-container casper-select,
+        .left-side-container .filters-container .filter-container casper-date-picker {
+          width: 100%;
         }
 
         .left-side-container .grid-container {
@@ -259,7 +281,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
               </iron-input>
               <!--Show/hide the active filters-->
               <paper-button id="displayAllFilters" on-click="_toggleDisplayAllFilters">
-                Ver todos os filtros
+                [[_displayOrHideFiltersButtonLabel(_displayAllFilters)]]
               </paper-button>
             </div>
             <div class="active-filters">
@@ -268,10 +290,12 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
                 [[_filteredItems.length]] resultados
               </div>
               <div class="active-filters-list">
-                <template is="dom-repeat" items="[[filters]]" as="filter" id="activeFilters">
-                  <div class="active-filter" hidden$="[[!_filterHasValue(filter)]]">
-                    [[filter.label]]:
-                    <strong>[[_filterValue(filter)]]</strong>
+                <template is="dom-repeat" items="[[_filters]]" id="activeFilters">
+                  <div class="active-filter" hidden$="[[!_filterHasValue(item.filter)]]">
+                    [[item.filter.label]]:
+                    <strong data-filter$="[[item.filterKey]]" on-click="_displayInlineFilters">
+                      [[_filterValue(item.filter)]]
+                    </strong>
                   </div>
                 </template>
               </div>
@@ -280,25 +304,39 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
           <div hidden$="[[!_displayAllFilters]]">
             <div class="filters-container">
-              <template is="dom-repeat" items="[[filters]]" as="filter">
-                <!--Casper-Select filter-->
-                <template is="dom-if" if="[[_isFilterCasperSelect(filter.type)]]">
-                  <casper-select
-                    value="{{filter.value}}"
-                    items="[[filter.options]]"
-                    on-value-changed="_updateActiveFilters"
-                    label="[[filter.inputOptions.placeholder]]">
-                  </casper-select>
-                </template>
+              <template is="dom-repeat" items="[[_filters]]">
+                <div class="filter-container">
+                  <span>[[item.filter.label]]:</span>
+                  <!--Casper-Select filter-->
+                  <template is="dom-if" if="[[_isFilterCasperSelect(item.filter.type)]]">
+                    <casper-select
+                      data-filter$="[[item.filterKey]]"
+                      list-width="20vw"
+                      value="{{item.filter.value}}"
+                      items="[[item.filter.options]]"
+                      label="[[item.filter.inputOptions.label]]"
+                      multi-selection$="[[item.filter.inputOptions.multiSelection]]">
+                    </casper-select>
+                  </template>
 
-                <!--Paper-Input filter-->
-                <template is="dom-if" if="[[_isFilterPaperInput(filter.type)]]">
-                  <paper-input
-                    value="{{filter.value}}"
-                    on-value-changed="_updateActiveFilters"
-                    label="[[filter.inputOptions.placeholder]]">
-                  </paper-input>
-                </template>
+                  <!--Paper-Input filter-->
+                  <template is="dom-if" if="[[_isFilterPaperInput(item.filter.type)]]">
+                    <paper-input
+                      data-filter$="[[item.filterKey]]"
+                      value="{{item.filter.value}}"
+                      label="[[item.filter.inputOptions.label]]">
+                    </paper-input>
+                  </template>
+
+                  <!--Casper-Date-Picker filter-->
+                  <template is="dom-if" if="[[_isFilterCasperDatePicker(item.filter.type)]]">
+                    <casper-date-picker
+                      data-filter$="[[item.filterKey]]"
+                      value="{{item.filter.value}}"
+                      input-placeholder="[[item.filter.inputOptions.label]]">
+                    </casper-date-picker>
+                  </template>
+                </div>
               </template>
             </div>
           </div>
@@ -335,11 +373,9 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     `;
   }
 
-  static get sortByAscending () { return 'asc'; }
-  static get sortByDescending () { return 'desc'; }
-
   _isFilterPaperInput (itemType) { return itemType === CasperMoac.filterTypes.PAPER_INPUT; }
   _isFilterCasperSelect (itemType) { return itemType === CasperMoac.filterTypes.CASPER_SELECT; }
+  _isFilterCasperDatePicker (itemType) { return itemType === CasperMoac.filterTypes.CASPER_DATE_PICKER; }
 
   ready () {
     super.ready();
@@ -358,23 +394,27 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     // Set event listeners.
     this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
+
+    afterNextRender(this, () => {
+      this.shadowRoot.querySelectorAll(`
+        paper-input[data-filter],
+        casper-select[data-filter],
+        casper-date-picker[data-filter]`
+      ).forEach(input => input.addEventListener('value-changed', () => {
+        this._updateFiltersDebouncer = Debouncer.debounce(
+          this._updateFiltersDebouncer,
+          timeOut.after(200),
+          () => { this.set('filters', { ...this.filters }); }
+        );
+      }));
+    });
   }
 
   _filterChanged () {
     this._filterChangedDebouncer = Debouncer.debounce(
       this._filterChangedDebouncer,
       timeOut.after(this.resourceFilterDebounceMs),
-      () => {
-        this.lazyLoad ? this._filterItemsLazyLoad() : this._filterItems();
-      }
-    );
-  }
-
-  _updateActiveFilters () {
-    this._updateActiveFiltersDebouncer = Debouncer.debounce(
-      this._updateActiveFiltersDebouncer,
-      timeOut.after(500),
-      () => { this.$.activeFilters.render(); }
+      () => { this.lazyLoad ? this._filterItemsLazyLoad() : this._filterItems(); }
     );
   }
 
@@ -417,16 +457,66 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
   }
 
   _filterValue (filter) {
+    if (!filter.value) return;
+
     switch (filter.type) {
       case CasperMoac.filterTypes.PAPER_INPUT:
+      case CasperMoac.filterTypes.CASPER_DATE_PICKER:
         return filter.value;
       case CasperMoac.filterTypes.CASPER_SELECT:
-        return filter.options.find(option => option.id.toString() === filter.value.toString()).name;
+        // Apply this logic manually because in the beginning we don't have access to the casper-select.
+        const keyColumn = filter.inputOptions.keyColumn || 'id';
+        const itemColumn = filter.inputOptions.itemColumn || 'name';
+        const multiSelectionValueSeparator = filter.inputOptions.multiSelectionValueSeparator || ',';
+
+        if (!filter.inputOptions.multiSelection) {
+          const selectedOption = filter.options.find(option => option[keyColumn].toString() === filter.value.toString());
+
+          return selectedOption ? selectedOption[itemColumn] : '';
+        } else {
+          const values = filter.value.toString().split(multiSelectionValueSeparator);
+          const selectedOptions = filter.options.filter(option => values.includes(option[keyColumn].toString()));
+
+          return selectedOptions && selectedOptions.length > 0 ? selectedOptions.map(selectedOption => selectedOption[itemColumn]).join(', ') : '';
+        }
     }
   }
 
   _toggleDisplayAllFilters () {
     this._displayAllFilters = !this._displayAllFilters;
+  }
+
+  _displayOrHideFiltersButtonLabel () {
+    return !this._displayAllFilters ? 'Ver todos os filtros' : 'Esconder todos os filtros';
+  }
+
+  _displayInlineFilters (event) {
+    const filterKey = event.target.dataset.filter
+    const filter = this.filters[filterKey];
+
+    switch (filter.type) {
+      case CasperMoac.filterTypes.CASPER_SELECT:
+        this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(event.target);
+        break;
+      case CasperMoac.filterTypes.PAPER_INPUT:
+        this._displayAllFilters = true;
+        this.shadowRoot.querySelector(`paper-input[data-filter="${filterKey}"]`).focus();
+        break;
+      case CasperMoac.filterTypes.CASPER_DATE_PICKER:
+        this._displayAllFilters = true;
+        this.shadowRoot.querySelector(`casper-date-picker[data-filter="${filterKey}"]`).open();
+        break;
+    }
+  }
+
+  _filtersChanged (filters) {
+    if (!filters) return;
+
+    // Transform the filters object into an array to use in a dom-repeat.
+    this._filters = Object.keys(filters).map(filterKey => ({
+      filterKey: filterKey,
+      filter: this.filters[filterKey]
+    }));
   }
 }
 
