@@ -10,7 +10,17 @@
   },
   "main": "casper-moac.js",
   "dependencies": {
-    "@polymer/polymer": "^3.0.0"
+    "@casper2020/casper-date-picker": "^1.x",
+    "@casper2020/casper-epaper": "^1.x",
+    "@casper2020/casper-icons": "^1.x",
+    "@casper2020/casper-select": "^2.x",
+    "@polymer/iron-icon": "^3.0.1",
+    "@polymer/iron-input": "^3.0.1",
+    "@polymer/paper-icon-button": "^3.0.2",
+    "@polymer/paper-input": "^3.0.2",
+    "@polymer/polymer": "^3.0.0",
+    "@vaadin/vaadin-grid": "^5.4.6",
+    "@vaadin/vaadin-split-layout": "^4.1.1"
   },
   "devDependencies": {
     "@polymer/iron-demo-helpers": "^3.0.0",
