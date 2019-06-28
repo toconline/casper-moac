@@ -100,7 +100,7 @@ class CasperMoacMenu extends PolymerElement {
       this.$.menuItems.horizontalOffset = menuTriggerDimensions.width / 2 - CasperMoacMenuItem.buttonRadius;
       this.$.menuItems.addEventListener('iron-overlay-canceled', event => {
         // Prevent the default action which would close the overlay and then the below listener would re-open it.
-        if (event.detail.path.includes(this.$.menuTrigger)) {
+        if (event.detail.path.includes(this.$.menuTrigger) || event.detail.path.includes(this.$.circleBackground)) {
           event.preventDefault();
         }
       });
