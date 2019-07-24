@@ -301,7 +301,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
             <!--Active filters-->
             <div class="active-filters">
               <div class="header">
-                <strong>Filtros activos:</strong>
+                <strong>Filtros ativos:</strong>
                 <template is="dom-if" if="[[!hideNumberResults]]">
                   [[_filteredItems.length]] resultado(s)
                 </template>
