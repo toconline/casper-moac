@@ -32,7 +32,10 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
        * The list of items to be displayed.
        * @type {Array}
        */
-      items: Array,
+      items: {
+        type: Array,
+        observer: '_itemsChanged'
+      },
       /**
        * List of attributes that should be used to filter.
        * @type {Array}
@@ -410,12 +413,32 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     });
   }
 
+  _itemsChanged () {
+    this._filterItems();
+  }
+
   _filterChanged () {
     this._filterChangedDebouncer = Debouncer.debounce(
       this._filterChangedDebouncer,
       timeOut.after(this.resourceFilterDebounceMs),
       () => { this.lazyLoad ? this._filterItemsLazyLoad() : this._filterItems(); }
     );
+  }
+
+  _filtersChanged (filters) {
+    if (!filters) return;
+
+    // Transform the filters object into an array to use in a dom-repeat.
+    this._filters = Object.keys(filters).map(filterKey => ({
+      filterKey: filterKey,
+      filter: this.filters[filterKey]
+    }));
+
+    afterNextRender(this, () => this._renderActiveFilters());
+  }
+
+  _selectedItemsChanged () {
+    this._hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
   }
 
   _filterItems () {
@@ -448,10 +471,6 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
       .toLowerCase();
   }
 
-  _selectedItemsChanged () {
-    this._hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
-  }
-
   _toggleDisplayAllFilters () {
     this._displayAllFilters = !this._displayAllFilters;
   }
@@ -479,18 +498,6 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         this.shadowRoot.querySelector(`casper-date-picker[data-filter="${filterKey}"]`).open();
         break;
     }
-  }
-
-  _filtersChanged (filters) {
-    if (!filters) return;
-
-    // Transform the filters object into an array to use in a dom-repeat.
-    this._filters = Object.keys(filters).map(filterKey => ({
-      filterKey: filterKey,
-      filter: this.filters[filterKey]
-    }));
-
-    afterNextRender(this, () => this._renderActiveFilters());
   }
 
   _renderActiveFilters () {
