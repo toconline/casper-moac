@@ -107,6 +107,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
       },
       /**
        * Whether to display or not the number of results on the top-right corner of the filters.
+       * @type {Boolean}
        */
       hideNumberResults: {
         type: Boolean,
