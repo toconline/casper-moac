@@ -249,7 +249,6 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
         .left-side-container .grid-container {
           flex-grow: 1;
-          position: relative;
         }
 
         .left-side-container .grid-multiple-selection-container {
@@ -281,6 +280,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
         .left-side-container .grid-container vaadin-grid {
           height: 100%;
+          overflow: hidden;
+          border-radius: 5px;
         }
       </style>
       <vaadin-split-layout>
