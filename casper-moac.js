@@ -106,6 +106,13 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         value: 40
       },
       /**
+       * Whether to display or not the number of results on the top-right corner of the filters.
+       */
+      hideNumberResults: {
+        type: Boolean,
+        value: false
+      },
+      /**
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
        * @type {Boolean}
        */
@@ -295,7 +302,9 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
             <div class="active-filters">
               <div class="header">
                 <strong>Filtros activos:</strong>
-                [[_filteredItems.length]] resultados
+                <template is="dom-if" if="[[!hideNumberResults]]">
+                  [[_filteredItems.length]] resultado(s)
+                </template>
               </div>
               <div class="active-filters-list" id="activeFilters"></div>
             </div>
@@ -442,8 +451,9 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
   }
 
   _filterItems () {
-    if (!this.$.filterInput.value) {
-      this._filteredItems = this.items;
+    // If the search input is empty or there are no items at the moment.
+    if (!this.$.filterInput.value || !this.items) {
+      this._filteredItems = this.items || [];
       return;
     }
 
