@@ -114,6 +114,14 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         value: false
       },
       /**
+       * Stylesheet to be injected in order to style the vaadin-grid inner components.
+       * @type {String}
+       */
+      stylesheet: {
+        type: String,
+        observer: '_stylesheetChanged'
+      },
+      /**
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
        * @type {Boolean}
        */
@@ -284,6 +292,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           border-radius: 5px;
         }
       </style>
+
       <vaadin-split-layout>
         <div class="left-side-container">
           <div class="header-container">
@@ -450,6 +459,23 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
   _selectedItemsChanged () {
     this._hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
+  }
+
+  _stylesheetChanged (stylesheet) {
+    // Check if there is already a custom existing tag.
+    const stylesheetTagId = 'custom-grid-styles';
+    let stylesheetTag = this.shadowRoot.getElementById(stylesheetTagId);
+    if (stylesheetTag) {
+      this.shadowRoot.removeChild(stylesheetTag);
+    }
+
+    if (stylesheet) {
+      stylesheetTag = document.createElement('style');
+      stylesheetTag.id = stylesheetTagId;
+      stylesheetTag.textContent = stylesheet;
+
+      this.shadowRoot.appendChild(stylesheetTag);
+    }
   }
 
   _filterItems () {
