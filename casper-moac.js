@@ -81,6 +81,14 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         notify: true,
       },
       /**
+       * The item that is currently displaying the context menu.
+       * @type {Object}
+       */
+      contextMenuActiveItem: {
+        type: Object,
+        notify: true,
+      },
+      /**
        * The items that are currently selected in the vaadin-grid.
        * @type {Array}
        */
@@ -291,6 +299,19 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           overflow: hidden;
           border-radius: 5px;
         }
+
+        .left-side-container .grid-container vaadin-grid .context-menu-icon {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          color: var(--primary-color);
+        }
+
+        .left-side-container .grid-container vaadin-grid .context-menu-icon:hover {
+          color: white;
+          cursor: pointer;
+          background-color: var(--primary-color);
+        }
       </style>
 
       <vaadin-split-layout>
@@ -384,6 +405,18 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
               active-item="{{activeItem}}"
               selected-items="{{selectedItems}}">
               <slot name="grid"></slot>
+
+              <template is="dom-if" if="[[_displayContextMenu]]">
+                <vaadin-grid-column flex-grow="0" width="40px" text-align="middle">
+                  <template>
+                    <iron-icon
+                      class="context-menu-icon"
+                      on-click="_openContextMenu"
+                      icon="casper-icons:arrow-drop-down">
+                    </iron-icon>
+                  </template>
+                </vaadin-grid-column>
+              </template>
             </vaadin-grid>
           </div>
         </div>
@@ -392,6 +425,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           <casper-epaper id="epaper" app="[[app]]"></casper-epaper>
         </div>
       </vaadin-split-layout>
+
+      <slot name="context-menu"></slot>
     `;
   }
 
@@ -431,6 +466,19 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           this._renderActiveFilters();
       }));
     });
+
+    // Check if there is a casper-context-menu.
+    this._contextMenu = Array.from(this.children).find(child => child.getAttribute('slot') === 'context-menu');
+    this._displayContextMenu = !!this._contextMenu;
+
+    if (this._contextMenu) {
+      this._contextMenu.addEventListener('iron-overlay-canceled', event => {
+        // Do not close the overlay if the event was triggered by another context menu icon.
+        if (event.detail.path.some(element => element.classList && element.classList.contains('context-menu-icon'))) {
+          event.preventDefault();
+        }
+      });
+    }
   }
 
   _itemsChanged () {
@@ -514,7 +562,9 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
   }
 
   _displayOrHideFiltersButtonLabel () {
-    return !this._displayAllFilters ? 'Ver todos os filtros' : 'Esconder todos os filtros';
+    return !this._displayAllFilters
+      ? 'Ver todos os filtros'
+      : 'Esconder todos os filtros';
   }
 
   _displayInlineFilters (event) {
@@ -591,6 +641,16 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
         return casperSelectSelectedItems.map(selectedItem => selectedItem[casperSelect.itemColumn]).join(', ');
     }
+  }
+
+  _openContextMenu (event) {
+    this._contextMenu.positionTarget = event.target;
+    this._contextMenu.refit();
+    if (!this._contextMenu.opened) {
+      this._contextMenu.open();
+    }
+
+    this.contextMenuActiveItem = this.$.grid.getEventContext(event).item;
   }
 }
 
