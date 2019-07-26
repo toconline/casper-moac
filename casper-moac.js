@@ -18,7 +18,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     return 'casper-moac';
   }
 
-  static get filterTypes () {
+  static get FILTER_TYPES () {
     return {
       PAPER_INPUT: 'PAPER_INPUT',
       CASPER_SELECT: 'CASPER_SELECT',
@@ -26,8 +26,23 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     };
   }
 
+  static get MOAC_TYPES () {
+    return {
+      GRID: 'GRID',
+      GRID_EPAPER: 'GRID_EPAPER'
+    }
+  };
+
   static get properties () {
     return {
+      /**
+       * This states what kind of MOAC we're dealing with so that certain items are displayed / hidden.
+       * @type {String}
+       */
+      moacType: {
+        type: String,
+        value: CasperMoac.MOAC_TYPES.GRID_EPAPER
+      },
       /**
        * The list of items to be displayed.
        * @type {Array}
@@ -314,8 +329,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         }
       </style>
 
-      <vaadin-split-layout>
-        <div class="left-side-container">
+      <vaadin-split-layout id="splitLayout">
+        <div class="left-side-container" style="[[_leftSideInitialWidth()]]">
           <div class="header-container">
             <!--Casper-moac-menu-->
             <slot name="menu"></slot>
@@ -406,6 +421,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
               selected-items="{{selectedItems}}">
               <slot name="grid"></slot>
 
+              <!--Context Menu-->
               <template is="dom-if" if="[[_displayContextMenu]]">
                 <vaadin-grid-column flex-grow="0" width="40px" text-align="middle">
                   <template>
@@ -420,28 +436,36 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
             </vaadin-grid>
           </div>
         </div>
-        <div class="right-side-container">
-          <slot name="right"></slot>
-          <casper-epaper id="epaper" app="[[app]]"></casper-epaper>
-        </div>
+
+        <template is="dom-if" if="[[_displayEpaper]]">
+          <div class="right-side-container" style="[[_rightSideInitialWidth()]]">
+            <slot name="right"></slot>
+            <casper-epaper id="epaper" app="[[app]]"></casper-epaper>
+          </div>
+        </template>
       </vaadin-split-layout>
 
       <slot name="context-menu"></slot>
     `;
   }
 
-  _isFilterPaperInput (itemType) { return itemType === CasperMoac.filterTypes.PAPER_INPUT; }
-  _isFilterCasperSelect (itemType) { return itemType === CasperMoac.filterTypes.CASPER_SELECT; }
-  _isFilterCasperDatePicker (itemType) { return itemType === CasperMoac.filterTypes.CASPER_DATE_PICKER; }
+  _isFilterPaperInput (itemType) { return itemType === CasperMoac.FILTER_TYPES.PAPER_INPUT; }
+  _isFilterCasperSelect (itemType) { return itemType === CasperMoac.FILTER_TYPES.CASPER_SELECT; }
+  _isFilterCasperDatePicker (itemType) { return itemType === CasperMoac.FILTER_TYPES.CASPER_DATE_PICKER; }
 
   ready () {
     super.ready();
 
-    this.epaper = this.$.epaper;
-
-    // Calculate the initial width for both the left and right side containers.
-    this.shadowRoot.querySelector('.left-side-container').style.width = `${this.leftSideInitialWidth}%`;
-    this.shadowRoot.querySelector('.right-side-container').style.width = `${100 - parseInt(this.leftSideInitialWidth)}%`;
+    this._displayEpaper = this.moacType !== CasperMoac.MOAC_TYPES.GRID;
+    if (!this._displayEpaper) {
+      // Hide the vaadin-split-layout handler.
+      this.$.splitLayout.shadowRoot.getElementById('splitter').style.display = 'none';
+    } else {
+      // Save the epaper in a notifiable property so it can be used outside.
+      afterNextRender(this, () => {
+        this.epaper = this.shadowRoot.querySelector('casper-epaper');
+      });
+    }
 
     // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
     this.lazyLoad
@@ -541,15 +565,15 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     }
 
     if (filterAttributes && this.items.length > 0) {
-      const filterTerm = this._normalizeVariableForComparison(this.$.filterInput.value);
+      const filterTerm = this._normalizeVariable(this.$.filterInput.value);
 
       this._filteredItems = this.items.filter(item => {
-        return filterAttributes.some(filterAttribute => item[filterAttribute] && this._normalizeVariableForComparison(item[filterAttribute]).includes(filterTerm));
+        return filterAttributes.some(filterAttribute => item[filterAttribute] && this._normalizeVariable(item[filterAttribute]).includes(filterTerm));
       });
     }
   }
 
-  _normalizeVariableForComparison (variable) {
+  _normalizeVariable (variable) {
     return variable
       .toString()
       .trim()
@@ -573,16 +597,16 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     const filter = this.filters[filterKey];
 
     switch (filter.type) {
-      case CasperMoac.filterTypes.CASPER_SELECT:
+      case CasperMoac.FILTER_TYPES.CASPER_SELECT:
         !filter.inputOptions.multiSelection
           ? this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(event.target)
           : this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(this.$.activeFilters);
         break;
-      case CasperMoac.filterTypes.PAPER_INPUT:
+      case CasperMoac.FILTER_TYPES.PAPER_INPUT:
         this._displayAllFilters = true;
         this.shadowRoot.querySelector(`paper-input[data-filter="${filterKey}"]`).focus();
         break;
-      case CasperMoac.filterTypes.CASPER_DATE_PICKER:
+      case CasperMoac.FILTER_TYPES.CASPER_DATE_PICKER:
         this._displayAllFilters = true;
         this.shadowRoot.querySelector(`casper-date-picker[data-filter="${filterKey}"]`).open();
         break;
@@ -628,10 +652,10 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     if (!filterItem.filter.value) return;
 
     switch (filterItem.filter.type) {
-      case CasperMoac.filterTypes.PAPER_INPUT:
-      case CasperMoac.filterTypes.CASPER_DATE_PICKER:
+      case CasperMoac.FILTER_TYPES.PAPER_INPUT:
+      case CasperMoac.FILTER_TYPES.CASPER_DATE_PICKER:
         return filterItem.filter.value;
-      case CasperMoac.filterTypes.CASPER_SELECT:
+      case CasperMoac.FILTER_TYPES.CASPER_SELECT:
         const casperSelect = this.shadowRoot.querySelector(`casper-select[data-filter="${filterItem.filterKey}"]`);
 
         if (!casperSelect || !casperSelect.selectedItems || casperSelect.selectedItems.length === 0) return;
@@ -654,6 +678,14 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     }
 
     this.contextMenuActiveItem = this.$.grid.getEventContext(event).item;
+  }
+
+  _leftSideInitialWidth () {
+    return `width: ${this.leftSideInitialWidth}%;`;
+  }
+
+  _rightSideInitialWidth () {
+    return `width: ${100 - parseInt(this.leftSideInitialWidth)}%;`;
   }
 }
 
