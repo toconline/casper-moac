@@ -285,6 +285,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         .left-side-container .grid-multiple-selection-container {
           display: flex;
           padding: 10px;
+          border-radius: 5px;
           align-items: center;
           background-color: #1A39601A;
           justify-content: space-between;
@@ -519,7 +520,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     if (this.activeItem) {
       this._lastActiveRow = event.composedPath().find(pathElement => pathElement.tagName === 'TR');
       Array.from(this._lastActiveRow.children).forEach(rowCell => {
-        rowCell.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.3)';
+        rowCell.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.2)';
       });
     }
   }
