@@ -473,6 +473,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
       : afterNextRender(this, () => this._filterItems());
 
     // Set event listeners.
+    this.$.grid.addEventListener('click', event => this._styleActiveRow(event));
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
     this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
 
@@ -502,6 +503,23 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         if (eventPathElement.classList.contains('context-menu-icon') && this._lastContextMenuTarget !== eventPathElement) {
           event.preventDefault();
         }
+      });
+    }
+  }
+
+  _styleActiveRow (event) {
+    // If there was a previous active item, remove its active styling.
+    if (this._lastActiveRow) {
+      Array.from(this._lastActiveRow.children).forEach(rowCell => {
+        rowCell.style.backgroundColor = '';
+      });
+    }
+
+    // Only paint the rows if there is an active item.
+    if (this.activeItem) {
+      this._lastActiveRow = event.composedPath().find(pathElement => pathElement.tagName === 'TR');
+      Array.from(this._lastActiveRow.children).forEach(rowCell => {
+        rowCell.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.3)';
       });
     }
   }
