@@ -78,7 +78,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
        */
       activeItem: {
         type: Object,
-        notify: true,
+        notify: true
       },
       /**
        * The item that is currently displaying the context menu.
@@ -474,7 +474,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     if (this._contextMenu) {
       this._contextMenu.addEventListener('iron-overlay-canceled', event => {
         // Do not close the overlay if the event was triggered by another context menu icon.
-        if (event.detail.path.some(element => element.classList && element.classList.contains('context-menu-icon'))) {
+        const eventPathElement = event.detail.path.shift();
+        if (eventPathElement.classList.contains('context-menu-icon') && this._lastContextMenuTarget !== eventPathElement) {
           event.preventDefault();
         }
       });
@@ -644,8 +645,10 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
   }
 
   _openContextMenu (event) {
+    this._lastContextMenuTarget = this._contextMenu.positionTarget;
     this._contextMenu.positionTarget = event.target;
     this._contextMenu.refit();
+
     if (!this._contextMenu.opened) {
       this._contextMenu.open();
     }
