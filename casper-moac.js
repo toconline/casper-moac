@@ -49,7 +49,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
        */
       items: {
         type: Array,
-        observer: '_itemsChanged'
+        observer: '_filterItems'
       },
       /**
        * List of attributes that should be used to filter.
@@ -475,8 +475,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     // Set event listeners.
     this.$.grid.addEventListener('click', event => this._styleActiveRow(event));
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
-    this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
 
+    this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
     const filterInput = this.$.filterInput.querySelector('input');
     filterInput.addEventListener('blur', () => { this.$.filterInput.style.border = ''; });
     filterInput.addEventListener('focus', () => { this.$.filterInput.style.border = '1px solid var(--primary-color)'; });
@@ -522,10 +522,6 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         rowCell.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.3)';
       });
     }
-  }
-
-  _itemsChanged () {
-    this._filterItems();
   }
 
   _filterChanged () {
