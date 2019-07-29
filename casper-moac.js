@@ -201,7 +201,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           text-align: center;
         }
 
-        /* Iron input styles */
+        /* Filter paper-input */
         .left-side-container .header-container .generic-filter-container #filterInput {
           height: 35px;
           display: flex;
@@ -237,6 +237,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           color: var(--primary-color);
         }
 
+        /* Active Filters summary */
         .left-side-container .header-container .active-filters {
           display: flex;
           font-size: 0.85em;
@@ -264,15 +265,26 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           color: var(--dark-primary-color);
         }
 
+        /* Active filters */
         .left-side-container .filters-container {
           display: grid;
-          grid-row-gap: 5px;
+          grid-row-gap: 10px;
           grid-column-gap: 10px;
           grid-template-columns: 1fr 1fr;
           padding: 15px;
           margin-bottom: 15px;
           border-top: 1px solid var(--primary-color);
           border-bottom: 1px solid var(--primary-color);
+        }
+
+        .left-side-container .filters-container.filters-container-inline {
+          display: flex;
+          padding: 10px;
+        }
+
+        .left-side-container .filters-container.filters-container-inline .filter-container {
+          flex: 1;
+          margin: 0 5px;
         }
 
         .left-side-container .filters-container .filter-container span {
@@ -286,6 +298,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           width: 100%;
         }
 
+        /* Vaadin-grid */
         .left-side-container .grid-container {
           flex-grow: 1;
         }
@@ -367,7 +380,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           </div>
 
           <div hidden$="[[!_displayAllFilters]]">
-            <div class="filters-container">
+            <div class$="[[_filtersContainerClassName()]]">
               <template is="dom-repeat" items="[[_filters]]">
                 <div class="filter-container">
                   <span>[[item.filter.label]]:</span>
@@ -712,6 +725,12 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
   _rightSideInitialWidth () {
     return `width: ${100 - parseInt(this.leftSideInitialWidth)}%;`;
+  }
+
+  _filtersContainerClassName () {
+    return this.moacType === CasperMoac.MOAC_TYPES.GRID_EPAPER
+      ? 'filters-container'
+      : 'filters-container filters-container-inline';
   }
 }
 
