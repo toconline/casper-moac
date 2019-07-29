@@ -229,7 +229,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
           color: var(--primary-color);
         }
 
-        /* Active Filters summary */
+        /* Active filters summary */
         .left-side-container .header-container .active-filters {
           display: flex;
           font-size: 0.85em;
@@ -413,6 +413,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
               </template>
             </div>
           </div>
+
+          <slot name="left"></slot>
 
           <div class="grid-multiple-selection-container" hidden$="[[!_hasSelectedItems]]">
             <div class="grid-multiple-selection-label">
