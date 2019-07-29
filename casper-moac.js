@@ -45,6 +45,13 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         value: CasperMoac.MOAC_TYPES.GRID_EPAPER
       },
       /**
+       * The identifier property that will be used when painting the active row.
+       */
+      idProperty: {
+        type: String,
+        value: 'id'
+      },
+      /**
        * The list of items to be displayed.
        * @type {Array}
        */
