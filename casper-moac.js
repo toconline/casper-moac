@@ -701,8 +701,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     }
 
     // If the currently active item is the one triggering the context menu, prevent its de-activation.
-    const eventItem = this.$.grid.getEventContext(event).item;
-    if (this.activeItem === eventItem) {
+    if (this.activeItem === this.$.grid.getEventContext(event).item) {
       event.preventDefault();
     }
   }
