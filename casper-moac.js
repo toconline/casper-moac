@@ -104,14 +104,6 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         notify: true
       },
       /**
-       * The item that is currently displaying the context menu.
-       * @type {Object}
-       */
-      contextMenuActiveItem: {
-        type: Object,
-        notify: true,
-      },
-      /**
        * The items that are currently selected in the vaadin-grid.
        * @type {Array}
        */
