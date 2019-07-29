@@ -4,6 +4,7 @@ import '@casper2020/casper-epaper/casper-epaper.js';
 import '@casper2020/casper-select/casper-select.js';
 import '@casper2020/casper-date-picker/casper-date-picker.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
+import '@vaadin/vaadin-grid/vaadin-grid-column';
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-input/iron-input.js';
@@ -420,6 +421,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
               items="[[_filteredItems]]"
               active-item="{{activeItem}}"
               selected-items="{{selectedItems}}">
+              <vaadin-grid-column width="0px" flex-grow="0" path="[[idProperty]]"></vaadin-grid-column>
+
               <slot name="grid"></slot>
 
               <!--Context Menu-->
@@ -474,7 +477,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
       : afterNextRender(this, () => this._filterItems());
 
     // Set event listeners.
-    this.$.grid.addEventListener('click', event => this._styleActiveRow(event));
+    this.$.grid.addEventListener('click', () => this._gridActiveItem());
+    this.$.grid.$.outerscroller.addEventListener('scroll', () => this._gridActiveItem());
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
 
     this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
@@ -508,21 +512,18 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     }
   }
 
-  _styleActiveRow (event) {
-    // If there was a previous active item, remove its active styling.
-    if (this._lastActiveRow) {
-      Array.from(this._lastActiveRow.children).forEach(rowCell => {
-        rowCell.style.backgroundColor = '';
-      });
-    }
+  _gridActiveItem () {
+    const activeItemId = this.activeItem ? this.activeItem[this.idProperty] : null;
 
-    // Only paint the rows if there is an active item.
-    if (this.activeItem) {
-      this._lastActiveRow = event.composedPath().find(pathElement => pathElement.tagName === 'TR');
-      Array.from(this._lastActiveRow.children).forEach(rowCell => {
-        rowCell.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.2)';
+    // Loop through each grid row and paint the active one.
+    this.$.grid.shadowRoot.querySelectorAll('tr').forEach(row => {
+      const isRowActive = row.firstChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
+
+      row.firstChild.style.display = 'none';
+      Array.from(row.children).forEach(rowCell => {
+        rowCell.style.backgroundColor = isRowActive ? 'rgba(var(--primary-color-rgb), 0.2)' : '';
       });
-    }
+    });
   }
 
   _filterChanged () {
