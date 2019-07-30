@@ -556,6 +556,11 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     afterNextRender(this, () => this._renderActiveFilters());
   }
 
+  /**
+   * Observer that fires as soon as the items change. This will invoke the internal _filterItems method to display
+   * the new items on the vaadin-grid and then loop through all the cells to check for elements that, when clicked,
+   * should not de-activate the current row.
+   */
   _itemsChanged () {
     this._filterItems();
 
@@ -657,12 +662,16 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     }
   }
 
+  /**
+   * This method is responsible for rendering the active filters summary and binding the event listeners that
+   * will be reponsible for displaying the filter's input overlay when possible.
+   */
   _renderActiveFilters () {
     this.$.activeFilters.innerHTML = '';
 
     const activeFiltersValues = {};
     this._filters.forEach(filterItem => {
-      const activeFilterValue = this._renderActiveFilterValue(filterItem);
+      const activeFilterValue = this._activeFilterValue(filterItem);
       if (activeFilterValue) {
         activeFiltersValues[filterItem.filterKey] = activeFilterValue;
       }
@@ -692,7 +701,12 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     });
   }
 
-  _renderActiveFilterValue (filterItem) {
+  /**
+   * Given a specific filter, this method is responsible for returning the human-readable version
+   * of its current value.
+   * @param {Object} filterItem
+   */
+  _activeFilterValue (filterItem) {
     if ([null, undefined].includes(filterItem.filter.value)) return;
 
     switch (filterItem.filter.type) {
@@ -712,6 +726,11 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     }
   }
 
+  /**
+   * This method is invoked when the grid is either clicked or scrolled and ensures the correct active
+   * row has a different background color. This is required for scroll as well since the vaadin-grid re-uses
+   * its rows and having this into account, the id property is used to avoid highlighting the wrong row.
+   */
   _gridActiveItem () {
     const activeItemId = this.activeItem ? this.activeItem[this.idProperty] : null;
 
@@ -726,6 +745,11 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     });
   }
 
+  /**
+   * In order to make searching items easier, every accented characters should be replaced with its
+   * unaccented equivalent.
+   * @param {String} variable
+   */
   _normalizeVariable (variable) {
     return variable
       .toString()
@@ -735,16 +759,27 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
       .toLowerCase();
   }
 
+  /**
+   * This method toggles the visibility of all the filters when the user presses the button below the search input.
+   */
   _toggleDisplayAllFilters () {
     this._displayAllFilters = !this._displayAllFilters;
   }
 
+  /**
+   * The button below the search input will have a different message based on all filters being visible or not.
+   */
   _displayOrHideFiltersButtonLabel () {
     return !this._displayAllFilters
       ? 'Ver todos os filtros'
       : 'Esconder todos os filtros';
   }
 
+  /**
+   * This method fires when a context menu icon is pressed on a specific row. The context menu will have to be moved around
+   * so that it appears aligned with the icon that triggered the event in the first place.
+   * @param {Event} event
+   */
   _openContextMenu (event) {
     this._lastContextMenuTarget = this._contextMenu.positionTarget;
     this._contextMenu.positionTarget = event.target;
@@ -755,14 +790,28 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     }
   }
 
+  /**
+   * This method is invoked directly in the template so that the vaadin-split-layout has the
+   * correct percentual width for the left side of the component.
+   */
   _leftSideInitialWidth () {
-    return `width: ${this.leftSideInitialWidth}%;`;
+    return this.moacType === CasperMoac.MOAC_TYPES.GRID
+      ? 'width: 100%;'
+      : `width: ${this.leftSideInitialWidth}%;`;
   }
 
+  /**
+   * This method is invoked directly in the template so that the vaadin-split-layout has the
+   * correct percentual width for the right side of the component.
+   */
   _rightSideInitialWidth () {
     return `width: ${100 - parseInt(this.leftSideInitialWidth)}%;`;
   }
 
+  /**
+   * Depending on the current MOAC type, the active filters will be displayed differently by either
+   * adding the 'filters-container-inline' class or not.
+   */
   _filtersContainerClassName () {
     return this.moacType === CasperMoac.MOAC_TYPES.GRID_EPAPER
       ? 'filters-container'
