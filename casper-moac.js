@@ -683,19 +683,19 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     const activeFiltersValues = {};
     this._filters.forEach(filterItem => {
       const activeFilterValue = this._activeFilterValue(filterItem);
-      if (activeFilterValue) {
+      if (this._valueIsNotEmpty(activeFilterValue)) {
         activeFiltersValues[filterItem.filterKey] = activeFilterValue;
       }
     });
 
     // This means that it wasn't possible obtain all the values from the filters components and therefore we schedule a new render.
-    if (this._filters.filter(filterItem => !!filterItem.filter.value).length !== Object.keys(activeFiltersValues).length) {
+    if (this._filters.filter(filterItem => this._valueIsNotEmpty(filterItem.filter.value)).length !== Object.keys(activeFiltersValues).length) {
       afterNextRender(this, () => this._renderActiveFilters());
       return;
     }
 
     this._filters.forEach(filterItem => {
-      if (filterItem.filter.value) {
+      if (this._valueIsNotEmpty(filterItem.filter.value)) {
         const activeFilter = document.createElement('div');
         activeFilter.className = 'active-filter';
 
@@ -710,6 +710,15 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         this.$.activeFilters.appendChild(activeFilter);
       }
     });
+  }
+
+  /**
+   * This method checks if the filter value is be empty since zeroes in some occasions
+   * might be used as actual values and they should not be disregarded.
+   * @param {String | Number | Array | Object} value
+   */
+  _valueIsNotEmpty (value) {
+    return ![null, undefined].includes(value);
   }
 
   /**
