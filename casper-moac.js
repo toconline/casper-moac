@@ -385,6 +385,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
                       value="{{item.filter.value}}"
                       items="[[item.filter.options]]"
                       label="[[item.filter.inputOptions.label]]"
+                      disable-clear$="[[item.filter.inputOptions.disableClear]]"
                       multi-selection$="[[item.filter.inputOptions.multiSelection]]"
                       lazy-load-resource="[[item.filter.inputOptions.lazyLoadResource]]"
                       lazy-load-callback="[[item.filter.inputOptions.lazyLoadCallback]]"
@@ -679,7 +680,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
   }
 
   _renderActiveFilterValue (filterItem) {
-    if (!filterItem.filter.value) return;
+    if ([null, undefined].includes(filterItem.filter.value)) return;
 
     switch (filterItem.filter.type) {
       case CasperMoac.FILTER_TYPES.PAPER_INPUT:
