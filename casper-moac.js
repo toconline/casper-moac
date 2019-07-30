@@ -57,7 +57,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
        */
       items: {
         type: Array,
-        observer: '_filterItems'
+        observer: '_itemsChanged'
       },
       /**
        * List of attributes that should be used to filter.
@@ -445,6 +445,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
                 <vaadin-grid-column flex-grow="0" width="40px" text-align="middle">
                   <template>
                     <iron-icon
+                      data-disable-default-click
                       class="context-menu-icon"
                       on-click="_openContextMenu"
                       icon="casper-icons:arrow-drop-down">
@@ -492,9 +493,9 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
       : afterNextRender(this, () => this._filterItems());
 
     // Set event listeners.
+    this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
     this.$.grid.addEventListener('click', () => this._gridActiveItem());
     this.$.grid.$.outerscroller.addEventListener('scroll', () => this._gridActiveItem());
-    this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
 
     this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
     const filterInput = this.$.filterInput.querySelector('input');
@@ -527,20 +528,9 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     }
   }
 
-  _gridActiveItem () {
-    const activeItemId = this.activeItem ? this.activeItem[this.idProperty] : null;
-
-    // Loop through each grid row and paint the active one.
-    this.$.grid.shadowRoot.querySelectorAll('tr').forEach(row => {
-      const isRowActive = row.firstChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
-
-      row.firstChild.style.display = 'none';
-      Array.from(row.children).forEach(rowCell => {
-        rowCell.style.backgroundColor = isRowActive ? 'rgba(var(--primary-color-rgb), 0.2)' : '';
-      });
-    });
-  }
-
+  /**
+   * Debounce the items filtering after the search input's value changes.
+   */
   _filterChanged () {
     this._filterChangedDebouncer = Debouncer.debounce(
       this._filterChangedDebouncer,
@@ -549,6 +539,11 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     );
   }
 
+  /**
+   * Observer that fires after the filters object change from the outside which
+   * will cause a re-render of the active filters.
+   * @param {Object} filters
+   */
   _filtersChanged (filters) {
     if (!filters) return;
 
@@ -561,12 +556,40 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     afterNextRender(this, () => this._renderActiveFilters());
   }
 
+  _itemsChanged () {
+    this._filterItems();
+
+    afterNextRender(this, () => {
+      // Loop through all the table cells to look for any elements that should not have the vaadin-grid's default behavior.
+      this.$.grid.$.items.querySelectorAll('td').forEach(rowCell => {
+        const rowCellElements = rowCell.firstChild.assignedNodes().shift().querySelectorAll('[data-disable-default-click]');
+        if (rowCellElements.length > 0) {
+          rowCellElements.forEach(rowCellElement => {
+            rowCellElement.addEventListener('click', event => {
+              // If the currently active item is the one triggering the context menu, prevent its de-activation.
+              if (this.activeItem === this.$.grid.getEventContext(event).item) {
+                event.preventDefault();
+              }
+            });
+          });
+        }
+      });
+    });
+  }
+
+  /**
+   * Observer that fires when the vaadin-grid selected items change.
+   */
   _selectedItemsChanged () {
     this._hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
   }
 
+  /**
+   * Observer that fires when the stylesheet property changes which will delete the previous
+   * <style> tag and create a new one with the most recent styles.
+   * @param {String} stylesheet
+   */
   _stylesheetChanged (stylesheet) {
-    // Check if there is already a custom existing tag.
     const stylesheetTagId = 'custom-grid-styles';
     let stylesheetTag = this.shadowRoot.getElementById(stylesheetTagId);
     if (stylesheetTag) {
@@ -582,6 +605,10 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     }
   }
 
+  /**
+   * This method filters the existing items with the search input's value taking into account the list of attributes
+   * provided for that effect. If none were specified, every single attribute will be used for comparison purposes.
+   */
   _filterItems () {
     // If the search input is empty or there are no items at the moment.
     if (!this.$.filterInput.value || !this.items) {
@@ -604,25 +631,11 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     }
   }
 
-  _normalizeVariable (variable) {
-    return variable
-      .toString()
-      .trim()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase();
-  }
-
-  _toggleDisplayAllFilters () {
-    this._displayAllFilters = !this._displayAllFilters;
-  }
-
-  _displayOrHideFiltersButtonLabel () {
-    return !this._displayAllFilters
-      ? 'Ver todos os filtros'
-      : 'Esconder todos os filtros';
-  }
-
+  /**
+   * Event listener which is fired when the user clicks on a filter's value in the summary. This will try to move
+   * the filter's overlay for UX purposes (casper-select) or display all the filters focusing the correct one.
+   * @param {Event} event
+   */
   _displayInlineFilters (event) {
     const filterKey = event.target.dataset.filter
     const filter = this.filters[filterKey];
@@ -699,6 +712,39 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     }
   }
 
+  _gridActiveItem () {
+    const activeItemId = this.activeItem ? this.activeItem[this.idProperty] : null;
+
+    // Loop through each grid row and paint the active one.
+    this.$.grid.shadowRoot.querySelectorAll('tr').forEach(row => {
+      const isRowActive = row.firstChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
+
+      row.firstChild.style.display = 'none';
+      Array.from(row.children).forEach(rowCell => {
+        rowCell.style.backgroundColor = isRowActive ? 'rgba(var(--primary-color-rgb), 0.2)' : '';
+      });
+    });
+  }
+
+  _normalizeVariable (variable) {
+    return variable
+      .toString()
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+  }
+
+  _toggleDisplayAllFilters () {
+    this._displayAllFilters = !this._displayAllFilters;
+  }
+
+  _displayOrHideFiltersButtonLabel () {
+    return !this._displayAllFilters
+      ? 'Ver todos os filtros'
+      : 'Esconder todos os filtros';
+  }
+
   _openContextMenu (event) {
     this._lastContextMenuTarget = this._contextMenu.positionTarget;
     this._contextMenu.positionTarget = event.target;
@@ -706,11 +752,6 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
     if (!this._contextMenu.opened) {
       this._contextMenu.open();
-    }
-
-    // If the currently active item is the one triggering the context menu, prevent its de-activation.
-    if (this.activeItem === this.$.grid.getEventContext(event).item) {
-      event.preventDefault();
     }
   }
 
