@@ -96,6 +96,15 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         notify: true
       },
       /**
+       * A reference to the vaadin-grid so that the page using casper-moac can
+       * use its methods.
+       * @type {Object}
+       */
+      grid: {
+        type: Object,
+        notify: true
+      },
+      /**
        * The item that is currently active in the vaadin-grid.
        * @type {Object}
        */
@@ -475,6 +484,8 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
   ready () {
     super.ready();
+
+    this.grid = this.$.grid;
 
     this._displayEpaper = this.moacType !== CasperMoac.MOAC_TYPES.GRID;
     if (!this._displayEpaper) {
