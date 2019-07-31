@@ -736,7 +736,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
    * @param {String | Number | Array | Object} value
    */
   _valueIsNotEmpty (value) {
-    return ![null, undefined].includes(value);
+    return ![null, undefined, ''].includes(value);
   }
 
   /**
