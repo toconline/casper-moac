@@ -118,6 +118,18 @@ class CasperMoacMenu extends PolymerElement {
   _disabledChanged (disabled) {
     if (disabled) this.$.menuItems.close();
   }
+
+  open () {
+    this.$.menuItems.open();
+  }
+
+  close () {
+    this.$.menuItems.close();
+  }
+
+  toggle () {
+    this.$.menuItems.toggle();
+  }
 }
 
 customElements.define(CasperMoacMenu.is, CasperMoacMenu);

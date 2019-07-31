@@ -699,7 +699,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
         const activeFilter = document.createElement('div');
         activeFilter.className = 'active-filter';
 
-        const activeFilterLabel = document.createTextNode(`${filterItem.filter.label}:\u00a0`);
+        const activeFilterLabel = document.createTextNode(`${filterItem.filter.label}: `);
         const activeFilterValue = document.createElement('strong');
         activeFilterValue.dataset.filter = filterItem.filterKey;
         activeFilterValue.innerHTML = activeFiltersValues[filterItem.filterKey];
