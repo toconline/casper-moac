@@ -111,6 +111,7 @@ export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoad
       );
 
       this._gridSelectedItems = [];
+      this._bindDisableDefaultClickListener();
     });
   }
 

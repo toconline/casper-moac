@@ -569,12 +569,17 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
   /**
    * Observer that fires as soon as the items change. This will invoke the internal _filterItems method to display
-   * the new items on the vaadin-grid and then loop through all the cells to check for elements that, when clicked,
-   * should not de-activate the current row.
+   * the new items on the vaadin-grid.
    */
   _itemsChanged () {
     this._filterItems();
+    this._bindDisableDefaultClickListener();
+  }
 
+  /**
+   * Loop through all the cells to check for elements that, when clicked should not de-activate the current row.
+   */
+  _bindDisableDefaultClickListener () {
     afterNextRender(this, () => {
       // Loop through all the table cells to look for any elements that should not have the vaadin-grid's default behavior.
       this.$.grid.$.items.querySelectorAll('td').forEach(rowCell => {
