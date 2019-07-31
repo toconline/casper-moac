@@ -1,5 +1,3 @@
-import { CasperMoac } from './casper-moac.js';
-
 export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoadBehavior extends superClass {
 
   static get properties () {
@@ -138,19 +136,18 @@ export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoad
     }
 
     // Check if there are attributes that should be filtered and if the input has already been initialized.
-    if (
-      this.$.filterInput &&
-      this.$.filterInput.value &&
-      this.resourceFilterAttributes &&
-      this.resourceFilterAttributes.length > 0
-    ) {
-      const resourceFilters = this.resourceFilterAttributes.map(filterAttribute => {
+    const fixedFilters = this._applyFilters().join(' AND ');
+    if (this.$.filterInput
+      && this.$.filterInput.value
+      && this.resourceFilterAttributes
+      && this.resourceFilterAttributes.length > 0) {
+      const freeTextFilters = this.resourceFilterAttributes.map(filterAttribute => {
         return `${filterAttribute}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}%'`;
-      });
+      }).join(' OR ');
 
-      resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${[...resourceFilters, ...this._applyFilters()].join(' AND ')}"`];
+      resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${[fixedFilters, `(${freeTextFilters})`].join(' AND ')}"`];
     } else {
-      resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${this._applyFilters().join(' AND ')}"`];
+      resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${fixedFilters}"`];
     }
 
     // Check if there is already existing filters in the resource name.
@@ -173,16 +170,16 @@ export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoad
         const filter = filterItem.filter;
         switch (filter.lazyLoad.comparisonType) {
           // String comparisons.
-          case CasperMoac.COMPARISON_TYPES.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}'`;
-          case CasperMoac.COMPARISON_TYPES.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
-          case CasperMoac.COMPARISON_TYPES.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}'`;
-          case CasperMoac.COMPARISON_TYPES.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}%'`;
-          case CasperMoac.COMPARISON_TYPES.DOES_NOT_CONTAIN: return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
+          case 'ENDS_WITH': return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}'`;
+          case 'CONTAINS': return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
+          case 'EXACT_MATCH': return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}'`;
+          case 'STARTS_WITH': return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}%'`;
+          case 'DOES_NOT_CONTAIN': return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
           // Numeric comparisons.
-          case CasperMoac.COMPARISON_TYPES.LESS_THAN: return `${filter.lazyLoad.field} < ${filter.value}`;
-          case CasperMoac.COMPARISON_TYPES.GREATER_THAN: return `${filter.lazyLoad.field} > ${filter.value}`;
-          case CasperMoac.COMPARISON_TYPES.LESS_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} <= ${filter.value}`;
-          case CasperMoac.COMPARISON_TYPES.GREATER_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} >= ${filter.value}`;
+          case 'LESS_THAN': return `${filter.lazyLoad.field} < ${filter.value}`;
+          case 'GREATER_THAN': return `${filter.lazyLoad.field} > ${filter.value}`;
+          case 'LESS_THAN_OR_EQUAL_TO': return `${filter.lazyLoad.field} <= ${filter.value}`;
+          case 'GREATER_THAN_OR_EQUAL_TO': return `${filter.lazyLoad.field} >= ${filter.value}`;
         }
     });
   }
