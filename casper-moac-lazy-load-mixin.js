@@ -1,3 +1,5 @@
+import { CasperMoac } from './casper-moac.js';
+
 export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoadBehavior extends superClass {
 
   static get properties () {
@@ -143,22 +145,44 @@ export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoad
       this.resourceFilterAttributes.length > 0
     ) {
       const resourceFilters = this.resourceFilterAttributes.map(filterAttribute => {
-        // Escape special characters that might break the ILIKE clause or the JSONAPI url parsing.
-        let escapedValue = this.$.filterInput.value.replace(/[%\\]/g, '\\$&');
-        escapedValue = escapedValue.replace(/[&]/g, '_');
-
-        return `${filterAttribute}::TEXT ILIKE '%${escapedValue}%'`;
+        return `${filterAttribute}::TEXT ILIKE '%${this._sanitizeString(this.$.filterInput.value)}%'`;
       });
 
-      resourceUrlParams = [
-        ...resourceUrlParams,
-        `${this.resourceFilterParam}="${resourceFilters.join(' AND ')}"`
-      ];
+      resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${[...resourceFilters, this._applyFilters()].join(' AND ')}"`];
+    } else {
+      resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${this._applyFilters().join(' AND ')}"`];
     }
 
     // Check if there is already existing filters in the resource name.
     return this.resourceName.includes('?')
       ? `${this.resourceName}&${resourceUrlParams.join('&')}`
       : `${this.resourceName}?${resourceUrlParams.join('&')}`;
+  }
+
+  _applyFilters () {
+    if (!this._filters) return [];
+
+    return this._filters
+      .filter(filterItem => {
+        return this._valueIsNotEmpty(filterItem.filter.value)
+          && filterItem.filter.lazyLoad
+          && filterItem.filter.lazyLoad.field
+          && filterItem.filter.lazyLoad.comparisonType
+      })
+      .map(filterItem => {
+        const filter = filterItem.filter;
+        switch (filter.lazyLoad.comparisonType) {
+          case CasperMoac.COMPARISON_TYPES.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeString(filter.value)}'`;
+          case CasperMoac.COMPARISON_TYPES.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeString(filter.value)}%'`;
+          case CasperMoac.COMPARISON_TYPES.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeString(filter.value)}'`;
+          case CasperMoac.COMPARISON_TYPES.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeString(filter.value)}%'`;
+        }
+    });
+  }
+
+  _sanitizeString (string) {
+    // Escape special characters that might break the ILIKE clause or the JSONAPI url parsing.
+    const escapedValue = string.replace(/[%\\]/g, '\\$&');
+    return escapedValue.replace(/[&]/g, '_');
   }
 }

@@ -34,6 +34,15 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
     }
   };
 
+  static get COMPARISON_TYPES () {
+    return {
+      CONTAINS: 'CONTAINS',
+      ENDS_WITH: 'ENDS_WITH',
+      STARTS_WITH: 'STARTS_WITH',
+      EXACT_MATCH: 'EXACT_MATCH',
+    };
+  }
+
   static get properties () {
     return {
       /**
@@ -445,6 +454,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
               items="[[_filteredItems]]"
               active-item="{{activeItem}}"
               selected-items="{{selectedItems}}">
+              <!--vaadin-grid-column with the id property to make sure the correct active item is highlighted-->
               <vaadin-grid-column width="0px" flex-grow="0" path="[[idProperty]]"></vaadin-grid-column>
 
               <slot name="grid"></slot>
@@ -521,6 +531,9 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
       `).forEach(input => input.addEventListener('value-changed', () => {
           this.dispatchEvent(new CustomEvent('filters-changed'));
           this._renderActiveFilters();
+
+          // If this is a lazy-loaded vaadin-grid, trigger the re-fetch of the resource.
+          if (this.lazyLoad) this._filterItemsLazyLoad();
       }));
     });
 
