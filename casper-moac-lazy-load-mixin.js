@@ -145,7 +145,7 @@ export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoad
       this.resourceFilterAttributes.length > 0
     ) {
       const resourceFilters = this.resourceFilterAttributes.map(filterAttribute => {
-        return `${filterAttribute}::TEXT ILIKE '%${this._sanitizeString(this.$.filterInput.value)}%'`;
+        return `${filterAttribute}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}%'`;
       });
 
       resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${[...resourceFilters, this._applyFilters()].join(' AND ')}"`];
@@ -172,17 +172,17 @@ export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoad
       .map(filterItem => {
         const filter = filterItem.filter;
         switch (filter.lazyLoad.comparisonType) {
-          case CasperMoac.COMPARISON_TYPES.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeString(filter.value)}'`;
-          case CasperMoac.COMPARISON_TYPES.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeString(filter.value)}%'`;
-          case CasperMoac.COMPARISON_TYPES.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeString(filter.value)}'`;
-          case CasperMoac.COMPARISON_TYPES.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeString(filter.value)}%'`;
+          case CasperMoac.COMPARISON_TYPES.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}'`;
+          case CasperMoac.COMPARISON_TYPES.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
+          case CasperMoac.COMPARISON_TYPES.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}'`;
+          case CasperMoac.COMPARISON_TYPES.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}%'`;
         }
     });
   }
 
-  _sanitizeString (string) {
+  _sanitizeValue (value) {
     // Escape special characters that might break the ILIKE clause or the JSONAPI url parsing.
-    const escapedValue = string.replace(/[%\\]/g, '\\$&');
+    const escapedValue = value.toString().replace(/[%\\]/g, '\\$&');
     return escapedValue.replace(/[&]/g, '_');
   }
 }
