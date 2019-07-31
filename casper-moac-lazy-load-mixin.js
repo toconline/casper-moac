@@ -140,7 +140,7 @@ export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoad
     // Check if there are attributes that should be filtered and if the input has already been initialized.
     if (
       this.$.filterInput &&
-      this.$.filterInput.value !== undefined &&
+      this.$.filterInput.value &&
       this.resourceFilterAttributes &&
       this.resourceFilterAttributes.length > 0
     ) {
@@ -148,7 +148,7 @@ export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoad
         return `${filterAttribute}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}%'`;
       });
 
-      resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${[...resourceFilters, this._applyFilters()].join(' AND ')}"`];
+      resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${[...resourceFilters, ...this._applyFilters()].join(' AND ')}"`];
     } else {
       resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${this._applyFilters().join(' AND ')}"`];
     }
@@ -172,10 +172,17 @@ export const CasperMoacLazyLoadBehavior = superClass => class CasperMoacLazyLoad
       .map(filterItem => {
         const filter = filterItem.filter;
         switch (filter.lazyLoad.comparisonType) {
+          // String comparisons.
           case CasperMoac.COMPARISON_TYPES.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}'`;
           case CasperMoac.COMPARISON_TYPES.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
           case CasperMoac.COMPARISON_TYPES.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}'`;
           case CasperMoac.COMPARISON_TYPES.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}%'`;
+          case CasperMoac.COMPARISON_TYPES.DOES_NOT_CONTAIN: return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
+          // Numeric comparisons.
+          case CasperMoac.COMPARISON_TYPES.LESS_THAN: return `${filter.lazyLoad.field} < ${filter.value}`;
+          case CasperMoac.COMPARISON_TYPES.GREATER_THAN: return `${filter.lazyLoad.field} > ${filter.value}`;
+          case CasperMoac.COMPARISON_TYPES.LESS_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} <= ${filter.value}`;
+          case CasperMoac.COMPARISON_TYPES.GREATER_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} >= ${filter.value}`;
         }
     });
   }

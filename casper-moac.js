@@ -36,10 +36,17 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
 
   static get COMPARISON_TYPES () {
     return {
+      // String comparisons.
       CONTAINS: 'CONTAINS',
       ENDS_WITH: 'ENDS_WITH',
       STARTS_WITH: 'STARTS_WITH',
       EXACT_MATCH: 'EXACT_MATCH',
+      DOES_NOT_CONTAIN: 'DOES_NOT_CONTAIN',
+      // Numeric comparisons.
+      LESS_THAN: 'LESS_THAN',
+      GREATER_THAN: 'GREATER_THAN',
+      LESS_THAN_OR_EQUAL_TO: 'LESS_THAN_OR_EQUAL_TO',
+      GREATER_THAN_OR_EQUAL_TO: 'GREATER_THAN_OR_EQUAL_TO',
     };
   }
 
@@ -770,7 +777,7 @@ export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
    * its rows and having this into account, the id property is used to avoid highlighting the wrong row.
    */
   _gridActiveItem () {
-    const activeItemId = this.activeItem ? this.activeItem[this.idProperty] : null;
+    const activeItemId = this.activeItem ? this.activeItem[this.idProperty].toString() : null;
 
     // Loop through each grid row and paint the active one.
     this.$.grid.shadowRoot.querySelectorAll('tr').forEach(row => {
