@@ -187,6 +187,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         .left-side-container .header-container .generic-filter-container {
           padding: 0 10px;
           text-align: center;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
         }
 
         /* Filter paper-input */
@@ -350,21 +353,26 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
                 <input placeholder="[[filterInputPlaceholder]]" />
                 <iron-icon icon="casper-icons:search"></iron-icon>
               </iron-input>
+
               <!--Show/hide the active filters-->
-              <paper-button id="displayAllFilters" on-click="_toggleDisplayAllFilters">
-                [[_displayOrHideFiltersButtonLabel(_displayAllFilters)]]
-              </paper-button>
+              <template is="dom-if" if="[[_hasFilters]]">
+                <paper-button id="displayAllFilters" on-click="_toggleDisplayAllFilters">
+                  [[_displayOrHideFiltersButtonLabel(_displayAllFilters)]]
+                </paper-button>
+              </template>
             </div>
             <!--Active filters-->
-            <div class="active-filters">
-              <div class="header">
-                <strong>Filtros ativos:</strong>
-                <template is="dom-if" if="[[!hideNumberResults]]">
-                  [[_filteredItems.length]] resultado(s)
-                </template>
+            <template is="dom-if" if="[[_hasFilters]]">
+              <div class="active-filters">
+                <div class="header">
+                  <strong>Filtros ativos:</strong>
+                  <template is="dom-if" if="[[!hideNumberResults]]">
+                    [[_filteredItems.length]] resultado(s)
+                  </template>
+                </div>
+                <div class="active-filters-list" id="activeFilters"></div>
               </div>
-              <div class="active-filters-list" id="activeFilters"></div>
-            </div>
+            </template>
           </div>
 
           <div hidden$="[[!_displayAllFilters]]">
@@ -473,9 +481,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   ready () {
     super.ready();
 
-    this.grid = this.$.grid;
-
+    this.grid           = this.$.grid;
     this._displayEpaper = this.moacType !== CasperMoacTypes.GRID;
+
     if (!this._displayEpaper) {
       // Hide the vaadin-split-layout handler.
       this.$.splitLayout.shadowRoot.getElementById('splitter').style.display = 'none';
@@ -548,6 +556,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    */
   _filtersChanged (filters) {
     if (!filters) return;
+
+    this._hasFilters = !!this.filters;
 
     // Transform the filters object into an array to use in a dom-repeat.
     this._filters = Object.keys(filters).map(filterKey => ({
@@ -674,7 +684,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * will be reponsible for displaying the filter's input overlay when possible.
    */
   _renderActiveFilters () {
-    this.$.activeFilters.innerHTML = '';
+    this._activeFilters = this._activeFilters || this.shadowRoot.querySelector('#activeFilters');
+    this._activeFilters.innerHTML = '';
 
     const activeFiltersValues = {};
     this._filters.forEach(filterItem => {
@@ -703,7 +714,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
         activeFilter.appendChild(activeFilterLabel);
         activeFilter.appendChild(activeFilterValue);
-        this.$.activeFilters.appendChild(activeFilter);
+        this._activeFilters.appendChild(activeFilter);
       }
     });
   }
