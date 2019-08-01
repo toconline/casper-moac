@@ -1,4 +1,6 @@
+import { CasperMoacTypes, CasperMoacFilterTypes } from './casper-moac-constants.js';
 import { CasperMoacLazyLoadMixin } from './casper-moac-lazy-load-mixin.js';
+
 import '@casper2020/casper-icons/casper-icons.js';
 import '@casper2020/casper-epaper/casper-epaper.js';
 import '@casper2020/casper-select/casper-select.js';
@@ -19,37 +21,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     return 'casper-moac';
   }
 
-  static get FILTER_TYPES () {
-    return {
-      PAPER_INPUT: 'PAPER_INPUT',
-      CASPER_SELECT: 'CASPER_SELECT',
-      CASPER_DATE_PICKER: 'CASPER_DATE_PICKER',
-    };
-  }
-
-  static get MOAC_TYPES () {
-    return {
-      GRID: 'GRID',
-      GRID_EPAPER: 'GRID_EPAPER'
-    }
-  };
-
-  static get COMPARISON_TYPES () {
-    return {
-      // String comparisons.
-      CONTAINS: 'CONTAINS',
-      ENDS_WITH: 'ENDS_WITH',
-      STARTS_WITH: 'STARTS_WITH',
-      EXACT_MATCH: 'EXACT_MATCH',
-      DOES_NOT_CONTAIN: 'DOES_NOT_CONTAIN',
-      // Numeric comparisons.
-      LESS_THAN: 'LESS_THAN',
-      GREATER_THAN: 'GREATER_THAN',
-      LESS_THAN_OR_EQUAL_TO: 'LESS_THAN_OR_EQUAL_TO',
-      GREATER_THAN_OR_EQUAL_TO: 'GREATER_THAN_OR_EQUAL_TO',
-    };
-  }
-
   static get properties () {
     return {
       /**
@@ -58,7 +29,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
        */
       moacType: {
         type: String,
-        value: CasperMoac.MOAC_TYPES.GRID_EPAPER
+        value: CasperMoacTypes.GRID_EPAPER
       },
       /**
        * The identifier property that will be used when painting the active row.
@@ -495,16 +466,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     `;
   }
 
-  _isFilterPaperInput (itemType) { return itemType === CasperMoac.FILTER_TYPES.PAPER_INPUT; }
-  _isFilterCasperSelect (itemType) { return itemType === CasperMoac.FILTER_TYPES.CASPER_SELECT; }
-  _isFilterCasperDatePicker (itemType) { return itemType === CasperMoac.FILTER_TYPES.CASPER_DATE_PICKER; }
+  _isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
+  _isFilterCasperSelect (itemType) { return itemType === CasperMoacFilterTypes.CASPER_SELECT; }
+  _isFilterCasperDatePicker (itemType) { return itemType === CasperMoacFilterTypes.CASPER_DATE_PICKER; }
 
   ready () {
     super.ready();
 
     this.grid = this.$.grid;
 
-    this._displayEpaper = this.moacType !== CasperMoac.MOAC_TYPES.GRID;
+    this._displayEpaper = this.moacType !== CasperMoacTypes.GRID;
     if (!this._displayEpaper) {
       // Hide the vaadin-split-layout handler.
       this.$.splitLayout.shadowRoot.getElementById('splitter').style.display = 'none';
@@ -682,16 +653,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     const filter = this.filters[filterKey];
 
     switch (filter.type) {
-      case CasperMoac.FILTER_TYPES.CASPER_SELECT:
+      case CasperMoacFilterTypes.CASPER_SELECT:
         !filter.inputOptions.multiSelection
           ? this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(event.target)
           : this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(this.$.activeFilters);
         break;
-      case CasperMoac.FILTER_TYPES.PAPER_INPUT:
+      case CasperMoacFilterTypes.PAPER_INPUT:
         this._displayAllFilters = true;
         this.shadowRoot.querySelector(`paper-input[data-filter="${filterKey}"]`).focus();
         break;
-      case CasperMoac.FILTER_TYPES.CASPER_DATE_PICKER:
+      case CasperMoacFilterTypes.CASPER_DATE_PICKER:
         this._displayAllFilters = true;
         this.shadowRoot.querySelector(`casper-date-picker[data-filter="${filterKey}"]`).open();
         break;
@@ -755,10 +726,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     if ([null, undefined].includes(filterItem.filter.value)) return;
 
     switch (filterItem.filter.type) {
-      case CasperMoac.FILTER_TYPES.PAPER_INPUT:
-      case CasperMoac.FILTER_TYPES.CASPER_DATE_PICKER:
+      case CasperMoacFilterTypes.PAPER_INPUT:
+      case CasperMoacFilterTypes.CASPER_DATE_PICKER:
         return filterItem.filter.value;
-      case CasperMoac.FILTER_TYPES.CASPER_SELECT:
+      case CasperMoacFilterTypes.CASPER_SELECT:
         const casperSelect = this.shadowRoot.querySelector(`casper-select[data-filter="${filterItem.filterKey}"]`);
 
         if (!casperSelect || !casperSelect.selectedItems || casperSelect.selectedItems.length === 0) return;
@@ -840,7 +811,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * correct percentual width for the left side of the component.
    */
   _leftSideInitialWidth () {
-    return this.moacType === CasperMoac.MOAC_TYPES.GRID
+    return this.moacType === CasperMoacTypes.GRID
       ? 'width: 100%;'
       : `width: ${this.leftSideInitialWidth}%;`;
   }
@@ -858,7 +829,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * adding the 'filters-container-inline' class or not.
    */
   _filtersContainerClassName () {
-    return this.moacType === CasperMoac.MOAC_TYPES.GRID_EPAPER
+    return this.moacType === CasperMoacTypes.GRID
       ? 'filters-container'
       : 'filters-container filters-container-inline';
   }

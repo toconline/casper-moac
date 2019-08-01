@@ -1,5 +1,7 @@
+import { CasperMoacOperators } from './casper-moac-constants.js';
+
 export const CasperMoacLazyLoadMixin = superClass => {
-    return class extends superClass {
+  return class extends superClass {
 
     static get properties () {
       return {
@@ -165,22 +167,22 @@ export const CasperMoacLazyLoadMixin = superClass => {
           return this._valueIsNotEmpty(filterItem.filter.value)
             && filterItem.filter.lazyLoad
             && filterItem.filter.lazyLoad.field
-            && filterItem.filter.lazyLoad.comparisonType
+            && filterItem.filter.lazyLoad.operator
         })
         .map(filterItem => {
           const filter = filterItem.filter;
-          switch (filter.lazyLoad.comparisonType) {
+          switch (filter.lazyLoad.operator) {
             // String comparisons.
-            case 'ENDS_WITH': return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}'`;
-            case 'CONTAINS': return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
-            case 'EXACT_MATCH': return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}'`;
-            case 'STARTS_WITH': return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}%'`;
-            case 'DOES_NOT_CONTAIN': return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
+            case CasperMoacOperators.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}'`;
+            case CasperMoacOperators.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
+            case CasperMoacOperators.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}'`;
+            case CasperMoacOperators.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}%'`;
+            case CasperMoacOperators.DOES_NOT_CONTAIN: return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
             // Numeric comparisons.
-            case 'LESS_THAN': return `${filter.lazyLoad.field} < ${filter.value}`;
-            case 'GREATER_THAN': return `${filter.lazyLoad.field} > ${filter.value}`;
-            case 'LESS_THAN_OR_EQUAL_TO': return `${filter.lazyLoad.field} <= ${filter.value}`;
-            case 'GREATER_THAN_OR_EQUAL_TO': return `${filter.lazyLoad.field} >= ${filter.value}`;
+            case CasperMoacOperators.LESS_THAN: return `${filter.lazyLoad.field} < ${filter.value}`;
+            case CasperMoacOperators.GREATER_THAN: return `${filter.lazyLoad.field} > ${filter.value}`;
+            case CasperMoacOperators.LESS_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} <= ${filter.value}`;
+            case CasperMoacOperators.GREATER_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} >= ${filter.value}`;
           }
       });
     }
