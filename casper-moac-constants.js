@@ -22,3 +22,8 @@ export const CasperMoacOperators = {
   LESS_THAN_OR_EQUAL_TO: 'LESS_THAN_OR_EQUAL_TO',
   GREATER_THAN_OR_EQUAL_TO: 'GREATER_THAN_OR_EQUAL_TO',
 };
+
+export const CasperMoacSort = {
+  ASCENDING: 'asc',
+  DESCENDING: 'desc'
+};

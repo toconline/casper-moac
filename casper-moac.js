@@ -452,7 +452,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
               <!--Context Menu-->
               <template is="dom-if" if="[[_displayContextMenu]]">
-                <vaadin-grid-column flex-grow="0" width="40px" text-align="middle">
+                <vaadin-grid-column flex-grow="0" width="40px" text-align="center">
                   <template>
                     <iron-icon
                       class="context-menu-icon"

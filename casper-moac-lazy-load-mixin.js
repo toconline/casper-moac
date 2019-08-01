@@ -1,4 +1,4 @@
-import { CasperMoacOperators } from './casper-moac-constants.js';
+import { CasperMoacOperators, CasperMoacSort } from './casper-moac-constants.js';
 
 export const CasperMoacLazyLoadMixin = superClass => {
   return class extends superClass {
@@ -114,7 +114,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
         );
 
         this._numberOfResults = this.$.grid.items.length;
-        this._bindDisableDefaultClickListener();
       });
     }
 
@@ -132,8 +131,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       // Sort by ascending or descending.
       if (parameters.sortOrders.length > 0) {
-        const sortSettings = parameters.sortOrders.shift(); 
-        resourceUrlParams = sortSettings.direction === this.constructor.sortByAscending
+        const sortSettings = parameters.sortOrders[0];
+        resourceUrlParams = sortSettings.direction === CasperMoacSort.ASCENDING
           ? [...resourceUrlParams, `${this.resourceSortParam}=${sortSettings.path}`]
           : [...resourceUrlParams, `${this.resourceSortParam}=-${sortSettings.path}`];
       }
