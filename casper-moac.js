@@ -97,7 +97,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
        */
       activeItem: {
         type: Object,
-        notify: true
+        notify: true,
+        observer: '_activeItemChanged'
       },
       /**
        * The items that are currently selected in the vaadin-grid.
@@ -454,7 +455,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
                 <vaadin-grid-column flex-grow="0" width="40px" text-align="middle">
                   <template>
                     <iron-icon
-                      data-disable-default-click
                       class="context-menu-icon"
                       on-click="_openContextMenu"
                       icon="casper-icons:arrow-drop-down">
@@ -505,8 +505,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
     // Set event listeners.
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
-    this.$.grid.addEventListener('click', () => this._gridActiveItem());
-    this.$.grid.$.outerscroller.addEventListener('scroll', () => this._gridActiveItem());
+    this.$.grid.addEventListener('click', () => this._paintGridActiveRow());
+    this.$.grid.$.outerscroller.addEventListener('scroll', () => this._paintGridActiveRow());
 
     this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
     const filterInput = this.$.filterInput.querySelector('input');
@@ -573,34 +573,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   }
 
   /**
+   * Force the vaadin-grid to always have an activeItem.
+   * @param {Object} newActiveItem
+   * @param {Object} previousActiveItem
+   */
+  _activeItemChanged (newActiveItem, previousActiveItem) {
+    if (!newActiveItem && previousActiveItem) {
+      this.$.grid.activeItem = previousActiveItem;
+    }
+  }
+
+  /**
    * Observer that fires as soon as the items change. This will invoke the internal _filterItems method to display
    * the new items on the vaadin-grid.
    */
   _itemsChanged () {
     this._filterItems();
-    this._bindDisableDefaultClickListener();
-  }
-
-  /**
-   * Loop through all the cells to check for elements that, when clicked should not de-activate the current row.
-   */
-  _bindDisableDefaultClickListener () {
-    afterNextRender(this, () => {
-      // Loop through all the table cells to look for any elements that should not have the vaadin-grid's default behavior.
-      this.$.grid.$.items.querySelectorAll('td').forEach(rowCell => {
-        const rowCellElements = rowCell.firstChild.assignedNodes().shift().querySelectorAll('[data-disable-default-click]');
-        if (rowCellElements.length > 0) {
-          rowCellElements.forEach(rowCellElement => {
-            rowCellElement.addEventListener('click', event => {
-              // If the currently active item is the one triggering the context menu, prevent its de-activation.
-              if (this.activeItem === this.$.grid.getEventContext(event).item) {
-                event.preventDefault();
-              }
-            });
-          });
-        }
-      });
-    });
   }
 
   /**
@@ -639,7 +627,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     // If the search input is empty or there are no items at the moment.
     if (!this.$.filterInput.value || !this.items) {
       this._filteredItems = this.items || [];
-      this._numberOfResults = this.$.grid.items.length;
+      this._updateNumberOfResultsAndActivateFirstItem();
       return;
     }
 
@@ -655,8 +643,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       this._filteredItems = this.items.filter(item => {
         return filterAttributes.some(filterAttribute => item[filterAttribute] && this._normalizeVariable(item[filterAttribute]).includes(filterTerm));
       });
-      this._numberOfResults = this.$.grid.items.length;
+      this._updateNumberOfResultsAndActivateFirstItem();
+    }
+  }
 
+  /**
+   * This method updates the UI with the current number of results and proceeds to select the first result
+   * since this is invoked when the items change.
+   */
+  _updateNumberOfResultsAndActivateFirstItem () {
+    this._numberOfResults = this._filteredItems.length;
+    if (this._filteredItems.length > 0) {
+      this.$.grid.activeItem = this._filteredItems[0];
+      this._paintGridActiveRow();
     }
   }
 
@@ -773,7 +772,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * row has a different background color. This is required for scroll as well since the vaadin-grid re-uses
    * its rows and having this into account, the id property is used to avoid highlighting the wrong row.
    */
-  _gridActiveItem () {
+  _paintGridActiveRow () {
     const activeItemId = this.activeItem ? this.activeItem[this.idProperty].toString() : null;
 
     // Loop through each grid row and paint the active one.
