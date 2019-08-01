@@ -1,6 +1,4 @@
-import { CasperMoac } from './casper-moac.js';
-
-export const CasperMoacLazyLoadBehavior = superClass => {
+export const CasperMoacLazyLoadMixin = superClass => {
     return class extends superClass {
 
     static get properties () {
@@ -173,16 +171,16 @@ export const CasperMoacLazyLoadBehavior = superClass => {
           const filter = filterItem.filter;
           switch (filter.lazyLoad.comparisonType) {
             // String comparisons.
-            case CasperMoac.COMPARISON_TYPES.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}'`;
-            case CasperMoac.COMPARISON_TYPES.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
-            case CasperMoac.COMPARISON_TYPES.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}'`;
-            case CasperMoac.COMPARISON_TYPES.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}%'`;
-            case CasperMoac.COMPARISON_TYPES.DOES_NOT_CONTAIN: return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
+            case 'ENDS_WITH': return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}'`;
+            case 'CONTAINS': return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
+            case 'EXACT_MATCH': return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}'`;
+            case 'STARTS_WITH': return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filter.value)}%'`;
+            case 'DOES_NOT_CONTAIN': return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
             // Numeric comparisons.
-            case CasperMoac.COMPARISON_TYPES.LESS_THAN: return `${filter.lazyLoad.field} < ${filter.value}`;
-            case CasperMoac.COMPARISON_TYPES.GREATER_THAN: return `${filter.lazyLoad.field} > ${filter.value}`;
-            case CasperMoac.COMPARISON_TYPES.LESS_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} <= ${filter.value}`;
-            case CasperMoac.COMPARISON_TYPES.GREATER_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} >= ${filter.value}`;
+            case 'LESS_THAN': return `${filter.lazyLoad.field} < ${filter.value}`;
+            case 'GREATER_THAN': return `${filter.lazyLoad.field} > ${filter.value}`;
+            case 'LESS_THAN_OR_EQUAL_TO': return `${filter.lazyLoad.field} <= ${filter.value}`;
+            case 'GREATER_THAN_OR_EQUAL_TO': return `${filter.lazyLoad.field} >= ${filter.value}`;
           }
       });
     }

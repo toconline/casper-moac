@@ -1,4 +1,4 @@
-import { CasperMoacLazyLoadBehavior } from './casper-moac-lazy-load-mixin.js';
+import { CasperMoacLazyLoadMixin } from './casper-moac-lazy-load-mixin.js';
 import '@casper2020/casper-icons/casper-icons.js';
 import '@casper2020/casper-epaper/casper-epaper.js';
 import '@casper2020/casper-select/casper-select.js';
@@ -13,7 +13,7 @@ import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
-export class CasperMoac extends CasperMoacLazyLoadBehavior(PolymerElement) {
+export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
   static get is () {
     return 'casper-moac';
