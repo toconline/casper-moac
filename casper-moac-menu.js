@@ -21,7 +21,25 @@ class CasperMoacMenu extends PolymerElement {
         type: Boolean,
         value: false,
         observer: '_disabledChanged'
-      }
+       },
+       /**
+        * Icon that will appear when the casper-moac-menu
+        * is closed.
+        * @type {String}
+        */
+       openIcon: {
+         type: String,
+         value: 'casper-icons:plus'
+       },
+       /**
+        * Icon that will appear when the casper-moac-menu
+        * is opened.
+        * @type {String}
+        */
+       closeIcon: {
+        type: String,
+        value: 'casper-icons:clear'
+      },
     };
   }
 
@@ -112,7 +130,7 @@ class CasperMoacMenu extends PolymerElement {
   }
 
   _menuIcon (opened) {
-    return opened ? 'casper-icons:clear' : 'casper-icons:plus';
+    return opened ? this.closeIcon : this.openIcon;
   }
 
   _disabledChanged (disabled) {
