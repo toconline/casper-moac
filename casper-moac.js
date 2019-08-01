@@ -246,6 +246,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           flex-wrap: wrap;
         }
 
+        .left-side-container .header-container .active-filters .no-active-filters {
+          color: #A5A5A5;
+        }
+
         .left-side-container .header-container .active-filters .active-filters-list .active-filter strong {
           cursor: pointer;
           margin-right: 5px;
@@ -367,7 +371,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
                 <div class="header">
                   <strong>Filtros ativos:</strong>
                   <template is="dom-if" if="[[!hideNumberResults]]">
-                    [[_filteredItems.length]] resultado(s)
+                    [[_numberOfResults]] resultado(s)
                   </template>
                 </div>
                 <div class="active-filters-list" id="activeFilters"></div>
@@ -635,6 +639,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     // If the search input is empty or there are no items at the moment.
     if (!this.$.filterInput.value || !this.items) {
       this._filteredItems = this.items || [];
+      this._numberOfResults = this._filteredItems.length;
       return;
     }
 
@@ -650,6 +655,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       this._filteredItems = this.items.filter(item => {
         return filterAttributes.some(filterAttribute => item[filterAttribute] && this._normalizeVariable(item[filterAttribute]).includes(filterTerm));
       });
+      this._numberOfResults = this._filteredItems.length;
     }
   }
 
@@ -717,6 +723,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         this._activeFilters.appendChild(activeFilter);
       }
     });
+
+    if (!this._activeFilters.innerHTML) {
+      const noActiveFiltersPlaceholder = document.createElement('span');
+      noActiveFiltersPlaceholder.className = 'no-active-filters';
+      noActiveFiltersPlaceholder.innerHTML = '(Não há filtros activos)';
+
+      this._activeFilters.appendChild(noActiveFiltersPlaceholder);
+    }
   }
 
   /**

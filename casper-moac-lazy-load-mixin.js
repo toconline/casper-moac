@@ -139,18 +139,22 @@ export const CasperMoacLazyLoadMixin = superClass => {
       }
 
       // Check if there are attributes that should be filtered and if the input has already been initialized.
+      let freeTextFilters;
       const fixedFilters = this._applyFilters().join(' AND ');
+
       if (this.$.filterInput
         && this.$.filterInput.value
         && this.resourceFilterAttributes
         && this.resourceFilterAttributes.length > 0) {
-        const freeTextFilters = this.resourceFilterAttributes.map(filterAttribute => {
-          return `${filterAttribute}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}%'`;
-        }).join(' OR ');
+        // Encapsulate the free filters in parenthesis to not mess with the AND clause.
+        freeTextFilters = this.resourceFilterAttributes.map(attribute => `${attribute}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}%'`);
+        freeTextFilters = `(${freeTextFilters.join(' OR ')})`;
+      }
 
-        resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${[fixedFilters, `(${freeTextFilters})`].join(' AND ')}"`];
-      } else {
-        resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${fixedFilters}"`];
+      const filterResourceUrlParams = [fixedFilters, freeTextFilters].filter(urlParam => !!urlParam).join(' AND ');
+
+      if (filterResourceUrlParams) {
+        resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${filterResourceUrlParams}"`];
       }
 
       // Check if there is already existing filters in the resource name.
