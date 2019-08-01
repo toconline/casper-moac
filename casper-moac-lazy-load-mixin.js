@@ -113,7 +113,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
           parseInt(socketResponse.meta.total)
         );
 
-        this._gridSelectedItems = [];
+        this._numberOfResults = this.$.grid.items.length;
         this._bindDisableDefaultClickListener();
       });
     }
