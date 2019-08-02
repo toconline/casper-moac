@@ -142,6 +142,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         observer: '_stylesheetChanged'
       },
       /**
+       * Icon that will be used when the vaadin-grid has no items do display.
+       * @type {String}
+       */
+      noItemsIcon: {
+        type: String,
+        value: 'casper-icons:empty-data'
+      },
+      /**
+       * Text that will be used when the vaadin-grid has no items do display.
+       * @type {String}
+       */
+      noItemsText: {
+        type: String,
+        value: 'Não existem qualquer resultados para mostrar.'
+      },
+      /**
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
        * @type {Boolean}
        */
@@ -297,6 +313,26 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         /* Vaadin-grid */
         .left-side-container .grid-container {
           flex-grow: 1;
+          position: relative;
+        }
+
+        .left-side-container .grid-no-items {
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          color: #8A8A8A;
+          position: absolute;
+          align-items: center;
+          flex-direction: column;
+          justify-content: center;
+          background: rgba(0, 0, 0, 0.1);
+        }
+
+        .left-side-container .grid-no-items iron-icon {
+          width: 100px;
+          height: 100px;
         }
 
         .left-side-container .grid-multiple-selection-container {
@@ -465,6 +501,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
                 </vaadin-grid-column>
               </template>
             </vaadin-grid>
+
+            <template is="dom-if" if="[[_hasNoItems(_filteredItems)]]">
+              <div class="grid-no-items">
+                <iron-icon icon="[[noItemsIcon]]"></iron-icon>
+                [[noItemsText]]
+              </div>
+            </template>
           </div>
         </div>
 
@@ -860,6 +903,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     return this.moacType === CasperMoacTypes.GRID
       ? 'filters-container'
       : 'filters-container filters-container-inline';
+  }
+
+  /**
+   * This method is invoked when the _filteredItem property changes and either hides or displays the
+   * vaadin-grid no items placeholder.
+   * @param {Array} filteredItems
+   */
+  _hasNoItems (filteredItems) {
+    return filteredItems.length === 0;
   }
 }
 
