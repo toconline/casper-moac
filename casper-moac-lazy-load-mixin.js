@@ -153,6 +153,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
                 case CasperMoacOperators.CONTAINS: return `${filterAttribute.field}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}%'`;
                 case CasperMoacOperators.ENDS_WITH: return `${filterAttribute.field}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}'`;
                 case CasperMoacOperators.STARTS_WITH: return `${filterAttribute.field}::TEXT ILIKE '${this._sanitizeValue(this.$.filterInput.value)}%'`;
+                case CasperMoacOperators.EXACT_MATCH: return `${filterAttribute.field}::TEXT ILIKE '${this._sanitizeValue(this.$.filterInput.value)}'`;
               }
             }
 

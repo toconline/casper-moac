@@ -689,6 +689,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       this._filteredItems = this.items.filter(item => filterAttributes.some(filterAttribute => {
         if (filterAttribute.constructor === Object) {
           switch (filterAttribute.operator) {
+            case CasperMoacOperators.EXACT_MATCH: return this._normalizeVariable(item[filterAttribute.field]) === filterTerm;
             case CasperMoacOperators.CONTAINS: return this._normalizeVariable(item[filterAttribute.field]).includes(filterTerm);
             case CasperMoacOperators.ENDS_WITH: return this._normalizeVariable(item[filterAttribute.field]).endsWith(filterTerm);
             case CasperMoacOperators.STARTS_WITH: return this._normalizeVariable(item[filterAttribute.field]).startsWith(filterTerm);
