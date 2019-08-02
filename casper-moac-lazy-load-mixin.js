@@ -113,7 +113,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
           parseInt(socketResponse.meta.total)
         );
 
-        this._numberOfResults = this.$.grid.items.length;
+        this._numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
+          ? `${this.$.grid.items.length} resultado(s)`
+          : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`
       });
     }
 

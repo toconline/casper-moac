@@ -353,6 +353,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
             <!--Casper-moac-menu-->
             <slot name="menu"></slot>
             <div class="generic-filter-container">
+
               <!--Generic Filter input-->
               <iron-input id="filterInput">
                 <input placeholder="[[filterInputPlaceholder]]" />
@@ -366,13 +367,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
                 </paper-button>
               </template>
             </div>
+
             <!--Active filters-->
             <template is="dom-if" if="[[_hasFilters]]">
               <div class="active-filters">
                 <div class="header">
                   <strong>Filtros ativos:</strong>
                   <template is="dom-if" if="[[!hideNumberResults]]">
-                    [[_numberOfResults]] resultado(s)
+                    [[_numberOfResults]]
                   </template>
                 </div>
                 <div class="active-filters-list" id="activeFilters"></div>
@@ -439,6 +441,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           <div class="grid-container">
             <vaadin-grid
               id="grid"
+              class="moac"
               page-size="[[pageSize]]"
               items="[[_filteredItems]]"
               active-item="{{activeItem}}"
@@ -625,7 +628,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     // If the search input is empty or there are no items at the moment.
     if (!this.$.filterInput.value || !this.items) {
       this._filteredItems = this.items || [];
-      this._updateNumberOfResultsAndActivateFirstItem();
+      this._numberOfResults = `${this._filteredItems.length} resultado(s)`;
+      this._activateFirstItem();
       return;
     }
 
@@ -641,16 +645,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       this._filteredItems = this.items.filter(item => {
         return filterAttributes.some(filterAttribute => item[filterAttribute] && this._normalizeVariable(item[filterAttribute]).includes(filterTerm));
       });
-      this._updateNumberOfResultsAndActivateFirstItem();
+
+      this._numberOfResults = `${this._filteredItems.length} de ${this.items.length} resultado(s)`;
+      this._activateFirstItem();
     }
   }
 
   /**
-   * This method updates the UI with the current number of results and proceeds to select the first result
-   * since this is invoked when the items change.
+   * This method activates the first result since this is invoked when the items change.
    */
-  _updateNumberOfResultsAndActivateFirstItem () {
-    this._numberOfResults = this._filteredItems.length;
+  _activateFirstItem () {
     if (this._filteredItems.length > 0) {
       this.$.grid.activeItem = this._filteredItems[0];
       this._paintGridActiveRow();
