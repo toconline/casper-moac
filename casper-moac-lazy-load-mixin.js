@@ -147,9 +147,19 @@ export const CasperMoacLazyLoadMixin = superClass => {
         && this.$.filterInput.value
         && this.resourceFilterAttributes
         && this.resourceFilterAttributes.length > 0) {
-        // Encapsulate the free filters in parenthesis to not mess with the AND clause.
-        freeTextFilters = this.resourceFilterAttributes.map(attribute => `${attribute}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}%'`);
-        freeTextFilters = `(${freeTextFilters.join(' OR ')})`;
+          freeTextFilters = this.resourceFilterAttributes.map(filterAttribute => {
+            if (filterAttribute.constructor === Object) {
+              switch (filterAttribute.operator) {
+                case CasperMoacOperators.CONTAINS: return `${filterAttribute.field}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}%'`;
+                case CasperMoacOperators.ENDS_WITH: return `${filterAttribute.field}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}'`;
+                case CasperMoacOperators.STARTS_WITH: return `${filterAttribute.field}::TEXT ILIKE '${this._sanitizeValue(this.$.filterInput.value)}%'`;
+              }
+            }
+
+            // Encapsulate the free filters in parenthesis to not mess with the AND clause.
+            return `${filterAttribute}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}%'`;
+          });
+          freeTextFilters = `(${freeTextFilters.join(' OR ')})`;
       }
 
       const filterResourceUrlParams = [fixedFilters, freeTextFilters].filter(urlParam => !!urlParam).join(' AND ');

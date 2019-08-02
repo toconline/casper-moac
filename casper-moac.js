@@ -1,4 +1,4 @@
-import { CasperMoacTypes, CasperMoacFilterTypes } from './casper-moac-constants.js';
+import { CasperMoacTypes, CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 import { CasperMoacLazyLoadMixin } from './casper-moac-lazy-load-mixin.js';
 
 import '@casper2020/casper-icons/casper-icons.js';
@@ -686,9 +686,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     if (filterAttributes && this.items.length > 0) {
       const filterTerm = this._normalizeVariable(this.$.filterInput.value);
 
-      this._filteredItems = this.items.filter(item => {
-        return filterAttributes.some(filterAttribute => item[filterAttribute] && this._normalizeVariable(item[filterAttribute]).includes(filterTerm));
-      });
+      this._filteredItems = this.items.filter(item => filterAttributes.some(filterAttribute => {
+        if (filterAttribute.constructor === Object) {
+          switch (filterAttribute.operator) {
+            case CasperMoacOperators.CONTAINS: return this._normalizeVariable(item[filterAttribute.field]).includes(filterTerm);
+            case CasperMoacOperators.ENDS_WITH: return this._normalizeVariable(item[filterAttribute.field]).endsWith(filterTerm);
+            case CasperMoacOperators.STARTS_WITH: return this._normalizeVariable(item[filterAttribute.field]).startsWith(filterTerm);
+          }
+        }
+
+        return this._normalizeVariable(item[filterAttribute]).includes(filterTerm);
+      }));
 
       this._numberOfResults = `${this._filteredItems.length} de ${this.items.length} resultado(s)`;
       this._activateFirstItem();
@@ -838,6 +846,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * @param {String} variable
    */
   _normalizeVariable (variable) {
+    if (!variable) return '';
+
     return variable
       .toString()
       .trim()
