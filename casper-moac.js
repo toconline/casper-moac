@@ -442,6 +442,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
             <vaadin-grid
               id="grid"
               class="moac"
+              theme="row-stripes"
               page-size="[[pageSize]]"
               items="[[_filteredItems]]"
               active-item="{{activeItem}}"
