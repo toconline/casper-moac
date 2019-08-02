@@ -100,7 +100,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.$.grid.dataProvider = (parameters, callback) => this._fetchResourceItems(parameters, callback);
     }
 
-    _filterItemsLazyLoad () {
+    filterLazyLoadItems () {
       this.$.grid.clearCache();
     }
 

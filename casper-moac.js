@@ -439,8 +439,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           <div class="grid-container">
             <vaadin-grid
               id="grid"
-              class="moac"
-              theme="row-stripes"
               page-size="[[pageSize]]"
               items="[[_filteredItems]]"
               active-item="{{activeItem}}"
@@ -452,7 +450,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
               <!--Context Menu-->
               <template is="dom-if" if="[[_displayContextMenu]]">
-                <vaadin-grid-column flex-grow="0" width="40px" text-align="center">
+                <vaadin-grid-column flex-grow="0" width="40px">
                   <template>
                     <iron-icon
                       class="context-menu-icon"
@@ -523,7 +521,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           this._renderActiveFilters();
 
           // If this is a lazy-loaded vaadin-grid, trigger the re-fetch of the resource.
-          if (this.lazyLoad) this._filterItemsLazyLoad();
+          if (this.lazyLoad) this.filterLazyLoadItems();
       }));
     });
 
@@ -549,7 +547,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this._filterChangedDebouncer = Debouncer.debounce(
       this._filterChangedDebouncer,
       timeOut.after(this.resourceFilterDebounceMs),
-      () => { this.lazyLoad ? this._filterItemsLazyLoad() : this._filterItems(); }
+      () => { this.lazyLoad ? this.filterLazyLoadItems() : this._filterItems(); }
     );
   }
 
