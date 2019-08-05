@@ -26,7 +26,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         /**
          * Number of milliseconds the UI must wait after the user stopped typing
          * so that it can fire a new request to the JSONAPI.
-         * @type {Array}
+         * @type {Number}
          */
         resourceFilterDebounceMs: {
           type: Number,
@@ -34,6 +34,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         },
         /**
          * Function used to format the items that are returned from the JSON API.
+         * @type {Function}
          */
         resourceFormatter: {
           type: Function

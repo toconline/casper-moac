@@ -158,6 +158,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         value: 'Não existem qualquer resultados para mostrar.'
       },
       /**
+       * Boolean that when set to true, forces one item to be active all the time.
+       * @type {Boolean}
+       */
+      forceActiveItem: {
+        type: Boolean,
+        value: false
+      },
+      /**
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
        * @type {Boolean}
        */
@@ -623,7 +631,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * @param {Object} previousActiveItem
    */
   _activeItemChanged (newActiveItem, previousActiveItem) {
-    if (!newActiveItem && previousActiveItem) {
+    if (!newActiveItem && previousActiveItem && this.forceActiveItem) {
       this.$.grid.activeItem = previousActiveItem;
     }
 
@@ -710,7 +718,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method activates the first result since this is invoked when the items change.
    */
   _activateFirstItem () {
-    if (this._filteredItems.length > 0) {
+    if (this._filteredItems.length > 0 && this.forceActiveItem) {
       this.$.grid.activeItem = this._filteredItems[0];
       this._paintGridActiveRow();
     }
