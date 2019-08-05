@@ -626,6 +626,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     if (!newActiveItem && previousActiveItem) {
       this.$.grid.activeItem = previousActiveItem;
     }
+
+    this._paintGridActiveRow();
   }
 
   /**
