@@ -184,7 +184,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
   static get template () {
     return html`
-      <style>
+      <style include="casper-common-styles">
         vaadin-split-layout {
           height: 100%;
           transform: unset;
