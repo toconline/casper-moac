@@ -33,6 +33,12 @@ export const CasperMoacLazyLoadMixin = superClass => {
           value: 250
         },
         /**
+         * Function used to format the items that are returned from the JSON API.
+         */
+        resourceFormatter: {
+          type: Function
+        },
+        /**
          * URL parameter that will contain the number of results per page.
          * @type {String}
          */
@@ -108,6 +114,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
       const socketResponse = await app.socket.jget(this._buildResourceUrl(parameters), this.resourceTimeoutMs);
 
       if (socketResponse.errors) return;
+
+      // Format the elements returned by the JSON API.
+      if (this.resourceFormatter) {
+        socketResponse.data.forEach((item, itemIndex, items) => {
+          items[itemIndex] = this.resourceFormatter(item);
+        });
+      }
 
       callback(socketResponse.data, parseInt(socketResponse.meta.total));
       this._numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
