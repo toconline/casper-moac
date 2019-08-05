@@ -361,14 +361,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           color: var(--primary-color);
         }
 
-        .left-side-container .grid-multiple-selection-container slot[name="actions-multiple-selected"]::slotted(paper-icon-button) {
-          padding: 3px;
-          width: 25px;
-          height: 25px;
-          color: white;
-          margin-left: 5px;
-          border-radius: 50%;
-          background-color: var(--primary-color);
+        .left-side-container .grid-multiple-selection-container .grid-multiple-selection-icons {
+          display: flex;
+          flex-wrap: wrap;
+          margin: -10px 0 0 0;
         }
 
         .left-side-container .grid-container vaadin-grid {
@@ -476,7 +472,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
             <div class="grid-multiple-selection-label">
               Selecção Múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
             </div>
-            <div>
+            <div class="grid-multiple-selection-icons">
               <slot name="actions-multiple-selected"></slot>
             </div>
           </div>
