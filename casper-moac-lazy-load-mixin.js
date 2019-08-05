@@ -104,19 +104,15 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.$.grid.clearCache();
     }
 
-    _fetchResourceItems (parameters, callback) {
-      app.socket.getData(this._buildResourceUrl(parameters), this.resourceTimeoutMs, socketResponse => {
-        if (socketResponse.errors) return;
+    async _fetchResourceItems (parameters, callback) {
+      const socketResponse = await app.socket.jget(this._buildResourceUrl(parameters), this.resourceTimeoutMs);
 
-        callback(
-          socketResponse.data.map(item => ({ id: item.id, ...item.attributes })),
-          parseInt(socketResponse.meta.total)
-        );
+      if (socketResponse.errors) return;
 
-        this._numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
-          ? `${this.$.grid.items.length} resultado(s)`
-          : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`
-      });
+      callback(socketResponse.data, parseInt(socketResponse.meta.total));
+      this._numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
+        ? `${this.$.grid.items.length} resultado(s)`
+        : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`
     }
 
     _buildResourceUrl (parameters) {
