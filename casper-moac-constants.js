@@ -10,6 +10,9 @@ export const CasperMoacFilterTypes = {
 };
 
 export const CasperMoacOperators = {
+  // Array comparisons.
+  IN: 'IN',
+  NOT_IN: 'NOT_IN',
   // String comparisons.
   CONTAINS: 'CONTAINS',
   ENDS_WITH: 'ENDS_WITH',

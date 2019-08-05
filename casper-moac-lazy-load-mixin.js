@@ -198,6 +198,17 @@ export const CasperMoacLazyLoadMixin = superClass => {
         .map(filterItem => {
           const filter = filterItem.filter;
           switch (filter.lazyLoad.operator) {
+            // Array comparisons.
+            case CasperMoacOperators.IN:
+            case CasperMoacOperators.NOT_IN:
+              if (filter.value) {
+                const filterValue = filter.value.constructor === Array ? filter.value : [filter.value];
+
+                return filter.lazyLoad.operator === CasperMoacOperators.IN
+                  ? `${filter.lazyLoad.field} IN (${filterValue.join(',')})`
+                  : `${filter.lazyLoad.field} NOT IN (${filterValue.join(',')})`;
+              }
+
             // String comparisons.
             case CasperMoacOperators.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}'`;
             case CasperMoacOperators.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filter.value)}%'`;
