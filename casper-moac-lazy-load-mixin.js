@@ -222,7 +222,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
             case CasperMoacOperators.LESS_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} <= ${filterValue}`;
             case CasperMoacOperators.GREATER_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} >= ${filterValue}`;
             // Custom comparisons.
-            case CasperMoacOperators.CUSTOM: return filter.lazyLoad.field.replace(`%{${filterItem.filterKey}}`, filterValue);
+            case CasperMoacOperators.CUSTOM: return filter.lazyLoad.field.replace(new RegExp(`%{${filterItem.filterKey}}`, 'g'), filterValue);
           }
       });
     }

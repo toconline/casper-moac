@@ -6,7 +6,8 @@ import '@casper2020/casper-epaper/casper-epaper.js';
 import '@casper2020/casper-select/casper-select.js';
 import '@casper2020/casper-date-picker/casper-date-picker.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
-import '@vaadin/vaadin-grid/vaadin-grid-column';
+import '@vaadin/vaadin-grid/vaadin-grid-column.js';
+import '@vaadin/vaadin-grid/vaadin-grid-selection-column.js';
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-input/iron-input.js';
@@ -490,6 +491,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               selected-items="{{selectedItems}}">
               <!--vaadin-grid-column with the id property to make sure the correct active item is highlighted-->
               <vaadin-grid-column width="0px" flex-grow="0" path="[[idProperty]]"></vaadin-grid-column>
+              <vaadin-grid-selection-column></vaadin-grid-selection-column>
 
               <slot name="grid"></slot>
 
