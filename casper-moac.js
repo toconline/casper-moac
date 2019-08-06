@@ -378,6 +378,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           height: 20px;
           border-radius: 50%;
           color: var(--primary-color);
+          display: var(--display-context-menu);
         }
 
         .left-side-container .grid-container vaadin-grid .context-menu-icon:hover {
