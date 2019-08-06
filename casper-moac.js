@@ -484,9 +484,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               id="grid"
               class="moac"
               theme="row-stripes"
-              page-size="[[pageSize]]"
               items="[[_filteredItems]]"
               active-item="{{activeItem}}"
+              page-size="[[resourcePageSize]]"
               selected-items="{{selectedItems}}">
               <!--vaadin-grid-column with the id property to make sure the correct active item is highlighted-->
               <vaadin-grid-column width="0px" flex-grow="0" path="[[idProperty]]"></vaadin-grid-column>
@@ -747,7 +747,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       case CasperMoacFilterTypes.CASPER_SELECT:
         !filter.inputOptions.multiSelection
           ? this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(event.target)
-          : this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(this.$.activeFilters);
+          : this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(this._activeFilters);
         break;
       case CasperMoacFilterTypes.PAPER_INPUT:
         this._displayAllFilters = true;

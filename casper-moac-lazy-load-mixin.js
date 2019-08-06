@@ -9,7 +9,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
          * Number of results that will be displayed per page.
          * @type {Number}
          */
-        pageSize: {
+        resourcePageSize: {
           type: Number,
           value: 250
         },
@@ -112,21 +112,28 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     async _fetchResourceItems (parameters, callback) {
-      const socketResponse = await app.socket.jget(this._buildResourceUrl(parameters), this.resourceTimeoutMs);
+      try {
+        const socketResponse = await app.socket.jget(this._buildResourceUrl(parameters), this.resourceTimeoutMs);
 
-      if (socketResponse.errors) return;
+        if (socketResponse.errors) return;
 
-      // Format the elements returned by the JSON API.
-      if (this.resourceFormatter) {
-        socketResponse.data.forEach((item, itemIndex, items) => {
-          items[itemIndex] = this.resourceFormatter(item);
-        });
+        // Format the elements returned by the JSON API.
+        if (this.resourceFormatter) {
+          socketResponse.data.forEach((item, itemIndex, items) => {
+            items[itemIndex] = this.resourceFormatter(item);
+          });
+        }
+
+        callback(socketResponse.data, parseInt(socketResponse.meta.total));
+        this._numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
+          ? `${this.$.grid.items.length} resultado(s)`
+          : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`
+      } catch (_exception) {
+        this.app.openToast({
+          text: 'Ocorreu um erro ao buscar os dados.',
+          backgroundColor: 'red'
+        })
       }
-
-      callback(socketResponse.data, parseInt(socketResponse.meta.total));
-      this._numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
-        ? `${this.$.grid.items.length} resultado(s)`
-        : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`
     }
 
     _buildResourceUrl (parameters) {
