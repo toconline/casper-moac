@@ -557,6 +557,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.$.grid.addEventListener('click', () => this._paintGridActiveRow());
     this.$.grid.$.outerscroller.addEventListener('scroll', () => this._paintGridActiveRow());
 
+    this._bindFiltersEvents();
+    this._bindContextMenuEvents();
+  }
+
+  /**
+   * Bind event listeners to the generic search input and to the ones present in the filters property.
+   */
+  _bindFiltersEvents () {
     this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
     const filterInput = this.$.filterInput.querySelector('input');
     filterInput.addEventListener('blur', () => { this.$.filterInput.style.border = ''; });
@@ -575,7 +583,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           if (this.lazyLoad) this.filterLazyLoadItems();
       }));
     });
+  }
 
+  /**
+   * Bind event listeners to the context menu component if there is any.
+   */
+  _bindContextMenuEvents () {
     // Check if there is a casper-context-menu.
     this._contextMenu = Array.from(this.children).find(child => child.getAttribute('slot') === 'context-menu');
     this._displayContextMenu = !!this._contextMenu;
