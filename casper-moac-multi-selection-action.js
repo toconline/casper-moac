@@ -41,10 +41,6 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
           border-radius: 50%;
         }
 
-        paper-button.wrapped {
-          margin-top: 5px;
-        }
-
         paper-button iron-icon {
           width: 19px;
           height: 19px;
