@@ -583,7 +583,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           this.__renderActiveFilters();
 
           // If this is a lazy-loaded vaadin-grid, trigger the re-fetch of the resource.
-          if (this.lazyLoad) this.filterLazyLoadItems();
+          if (this.lazyLoad) this.__filterLazyLoadItems();
       }));
     });
   }
@@ -623,7 +623,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.__filterChangedDebouncer = Debouncer.debounce(
       this.__filterChangedDebouncer,
       timeOut.after(this.resourceFilterDebounceMs),
-      () => { this.lazyLoad ? this.filterLazyLoadItems() : this.__filterItems(); }
+      () => {
+        !this.lazyLoad
+          ? this.__filterItems()
+          : this.__filterLazyLoadItems();
+      }
     );
   }
 

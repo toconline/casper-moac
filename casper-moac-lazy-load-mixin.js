@@ -91,6 +91,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     /**
+     * Public method that allows the casper-moac users to re-fetch the items.
+     */
+    refreshItems () {
+      this.$.grid.clearCache();
+    }
+
+    /**
      * This method initializes the vaadin-grid lazy load behavior by provinding the function
      * that interacts with the JSON API.
      */
@@ -112,9 +119,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     /**
-     * Public method that allows the casper-moac users to force the items refresh.
+     * Internal method that will force the vaadin-grid items to be re-fetched.
      */
-    filterLazyLoadItems () {
+    __filterLazyLoadItems () {
       this.$.grid.clearCache();
     }
 
