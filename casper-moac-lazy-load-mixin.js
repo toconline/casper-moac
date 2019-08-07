@@ -125,7 +125,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         }
 
         callback(socketResponse.data, parseInt(socketResponse.meta.total));
-        this._numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
+        this.__numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
           ? `${this.$.grid.items.length} resultado(s)`
           : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`
       } catch (_exception) {
@@ -193,9 +193,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     __applyFilters () {
-      if (!this._filters) return [];
+      if (!this.__filters) return [];
 
-      return this._filters
+      return this.__filters
         .filter(filterItem => {
           return this._valueIsNotEmpty(filterItem.filter.value)
             && filterItem.filter.lazyLoad
