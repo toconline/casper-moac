@@ -197,7 +197,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       return this.__filters
         .filter(filterItem => {
-          return this._valueIsNotEmpty(filterItem.filter.value)
+          return this.__valueIsNotEmpty(filterItem.filter.value)
             && filterItem.filter.lazyLoad
             && filterItem.filter.lazyLoad.field
             && filterItem.filter.lazyLoad.operator
