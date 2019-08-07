@@ -45,7 +45,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
        */
       items: {
         type: Array,
-        observer: '_itemsChanged'
+        observer: '__itemsChanged'
       },
       /**
        * List of attributes that should be used to filter.
@@ -99,7 +99,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       activeItem: {
         type: Object,
         notify: true,
-        observer: '_activeItemChanged'
+        observer: '__activeItemChanged'
       },
       /**
        * The items that are currently selected in the vaadin-grid.
@@ -116,7 +116,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       filters: {
         type: Object,
         notify: true,
-        observer: '_filtersChanged'
+        observer: '__filtersChanged'
       },
       /**
        * The initial width of the left~side container.
@@ -170,7 +170,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
        * @type {Boolean}
        */
-      _displayAllFilters: {
+      __displayAllFilters: {
         type: Boolean,
         value: false
       }
@@ -179,7 +179,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
   static get observers () {
     return [
-      '_selectedItemsChanged(selectedItems.splices)'
+      '__selectedItemsChanged(selectedItems.splices)'
     ];
   }
 
@@ -379,7 +379,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           height: 20px;
           border-radius: 50%;
           color: var(--primary-color);
-          display: var(--display-context-menu);
+          display: var(--display-actions-on-hover);
         }
 
         .left-side-container .grid-container vaadin-grid .context-menu-icon:hover {
@@ -390,7 +390,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       </style>
 
       <vaadin-split-layout id="splitLayout">
-        <div class="left-side-container" style="[[_leftSideInitialWidth()]]">
+        <div class="left-side-container" style="[[__leftSideInitialWidth()]]">
           <div class="header-container">
             <!--Casper-moac-menu-->
             <slot name="menu"></slot>
@@ -403,20 +403,20 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               </iron-input>
 
               <!--Show/hide the active filters-->
-              <template is="dom-if" if="[[_hasFilters]]">
-                <paper-button id="displayAllFilters" on-click="_toggleDisplayAllFilters">
-                  [[_displayOrHideFiltersButtonLabel(_displayAllFilters)]]
+              <template is="dom-if" if="[[__hasFilters]]">
+                <paper-button id="displayAllFilters" on-click="__toggleDisplayAllFilters">
+                  [[_displayOrHideFiltersButtonLabel(__displayAllFilters)]]
                 </paper-button>
               </template>
             </div>
 
             <!--Active filters-->
-            <template is="dom-if" if="[[_hasFilters]]">
+            <template is="dom-if" if="[[__hasFilters]]">
               <div class="active-filters">
                 <div class="header">
                   <strong>Filtros ativos:</strong>
                   <template is="dom-if" if="[[!hideNumberResults]]">
-                    [[_numberOfResults]]
+                    [[__numberOfResults]]
                   </template>
                 </div>
                 <div class="active-filters-list" id="activeFilters"></div>
@@ -424,13 +424,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
             </template>
           </div>
 
-          <div hidden$="[[!_displayAllFilters]]">
-            <div class$="[[_filtersContainerClassName()]]">
-              <template is="dom-repeat" items="[[_filters]]">
+          <div hidden$="[[!__displayAllFilters]]">
+            <div class$="[[__filtersContainerClassName()]]">
+              <template is="dom-repeat" items="[[__filters]]">
                 <div class="filter-container">
                   <span>[[item.filter.label]]:</span>
                   <!--Casper-Select filter-->
-                  <template is="dom-if" if="[[_isFilterCasperSelect(item.filter.type)]]">
+                  <template is="dom-if" if="[[__isFilterCasperSelect(item.filter.type)]]">
                     <casper-select
                       data-filter$="[[item.filterKey]]"
                       list-width="20vw"
@@ -447,7 +447,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
                   </template>
 
                   <!--Paper-Input filter-->
-                  <template is="dom-if" if="[[_isFilterPaperInput(item.filter.type)]]">
+                  <template is="dom-if" if="[[__isFilterPaperInput(item.filter.type)]]">
                     <paper-input
                       data-filter$="[[item.filterKey]]"
                       value="{{item.filter.value}}"
@@ -456,7 +456,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
                   </template>
 
                   <!--Casper-Date-Picker filter-->
-                  <template is="dom-if" if="[[_isFilterCasperDatePicker(item.filter.type)]]">
+                  <template is="dom-if" if="[[__isFilterCasperDatePicker(item.filter.type)]]">
                     <casper-date-picker
                       data-filter$="[[item.filterKey]]"
                       value="{{item.filter.value}}"
@@ -470,7 +470,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
           <slot name="left"></slot>
 
-          <div class="grid-multiple-selection-container" hidden$="[[!_hasSelectedItems]]">
+          <div class="grid-multiple-selection-container" hidden$="[[!__hasSelectedItems]]">
             <div class="grid-multiple-selection-label">
               Selecção Múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
             </div>
@@ -485,7 +485,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               id="grid"
               class="moac"
               theme="row-stripes"
-              items="[[_filteredItems]]"
+              items="[[__filteredItems]]"
               active-item="{{activeItem}}"
               page-size="[[resourcePageSize]]"
               selected-items="{{selectedItems}}">
@@ -496,12 +496,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               <slot name="grid"></slot>
 
               <!--Context Menu-->
-              <template is="dom-if" if="[[_displayContextMenu]]">
+              <template is="dom-if" if="[[__displayContextMenu]]">
                 <vaadin-grid-column flex-grow="0" width="40px">
                   <template>
                     <iron-icon
                       class="context-menu-icon"
-                      on-click="_openContextMenu"
+                      on-click="__openContextMenu"
                       icon="casper-icons:arrow-drop-down">
                     </iron-icon>
                   </template>
@@ -509,7 +509,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               </template>
             </vaadin-grid>
 
-            <template is="dom-if" if="[[_hasNoItems(_filteredItems)]]">
+            <template is="dom-if" if="[[__hasNoItems(__filteredItems)]]">
               <div class="grid-no-items">
                 <iron-icon icon="[[noItemsIcon]]"></iron-icon>
                 [[noItemsText]]
@@ -518,8 +518,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           </div>
         </div>
 
-        <template is="dom-if" if="[[_displayEpaper]]">
-          <div class="right-side-container" style="[[_rightSideInitialWidth()]]">
+        <template is="dom-if" if="[[__displayEpaper]]">
+          <div class="right-side-container" style="[[__rightSideInitialWidth()]]">
             <slot name="right"></slot>
             <casper-epaper id="epaper" app="[[app]]"></casper-epaper>
           </div>
@@ -530,17 +530,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     `;
   }
 
-  _isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
-  _isFilterCasperSelect (itemType) { return itemType === CasperMoacFilterTypes.CASPER_SELECT; }
-  _isFilterCasperDatePicker (itemType) { return itemType === CasperMoacFilterTypes.CASPER_DATE_PICKER; }
+  __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
+  __isFilterCasperSelect (itemType) { return itemType === CasperMoacFilterTypes.CASPER_SELECT; }
+  __isFilterCasperDatePicker (itemType) { return itemType === CasperMoacFilterTypes.CASPER_DATE_PICKER; }
 
   ready () {
     super.ready();
 
     this.grid           = this.$.grid;
-    this._displayEpaper = this.moacType !== CasperMoacTypes.GRID;
+    this.__displayEpaper = this.moacType !== CasperMoacTypes.GRID;
 
-    if (!this._displayEpaper) {
+    if (!this.__displayEpaper) {
       // Hide the vaadin-split-layout handler.
       this.$.splitLayout.shadowRoot.getElementById('splitter').style.display = 'none';
     } else {
@@ -553,12 +553,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
     this.lazyLoad
       ? this._initializeLazyLoad()
-      : afterNextRender(this, () => this._filterItems());
+      : afterNextRender(this, () => this.__filterItems());
 
     // Set event listeners.
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
-    this.$.grid.addEventListener('click', () => this._paintGridActiveRow());
-    this.$.grid.$.outerscroller.addEventListener('scroll', () => this._paintGridActiveRow());
+    this.$.grid.addEventListener('click', () => this.__paintGridActiveRow());
+    this.$.grid.$.outerscroller.addEventListener('scroll', () => this.__paintGridActiveRow());
 
     this._bindFiltersEvents();
     this._bindContextMenuEvents();
@@ -580,7 +580,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         casper-date-picker[data-filter]
       `).forEach(input => input.addEventListener('value-changed', () => {
           this.dispatchEvent(new CustomEvent('filters-changed'));
-          this._renderActiveFilters();
+          this.__renderActiveFilters();
 
           // If this is a lazy-loaded vaadin-grid, trigger the re-fetch of the resource.
           if (this.lazyLoad) this.filterLazyLoadItems();
@@ -593,28 +593,37 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    */
   _bindContextMenuEvents () {
     // Check if there is a casper-context-menu.
-    this._contextMenu = Array.from(this.children).find(child => child.getAttribute('slot') === 'context-menu');
-    this._displayContextMenu = !!this._contextMenu;
+    this.__contextMenu = Array.from(this.children).find(child => child.getAttribute('slot') === 'context-menu');
+    this.__displayContextMenu = !!this.__contextMenu;
 
-    if (this._contextMenu) {
-      this._contextMenu.addEventListener('iron-overlay-canceled', event => {
+    if (!this.__contextMenu) return;
+
+    this.__contextMenu.addEventListener('iron-overlay-canceled', event => {
+      const eventPathElement = event.detail.path.shift();
+
+      // This means the iron-overlay-canceled event was called after a new menu was open so we hide the previous one.
+      if (eventPathElement.classList.contains('context-menu-icon')) {
+        this.__lastContextMenuTarget.removeAttribute('style');
+
         // Do not close the overlay if the event was triggered by another context menu icon.
-        const eventPathElement = event.detail.path.shift();
-        if (eventPathElement.classList.contains('context-menu-icon') && this._lastContextMenuTarget !== eventPathElement) {
+        if (this.__lastContextMenuTarget !== eventPathElement) {
           event.preventDefault();
         }
-      });
-    }
+      } else {
+        // This means the iron-overlay-canceled event was called after some other element was clicked so we close the current menu.
+        this.__contextMenu.positionTarget.removeAttribute('style');
+      }
+    });
   }
 
   /**
    * Debounce the items filtering after the search input's value changes.
    */
   _filterChanged () {
-    this._filterChangedDebouncer = Debouncer.debounce(
-      this._filterChangedDebouncer,
+    this.__filterChangedDebouncer = Debouncer.debounce(
+      this.__filterChangedDebouncer,
       timeOut.after(this.resourceFilterDebounceMs),
-      () => { this.lazyLoad ? this.filterLazyLoadItems() : this._filterItems(); }
+      () => { this.lazyLoad ? this.filterLazyLoadItems() : this.__filterItems(); }
     );
   }
 
@@ -623,18 +632,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * will cause a re-render of the active filters.
    * @param {Object} filters
    */
-  _filtersChanged (filters) {
+  __filtersChanged (filters) {
     if (!filters) return;
 
-    this._hasFilters = !!this.filters;
+    this.__hasFilters = !!this.filters;
 
     // Transform the filters object into an array to use in a dom-repeat.
-    this._filters = Object.keys(filters).map(filterKey => ({
+    this.__filters = Object.keys(filters).map(filterKey => ({
       filterKey: filterKey,
       filter: this.filters[filterKey]
     }));
 
-    afterNextRender(this, () => this._renderActiveFilters());
+    afterNextRender(this, () => this.__renderActiveFilters());
   }
 
   /**
@@ -642,27 +651,27 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * @param {Object} newActiveItem
    * @param {Object} previousActiveItem
    */
-  _activeItemChanged (newActiveItem, previousActiveItem) {
+  __activeItemChanged (newActiveItem, previousActiveItem) {
     if (!newActiveItem && previousActiveItem && this.forceActiveItem) {
       this.$.grid.activeItem = previousActiveItem;
     }
 
-    this._paintGridActiveRow();
+    this.__paintGridActiveRow();
   }
 
   /**
-   * Observer that fires as soon as the items change. This will invoke the internal _filterItems method to display
+   * Observer that fires as soon as the items change. This will invoke the internal __filterItems method to display
    * the new items on the vaadin-grid.
    */
-  _itemsChanged () {
-    this._filterItems();
+  __itemsChanged () {
+    this.__filterItems();
   }
 
   /**
    * Observer that fires when the vaadin-grid selected items change.
    */
-  _selectedItemsChanged () {
-    this._hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
+  __selectedItemsChanged () {
+    this.__hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
   }
 
   /**
@@ -690,12 +699,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method filters the existing items with the search input's value taking into account the list of attributes
    * provided for that effect. If none were specified, every single attribute will be used for comparison purposes.
    */
-  _filterItems () {
+  __filterItems () {
     // If the search input is empty or there are no items at the moment.
     if (!this.$.filterInput.value || !this.items) {
-      this._filteredItems = this.items || [];
-      this._numberOfResults = `${this._filteredItems.length} resultado(s)`;
-      this._activateFirstItem();
+      this.__filteredItems = this.items || [];
+      this.__numberOfResults = `${this.__filteredItems.length} resultado(s)`;
+      this.__activateFirstItem();
       return;
     }
 
@@ -706,33 +715,33 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     }
 
     if (filterAttributes && this.items.length > 0) {
-      const filterTerm = this._normalizeVariable(this.$.filterInput.value);
+      const filterTerm = this.__normalizeVariable(this.$.filterInput.value);
 
-      this._filteredItems = this.items.filter(item => filterAttributes.some(filterAttribute => {
+      this.__filteredItems = this.items.filter(item => filterAttributes.some(filterAttribute => {
         if (filterAttribute.constructor === Object) {
           switch (filterAttribute.operator) {
-            case CasperMoacOperators.EXACT_MATCH: return this._normalizeVariable(item[filterAttribute.field]) === filterTerm;
-            case CasperMoacOperators.CONTAINS: return this._normalizeVariable(item[filterAttribute.field]).includes(filterTerm);
-            case CasperMoacOperators.ENDS_WITH: return this._normalizeVariable(item[filterAttribute.field]).endsWith(filterTerm);
-            case CasperMoacOperators.STARTS_WITH: return this._normalizeVariable(item[filterAttribute.field]).startsWith(filterTerm);
+            case CasperMoacOperators.EXACT_MATCH: return this.__normalizeVariable(item[filterAttribute.field]) === filterTerm;
+            case CasperMoacOperators.CONTAINS: return this.__normalizeVariable(item[filterAttribute.field]).includes(filterTerm);
+            case CasperMoacOperators.ENDS_WITH: return this.__normalizeVariable(item[filterAttribute.field]).endsWith(filterTerm);
+            case CasperMoacOperators.STARTS_WITH: return this.__normalizeVariable(item[filterAttribute.field]).startsWith(filterTerm);
           }
         }
 
-        return this._normalizeVariable(item[filterAttribute]).includes(filterTerm);
+        return this.__normalizeVariable(item[filterAttribute]).includes(filterTerm);
       }));
 
-      this._numberOfResults = `${this._filteredItems.length} de ${this.items.length} resultado(s)`;
-      this._activateFirstItem();
+      this.__numberOfResults = `${this.__filteredItems.length} de ${this.items.length} resultado(s)`;
+      this.__activateFirstItem();
     }
   }
 
   /**
    * This method activates the first result since this is invoked when the items change.
    */
-  _activateFirstItem () {
-    if (this._filteredItems.length > 0 && this.forceActiveItem) {
-      this.$.grid.activeItem = this._filteredItems[0];
-      this._paintGridActiveRow();
+  __activateFirstItem () {
+    if (this.__filteredItems.length > 0 && this.forceActiveItem) {
+      this.$.grid.activeItem = this.__filteredItems[0];
+      this.__paintGridActiveRow();
     }
   }
 
@@ -749,14 +758,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       case CasperMoacFilterTypes.CASPER_SELECT:
         !filter.inputOptions.multiSelection
           ? this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(event.target)
-          : this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(this._activeFilters);
+          : this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(this.__activeFiltersContainer);
         break;
       case CasperMoacFilterTypes.PAPER_INPUT:
-        this._displayAllFilters = true;
+        this.__displayAllFilters = true;
         this.shadowRoot.querySelector(`paper-input[data-filter="${filterKey}"]`).focus();
         break;
       case CasperMoacFilterTypes.CASPER_DATE_PICKER:
-        this._displayAllFilters = true;
+        this.__displayAllFilters = true;
         this.shadowRoot.querySelector(`casper-date-picker[data-filter="${filterKey}"]`).open();
         break;
     }
@@ -766,26 +775,26 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method is responsible for rendering the active filters summary and binding the event listeners that
    * will be reponsible for displaying the filter's input overlay when possible.
    */
-  _renderActiveFilters () {
-    this._activeFilters = this._activeFilters || this.shadowRoot.querySelector('#activeFilters');
-    this._activeFilters.innerHTML = '';
+  __renderActiveFilters () {
+    this.__activeFiltersContainer = this.__activeFiltersContainer || this.shadowRoot.querySelector('#activeFilters');
+    this.__activeFiltersContainer.innerHTML = '';
 
     const activeFiltersValues = {};
-    this._filters.forEach(filterItem => {
+    this.__filters.forEach(filterItem => {
       const activeFilterValue = this._activeFilterValue(filterItem);
-      if (this._valueIsNotEmpty(activeFilterValue)) {
+      if (this.__valueIsNotEmpty(activeFilterValue)) {
         activeFiltersValues[filterItem.filterKey] = activeFilterValue;
       }
     });
 
     // This means that it wasn't possible obtain all the values from the filters components and therefore we schedule a new render.
-    if (this._filters.filter(filterItem => this._valueIsNotEmpty(filterItem.filter.value)).length !== Object.keys(activeFiltersValues).length) {
-      afterNextRender(this, () => this._renderActiveFilters());
+    if (this.__filters.filter(filterItem => this.__valueIsNotEmpty(filterItem.filter.value)).length !== Object.keys(activeFiltersValues).length) {
+      afterNextRender(this, () => this.__renderActiveFilters());
       return;
     }
 
-    this._filters.forEach(filterItem => {
-      if (this._valueIsNotEmpty(filterItem.filter.value)) {
+    this.__filters.forEach(filterItem => {
+      if (this.__valueIsNotEmpty(filterItem.filter.value)) {
         const activeFilter = document.createElement('div');
         activeFilter.className = 'active-filter';
 
@@ -797,16 +806,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
         activeFilter.appendChild(activeFilterLabel);
         activeFilter.appendChild(activeFilterValue);
-        this._activeFilters.appendChild(activeFilter);
+        this.__activeFiltersContainer.appendChild(activeFilter);
       }
     });
 
-    if (!this._activeFilters.innerHTML) {
+    if (!this.__activeFiltersContainer.innerHTML) {
       const noActiveFiltersPlaceholder = document.createElement('span');
       noActiveFiltersPlaceholder.className = 'no-active-filters';
       noActiveFiltersPlaceholder.innerHTML = '(Não há filtros activos)';
 
-      this._activeFilters.appendChild(noActiveFiltersPlaceholder);
+      this.__activeFiltersContainer.appendChild(noActiveFiltersPlaceholder);
     }
   }
 
@@ -815,7 +824,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * might be used as actual values and they should not be disregarded.
    * @param {String | Number | Array | Object} value
    */
-  _valueIsNotEmpty (value) {
+  __valueIsNotEmpty (value) {
     return ![null, undefined, ''].includes(value);
   }
 
@@ -849,7 +858,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * row has a different background color. This is required for scroll as well since the vaadin-grid re-uses
    * its rows and having this into account, the id property is used to avoid highlighting the wrong row.
    */
-  _paintGridActiveRow () {
+  __paintGridActiveRow () {
     const activeItemId = this.activeItem ? this.activeItem[this.idProperty].toString() : null;
 
     // Loop through each grid row and paint the active one.
@@ -868,7 +877,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * unaccented equivalent.
    * @param {String} variable
    */
-  _normalizeVariable (variable) {
+  __normalizeVariable (variable) {
     if (!variable) return '';
 
     return variable
@@ -882,15 +891,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * This method toggles the visibility of all the filters when the user presses the button below the search input.
    */
-  _toggleDisplayAllFilters () {
-    this._displayAllFilters = !this._displayAllFilters;
+  __toggleDisplayAllFilters () {
+    this.__displayAllFilters = !this.__displayAllFilters;
   }
 
   /**
    * The button below the search input will have a different message based on all filters being visible or not.
    */
   _displayOrHideFiltersButtonLabel () {
-    return !this._displayAllFilters
+    return !this.__displayAllFilters
       ? 'Ver todos os filtros'
       : 'Esconder todos os filtros';
   }
@@ -900,13 +909,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * so that it appears aligned with the icon that triggered the event in the first place.
    * @param {Event} event
    */
-  _openContextMenu (event) {
-    this._lastContextMenuTarget = this._contextMenu.positionTarget;
-    this._contextMenu.positionTarget = event.target;
-    this._contextMenu.refit();
+  __openContextMenu (event) {
+    this.__lastContextMenuTarget = this.__contextMenuOpenedOnce ? this.__contextMenu.positionTarget : event.target;
 
-    if (!this._contextMenu.opened) {
-      this._contextMenu.open();
+    // Check if the context menu was already opened.
+    this.__contextMenu.positionTarget = event.target;
+    this.__contextMenu.positionTarget.style.display = 'block';
+    this.__contextMenu.refit();
+
+    if (!this.__contextMenu.opened) {
+      this.__contextMenu.open();
+      this.__contextMenuOpenedOnce = true;
     }
   }
 
@@ -914,7 +927,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method is invoked directly in the template so that the vaadin-split-layout has the
    * correct percentual width for the left side of the component.
    */
-  _leftSideInitialWidth () {
+  __leftSideInitialWidth () {
     return this.moacType === CasperMoacTypes.GRID
       ? 'width: 100%;'
       : `width: ${this.leftSideInitialWidth}%;`;
@@ -924,7 +937,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method is invoked directly in the template so that the vaadin-split-layout has the
    * correct percentual width for the right side of the component.
    */
-  _rightSideInitialWidth () {
+  __rightSideInitialWidth () {
     return `width: ${100 - parseInt(this.leftSideInitialWidth)}%;`;
   }
 
@@ -932,8 +945,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * Depending on the current MOAC type, the active filters will be displayed differently by either
    * adding the 'filters-container-inline' class or not.
    */
-  _filtersContainerClassName () {
-    return this.moacType === CasperMoacTypes.GRID
+  __filtersContainerClassName () {
+    return this.moacType === CasperMoacTypes.GRID_EPAPER
       ? 'filters-container'
       : 'filters-container filters-container-inline';
   }
@@ -943,7 +956,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * vaadin-grid no items placeholder.
    * @param {Array} filteredItems
    */
-  _hasNoItems (filteredItems) {
+  __hasNoItems (filteredItems) {
     return filteredItems.length === 0;
   }
 }
