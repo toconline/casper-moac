@@ -130,9 +130,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
           : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`
       } catch (_exception) {
         this.app.openToast({
-          text: 'Ocorreu um erro ao buscar os dados.',
+          text: 'Ocorreu um erro ao obter os dados.',
           backgroundColor: 'red'
-        })
+        });
       }
     }
 

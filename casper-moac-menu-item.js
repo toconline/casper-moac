@@ -9,37 +9,57 @@ export class CasperMoacMenuItem extends PolymerElement {
     return 'casper-moac-menu-item';
   }
 
-  static get buttonRadius () { return 15; }
-  static get buttonMargin () { return 20; }
-
   static get template () {
     return html`
       <style>
-        :host {
-          cursor: pointer;
-        }
-
         #container {
           display: flex;
+          color: #212121;
+          font-size: 15px;
+          user-select: none;
+          border-radius: 5px;
           align-items: center;
+          padding: 8px 25px 8px 15px;
         }
 
-        #button {
-          padding: 5px;
+        #container[disabled] {
+          color: #A8A8A8;
+        }
+
+        #container:not([disabled]):hover {
           color: white;
+          cursor: pointer;
+          background-color: var(--primary-color);
+          transition: background-color 100ms linear;
+        }
+
+        /* Paper-icon-button */
+        #container paper-icon-button {
+          width: 30px;
+          height: 30px;
+          padding: 5px;
           margin-left: 0;
           border-radius: 50%;
           margin-right: 10px;
           background-color: var(--primary-color);
         }
 
-        #button:hover {
-          filter: brightness(90%);
-          transition: filter 200ms linear;
+        #container:not([disabled]) paper-icon-button {
+          color: white;
+        }
+
+        #container:not([disabled]):hover paper-icon-button {
+          background-color: white;
+          color: var(--primary-color);
+        }
+
+        #container[disabled] paper-icon-button {
+          color: #A8A8A8;
+          background-color: lightgray;
         }
       </style>
-      <div id="container">
-        <paper-icon-button id="button" icon="[[icon]]"></paper-icon-button>
+      <div id="container" disabled$="[[disabled]]">
+        <paper-icon-button icon="[[icon]]"></paper-icon-button>
         <slot></slot>
       </div>
     `;
@@ -47,18 +67,26 @@ export class CasperMoacMenuItem extends PolymerElement {
 
   static get properties () {
     return {
-      icon: String,
-      text: String,
-      onClick: Object
+      /**
+       * Icon that will be used in the paper-icon-button.
+       * @type {String}
+       */
+      icon: {
+        type: String,
+      },
+      /**
+       * Flag that enables / disables the menu item.
+       */
+      disabled: {
+        type: Boolean,
+        value: false,
+        observer: '__disabledChanged'
+      }
     };
   }
 
-  ready () {
-    super.ready();
-
-    this.$.button.style.width = `${CasperMoacMenuItem.buttonRadius * 2}px`;
-    this.$.button.style.height = `${CasperMoacMenuItem.buttonRadius * 2}px`;
-    this.$.container.style.padding = `${CasperMoacMenuItem.buttonMargin / 2}px 0`;
+  __disabledChanged () {
+    this.shadowRoot.host.style.pointerEvents = this.disabled ? 'none' : '';
   }
 }
 

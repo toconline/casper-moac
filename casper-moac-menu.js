@@ -1,5 +1,5 @@
+import './casper-moac-menu-item';
 import './casper-moac-menu-items';
-import { CasperMoacMenuItem } from './casper-moac-menu-item';
 import '@casper2020/casper-icons/casper-icons.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
@@ -114,8 +114,8 @@ class CasperMoacMenu extends PolymerElement {
       const menuTriggerDimensions = this.$.menuTrigger.getBoundingClientRect();
 
       this.$.menuItems.positionTarget = this.$.menuTrigger;
-      this.$.menuItems.verticalOffset = menuTriggerDimensions.height + CasperMoacMenuItem.buttonMargin / 2;
-      this.$.menuItems.horizontalOffset = menuTriggerDimensions.width / 2 - CasperMoacMenuItem.buttonRadius;
+      this.$.menuItems.verticalOffset = menuTriggerDimensions.height + 10;
+      this.$.menuItems.horizontalOffset = menuTriggerDimensions.width / 2 - 30;
       this.$.menuItems.addEventListener('iron-overlay-canceled', event => {
         // Prevent the default action which would close the overlay and then the below listener would re-open it.
         if (event.detail.path.includes(this.$.menuTrigger) || event.detail.path.includes(this.$.circleBackground)) {
