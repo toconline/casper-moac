@@ -123,9 +123,8 @@ class CasperMoacMenu extends PolymerElement {
         }
       });
 
-      this.$.menuTrigger.addEventListener('click', () => {
-        this.$.menuItems.toggle();
-      });
+      this.$.menuTrigger.addEventListener('click', () => { this.$.menuItems.toggle(); });
+      this.$.menuTrigger.addEventListener('mouseover', () => { this.$.menuItems.open(); });
     });
   }
 
