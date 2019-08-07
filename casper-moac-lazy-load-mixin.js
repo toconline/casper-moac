@@ -90,6 +90,10 @@ export const CasperMoacLazyLoadMixin = superClass => {
       };
     }
 
+    /**
+     * This method initializes the vaadin-grid lazy load behavior by provinding the function
+     * that interacts with the JSON API.
+     */
     __initializeLazyLoad () {
       const missingProperties = [
         'resourceName',
@@ -107,10 +111,19 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.$.grid.dataProvider = (parameters, callback) => this.__fetchResourceItems(parameters, callback);
     }
 
+    /**
+     * Public method that allows the casper-moac users to force the items refresh.
+     */
     filterLazyLoadItems () {
       this.$.grid.clearCache();
     }
 
+    /**
+     * Function that is invoked by the vaadin-grid to fetch items from the remote source which is
+     * the JSON API in this case.
+     * @param {Object} parameters Object that contains the number of items per page, the current page number and sort settings.
+     * @param {Function} callback Callback that will be called as soon as the items are returned from the JSON API. 
+     */
     async __fetchResourceItems (parameters, callback) {
       try {
         const socketResponse = await app.socket.jget(this.__buildResourceUrl(parameters), this.resourceTimeoutMs);
@@ -136,6 +149,10 @@ export const CasperMoacLazyLoadMixin = superClass => {
       }
     }
 
+    /**
+     * This method will build the JSON API resource url with all the required parameters and filters.
+     * @param {Object} parameters Object that contains the number of items per page, the current page number and sort settings.
+     */
     __buildResourceUrl (parameters) {
       let resourceUrlParams = [
         this.resourceTotalsMetaParam,
@@ -158,7 +175,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       // Check if there are attributes that should be filtered and if the input has already been initialized.
       let freeTextFilters;
-      const fixedFilters = this.__applyFilters().join(' AND ');
+      const fixedFilters = this.__buildResourceUrlFilters().join(' AND ');
 
       if (this.$.filterInput
         && this.$.filterInput.value
@@ -192,7 +209,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
         : `${this.resourceName}?${resourceUrlParams.join('&')}`;
     }
 
-    __applyFilters () {
+    /**
+     * This method is responsible for building the query part of url and apply all the filters
+     * according to their values and operators.
+     */
+    __buildResourceUrlFilters () {
       if (!this.__filters) return [];
 
       return this.__filters
@@ -227,8 +248,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
       });
     }
 
+    /**
+     * Method used to escape special characters that might break the ILIKE clause or the JSONAPI url parsing.
+     * @param {String} value
+     */
     __sanitizeValue (value) {
-      // Escape special characters that might break the ILIKE clause or the JSONAPI url parsing.
       const escapedValue = value.toString().replace(/[%\\]/g, '\\$&');
       return escapedValue.replace(/[&]/g, '_');
     }

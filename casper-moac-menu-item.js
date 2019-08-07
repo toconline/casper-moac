@@ -85,6 +85,9 @@ export class CasperMoacMenuItem extends PolymerElement {
     };
   }
 
+  /**
+   * Observer that fires when the menu item is enabled / disabled and react accordingly.
+   */
   __disabledChanged () {
     this.shadowRoot.host.style.pointerEvents = this.disabled ? 'none' : '';
   }

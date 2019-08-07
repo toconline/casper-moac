@@ -20,7 +20,7 @@ class CasperMoacMenu extends PolymerElement {
       disabled: {
         type: Boolean,
         value: false,
-        observer: '_disabledChanged'
+        observer: '__disabledChanged'
        },
        /**
         * Icon that will appear when the casper-moac-menu
@@ -93,17 +93,17 @@ class CasperMoacMenu extends PolymerElement {
       <paper-icon-button
         id="menuTrigger"
         disabled="[[disabled]]"
-        icon="[[_menuIcon(_opened)]]"
-        data-menu-opened$="[[_opened]]">
+        icon="[[__menuIcon(__opened)]]"
+        data-menu-opened$="[[__opened]]">
       </paper-icon-button>
       <casper-moac-menu-items
         id="menuItems"
-        opened="{{_opened}}"
+        opened="{{__opened}}"
         vertical-align="top"
         horizontal-align="left">
         <slot></slot>
       </casper-moac-menu-items>
-      <div id="circleBackground" data-menu-opened$="[[_opened]]"></div>
+      <div id="circleBackground" data-menu-opened$="[[__opened]]"></div>
     `;
   }
 
@@ -129,22 +129,38 @@ class CasperMoacMenu extends PolymerElement {
     });
   }
 
-  _menuIcon (opened) {
+  /**
+   * Method that changes the menu's icon when it opens / closes.
+   * @param {Boolean} opened Boolean that states if the menu is open or not.
+   */
+  __menuIcon (opened) {
     return opened ? this.closeIcon : this.openIcon;
   }
 
-  _disabledChanged (disabled) {
+  /**
+   * Observer that fires when the menu is enabled / disabled and react accordingly.
+   */
+  __disabledChanged (disabled) {
     if (disabled) this.$.menuItems.close();
   }
 
+  /**
+   * Public method to open the menu.
+   */
   open () {
     this.$.menuItems.open();
   }
 
+  /**
+   * Public method to close the menu.
+   */
   close () {
     this.$.menuItems.close();
   }
 
+  /**
+   * Public method that opens / closes the menu depending on its current state.
+   */
   toggle () {
     this.$.menuItems.toggle();
   }
