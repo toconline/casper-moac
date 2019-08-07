@@ -704,6 +704,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * provided for that effect. If none were specified, every single attribute will be used for comparison purposes.
    */
   __filterItems () {
+    this.selectedItems = [];
+
     // If the search input is empty or there are no items at the moment.
     if (!this.$.filterInput.value || !this.items) {
       this.__filteredItems = this.items || [];

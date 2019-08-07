@@ -145,9 +145,12 @@ export const CasperMoacLazyLoadMixin = superClass => {
         }
 
         callback(socketResponse.data, parseInt(socketResponse.meta.total));
+
+        this.selectedItems = [];
         this.__numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
           ? `${this.$.grid.items.length} resultado(s)`
-          : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`
+          : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`;
+
       } catch (_exception) {
         this.app.openToast({
           text: 'Ocorreu um erro ao obter os dados.',

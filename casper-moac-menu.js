@@ -112,6 +112,8 @@ class CasperMoacMenu extends PolymerElement {
 
     afterNextRender(this, () => {
       const menuTriggerDimensions = this.$.menuTrigger.getBoundingClientRect();
+      this.$.menuTrigger.addEventListener('click', () => { this.$.menuItems.toggle(); });
+      this.$.menuTrigger.addEventListener('mouseover', () => { this.$.menuItems.open(); });
 
       this.$.menuItems.positionTarget = this.$.menuTrigger;
       this.$.menuItems.verticalOffset = menuTriggerDimensions.height + 10;
@@ -123,8 +125,12 @@ class CasperMoacMenu extends PolymerElement {
         }
       });
 
-      this.$.menuTrigger.addEventListener('click', () => { this.$.menuItems.toggle(); });
-      this.$.menuTrigger.addEventListener('mouseover', () => { this.$.menuItems.open(); });
+      // Close the menu if there was a click on one of the items.
+      this.$.menuItems.addEventListener('click', event => {
+        if (event.composedPath().some(element => element.tagName && element.tagName.toLowerCase() === 'casper-moac-menu-item')) {
+          this.$.menuItems.close();
+        }
+      });
     });
   }
 

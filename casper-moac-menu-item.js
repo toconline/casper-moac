@@ -29,7 +29,7 @@ export class CasperMoacMenuItem extends PolymerElement {
         #container:not([disabled]):hover {
           color: white;
           cursor: pointer;
-          background-color: var(--primary-color);
+          text-decoration: underline;
           transition: background-color 100ms linear;
         }
 
