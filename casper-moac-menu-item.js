@@ -55,7 +55,7 @@ export class CasperMoacMenuItem extends PolymerElement {
 
         #container[disabled] paper-icon-button {
           color: #A8A8A8;
-          background-color: lightgray;
+          background-color: transparent;
         }
       </style>
       <div id="container" disabled$="[[disabled]]">

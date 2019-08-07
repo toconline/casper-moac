@@ -24,8 +24,7 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
       disabled: {
         type: Boolean,
         value: false,
-        observer: '__disabledChanged',
-        reflectToAttribute: true
+        observer: '__disabledChanged'
       }
     };
   }
