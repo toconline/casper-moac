@@ -552,7 +552,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
     // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
     this.lazyLoad
-      ? this._initializeLazyLoad()
+      ? this.__initializeLazyLoad()
       : afterNextRender(this, () => this.__filterItems());
 
     // Set event listeners.
@@ -560,14 +560,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.$.grid.addEventListener('click', () => this.__paintGridActiveRow());
     this.$.grid.$.outerscroller.addEventListener('scroll', () => this.__paintGridActiveRow());
 
-    this._bindFiltersEvents();
-    this._bindContextMenuEvents();
+    this.__bindFiltersEvents();
+    this.__bindContextMenuEvents();
   }
 
   /**
    * Bind event listeners to the generic search input and to the ones present in the filters property.
    */
-  _bindFiltersEvents () {
+  __bindFiltersEvents () {
     this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
     const filterInput = this.$.filterInput.querySelector('input');
     filterInput.addEventListener('blur', () => { this.$.filterInput.style.border = ''; });
@@ -591,7 +591,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * Bind event listeners to the context menu component if there is any.
    */
-  _bindContextMenuEvents () {
+  __bindContextMenuEvents () {
     // Check if there is a casper-context-menu.
     this.__contextMenu = Array.from(this.children).find(child => child.getAttribute('slot') === 'context-menu');
     this.__displayContextMenu = !!this.__contextMenu;

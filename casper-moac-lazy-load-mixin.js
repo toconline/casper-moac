@@ -90,7 +90,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       };
     }
 
-    _initializeLazyLoad () {
+    __initializeLazyLoad () {
       const missingProperties = [
         'resourceName',
         'resourceSortParam',
@@ -104,16 +104,16 @@ export const CasperMoacLazyLoadMixin = superClass => {
         throw new Error(`The following properties are missing to activate the lazy-load mode: ${missingProperties.join(', ')}.`);
       }
 
-      this.$.grid.dataProvider = (parameters, callback) => this._fetchResourceItems(parameters, callback);
+      this.$.grid.dataProvider = (parameters, callback) => this.__fetchResourceItems(parameters, callback);
     }
 
     filterLazyLoadItems () {
       this.$.grid.clearCache();
     }
 
-    async _fetchResourceItems (parameters, callback) {
+    async __fetchResourceItems (parameters, callback) {
       try {
-        const socketResponse = await app.socket.jget(this._buildResourceUrl(parameters), this.resourceTimeoutMs);
+        const socketResponse = await app.socket.jget(this.__buildResourceUrl(parameters), this.resourceTimeoutMs);
 
         if (socketResponse.errors) return;
 
@@ -136,7 +136,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       }
     }
 
-    _buildResourceUrl (parameters) {
+    __buildResourceUrl (parameters) {
       let resourceUrlParams = [
         this.resourceTotalsMetaParam,
         `${this.resourcePageParam}=${parameters.page + 1}`,
@@ -158,7 +158,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       // Check if there are attributes that should be filtered and if the input has already been initialized.
       let freeTextFilters;
-      const fixedFilters = this._applyFilters().join(' AND ');
+      const fixedFilters = this.__applyFilters().join(' AND ');
 
       if (this.$.filterInput
         && this.$.filterInput.value
@@ -167,15 +167,15 @@ export const CasperMoacLazyLoadMixin = superClass => {
           freeTextFilters = this.resourceFilterAttributes.map(filterAttribute => {
             if (filterAttribute.constructor === Object) {
               switch (filterAttribute.operator) {
-                case CasperMoacOperators.CONTAINS: return `${filterAttribute.field}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}%'`;
-                case CasperMoacOperators.ENDS_WITH: return `${filterAttribute.field}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}'`;
-                case CasperMoacOperators.STARTS_WITH: return `${filterAttribute.field}::TEXT ILIKE '${this._sanitizeValue(this.$.filterInput.value)}%'`;
-                case CasperMoacOperators.EXACT_MATCH: return `${filterAttribute.field}::TEXT ILIKE '${this._sanitizeValue(this.$.filterInput.value)}'`;
+                case CasperMoacOperators.CONTAINS: return `${filterAttribute.field}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}%'`;
+                case CasperMoacOperators.ENDS_WITH: return `${filterAttribute.field}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}'`;
+                case CasperMoacOperators.STARTS_WITH: return `${filterAttribute.field}::TEXT ILIKE '${this.__sanitizeValue(this.$.filterInput.value)}%'`;
+                case CasperMoacOperators.EXACT_MATCH: return `${filterAttribute.field}::TEXT ILIKE '${this.__sanitizeValue(this.$.filterInput.value)}'`;
               }
             }
 
             // Encapsulate the free filters in parenthesis to not mess with the AND clause.
-            return `${filterAttribute}::TEXT ILIKE '%${this._sanitizeValue(this.$.filterInput.value)}%'`;
+            return `${filterAttribute}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}%'`;
           });
           freeTextFilters = `(${freeTextFilters.join(' OR ')})`;
       }
@@ -192,7 +192,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         : `${this.resourceName}?${resourceUrlParams.join('&')}`;
     }
 
-    _applyFilters () {
+    __applyFilters () {
       if (!this._filters) return [];
 
       return this._filters
@@ -211,11 +211,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
             case CasperMoacOperators.IN: return `${filter.lazyLoad.field} IN (${filterValue})`;
             case CasperMoacOperators.NOT_IN: return `${filter.lazyLoad.field} NOT IN (${filterValue})`;
             // String comparisons.
-            case CasperMoacOperators.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filterValue)}'`;
-            case CasperMoacOperators.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this._sanitizeValue(filterValue)}%'`;
-            case CasperMoacOperators.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filterValue)}'`;
-            case CasperMoacOperators.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this._sanitizeValue(filterValue)}%'`;
-            case CasperMoacOperators.DOES_NOT_CONTAIN: return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${this._sanitizeValue(filterValue)}%'`;
+            case CasperMoacOperators.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this.__sanitizeValue(filterValue)}'`;
+            case CasperMoacOperators.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this.__sanitizeValue(filterValue)}%'`;
+            case CasperMoacOperators.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this.__sanitizeValue(filterValue)}'`;
+            case CasperMoacOperators.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this.__sanitizeValue(filterValue)}%'`;
+            case CasperMoacOperators.DOES_NOT_CONTAIN: return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${this.__sanitizeValue(filterValue)}%'`;
             // Numeric comparisons.
             case CasperMoacOperators.LESS_THAN: return `${filter.lazyLoad.field} < ${filterValue}`;
             case CasperMoacOperators.GREATER_THAN: return `${filter.lazyLoad.field} > ${filterValue}`;
@@ -227,7 +227,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       });
     }
 
-    _sanitizeValue (value) {
+    __sanitizeValue (value) {
       // Escape special characters that might break the ILIKE clause or the JSONAPI url parsing.
       const escapedValue = value.toString().replace(/[%\\]/g, '\\$&');
       return escapedValue.replace(/[&]/g, '_');
