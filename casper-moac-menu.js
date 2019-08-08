@@ -139,7 +139,7 @@ class CasperMoacMenu extends PolymerElement {
     this.shadowRoot.host.addEventListener('mouseleave', () => {
       if (this.$.menuItems.opened) {
         // Start a fading out transition by reducing the opacity.
-        const fadingOutDuration = 500;
+        const fadingOutDuration = 250;
         this.shadowRoot.host.style.transition = `opacity ${fadingOutDuration}ms linear`;
         this.shadowRoot.host.style.opacity = 0;
 
