@@ -160,7 +160,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
           ? `${this.$.grid.items.length} resultado(s)`
           : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`;
 
-        this.__lazyLoadMultiSelection(parameters.page, socketResponse);
+        this.__lazyLoadMultiSelection(parameters.page, socketResponse.data);
       } catch (_exception) {
         this.app.openToast({
           text: 'Ocorreu um erro ao obter os dados.',
