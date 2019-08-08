@@ -172,7 +172,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
        */
       __displayAllFilters: {
         type: Boolean,
-        value: false
+        value: false,
+        observer: '__displayAllFiltersChanged'
       }
     };
   }
@@ -248,10 +249,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         .left-side-container .header-container .generic-filter-container #displayAllFilters {
           margin: 0;
           width: 100%;
+          line-height: 15px;
           font-size: 0.85em;
           font-weight: bold;
           text-transform: unset;
           color: var(--primary-color);
+        }
+
+        .left-side-container .header-container .generic-filter-container #displayAllFilters iron-icon {
+          width: 15px;
+          height: 15px;
+          margin-left: 5px;
+          transition: transform 200ms linear;
+        }
+
+        .left-side-container .header-container .generic-filter-container #displayAllFilters iron-icon[rotate] {
+          transform: rotate(180deg);
         }
 
         /* Active filters summary */
@@ -405,7 +418,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               <!--Show/hide the active filters-->
               <template is="dom-if" if="[[__hasFilters]]">
                 <paper-button id="displayAllFilters" on-click="__toggleDisplayAllFilters">
-                  [[_displayOrHideFiltersButtonLabel(__displayAllFilters)]]
+                  <span>Ver todos os filtros</span>
+                  <iron-icon icon="casper-icons:arrow-drop-down"></iron-icon>
                 </paper-button>
               </template>
             </div>
@@ -612,6 +626,26 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       } else {
         // This means the iron-overlay-canceled event was called after some other element was clicked so we close the current menu.
         this.__contextMenu.positionTarget.removeAttribute('style');
+      }
+    });
+  }
+
+  /**
+   * Observer that gets fired when the user displays / hides all the filters by pressing the button below the search
+   * input. This method change the button's text and rotate the icon accordingly.
+   */
+  __displayAllFiltersChanged () {
+    afterNextRender(this, () => {
+      this.__displayAllFiltersButton = this.__displayAllFiltersButton || this.shadowRoot.querySelector('#displayAllFilters');
+      this.__displayAllFiltersButtonSpan = this.__displayAllFiltersButtonSpan || this.__displayAllFiltersButton.querySelector('span');
+      this.__displayAllFiltersButtonIcon = this.__displayAllFiltersButtonIcon || this.__displayAllFiltersButton.querySelector('iron-icon');
+
+      if (this.__displayAllFilters) {
+        this.__displayAllFiltersButtonIcon.setAttribute('rotate', true);
+        this.__displayAllFiltersButtonSpan.innerHTML = 'Esconder todos os filtros';
+      } else {
+        this.__displayAllFiltersButtonIcon.removeAttribute('rotate');
+        this.__displayAllFiltersButtonSpan.innerHTML = 'Ver todos os filtros';
       }
     });
   }
@@ -899,15 +933,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    */
   __toggleDisplayAllFilters () {
     this.__displayAllFilters = !this.__displayAllFilters;
-  }
-
-  /**
-   * The button below the search input will have a different message based on all filters being visible or not.
-   */
-  _displayOrHideFiltersButtonLabel () {
-    return !this.__displayAllFilters
-      ? 'Ver todos os filtros'
-      : 'Esconder todos os filtros';
   }
 
   /**
