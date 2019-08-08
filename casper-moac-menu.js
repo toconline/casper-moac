@@ -39,13 +39,17 @@ class CasperMoacMenu extends PolymerElement {
        closeIcon: {
         type: String,
         value: 'casper-icons:clear'
-      },
+      }
     };
   }
 
   static get template () {
     return html`
       <style>
+        :host {
+          z-index: 2;
+        }
+
         #menuTrigger {
           padding: 0;
           z-index: 2;
@@ -82,7 +86,6 @@ class CasperMoacMenu extends PolymerElement {
           filter: brightness(200%);
           transform: translate(-40%, -40%);
           background-color: var(--primary-color);
-          transition: width 200ms ease-in, height 200ms ease-in;
         }
 
         #circleBackground[data-menu-opened] {
@@ -111,6 +114,27 @@ class CasperMoacMenu extends PolymerElement {
     super.ready();
 
     afterNextRender(this, () => {
+      this.shadowRoot.host.addEventListener('mouseleave', () => {
+        if (this.$.menuItems.opened) {
+          // Start a fading out transition by reducing the opacity.
+          const fadingOutDuration = 500;
+          this.shadowRoot.host.style.transition = `opacity ${fadingOutDuration}ms linear`;
+          this.shadowRoot.host.style.opacity = 0;
+
+          this.__fadeOutTimeout = setTimeout(() => {
+            this.$.menuItems.close();
+            this.shadowRoot.host.style.transition = '';
+            this.shadowRoot.host.style.opacity = 1;
+          }, fadingOutDuration);
+        }
+      });
+
+      this.shadowRoot.host.addEventListener('mouseenter', () => {
+        this.shadowRoot.host.style.transition = '';
+        this.shadowRoot.host.style.opacity = 1;
+        clearTimeout(this.__fadeOutTimeout);
+      });
+
       const menuTriggerDimensions = this.$.menuTrigger.getBoundingClientRect();
       this.$.menuTrigger.addEventListener('click', () => { this.$.menuItems.toggle(); });
       this.$.menuTrigger.addEventListener('mouseover', () => { this.$.menuItems.open(); });
