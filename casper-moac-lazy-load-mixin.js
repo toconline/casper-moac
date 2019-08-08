@@ -160,7 +160,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
           ? `${this.$.grid.items.length} resultado(s)`
           : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`;
 
-        this.__handleLazyLoadMultiSelection(parameters.page, socketResponse);
+        this.__lazyLoadMultiSelection(parameters.page, socketResponse);
       } catch (_exception) {
         this.app.openToast({
           text: 'Ocorreu um erro ao obter os dados.',
@@ -169,16 +169,23 @@ export const CasperMoacLazyLoadMixin = superClass => {
       }
     }
 
-    __handleLazyLoadMultiSelection (page, socketResponse) {
+    /**
+     * This method is responsible for selecting all the new items if the user is scrolling with that option active
+     * or wiping all selected items if the filters have changed.
+     * @param {Number} page The current vaadin-grid's page.
+     * @param {Array} socketResponse The newly fetched data from the JSON API.
+     */
+    __lazyLoadMultiSelection (page, socketResponseData) {
       // This means the filters were re-applied so clear all the selected items and reset the internal items.
       if (page === 0) {
+        this.selectedItems = [];
         this.__vaadinCheckbox.checked = false;
-        this.__internalItems = socketResponse.data;
+        this.__internalItems = socketResponseData;
         return;
       }
 
       // Append the new items and select all of them if that's the case.
-      this.__internalItems = [...this.__internalItems, ...socketResponse.data];
+      this.__internalItems = [...this.__internalItems, ...socketResponseData];
       if (this.__allItemsSelected) {
         this.selectedItems = [...this.__internalItems];
       }
