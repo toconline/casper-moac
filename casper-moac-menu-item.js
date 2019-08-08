@@ -35,7 +35,7 @@ export class CasperMoacMenuItem extends PolymerElement {
 
         /* Paper-icon-button */
         #container paper-icon-button {
-          width: 30px;
+          flex: 0 0 30px;
           height: 30px;
           padding: 5px;
           margin-left: 0;

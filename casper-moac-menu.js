@@ -77,20 +77,13 @@ class CasperMoacMenu extends PolymerElement {
         }
 
         #circleBackground {
-          width: 0;
-          height: 0;
           z-index: 1;
           opacity: 0.95;
           position: absolute;
           border-radius: 50%;
           filter: brightness(200%);
-          transform: translate(-40%, -40%);
+          transform: translate(-35%, -35%);
           background-color: var(--primary-color);
-        }
-
-        #circleBackground[data-menu-opened] {
-          width: 500px;
-          height: 500px;
         }
       </style>
       <paper-icon-button
@@ -106,7 +99,7 @@ class CasperMoacMenu extends PolymerElement {
         horizontal-align="left">
         <slot></slot>
       </casper-moac-menu-items>
-      <div id="circleBackground" data-menu-opened$="[[__opened]]"></div>
+      <div id="circleBackground"></div>
     `;
   }
 
@@ -114,34 +107,14 @@ class CasperMoacMenu extends PolymerElement {
     super.ready();
 
     afterNextRender(this, () => {
-      this.shadowRoot.host.addEventListener('mouseleave', () => {
-        if (this.$.menuItems.opened) {
-          // Start a fading out transition by reducing the opacity.
-          const fadingOutDuration = 500;
-          this.shadowRoot.host.style.transition = `opacity ${fadingOutDuration}ms linear`;
-          this.shadowRoot.host.style.opacity = 0;
+      this.__bindMouseEnterAndLeave();
 
-          this.__fadeOutTimeout = setTimeout(() => {
-            this.$.menuItems.close();
-            this.shadowRoot.host.style.transition = '';
-            this.shadowRoot.host.style.opacity = 1;
-          }, fadingOutDuration);
-        }
-      });
-
-      this.shadowRoot.host.addEventListener('mouseenter', () => {
-        this.shadowRoot.host.style.transition = '';
-        this.shadowRoot.host.style.opacity = 1;
-        clearTimeout(this.__fadeOutTimeout);
-      });
-
-      const menuTriggerDimensions = this.$.menuTrigger.getBoundingClientRect();
-      this.$.menuTrigger.addEventListener('click', () => { this.$.menuItems.toggle(); });
-      this.$.menuTrigger.addEventListener('mouseover', () => { this.$.menuItems.open(); });
+      this.$.menuTrigger.addEventListener('click', () => { this.toggle(); });
+      this.$.menuTrigger.addEventListener('mouseover', () => { this.open(); });
 
       this.$.menuItems.positionTarget = this.$.menuTrigger;
-      this.$.menuItems.verticalOffset = menuTriggerDimensions.height + 10;
-      this.$.menuItems.horizontalOffset = menuTriggerDimensions.width / 2 - 30;
+      this.$.menuItems.verticalOffset = this.$.menuTrigger.offsetHeight + 10;
+      this.$.menuItems.horizontalOffset = this.$.menuTrigger.offsetWidth / 2 - 30;
       this.$.menuItems.addEventListener('iron-overlay-canceled', event => {
         // Prevent the default action which would close the overlay and then the below listener would re-open it.
         if (event.detail.path.includes(this.$.menuTrigger) || event.detail.path.includes(this.$.circleBackground)) {
@@ -152,9 +125,32 @@ class CasperMoacMenu extends PolymerElement {
       // Close the menu if there was a click on one of the items.
       this.$.menuItems.addEventListener('click', event => {
         if (event.composedPath().some(element => element.tagName && element.tagName.toLowerCase() === 'casper-moac-menu-item')) {
-          this.$.menuItems.close();
+          this.close();
         }
       });
+    });
+  }
+
+  __bindMouseEnterAndLeave () {
+    this.shadowRoot.host.addEventListener('mouseleave', () => {
+      if (this.$.menuItems.opened) {
+        // Start a fading out transition by reducing the opacity.
+        const fadingOutDuration = 750;
+        this.shadowRoot.host.style.transition = `opacity ${fadingOutDuration}ms linear`;
+        this.shadowRoot.host.style.opacity = 0;
+
+        this.__fadeOutTimeout = setTimeout(() => {
+          this.close();
+          this.shadowRoot.host.style.transition = '';
+          this.shadowRoot.host.style.opacity = 1;
+        }, fadingOutDuration);
+      }
+    });
+
+    this.shadowRoot.host.addEventListener('mouseenter', () => {
+      this.shadowRoot.host.style.transition = '';
+      this.shadowRoot.host.style.opacity = 1;
+      clearTimeout(this.__fadeOutTimeout);
     });
   }
 
@@ -170,7 +166,7 @@ class CasperMoacMenu extends PolymerElement {
    * Observer that fires when the menu is enabled / disabled and react accordingly.
    */
   __disabledChanged (disabled) {
-    if (disabled) this.$.menuItems.close();
+    if (disabled) this.close();
   }
 
   /**
@@ -178,6 +174,15 @@ class CasperMoacMenu extends PolymerElement {
    */
   open () {
     this.$.menuItems.open();
+
+    afterNextRender(this, () => {
+      const circleMinimumDimensions = 500;
+      const menuItemsDimensions = Math.max(this.$.menuItems.offsetHeight, this.$.menuItems.offsetWidth) * 2;
+      const circleDimensions = Math.max(circleMinimumDimensions, menuItemsDimensions);
+
+      this.$.circleBackground.style.width = `${circleDimensions}px`;
+      this.$.circleBackground.style.height = `${circleDimensions}px`;
+    });
   }
 
   /**
@@ -185,13 +190,15 @@ class CasperMoacMenu extends PolymerElement {
    */
   close () {
     this.$.menuItems.close();
+    this.$.circleBackground.style.width = 0;
+    this.$.circleBackground.style.height = 0;
   }
 
   /**
    * Public method that opens / closes the menu depending on its current state.
    */
   toggle () {
-    this.$.menuItems.toggle();
+    this.__opened ? this.close() : this.open();
   }
 }
 

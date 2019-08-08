@@ -11,6 +11,10 @@ class CasperMoacMenuItems extends mixinBehaviors(IronOverlayBehavior, PolymerEle
   static get template () {
     return html`
       <style>
+        :host {
+          max-width: 15vw;
+        }
+
         .items-container {
           display: flex;
           flex-direction: column;
