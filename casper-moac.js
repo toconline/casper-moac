@@ -491,7 +491,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               selected-items="{{selectedItems}}">
               <!--vaadin-grid-column with the id property to make sure the correct active item is highlighted-->
               <vaadin-grid-column width="0px" flex-grow="0" path="[[idProperty]]"></vaadin-grid-column>
-              <vaadin-grid-selection-column></vaadin-grid-selection-column>
+              <vaadin-grid-selection-column width="45px" flex-grow="0" text-align="center"></vaadin-grid-selection-column>
 
               <slot name="grid"></slot>
 
