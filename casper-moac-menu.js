@@ -131,6 +131,10 @@ class CasperMoacMenu extends PolymerElement {
     });
   }
 
+  /**
+   * Bind the mouseenter / mouseleave events that will change the opacity
+   * when the user is hovering in / out the casper-moac-menu.
+   */
   __bindMouseEnterAndLeave () {
     this.shadowRoot.host.addEventListener('mouseleave', () => {
       if (this.$.menuItems.opened) {
