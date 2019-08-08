@@ -1,4 +1,5 @@
 import { CasperMoacOperators, CasperMoacSort } from './casper-moac-constants.js';
+import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 export const CasperMoacLazyLoadMixin = superClass => {
   return class extends superClass {
@@ -116,6 +117,16 @@ export const CasperMoacLazyLoadMixin = superClass => {
       }
 
       this.$.grid.dataProvider = (parameters, callback) => this.__fetchResourceItems(parameters, callback);
+
+      afterNextRender(this, () => {
+        // Display the checkbox that gets hidden in lazy-load mode.
+        this.__vaadinCheckbox = this.$.grid.shadowRoot.querySelector('thead tr th:nth-child(2) slot').assignedNodes().shift().firstElementChild;
+        this.__vaadinCheckbox.removeAttribute('hidden');
+        this.__vaadinCheckbox.addEventListener('checked-changed', event => {
+          this.__allItemsSelected = event.detail.value;
+          this.selectedItems = this.__allItemsSelected ? [...this.__internalItems] : [];
+        });
+      });
     }
 
     /**
@@ -145,17 +156,31 @@ export const CasperMoacLazyLoadMixin = superClass => {
         }
 
         callback(socketResponse.data, parseInt(socketResponse.meta.total));
-
-        this.selectedItems = [];
         this.__numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
           ? `${this.$.grid.items.length} resultado(s)`
           : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`;
 
+        this.__handleLazyLoadMultiSelection(parameters.page, socketResponse);
       } catch (_exception) {
         this.app.openToast({
           text: 'Ocorreu um erro ao obter os dados.',
           backgroundColor: 'red'
         });
+      }
+    }
+
+    __handleLazyLoadMultiSelection (page, socketResponse) {
+      // This means the filters were re-applied so clear all the selected items and reset the internal items.
+      if (page === 0) {
+        this.__vaadinCheckbox.checked = false;
+        this.__internalItems = socketResponse.data;
+        return;
+      }
+
+      // Append the new items and select all of them if that's the case.
+      this.__internalItems = [...this.__internalItems, ...socketResponse.data];
+      if (this.__allItemsSelected) {
+        this.selectedItems = [...this.__internalItems];
       }
     }
 
@@ -263,8 +288,10 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * @param {String} value
      */
     __sanitizeValue (value) {
-      const escapedValue = value.toString().replace(/[%\\]/g, '\\$&');
-      return escapedValue.replace(/[&]/g, '_');
+      return value
+        .toString()
+        .replace(/[%\\]/g, '\\$&')
+        .replace(/[&]/g, '_');
     }
   }
 }
