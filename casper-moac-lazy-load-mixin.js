@@ -100,6 +100,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * Public method that allows the casper-moac users to re-fetch the items.
      */
     refreshItems () {
+      // Scroll to the top of the grid to reset the current page being displayed.
+      this.$.grid.$.outerscroller.scrollTop = 0;
       this.$.grid.clearCache();
     }
 
@@ -109,8 +111,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
      */
     __resourceNameChanged () {
       if (this.__lazyLoadInitialized) {
-        // Scroll to the top of the grid to reset the current page being displayed.
-        this.$.grid.$.outerscroller.scrollTop = 0;
         this.refreshItems();
       } else {
         this.__initializeLazyLoad();
@@ -152,7 +152,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * Internal method that will force the vaadin-grid items to be re-fetched.
      */
     __filterLazyLoadItems () {
-      this.$.grid.clearCache();
+      this.refreshItems();
     }
 
     /**
