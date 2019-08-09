@@ -357,6 +357,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           height: 100px;
         }
 
+        .left-side-container paper-spinner {
+          top: 50%;
+          left: 50%;
+          width: 50px;
+          height: 50px;
+          position: absolute;
+          --paper-spinner-stroke-width: 5px;
+        }
+
         .left-side-container .grid-multiple-selection-container {
           display: flex;
           padding: 10px;
@@ -499,6 +508,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               id="grid"
               class="moac"
               theme="row-stripes"
+              loading="{{__loading}}"
               items="[[__filteredItems]]"
               active-item="{{activeItem}}"
               page-size="[[resourcePageSize]]"
@@ -523,12 +533,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               </template>
             </vaadin-grid>
 
+            <!--No items placeholder-->
             <template is="dom-if" if="[[__hasNoItems(__filteredItems, __internalItems)]]">
               <div class="grid-no-items">
                 <iron-icon icon="[[noItemsIcon]]"></iron-icon>
                 [[noItemsText]]
               </div>
             </template>
+
+            <!--Loading paper-spinner-->
+            <paper-spinner active="[[__loading]]"></paper-spinner>
           </div>
         </div>
 
