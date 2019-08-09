@@ -18,12 +18,17 @@ export const CasperMoacLazyLoadMixin = superClass => {
          * The JSON API resource name that will be used to build the URL.
          * @type {String}
          */
-        resourceName: String,
+        resourceName: {
+          type: String,
+          observer: '__resourceNameChanged'
+        },
         /**
          * List of attributes that should be fetch via JSON API.
          * @type {Array}
          */
-        resourceListAttributes: Array,
+        resourceListAttributes: {
+          type: Array
+        },
         /**
          * Number of milliseconds the UI must wait after the user stopped typing
          * so that it can fire a new request to the JSONAPI.
@@ -99,6 +104,20 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     /**
+     * This observer gets fired as soon as the JSON API resource changes and the
+     * method is responsible for refreshing or initializing the vaadin-grid lazy load.
+     */
+    __resourceNameChanged () {
+      if (this.__lazyLoadInitialized) {
+        // Scroll to the top of the grid to reset the current page being displayed.
+        this.$.grid.$.outerscroller.scrollTop = 0;
+        this.refreshItems();
+      } else {
+        this.__initializeLazyLoad();
+      }
+    }
+
+    /**
      * This method initializes the vaadin-grid lazy load behavior by provinding the function
      * that interacts with the JSON API.
      */
@@ -112,9 +131,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       ].filter(property => !this[property]);
 
       // Check if all the required parameters were provided.
-      if (missingProperties.length > 0) {
-        throw new Error(`The following properties are missing to activate the lazy-load mode: ${missingProperties.join(', ')}.`);
-      }
+      if (missingProperties.length > 0) return;
 
       this.$.grid.dataProvider = (parameters, callback) => this.__fetchResourceItems(parameters, callback);
 
@@ -127,6 +144,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
           this.selectedItems = this.__allItemsSelected ? [...this.__internalItems] : [];
         });
       });
+
+      this.__lazyLoadInitialized = true;
     }
 
     /**
