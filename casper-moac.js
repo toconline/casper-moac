@@ -523,7 +523,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               </template>
             </vaadin-grid>
 
-            <template is="dom-if" if="[[__hasNoItems(__filteredItems)]]">
+            <template is="dom-if" if="[[__hasNoItems(__filteredItems, __internalItems)]]">
               <div class="grid-no-items">
                 <iron-icon icon="[[noItemsIcon]]"></iron-icon>
                 [[noItemsText]]
@@ -991,8 +991,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * vaadin-grid no items placeholder.
    * @param {Array} filteredItems
    */
-  __hasNoItems (filteredItems) {
-    return filteredItems.length === 0;
+  __hasNoItems (filteredItems, internalItems) {
+    return (filteredItems && filteredItems.length === 0) || (internalItems && internalItems.length === 0);
   }
 }
 
