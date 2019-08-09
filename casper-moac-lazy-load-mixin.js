@@ -1,4 +1,6 @@
 import { CasperMoacOperators, CasperMoacSort } from './casper-moac-constants.js';
+import { timeOut } from '@polymer/polymer/lib/utils/async.js';
+import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 export const CasperMoacLazyLoadMixin = superClass => {
@@ -133,7 +135,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       // Check if all the required parameters were provided.
       if (missingProperties.length > 0) return;
 
-      this.$.grid.dataProvider = (parameters, callback) => this.__fetchResourceItems(parameters, callback);
+      this.$.grid.dataProvider = (parameters, callback) => this.__debounceFetchResourceItems(parameters, callback);
 
       afterNextRender(this, () => {
         // Replace the vaadin-checkbox since the default one has event listeners not compatible with the lazy-load mode.
@@ -152,7 +154,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
         vaadinCheckboxParent.appendChild(this.__vaadinCheckbox);
       });
 
-
       this.__lazyLoadInitialized = true;
     }
 
@@ -161,6 +162,14 @@ export const CasperMoacLazyLoadMixin = superClass => {
      */
     __filterLazyLoadItems () {
       this.refreshItems();
+    }
+
+    __debounceFetchResourceItems (parameters, callback) {
+      this.__fetchResourceItemsDebouncer = Debouncer.debounce(
+        this.__fetchResourceItemsDebouncer,
+        timeOut.after(250),
+        () => { this.__fetchResourceItems(parameters, callback); }
+      );
     }
 
     /**
