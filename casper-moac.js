@@ -534,7 +534,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
             </vaadin-grid>
 
             <!--No items placeholder-->
-            <template is="dom-if" if="[[__hasNoItems(__filteredItems, __internalItems)]]">
+            <template is="dom-if" if="[[__hasNoItems(__filteredItems, __internalItems, __loading)]]">
               <div class="grid-no-items">
                 <iron-icon icon="[[noItemsIcon]]"></iron-icon>
                 [[noItemsText]]
@@ -596,7 +596,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * Bind event listeners to the generic search input and to the ones present in the filters property.
    */
   __bindFiltersEvents () {
-    this.$.filterInput.addEventListener('keyup', () => this._filterChanged());
+    this.$.filterInput.addEventListener('keyup', () => this._freeFilterChanged());
     const filterInput = this.$.filterInput.querySelector('input');
     filterInput.addEventListener('blur', () => { this.$.filterInput.style.border = ''; });
     filterInput.addEventListener('focus', () => { this.$.filterInput.style.border = '1px solid var(--primary-color)'; });
@@ -667,14 +667,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * Debounce the items filtering after the search input's value changes.
    */
-  _filterChanged () {
-    this.__filterChangedDebouncer = Debouncer.debounce(
-      this.__filterChangedDebouncer,
+  _freeFilterChanged () {
+    this.__freeFilterChangedDebouncer = Debouncer.debounce(
+      this.__freeFilterChangedDebouncer,
       timeOut.after(this.resourceFilterDebounceMs),
       () => {
+        // Do not re-filter the items if the current value matches the last one.
+        if (this.$.filterInput.value === this._lastFreeFilter) return;
+
         !this.lazyLoad
           ? this.__filterItems()
           : this.__filterLazyLoadItems();
+
+        this._lastFreeFilter = this.$.filterInput.value;
       }
     );
   }
@@ -1011,9 +1016,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method is invoked when the _filteredItem property changes and either hides or displays the
    * vaadin-grid no items placeholder.
    * @param {Array} filteredItems
+   * @param {Array} internalItems
+   * @param {Boolean} loading
    */
-  __hasNoItems (filteredItems, internalItems) {
-    return (filteredItems && filteredItems.length === 0) || (internalItems && internalItems.length === 0);
+  __hasNoItems (filteredItems, internalItems, loading) {
+    return !loading && (
+      (filteredItems && filteredItems.length === 0) ||
+      (internalItems && internalItems.length === 0));
   }
 }
 
