@@ -551,7 +551,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   ready () {
     super.ready();
 
-    this.grid           = this.$.grid;
+    this.grid            = this.$.grid;
     this.__displayEpaper = this.moacType !== CasperMoacTypes.GRID;
 
     if (!this.__displayEpaper) {
