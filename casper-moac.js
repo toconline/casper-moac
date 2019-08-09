@@ -711,7 +711,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   __selectedItemsChanged () {
     this.__hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
 
-    if (this.lazyLoad && this.__internalItems) {
+    if (this.lazyLoad && this.__internalItems && this.__vaadinCheckbox) {
       this.__checkboxObserverLock = true;
       this.__vaadinCheckbox.checked = this.__internalItems.length === this.selectedItems.length && this.selectedItems.length > 0;
       this.__vaadinCheckbox.indeterminate = this.__internalItems.length !== this.selectedItems.length && this.selectedItems.length > 0;
@@ -786,9 +786,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method activates the first result since this is invoked when the items change.
    */
   __activateFirstItem () {
-    if (this.__filteredItems.length > 0 && this.forceActiveItem) {
-      this.$.grid.activeItem = this.__filteredItems[0];
-      this.__paintGridActiveRow();
+    if (this.forceActiveItem && (
+      (this.__filteredItems && this.__filteredItems.length > 0) ||
+      (this.__internalItems && this.__internalItems.length > 0))) {
+      // Fetch the first item from different sources depending if it's lazy-load or not.
+      this.activeItem = !this.lazyLoad
+        ? this.__filteredItems[0]
+        : this.__internalItems[0];
     }
   }
 
