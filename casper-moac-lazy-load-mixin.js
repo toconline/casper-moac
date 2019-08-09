@@ -94,6 +94,21 @@ export const CasperMoacLazyLoadMixin = superClass => {
         resourceTimeoutMs: {
           type: Number,
           value: 5000
+        },
+        /**
+         * Filters that should be always applied to the JSON API resource regardless of the current filters.
+         */
+        resourceDefaultFilters: {
+          type: String
+        },
+        /**
+         * Number of milliseconds to wait after the last intent to fetch items from the JSON API
+         * so that we can reduce the number of requests.
+         * @type {Number}
+         */
+        __fetchResourceItemsDebouncerTimeout: {
+          type: Number,
+          value: 250
         }
       };
     }
@@ -167,7 +182,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
     __debounceFetchResourceItems (parameters, callback) {
       this.__fetchResourceItemsDebouncer = Debouncer.debounce(
         this.__fetchResourceItemsDebouncer,
-        timeOut.after(250),
+        timeOut.after(this.__fetchResourceItemsDebouncerTimeout),
         () => { this.__fetchResourceItems(parameters, callback); }
       );
     }
@@ -254,31 +269,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
           : [...resourceUrlParams, `${this.resourceSortParam}=-${sortSettings.path}`];
       }
 
-      // Check if there are attributes that should be filtered and if the input has already been initialized.
-      let freeTextFilters;
-      const fixedFilters = this.__buildResourceUrlFilters().join(' AND ');
-
-      if (this.$.filterInput
-        && this.$.filterInput.value
-        && this.resourceFilterAttributes
-        && this.resourceFilterAttributes.length > 0) {
-          freeTextFilters = this.resourceFilterAttributes.map(filterAttribute => {
-            if (filterAttribute.constructor === Object) {
-              switch (filterAttribute.operator) {
-                case CasperMoacOperators.CONTAINS: return `${filterAttribute.field}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}%'`;
-                case CasperMoacOperators.ENDS_WITH: return `${filterAttribute.field}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}'`;
-                case CasperMoacOperators.STARTS_WITH: return `${filterAttribute.field}::TEXT ILIKE '${this.__sanitizeValue(this.$.filterInput.value)}%'`;
-                case CasperMoacOperators.EXACT_MATCH: return `${filterAttribute.field}::TEXT ILIKE '${this.__sanitizeValue(this.$.filterInput.value)}'`;
-              }
-            }
-
-            // Encapsulate the free filters in parenthesis to not mess with the AND clause.
-            return `${filterAttribute}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}%'`;
-          });
-          freeTextFilters = `(${freeTextFilters.join(' OR ')})`;
-      }
-
-      const filterResourceUrlParams = [fixedFilters, freeTextFilters].filter(urlParam => !!urlParam).join(' AND ');
+      const filterResourceUrlParams = [
+        this.resourceDefaultFilters,
+        this.__buildResourceUrlFreeFilters(),
+        this.__buildResourceUrlFixedFilters(),
+      ].filter(filterUrlParam => !!filterUrlParam).join(' AND ');
 
       if (filterResourceUrlParams) {
         resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${filterResourceUrlParams}"`];
@@ -291,10 +286,43 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     /**
-     * This method is responsible for building the query part of url and apply all the filters
-     * according to their values and operators.
+     * This method is responsible building the filter url parameter taking into account the search
+     * input's value and the resourceFilterAttributes property.
      */
-    __buildResourceUrlFilters () {
+    __buildResourceUrlFreeFilters () {
+      let freeFilters;
+
+      // Check if there are attributes that should be filtered and if the input has already been initialized.
+      if (this.$.filterInput
+        && this.$.filterInput.value
+        && this.resourceFilterAttributes
+        && this.resourceFilterAttributes.length > 0) {
+
+        freeFilters = this.resourceFilterAttributes.map(filterAttribute => {
+          if (filterAttribute.constructor === Object) {
+            switch (filterAttribute.operator) {
+              case CasperMoacOperators.CONTAINS: return `${filterAttribute.field}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}%'`;
+              case CasperMoacOperators.ENDS_WITH: return `${filterAttribute.field}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}'`;
+              case CasperMoacOperators.STARTS_WITH: return `${filterAttribute.field}::TEXT ILIKE '${this.__sanitizeValue(this.$.filterInput.value)}%'`;
+              case CasperMoacOperators.EXACT_MATCH: return `${filterAttribute.field}::TEXT ILIKE '${this.__sanitizeValue(this.$.filterInput.value)}'`;
+            }
+          }
+
+          // Encapsulate the free filters in parenthesis to not mess with the AND clause.
+          return `${filterAttribute}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}%'`;
+        });
+
+        freeFilters = `(${freeFilters.join(' OR ')})`;
+      }
+
+      return freeFilters;
+    }
+
+    /**
+     * This method is responsible building the filter url parameter taking into account the current
+     * active filters (casper-select, paper-input, etc).
+     */
+    __buildResourceUrlFixedFilters () {
       if (!this.__filters) return [];
 
       return this.__filters
@@ -326,7 +354,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
             // Custom comparisons.
             case CasperMoacOperators.CUSTOM: return filter.lazyLoad.field.replace(new RegExp(`%{${filterItem.filterKey}}`, 'g'), filterValue);
           }
-      });
+      }).join(' AND ');
     }
 
     /**
