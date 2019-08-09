@@ -286,7 +286,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     /**
-     * This method is responsible building the filter url parameter taking into account the search
+     * This method is responsible for building the filter url parameter taking into account the search
      * input's value and the resourceFilterAttributes property.
      */
     __buildResourceUrlFreeFilters () {
@@ -319,7 +319,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     /**
-     * This method is responsible building the filter url parameter taking into account the current
+     * This method is responsible for building the filter url parameter taking into account the current
      * active filters (casper-select, paper-input, etc).
      */
     __buildResourceUrlFixedFilters () {
