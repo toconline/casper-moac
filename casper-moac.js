@@ -712,7 +712,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.__hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
 
     if (this.lazyLoad && this.__internalItems) {
+      this.__checkboxObserverLock = true;
+      this.__vaadinCheckbox.checked = this.__internalItems.length === this.selectedItems.length && this.selectedItems.length > 0;
       this.__vaadinCheckbox.indeterminate = this.__internalItems.length !== this.selectedItems.length && this.selectedItems.length > 0;
+      this.__checkboxObserverLock = false;
     }
   }
 
@@ -794,7 +797,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * the filter's overlay for UX purposes (casper-select) or display all the filters focusing the correct one.
    * @param {Event} event
    */
-  _displayInlineFilters (event) {
+  __displayInlineFilters (event) {
     const filterKey = event.target.dataset.filter
     const filter = this.filters[filterKey];
 
@@ -846,7 +849,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         const activeFilterValue = document.createElement('strong');
         activeFilterValue.dataset.filter = filterItem.filterKey;
         activeFilterValue.innerHTML = activeFiltersValues[filterItem.filterKey];
-        activeFilterValue.addEventListener('click', event => this._displayInlineFilters(event));
+        activeFilterValue.addEventListener('click', event => this.__displayInlineFilters(event));
 
         activeFilter.appendChild(activeFilterLabel);
         activeFilter.appendChild(activeFilterValue);

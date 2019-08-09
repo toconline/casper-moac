@@ -136,14 +136,22 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.$.grid.dataProvider = (parameters, callback) => this.__fetchResourceItems(parameters, callback);
 
       afterNextRender(this, () => {
-        // Display the checkbox that gets hidden in lazy-load mode.
-        this.__vaadinCheckbox = this.$.grid.shadowRoot.querySelector('thead tr th:nth-child(2) slot').assignedNodes().shift().firstElementChild;
-        this.__vaadinCheckbox.removeAttribute('hidden');
+        // Replace the vaadin-checkbox since the default one has event listeners not compatible with the lazy-load mode.
+        this.__vaadinCheckbox = document.createElement('vaadin-checkbox');
         this.__vaadinCheckbox.addEventListener('checked-changed', event => {
           this.__allItemsSelected = event.detail.value;
+
+          // This means the checked observer was fired internally.
+          if (this.__checkboxObserverLock) return;
+
           this.selectedItems = this.__allItemsSelected ? [...this.__internalItems] : [];
         });
+
+        const vaadinCheckboxParent = this.$.grid.shadowRoot.querySelector('thead tr th:nth-child(2) slot').assignedNodes().shift();
+        vaadinCheckboxParent.removeChild(vaadinCheckboxParent.firstElementChild);
+        vaadinCheckboxParent.appendChild(this.__vaadinCheckbox);
       });
+
 
       this.__lazyLoadInitialized = true;
     }
