@@ -154,8 +154,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       afterNextRender(this, () => {
         // Replace the vaadin-checkbox since the default one has event listeners not compatible with the lazy-load mode.
-        this.__vaadinCheckbox = document.createElement('vaadin-checkbox');
-        this.__vaadinCheckbox.addEventListener('checked-changed', event => {
+        this.__selectAllCheckbox = document.createElement('vaadin-checkbox');
+        this.__selectAllCheckbox.addEventListener('checked-changed', event => {
           this.__allItemsSelected = event.detail.value;
 
           // This means the checked observer was fired internally.
@@ -166,7 +166,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
         const vaadinCheckboxParent = this.$.grid.shadowRoot.querySelector('thead tr th:nth-child(2) slot').assignedNodes().shift();
         vaadinCheckboxParent.removeChild(vaadinCheckboxParent.firstElementChild);
-        vaadinCheckboxParent.appendChild(this.__vaadinCheckbox);
+        vaadinCheckboxParent.appendChild(this.__selectAllCheckbox);
       });
 
       this.__lazyLoadInitialized = true;
@@ -233,8 +233,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.selectedItems = [];
         this.__internalItems = socketResponseData;
 
-        // When the component is still initializing the __vaadinCheckbox might still be undefined.
-        if (this.__vaadinCheckbox) this.__vaadinCheckbox.checked = false;
+        // When the component is still initializing the __selectAllCheckbox might still be undefined.
+        if (this.__selectAllCheckbox) this.__selectAllCheckbox.checked = false;
         return;
       }
 

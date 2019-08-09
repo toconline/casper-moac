@@ -730,11 +730,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   __selectedItemsChanged () {
     this.__hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
 
-    if (this.lazyLoad && this.__internalItems && this.__vaadinCheckbox) {
-      this.__checkboxObserverLock = true;
-      this.__vaadinCheckbox.checked = this.__internalItems.length === this.selectedItems.length && this.selectedItems.length > 0;
-      this.__vaadinCheckbox.indeterminate = this.__internalItems.length !== this.selectedItems.length && this.selectedItems.length > 0;
-      this.__checkboxObserverLock = false;
+    if (this.lazyLoad && this.__internalItems && this.__selectAllCheckbox) {
+      this.__selectAllCheckboxObserverLock = true;
+      this.__selectAllCheckbox.checked = this.__internalItems.length === this.selectedItems.length && this.selectedItems.length > 0;
+      this.__selectAllCheckbox.indeterminate = this.__internalItems.length !== this.selectedItems.length && this.selectedItems.length > 0;
+      this.__selectAllCheckboxObserverLock = false;
     }
   }
 
