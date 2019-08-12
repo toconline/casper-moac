@@ -174,6 +174,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         type: Boolean,
         value: false,
         observer: '__displayAllFiltersChanged'
+      },
+      /**
+       * Boolean that toggles the paper-spinner when the grid is loading items. This was required since the vaadin-grid one
+       * is readoOnly.
+       * @type {Boolean}
+       */
+      loading: {
+        type: Boolean,
+        value: false
       }
     };
   }
@@ -508,7 +517,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               id="grid"
               class="moac"
               theme="row-stripes"
-              loading="{{__loading}}"
+              loading="{{__gridLoading}}"
               items="[[__filteredItems]]"
               active-item="{{activeItem}}"
               page-size="[[resourcePageSize]]"
@@ -534,7 +543,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
             </vaadin-grid>
 
             <!--No items placeholder-->
-            <template is="dom-if" if="[[__hasNoItems(__filteredItems, __internalItems, __loading)]]">
+            <template is="dom-if" if="[[__hasNoItems(__filteredItems, __internalItems, __gridLoading, loading)]]">
               <div class="grid-no-items">
                 <iron-icon icon="[[noItemsIcon]]"></iron-icon>
                 [[noItemsText]]
@@ -542,7 +551,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
             </template>
 
             <!--Loading paper-spinner-->
-            <paper-spinner active="[[__loading]]"></paper-spinner>
+            <paper-spinner active="[[__displaySpinner(__gridLoading, loading)]]"></paper-spinner>
           </div>
         </div>
 
@@ -1017,12 +1026,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * vaadin-grid no items placeholder.
    * @param {Array} filteredItems
    * @param {Array} internalItems
+   * @param {Boolean} gridLoading
    * @param {Boolean} loading
    */
-  __hasNoItems (filteredItems, internalItems, loading) {
-    return !loading && (
+  __hasNoItems (filteredItems, internalItems, gridLoading, loading) {
+    return !gridLoading && !loading && (
       (filteredItems && filteredItems.length === 0) ||
       (internalItems && internalItems.length === 0));
+  }
+
+  /**
+   * Method used to toggle the paper-spinner's visibility.
+   * @param {Boolean} gridLoading
+   * @param {Boolean} loading
+   */
+  __displaySpinner (gridLoading, loading) {
+    return gridLoading || loading;
   }
 }
 
