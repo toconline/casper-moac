@@ -713,22 +713,36 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         && (!this.__filteredItems || this.__filteredItems.length === 0))
         || event.composedPath().some(element => element === this.$.filterInput)) return;
 
+      let activeItemChanged = false;
       const displayedItems = this.__internalItems || this.__filteredItems;
 
       // When there are no active items, select the first one.
-      if (!this.activeItem) {
-        this.activeItem = this.items[0];
+      if (!this.__activeItem) {
+        this.__activeItem = displayedItems[0];
+        activeItemChanged = true;
       } else {
         // Find the index of the current active item.
-        const activeItemIndex = displayedItems.findIndex(item => item === this.activeItem);
+        const activeItemIndex = displayedItems.findIndex(item => item === this.__activeItem);
 
         if (keyCode === 'ArrowDown' && activeItemIndex + 1 < displayedItems.length) {
-          this.activeItem = displayedItems[activeItemIndex + 1];
+          this.__activeItem = displayedItems[activeItemIndex + 1];
+          activeItemChanged = true;
         }
 
         if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
-          this.activeItem = displayedItems[activeItemIndex - 1];
+          this.__activeItem = displayedItems[activeItemIndex - 1];
+          activeItemChanged = true;
         }
+      }
+
+      // If the active item changed, debounce the active item change.
+      if (activeItemChanged) {
+        this.__paintGridActiveRow();
+        this.__activeItemDebouncer = Debouncer.debounce(
+          this.__activeItemDebouncer,
+          timeOut.after(150),
+          () => { this.activeItem = this.__activeItem; }
+        );
       }
     });
   }
@@ -804,6 +818,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       this.$.grid.activeItem = previousActiveItem;
     }
 
+    this.__activeItem = this.activeItem;
     this.__paintGridActiveRow();
   }
 
@@ -944,7 +959,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
     const activeFiltersValues = {};
     this.__filters.forEach(filterItem => {
-      const activeFilterValue = this._activeFilterValue(filterItem);
+      const activeFilterValue = this.__activeFilterValue(filterItem);
       if (this.__valueIsNotEmpty(activeFilterValue)) {
         activeFiltersValues[filterItem.filterKey] = activeFilterValue;
       }
@@ -998,7 +1013,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    *
    * @param {Object} filterItem
    */
-  _activeFilterValue (filterItem) {
+  __activeFilterValue (filterItem) {
     if ([null, undefined].includes(filterItem.filter.value)) return;
 
     switch (filterItem.filter.type) {
@@ -1024,7 +1039,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * its rows and having this into account, the id property is used to avoid highlighting the wrong row.
    */
   __paintGridActiveRow () {
-    const activeItemId = this.activeItem ? this.activeItem[this.idProperty].toString() : null;
+    const activeItemId = this.__activeItem ? this.__activeItem[this.idProperty].toString() : null;
 
     // Loop through each grid row and paint the active one.
     this.$.grid.shadowRoot.querySelectorAll('tr').forEach(row => {
