@@ -94,18 +94,32 @@ class CasperMoacSidebarItem extends PolymerElement {
     this.$.header.addEventListener('click', () => this.toggle());
   }
 
+  /**
+   * Toggle the current opened state of the sidebar item.
+   */
   toggle () {
     this.opened = !this.opened;
   }
 
+  /**
+   * Open the sidebar item.
+   */
   open () {
     this.opened = true;
   }
 
+  /**
+   * Close the sidebar item.
+   */
   close () {
     this.opened = false;
   }
 
+  /**
+   * Observer that gets fired when the opened property changes and triggers the sidebar item opening / close animation.
+   *
+   * @param {Boolean} opened The current opened state of the sidebar item.
+   */
   __openedChanged (opened) {
     afterNextRender(this, () => {
       if (opened) {

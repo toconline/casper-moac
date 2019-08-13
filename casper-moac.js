@@ -647,6 +647,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
     this.__bindFiltersEvents();
     this.__bindContextMenuEvents();
+    this.__bindArrowSelectionEvents();
   }
 
   /**
@@ -697,6 +698,37 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       } else {
         // This means the iron-overlay-canceled event was called after some other element was clicked so we close the current menu.
         this.__contextMenu.positionTarget.removeAttribute('style');
+      }
+    });
+  }
+
+  __bindArrowSelectionEvents () {
+    document.addEventListener('keydown', event => {
+      const keyCode = event.code;
+
+      // Early return if the user pressed any other key besides the up-arrow / down-arrow, there are no items (lazy-loaded or not) or if the event originated from the search input.
+      if ((keyCode !== 'ArrowUp'
+        && keyCode !== 'ArrowDown'
+        && (!this.__internalItems || this.__internalItems.length === 0)
+        && (!this.__filteredItems || this.__filteredItems.length === 0))
+        || event.composedPath().some(element => element === this.$.filterInput)) return;
+
+      const displayedItems = this.__internalItems || this.__filteredItems;
+
+      // When there are no active items, select the first one.
+      if (!this.activeItem) {
+        this.activeItem = this.items[0];
+      } else {
+        // Find the index of the current active item.
+        const activeItemIndex = displayedItems.findIndex(item => item === this.activeItem);
+
+        if (keyCode === 'ArrowDown' && activeItemIndex + 1 < displayedItems.length) {
+          this.activeItem = displayedItems[activeItemIndex + 1];
+        }
+
+        if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
+          this.activeItem = displayedItems[activeItemIndex - 1];
+        }
       }
     });
   }
