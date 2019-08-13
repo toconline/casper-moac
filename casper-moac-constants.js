@@ -1,6 +1,8 @@
 export const CasperMoacTypes = {
   GRID: 'GRID',
-  GRID_EPAPER: 'GRID_EPAPER'
+  GRID_EPAPER: 'GRID_EPAPER',
+  GRID_SIDEBAR: 'GRID_SIDEBAR',
+  GRID_EPAPER_SIDEBAR: 'GRID_EPAPER_SIDEBAR'
 };
 
 export const CasperMoacFilterTypes = {

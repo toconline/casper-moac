@@ -26,6 +26,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     return {
       /**
        * This states what kind of MOAC we're dealing with so that certain items are displayed / hidden.
+       *
        * @type {String}
        */
       moacType: {
@@ -34,6 +35,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       },
       /**
        * The identifier property that will be used when painting the active row.
+       *
+       * @type {String}
        */
       idProperty: {
         type: String,
@@ -41,6 +44,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       },
       /**
        * The list of items to be displayed.
+       *
        * @type {Array}
        */
       items: {
@@ -49,11 +53,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       },
       /**
        * List of attributes that should be used to filter.
+       *
        * @type {Array}
        */
       resourceFilterAttributes: Array,
       /**
        * The placeholder used in the input where the user can filter the results.
+       *
        * @type {String}
        */
       filterInputPlaceholder: {
@@ -63,11 +69,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       /**
        * Label that will be used on the header when multiple items are selected in
        * the vaadin-grid.
+       *
        * @type {String}
        */
       multiSelectionLabel: String,
       /**
        * Flag used to activate the casper-moac's lazy load mode.
+       *
        * @type {Boolean}
        */
       lazyLoad: {
@@ -77,6 +85,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       /**
        * A reference to the epaper object so that the page using casper-moac can
        * use its methods.
+       *
        * @type {Object}
        */
       epaper: {
@@ -86,6 +95,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       /**
        * A reference to the vaadin-grid so that the page using casper-moac can
        * use its methods.
+       *
        * @type {Object}
        */
       grid: {
@@ -94,6 +104,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       },
       /**
        * The item that is currently active in the vaadin-grid.
+       *
        * @type {Object}
        */
       activeItem: {
@@ -103,6 +114,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       },
       /**
        * The items that are currently selected in the vaadin-grid.
+       *
        * @type {Array}
        */
       selectedItems: {
@@ -111,6 +123,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       },
       /**
        * The array of filters that are available to filter the results presents on the page.
+       *
        * @type {Array}
        */
       filters: {
@@ -120,6 +133,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       },
       /**
        * The initial width of the left~side container.
+       *
        * @type {Number}
        */
       leftSideInitialWidth: {
@@ -128,6 +142,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       },
       /**
        * Whether to display or not the number of results on the top-right corner of the filters.
+       *
        * @type {Boolean}
        */
       hideNumberResults: {
@@ -136,6 +151,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       },
       /**
        * Stylesheet to be injected in order to style the vaadin-grid inner components.
+       *
        * @type {String}
        */
       stylesheet: {
@@ -143,7 +159,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         observer: '_stylesheetChanged'
       },
       /**
-       * Icon that will be used when the vaadin-grid has no items do display.
+       * Icon that will be used when the vaadin-grid has no items to display.
+       *
        * @type {String}
        */
       noItemsIcon: {
@@ -151,7 +168,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         value: 'casper-icons:empty-data'
       },
       /**
-       * Text that will be used when the vaadin-grid has no items do display.
+       * Text that will be used when the vaadin-grid has no items to display.
+       *
        * @type {String}
        */
       noItemsText: {
@@ -160,6 +178,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       },
       /**
        * Boolean that when set to true, forces one item to be active all the time.
+       *
        * @type {Boolean}
        */
       forceActiveItem: {
@@ -168,6 +187,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       },
       /**
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
+       *
        * @type {Boolean}
        */
       __displayAllFilters: {
@@ -178,6 +198,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       /**
        * Boolean that toggles the paper-spinner when the grid is loading items. This was required since the vaadin-grid one
        * is readoOnly.
+       *
        * @type {Boolean}
        */
       loading: {
@@ -418,6 +439,20 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           cursor: pointer;
           background-color: var(--primary-color);
         }
+
+        .right-side-container {
+          display: flex;
+        }
+
+        .right-side-container .epaper-container {
+          flex: 1 0 75%;
+        }
+
+        .right-side-container .sidebar-container {
+          flex: 1 0 25%;
+          display: flex;
+          flex-direction: column;
+        }
       </style>
 
       <vaadin-split-layout id="splitLayout">
@@ -555,12 +590,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           </div>
         </div>
 
-        <template is="dom-if" if="[[__displayEpaper]]">
-          <div class="right-side-container" style="[[__rightSideInitialWidth()]]">
-            <slot name="right"></slot>
-            <casper-epaper id="epaper" app="[[app]]"></casper-epaper>
-          </div>
-        </template>
+        <div class="right-side-container" style="[[__rightSideInitialWidth()]]">
+          <!--Epaper-->
+          <template is="dom-if" if="[[__displayEpaper]]">
+            <div class="epaper-container">
+              <slot name="right"></slot>
+              <casper-epaper id="epaper" app="[[app]]"></casper-epaper>
+            </div>
+          </template>
+
+          <!--Sidebar-->
+          <template is="dom-if" if="[[__displaySidebar]]">
+            <div class="sidebar-container">
+              <slot name="sidebar"></slot>
+            </div>
+          </template>
+        </div>
       </vaadin-split-layout>
 
       <slot name="context-menu"></slot>
@@ -574,17 +619,20 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   ready () {
     super.ready();
 
-    this.grid            = this.$.grid;
-    this.__displayEpaper = this.moacType !== CasperMoacTypes.GRID;
+    this.grid             = this.$.grid;
+    this.__displayEpaper  = [CasperMoacTypes.GRID_EPAPER_SIDEBAR, CasperMoacTypes.GRID_EPAPER].includes(this.moacType);
+    this.__displaySidebar = [CasperMoacTypes.GRID_EPAPER_SIDEBAR, CasperMoacTypes.GRID_SIDEBAR].includes(this.moacType);
 
-    if (!this.__displayEpaper) {
-      // Hide the vaadin-split-layout handler.
-      this.$.splitLayout.shadowRoot.getElementById('splitter').style.display = 'none';
-    } else {
+    if (this.__displayEpaper) {
       // Save the epaper in a notifiable property so it can be used outside.
       afterNextRender(this, () => {
         this.epaper = this.shadowRoot.querySelector('casper-epaper');
       });
+    }
+
+    // Hide the vaadin-split-layout handler.
+    if (!this.__displayEpaper && !this.__displaySidebar) {
+      this.$.splitLayout.shadowRoot.getElementById('splitter').style.display = 'none';
     }
 
     // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
@@ -696,6 +744,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * Observer that fires after the filters object change from the outside which
    * will cause a re-render of the active filters.
+   *
    * @param {Object} filters
    */
   __filtersChanged (filters) {
@@ -714,6 +763,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
   /**
    * Force the vaadin-grid to always have an activeItem.
+   *
    * @param {Object} newActiveItem
    * @param {Object} previousActiveItem
    */
@@ -750,6 +800,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * Observer that fires when the stylesheet property changes which will delete the previous
    * <style> tag and create a new one with the most recent styles.
+   *
    * @param {String} stylesheet
    */
   _stylesheetChanged (stylesheet) {
@@ -827,6 +878,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * Event listener which is fired when the user clicks on a filter's value in the summary. This will try to move
    * the filter's overlay for UX purposes (casper-select) or display all the filters focusing the correct one.
+   *
    * @param {Event} event
    */
   __displayInlineFilters (event) {
@@ -901,6 +953,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * This method checks if the filter value is be empty since zeroes in some occasions
    * might be used as actual values and they should not be disregarded.
+   *
    * @param {String | Number | Array | Object} value
    */
   __valueIsNotEmpty (value) {
@@ -910,6 +963,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * Given a specific filter, this method is responsible for returning the human-readable version
    * of its current value.
+   *
    * @param {Object} filterItem
    */
   _activeFilterValue (filterItem) {
@@ -954,6 +1008,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * In order to make searching items easier, every accented characters should be replaced with its
    * unaccented equivalent.
+   *
    * @param {String} variable
    */
   __normalizeVariable (variable) {
@@ -977,6 +1032,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * This method fires when a context menu icon is pressed on a specific row. The context menu will have to be moved around
    * so that it appears aligned with the icon that triggered the event in the first place.
+   *
    * @param {Event} event
    */
   __openContextMenu (event) {
@@ -1008,7 +1064,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * correct percentual width for the right side of the component.
    */
   __rightSideInitialWidth () {
-    return `width: ${100 - parseInt(this.leftSideInitialWidth)}%;`;
+    return this.moacType === CasperMoacTypes.GRID
+      ? 'width: 0%;'
+      : `width: ${100 - parseInt(this.leftSideInitialWidth)}%;`;
   }
 
   /**
@@ -1016,7 +1074,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * adding the 'filters-container-inline' class or not.
    */
   __filtersContainerClassName () {
-    return this.moacType === CasperMoacTypes.GRID_EPAPER
+    return this.moacType === CasperMoacTypes.GRID_EPAPER || this.moacType === CasperMoacTypes.GRID_EPAPER_SIDEBAR
       ? 'filters-container'
       : 'filters-container filters-container-inline';
   }
@@ -1024,6 +1082,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * This method is invoked when the _filteredItem property changes and either hides or displays the
    * vaadin-grid no items placeholder.
+   *
    * @param {Array} filteredItems
    * @param {Array} internalItems
    * @param {Boolean} gridLoading
@@ -1037,6 +1096,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
   /**
    * Method used to toggle the paper-spinner's visibility.
+   *
    * @param {Boolean} gridLoading
    * @param {Boolean} loading
    */
