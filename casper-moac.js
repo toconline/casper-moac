@@ -156,7 +156,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
        */
       stylesheet: {
         type: String,
-        observer: '_stylesheetChanged'
+        observer: '__stylesheetChanged'
       },
       /**
        * Icon that will be used when the vaadin-grid has no items to display.
@@ -659,7 +659,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       this.__paintGridActiveRow();
 
       // When the grid is not lazy-loaded, when the user clicks on the header make sure the __filteredItems matches the vaadin-grid items.
-      if (!this.lazyLoad && event.composedPath().some(element => element.nodeName && element.nodeName.toLowerCase() === 'thead')) {
+      if (!this.lazyLoad && this.__eventPathContainsNode(event, 'thead')) {
         const controlCells = Array.from(this.$.grid.shadowRoot.querySelectorAll('tbody tr td:nth-child(1)'));
 
         this.__filteredItems = controlCells.map(cell => {
@@ -704,6 +704,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.__displayContextMenu = !!this.__contextMenu;
 
     if (!this.__contextMenu) return;
+
+    // Hide the context menu when one of its items is clicked.
+    this.__contextMenu.addEventListener('click', event => {
+      if (this.__eventPathContainsNode(event, 'casper-menu-item')) {
+        this.__contextMenu.positionTarget.removeAttribute('style');
+      }
+    });
 
     this.__contextMenu.addEventListener('iron-overlay-canceled', event => {
       const eventPathElement = event.detail.path.shift();
@@ -876,7 +883,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    *
    * @param {String} stylesheet
    */
-  _stylesheetChanged (stylesheet) {
+  __stylesheetChanged (stylesheet) {
     const stylesheetTagId = 'custom-grid-styles';
     let stylesheetTag = this.shadowRoot.getElementById(stylesheetTagId);
     if (stylesheetTag) {
@@ -1183,6 +1190,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    */
   __displaySpinner (gridLoading, loading) {
     return gridLoading || loading;
+  }
+
+  /**
+   * Utility method to check if an event path contains a specific node type.
+   *
+   * @param {Event} event The event's object.
+   * @param {String} nodeName The node type that should be present in the event's path.
+   */
+  __eventPathContainsNode (event, nodeName) {
+    return event.composedPath().some(element => element.nodeName && element.nodeName.toLowerCase() === nodeName);
   }
 }
 
