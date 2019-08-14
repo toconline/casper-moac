@@ -442,6 +442,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
         .right-side-container {
           display: flex;
+          max-height: 100%;
+          overflow: hidden;
         }
 
         .right-side-container .epaper-container {
