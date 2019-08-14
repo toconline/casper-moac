@@ -4,6 +4,7 @@ import { CasperMoacLazyLoadMixin } from './casper-moac-lazy-load-mixin.js';
 import '@casper2020/casper-icons/casper-icons.js';
 import '@casper2020/casper-epaper/casper-epaper.js';
 import '@casper2020/casper-select/casper-select.js';
+import '@casper2020/casper-notice/casper-notice.js';
 import '@casper2020/casper-date-picker/casper-date-picker.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
 import '@vaadin/vaadin-grid/vaadin-grid-column.js';
@@ -420,6 +421,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           margin: -10px 0 0 0;
         }
 
+        .left-side-container casper-notice {
+          margin-bottom: 15px;
+        }
+
         .left-side-container .grid-container vaadin-grid {
           height: 100%;
           overflow: hidden;
@@ -537,6 +542,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
           <slot name="left"></slot>
 
+          <casper-notice>
+            Para navegar entre os diversos resultados da grelha, pode usar as setas para <strong>cima e para baixo</strong>.
+            Também poderá seleccionar / deseleccionar os resultados pressionando a <strong>tecla de Enter</strong>.
+          </casper-notice>
+
           <div class="grid-multiple-selection-container" hidden$="[[!__hasSelectedItems]]">
             <div class="grid-multiple-selection-label">
               Selecção Múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
@@ -558,7 +568,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               page-size="[[resourcePageSize]]"
               selected-items="{{selectedItems}}">
               <!--vaadin-grid-column with the id property to make sure the correct active item is highlighted-->
-              <vaadin-grid-column width="0px" flex-grow="0" path="[[idProperty]]"></vaadin-grid-column>
+              <vaadin-grid-column width="0px" flex-grow="0" path="[[idProperty]]" hidden></vaadin-grid-column>
               <vaadin-grid-selection-column width="45px" flex-grow="0" text-align="center"></vaadin-grid-selection-column>
 
               <slot name="grid"></slot>
@@ -646,8 +656,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.$.grid.$.outerscroller.addEventListener('scroll', () => this.__paintGridActiveRow());
 
     this.__bindFiltersEvents();
+    this.__bindKeyPressEvents();
     this.__bindContextMenuEvents();
-    this.__bindArrowSelectionEvents();
   }
 
   /**
@@ -702,42 +712,47 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     });
   }
 
-  __bindArrowSelectionEvents () {
+  /**
+   * Bind event listeners for when the user presses down the Enter or the down / up arrow keys.
+   */
+  __bindKeyPressEvents () {
     document.addEventListener('keydown', event => {
       const keyCode = event.code;
 
-      // Early return if the user pressed any other key besides the up-arrow / down-arrow, there are no items (lazy-loaded or not) or if the event originated from the search input.
-      if ((keyCode !== 'ArrowUp'
+      if ((keyCode !== 'Enter'
+        && keyCode !== 'ArrowUp'
         && keyCode !== 'ArrowDown'
         && (!this.__internalItems || this.__internalItems.length === 0)
         && (!this.__filteredItems || this.__filteredItems.length === 0))
         || event.composedPath().some(element => element === this.$.filterInput)) return;
 
-      let activeItemChanged = false;
       const displayedItems = this.__internalItems || this.__filteredItems;
 
       // When there are no active items, select the first one.
       if (!this.__activeItem) {
         this.__activeItem = displayedItems[0];
-        activeItemChanged = true;
       } else {
         // Find the index of the current active item.
         const activeItemIndex = displayedItems.findIndex(item => item === this.__activeItem);
 
-        if (keyCode === 'ArrowDown' && activeItemIndex + 1 < displayedItems.length) {
-          this.__activeItem = displayedItems[activeItemIndex + 1];
-          activeItemChanged = true;
-        }
-
         if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
           this.__activeItem = displayedItems[activeItemIndex - 1];
-          activeItemChanged = true;
+        }
+
+        if (keyCode === 'ArrowDown' && activeItemIndex + 1 < displayedItems.length) {
+          this.__activeItem = displayedItems[activeItemIndex + 1];
+        }
+
+        if (keyCode === 'Enter') {
+          !this.selectedItems.includes(this.__activeItem)
+            ? this.$.grid.selectItem(this.__activeItem)
+            : this.$.grid.deselectItem(this.__activeItem);
         }
       }
 
+      this.__paintGridActiveRow();
       // If the active item changed, debounce the active item change.
-      if (activeItemChanged) {
-        this.__paintGridActiveRow();
+      if (this.__activeItem !== this.activeItem) {
         this.__activeItemDebouncer = Debouncer.debounce(
           this.__activeItemDebouncer,
           timeOut.after(150),
@@ -1042,13 +1057,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     const activeItemId = this.__activeItem ? this.__activeItem[this.idProperty].toString() : null;
 
     // Loop through each grid row and paint the active one.
-    this.$.grid.shadowRoot.querySelectorAll('tr').forEach(row => {
-      const isRowActive = row.firstChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
+    this.$.grid.shadowRoot.querySelectorAll('tbody tr').forEach((row, rowIndex) => {
+      const isRowActive = row.firstElementChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
 
-      row.firstChild.style.display = 'none';
       Array.from(row.children).forEach(rowCell => {
         rowCell.style.backgroundColor = isRowActive ? 'rgba(var(--primary-color-rgb), 0.2)' : '';
       });
+
+      if (isRowActive) {
+        row.children[1].focus();
+
+        // Avoid "jumps" that happen when the first vaadin-grid row is focused.
+        if (rowIndex === 0) this.$.grid.$.outerscroller.scrollTop = 0;
+      }
     });
   }
 
