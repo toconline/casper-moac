@@ -641,14 +641,35 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       ? this.__initializeLazyLoad()
       : afterNextRender(this, () => this.__filterItems());
 
-    // Set event listeners.
-    this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
-    this.$.grid.addEventListener('click', () => this.__paintGridActiveRow());
     this.$.grid.$.outerscroller.addEventListener('scroll', () => this.__paintGridActiveRow());
 
+    // Set event listeners.
+    this.__bindClickEvents();
     this.__bindFiltersEvents();
     this.__bindKeyPressEvents();
     this.__bindContextMenuEvents();
+  }
+
+  /**
+   * Bind click events in order to paint the current active item and to update the __filteredItems
+   * when the user uses the grid sort columns.
+   */
+  __bindClickEvents () {
+    this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
+    this.$.grid.addEventListener('click', event => {
+      this.__paintGridActiveRow();
+
+      // When the grid is not lazy-loaded, when the user clicks on the header make sure the __filteredItems matches the vaadin-grid items.
+      if (!this.lazyLoad && event.composedPath().some(element => element.nodeName.toLowerCase() === 'thead')) {
+        const controlCells = Array.from(this.$.grid.shadowRoot.querySelectorAll('tbody tr td:nth-child(1)'));
+
+        this.__filteredItems = controlCells.map(cell => {
+          const itemId = cell.firstElementChild.assignedElements().shift().innerHTML;
+
+          return this.__filteredItems.find(item => item[this.idProperty].toString() === itemId);
+        });
+      }
+    });
   }
 
   /**
@@ -741,7 +762,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         }
       }
 
-      this.__paintGridActiveRow();
+      this.__paintGridActiveRow(true);
       // If the active item changed, debounce the active item change.
       if (this.__activeItem !== this.activeItem) {
         this.__activeItemDebouncer = Debouncer.debounce(
@@ -1044,7 +1065,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * row has a different background color. This is required for scroll as well since the vaadin-grid re-uses
    * its rows and having this into account, the id property is used to avoid highlighting the wrong row.
    */
-  __paintGridActiveRow () {
+  __paintGridActiveRow (focusActiveCell = false) {
     afterNextRender(this, () => {
       const activeItemId = this.__activeItem ? String(this.__activeItem[this.idProperty]) : null;
 
@@ -1056,7 +1077,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           rowCell.style.backgroundColor = isRowActive ? 'rgba(var(--primary-color-rgb), 0.2)' : '';
         });
 
-        if (isRowActive) {
+        if (isRowActive && focusActiveCell) {
           row.children[1].focus();
 
           // Avoid "jumps" that happen when the first vaadin-grid row is focused.
