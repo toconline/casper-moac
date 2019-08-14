@@ -421,10 +421,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           margin: -10px 0 0 0;
         }
 
-        .left-side-container casper-notice {
-          margin-bottom: 15px;
-        }
-
         .left-side-container .grid-container vaadin-grid {
           height: 100%;
           overflow: hidden;
@@ -541,11 +537,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           </div>
 
           <slot name="left"></slot>
-
-          <casper-notice>
-            Para navegar entre os diversos resultados da grelha, pode usar as setas para <strong>cima e para baixo</strong>.
-            Também poderá seleccionar / deseleccionar os resultados pressionando a <strong>tecla de Enter</strong>.
-          </casper-notice>
 
           <div class="grid-multiple-selection-container" hidden$="[[!__hasSelectedItems]]">
             <div class="grid-multiple-selection-label">
@@ -1056,20 +1047,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   __paintGridActiveRow () {
     const activeItemId = this.__activeItem ? this.__activeItem[this.idProperty].toString() : null;
 
-    // Loop through each grid row and paint the active one.
-    this.$.grid.shadowRoot.querySelectorAll('tbody tr').forEach((row, rowIndex) => {
-      const isRowActive = row.firstElementChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
+    afterNextRender(this, () => {
+      // Loop through each grid row and paint the active one.
+      this.$.grid.shadowRoot.querySelectorAll('tbody tr').forEach((row, rowIndex) => {
+        const isRowActive = row.firstElementChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
 
-      Array.from(row.children).forEach(rowCell => {
-        rowCell.style.backgroundColor = isRowActive ? 'rgba(var(--primary-color-rgb), 0.2)' : '';
+        Array.from(row.children).forEach(rowCell => {
+          rowCell.style.backgroundColor = isRowActive ? 'rgba(var(--primary-color-rgb), 0.2)' : '';
+        });
+
+        if (isRowActive) {
+          row.children[1].focus();
+
+          // Avoid "jumps" that happen when the first vaadin-grid row is focused.
+          if (rowIndex === 0) this.$.grid.$.outerscroller.scrollTop = 0;
+        }
       });
-
-      if (isRowActive) {
-        row.children[1].focus();
-
-        // Avoid "jumps" that happen when the first vaadin-grid row is focused.
-        if (rowIndex === 0) this.$.grid.$.outerscroller.scrollTop = 0;
-      }
     });
   }
 
