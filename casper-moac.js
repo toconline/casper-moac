@@ -1045,9 +1045,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * its rows and having this into account, the id property is used to avoid highlighting the wrong row.
    */
   __paintGridActiveRow () {
-    const activeItemId = this.__activeItem ? this.__activeItem[this.idProperty].toString() : null;
-
     afterNextRender(this, () => {
+      const activeItemId = this.__activeItem ? String(this.__activeItem[this.idProperty]) : null;
+
       // Loop through each grid row and paint the active one.
       this.$.grid.shadowRoot.querySelectorAll('tbody tr').forEach((row, rowIndex) => {
         const isRowActive = row.firstElementChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
