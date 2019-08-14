@@ -1,14 +1,13 @@
 import { CasperMoacTypes, CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 import { CasperMoacLazyLoadMixin } from './casper-moac-lazy-load-mixin.js';
 
-import '@casper2020/casper-icons/casper-icons.js';
-import '@casper2020/casper-epaper/casper-epaper.js';
-import '@casper2020/casper-select/casper-select.js';
-import '@casper2020/casper-notice/casper-notice.js';
-import '@casper2020/casper-date-picker/casper-date-picker.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
 import '@vaadin/vaadin-grid/vaadin-grid-column.js';
 import '@vaadin/vaadin-grid/vaadin-grid-selection-column.js';
+import '@casper2020/casper-icons/casper-icons.js';
+import '@casper2020/casper-epaper/casper-epaper.js';
+import '@casper2020/casper-select/casper-select.js';
+import '@casper2020/casper-date-picker/casper-date-picker.js';
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-input/iron-input.js';
