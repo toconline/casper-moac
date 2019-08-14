@@ -647,7 +647,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     // Set event listeners.
     this.__bindClickEvents();
     this.__bindFiltersEvents();
-    this.__bindKeyPressEvents();
+    this.__bindKeyDownEvents();
     this.__bindContextMenuEvents();
   }
 
@@ -729,16 +729,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * Bind event listeners for when the user presses down the Enter or the down / up arrow keys.
    */
-  __bindKeyPressEvents () {
+  __bindKeyDownEvents () {
     document.addEventListener('keydown', event => {
       const keyCode = event.code;
 
-      if ((keyCode !== 'Enter'
-        && keyCode !== 'ArrowUp'
-        && keyCode !== 'ArrowDown'
-        && (!this.__internalItems || this.__internalItems.length === 0)
-        && (!this.__filteredItems || this.__filteredItems.length === 0))
-        || event.composedPath().some(element => element === this.$.filterInput)) return;
+      if (this.__eventPathContainsNode(event, 'input') || (
+        !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)
+          && (!this.__internalItems || this.__internalItems.length === 0)
+          && (!this.__filteredItems || this.__filteredItems.length === 0)
+      )) return;
 
       const displayedItems = this.__internalItems || this.__filteredItems;
 
