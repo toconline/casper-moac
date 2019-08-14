@@ -662,7 +662,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
       // When the grid is not lazy-loaded, when the user clicks on the header make sure the __filteredItems matches the vaadin-grid items.
       if (!this.lazyLoad && this.__eventPathContainsNode(event, 'thead')) {
-        this.__filteredItems = Object.keys(this.$.grid._cache.items).map(itemIndex => this.$.grid._cache.items[itemIndex]);
+        this.__mirrorGridInternalItems();
       }
     });
   }
@@ -736,10 +736,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       if (this.__eventPathContainsNode(event, 'input') || (
         !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)
           && (!this.__internalItems || this.__internalItems.length === 0)
-          && (!this.__filteredItems || this.__filteredItems.length === 0)
+          && (!this.__gridInternalItems || this.__gridInternalItems.length === 0)
       )) return;
 
-      const displayedItems = this.__internalItems || this.__filteredItems;
+      const displayedItems = this.__internalItems || this.__gridInternalItems;
 
       // When there are no active items, select the first one.
       if (!this.__activeItem) {
@@ -899,6 +899,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * provided for that effect. If none were specified, every single attribute will be used for comparison purposes.
    */
   __filterItems () {
+    this.activeItem = null;
     this.selectedItems = [];
 
     // If the search input is empty or there are no items at the moment.
@@ -906,6 +907,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       this.__filteredItems = this.items || [];
       this.__numberOfResults = `${this.__filteredItems.length} resultado(s)`;
       this.__activateFirstItem();
+      this.__mirrorGridInternalItems();
       return;
     }
 
@@ -933,6 +935,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
       this.__numberOfResults = `${this.__filteredItems.length} de ${this.items.length} resultado(s)`;
       this.__activateFirstItem();
+      this.__mirrorGridInternalItems();
     }
   }
 
@@ -1195,6 +1198,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    */
   __eventPathContainsNode (event, nodeName) {
     return event.composedPath().some(element => element.nodeName && element.nodeName.toLowerCase() === nodeName);
+  }
+
+  __mirrorGridInternalItems () {
+    this.__gridInternalItems = Object.keys(this.$.grid._cache.items).map(itemIndex => this.$.grid._cache.items[itemIndex]);;
   }
 }
 
