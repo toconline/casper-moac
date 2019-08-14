@@ -660,13 +660,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
       // When the grid is not lazy-loaded, when the user clicks on the header make sure the __filteredItems matches the vaadin-grid items.
       if (!this.lazyLoad && this.__eventPathContainsNode(event, 'thead')) {
-        const controlCells = Array.from(this.$.grid.shadowRoot.querySelectorAll('tbody tr td:nth-child(1)'));
-
-        this.__filteredItems = controlCells.map(cell => {
-          const itemId = cell.firstElementChild.assignedElements().shift().innerHTML;
-
-          return this.__filteredItems.find(item => item[this.idProperty].toString() === itemId);
-        });
+        this.__filteredItems = Object.keys(this.$.grid._cache.items).map(itemIndex => this.$.grid._cache.items[itemIndex]);
       }
     });
   }
