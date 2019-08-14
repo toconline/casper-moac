@@ -906,8 +906,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     if (!this.$.filterInput.value || !this.items) {
       this.__filteredItems = this.items || [];
       this.__numberOfResults = `${this.__filteredItems.length} resultado(s)`;
-      this.__activateFirstItem();
       this.__mirrorGridInternalItems();
+      this.__activateFirstItem();
       return;
     }
 
@@ -934,8 +934,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       }));
 
       this.__numberOfResults = `${this.__filteredItems.length} de ${this.items.length} resultado(s)`;
-      this.__activateFirstItem();
       this.__mirrorGridInternalItems();
+      this.__activateFirstItem();
     }
   }
 
@@ -944,12 +944,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    */
   __activateFirstItem () {
     if (this.forceActiveItem && (
-      (this.__filteredItems && this.__filteredItems.length > 0) ||
-      (this.__internalItems && this.__internalItems.length > 0))) {
+      (this.__internalItems && this.__internalItems.length > 0) ||
+      (this.__gridInternalItems && this.__gridInternalItems.length > 0))) {
       // Fetch the first item from different sources depending if it's lazy-load or not.
-      this.activeItem = !this.lazyLoad
-        ? this.__filteredItems[0]
-        : this.__internalItems[0];
+      this.activeItem = this.lazyLoad
+        ? this.__internalItems[0]
+        : this.__gridInternalItems[0];
     }
   }
 
