@@ -598,7 +598,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           <template is="dom-if" if="[[__displayEpaper]]">
             <div class="epaper-container">
               <slot name="right"></slot>
-              <casper-epaper id="epaper" app="[[app]]"></casper-epaper>
+              <casper-epaper app="[[app]]"></casper-epaper>
             </div>
           </template>
 
