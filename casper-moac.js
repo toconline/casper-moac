@@ -186,16 +186,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         value: false
       },
       /**
-       * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
-       *
-       * @type {Boolean}
-       */
-      __displayAllFilters: {
-        type: Boolean,
-        value: false,
-        observer: '__displayAllFiltersChanged'
-      },
-      /**
        * Boolean that toggles the paper-spinner when the grid is loading items. This was required since the vaadin-grid one
        * is readoOnly.
        *
@@ -204,6 +194,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       loading: {
         type: Boolean,
         value: false
+      },
+      /**
+       * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
+       *
+       * @type {Boolean}
+       */
+      __displayAllFilters: {
+        type: Boolean,
+        value: false,
+        observer: '__displayAllFiltersChanged'
       }
     };
   }
