@@ -388,12 +388,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         }
 
         .left-side-container paper-spinner {
-          top: 50%;
-          left: 50%;
           width: 75px;
           height: 75px;
           position: absolute;
+          top: calc(50% - 32.5px);
+          left: calc(50% - 32.5px);
           --paper-spinner-stroke-width: 8px;
+          --paper-spinner-layer-1-color: var(--primary-color);
+          --paper-spinner-layer-2-color: var(--primary-color);
+          --paper-spinner-layer-3-color: var(--primary-color);
+          --paper-spinner-layer-4-color: var(--primary-color);
         }
 
         .left-side-container .grid-multiple-selection-container {
