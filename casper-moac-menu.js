@@ -122,12 +122,8 @@ class CasperMoacMenu extends PolymerElement {
         }
       });
 
-      // Close the menu if there was a click on one of the items.
-      this.$.menuItems.addEventListener('click', event => {
-        if (event.composedPath().some(element => element.tagName && element.tagName.toLowerCase() === 'casper-moac-menu-item')) {
-          this.close();
-        }
-      });
+      // Close the menu if there was a click on the circle background.
+      this.$.circleBackground.addEventListener('click', () => this.close());
     });
   }
 
@@ -173,11 +169,16 @@ class CasperMoacMenu extends PolymerElement {
     if (disabled) this.close();
   }
 
+  __closeOnEscapePress (event) {
+    if (event.code === 'Escape') this.close();
+  }
+
   /**
    * Public method to open the menu.
    */
   open () {
     this.$.menuItems.open();
+    document.addEventListener('keydown', this.__closeOnEscapePress.bind(this));
 
     afterNextRender(this, () => {
       const circleMinimumDimensions = 500;
@@ -196,6 +197,7 @@ class CasperMoacMenu extends PolymerElement {
     this.$.menuItems.close();
     this.$.circleBackground.style.width = 0;
     this.$.circleBackground.style.height = 0;
+    document.removeEventListener('keydown', this.__closeOnEscapePress.bind(this));
   }
 
   /**

@@ -828,9 +828,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * @param {Object} filters
    */
   __filtersChanged (filters) {
-    if (!filters) return;
-
     this.__hasFilters = !!this.filters;
+
+    if (!this.filters) return;
 
     // Transform the filters object into an array to use in a dom-repeat.
     this.__filters = Object.keys(filters).map(filterKey => ({
