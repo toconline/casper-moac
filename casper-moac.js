@@ -1088,12 +1088,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           rowCell.style.backgroundColor = isRowActive ? 'rgba(var(--primary-color-rgb), 0.2)' : '';
         });
 
-        if (isRowActive && focusActiveCell) {
-          row.firstElementChild.focus();
-
-          // Avoid "jumps" that happen when the first vaadin-grid row is focused.
-          if (rowIndex === 0) this.$.grid.$.outerscroller.scrollTop = 0;
-        }
+        if (isRowActive && focusActiveCell) row.firstElementChild.focus();
       });
     });
   }
