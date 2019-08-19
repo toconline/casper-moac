@@ -391,6 +391,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           width: 75px;
           height: 75px;
           position: absolute;
+          pointer-events: none;
           top: calc(50% - 32.5px);
           left: calc(50% - 32.5px);
           --paper-spinner-stroke-width: 8px;
