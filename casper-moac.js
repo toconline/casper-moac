@@ -564,8 +564,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               active-item="{{activeItem}}"
               page-size="[[resourcePageSize]]"
               selected-items="{{selectedItems}}">
-              <!--vaadin-grid-column with the id property to make sure the correct active item is highlighted-->
-              <vaadin-grid-column width="0px" flex-grow="0" path="[[idProperty]]" hidden></vaadin-grid-column>
               <vaadin-grid-selection-column width="45px" flex-grow="0" text-align="center"></vaadin-grid-selection-column>
 
               <slot name="grid"></slot>
@@ -582,6 +580,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
                   </template>
                 </vaadin-grid-column>
               </template>
+
+              <!--vaadin-grid-column with the id property to make sure the correct active item is highlighted-->
+              <vaadin-grid-column width="0px" flex-grow="0" path="[[idProperty]]" hidden></vaadin-grid-column>
             </vaadin-grid>
 
             <!--No items placeholder-->
@@ -1081,14 +1082,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
       // Loop through each grid row and paint the active one.
       this.$.grid.shadowRoot.querySelectorAll('tbody tr').forEach((row, rowIndex) => {
-        const isRowActive = row.firstElementChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
+        const isRowActive = row.lastElementChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
 
         Array.from(row.children).forEach(rowCell => {
           rowCell.style.backgroundColor = isRowActive ? 'rgba(var(--primary-color-rgb), 0.2)' : '';
         });
 
         if (isRowActive && focusActiveCell) {
-          row.children[1].focus();
+          row.firstElementChild.focus();
 
           // Avoid "jumps" that happen when the first vaadin-grid row is focused.
           if (rowIndex === 0) this.$.grid.$.outerscroller.scrollTop = 0;
