@@ -738,10 +738,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     document.addEventListener('keydown', event => {
       const keyCode = event.code;
 
-      if (this.__eventPathContainsNode(event, 'input') || (
-        !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)
-          && (!this.__internalItems || this.__internalItems.length === 0)
-          && (!this.__gridInternalItems || this.__gridInternalItems.length === 0)
+      if (!['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode) || (
+        (!this.__internalItems || this.__internalItems.length === 0) &&
+        (!this.__gridInternalItems || this.__gridInternalItems.length === 0)
       )) return;
 
       const displayedItems = this.__internalItems || this.__gridInternalItems;
@@ -785,6 +784,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * input. This method change the button's text and rotate the icon accordingly.
    */
   __displayAllFiltersChanged () {
+    if (!this.__hasFilters) return;
+
     afterNextRender(this, () => {
       this.__displayAllFiltersButton = this.__displayAllFiltersButton || this.shadowRoot.querySelector('#displayAllFilters');
       this.__displayAllFiltersButtonSpan = this.__displayAllFiltersButtonSpan || this.__displayAllFiltersButton.querySelector('span');
