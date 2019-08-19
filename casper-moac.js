@@ -1202,6 +1202,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     return event.composedPath().some(element => element.nodeName && element.nodeName.toLowerCase() === nodeName);
   }
 
+  /**
+   * This method will store the vaadin-grid's sorted and filtered items into casper-moac's __gridInternalItems property.
+   */
   __mirrorGridInternalItems () {
     this.__gridInternalItems = Object.keys(this.$.grid._cache.items).map(itemIndex => this.$.grid._cache.items[itemIndex]);;
   }
