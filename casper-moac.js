@@ -606,6 +606,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               <slot name="right"></slot>
               <casper-epaper app="[[app]]">
                 <slot name="casper-epaper-tabs" slot="casper-epaper-tabs"></slot>
+                <slot name="casper-epaper-actions" slot="casper-epaper-actions"></slot>
               </casper-epaper>
             </div>
           </template>
