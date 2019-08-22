@@ -260,7 +260,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           transition: border 250ms linear;
         }
 
-        .left-side-container .header-container .generic-filter-container #filterInput:focus {
+        .left-side-container .header-container .generic-filter-container #filterInput:focus,
+        .left-side-container .header-container .generic-filter-container #filterInput:hover {
           border-color: var(--primary-color);
         }
 
@@ -270,10 +271,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         }
 
         .left-side-container .header-container .generic-filter-container #filterInput input {
-          border: 0;
+          border: none;
+          height: 100%;
           flex-grow: 1;
           outline: none;
           font-size: 0.75em;
+          background: transparent;
         }
 
         .left-side-container .header-container .generic-filter-container #displayAllFilters {
