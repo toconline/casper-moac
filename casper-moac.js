@@ -638,9 +638,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
     if (this.__displayEpaper) {
       // Save the epaper in a notifiable property so it can be used outside.
-      afterNextRender(this, () => {
-        this.epaper = this.shadowRoot.querySelector('casper-epaper');
-      });
+      afterNextRender(this, () => this.epaper = this.shadowRoot.querySelector('casper-epaper'));
     }
 
     // Hide the vaadin-split-layout handler.

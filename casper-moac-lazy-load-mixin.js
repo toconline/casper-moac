@@ -164,7 +164,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
           this.selectedItems = this.__allItemsSelected ? [...this.__internalItems] : [];
         });
 
-        const vaadinCheckboxParent = this.$.grid.shadowRoot.querySelector('thead tr th:nth-child(2) slot').assignedNodes().shift();
+        const vaadinCheckboxParent = this.$.grid.shadowRoot.querySelector('thead tr th:first-child slot').assignedNodes().shift();
         vaadinCheckboxParent.removeChild(vaadinCheckboxParent.firstElementChild);
         vaadinCheckboxParent.appendChild(this.__selectAllCheckbox);
       });
