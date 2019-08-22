@@ -72,7 +72,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
        *
        * @type {String}
        */
-      multiSelectionLabel: String,
+      multiSelectionLabel: {
+        type: String,
+        value: 'resultado(s)'
+      },
       /**
        * Flag used to activate the casper-moac's lazy load mode.
        *
