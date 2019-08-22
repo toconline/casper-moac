@@ -276,6 +276,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           flex-grow: 1;
           outline: none;
           font-size: 0.75em;
+          text-align: center;
           background: transparent;
         }
 
@@ -287,6 +288,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           font-weight: bold;
           text-transform: unset;
           color: var(--primary-color);
+          transition: background-color 100ms linear;
+        }
+
+        .left-side-container .header-container .generic-filter-container #displayAllFilters:hover {
+          background-color: rgba(var(--primary-color-rgb), 0.2);
         }
 
         .left-side-container .header-container .generic-filter-container #displayAllFilters iron-icon {
