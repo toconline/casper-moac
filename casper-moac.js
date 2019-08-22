@@ -1055,7 +1055,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * @param {Object} filterItem
    */
   __activeFilterValue (filterItem) {
-    if ([null, undefined].includes(filterItem.filter.value)) return;
+    if (!this.__valueIsNotEmpty(filterItem.filter.value)) return;
 
     switch (filterItem.filter.type) {
       case CasperMoacFilterTypes.PAPER_INPUT:
