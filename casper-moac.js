@@ -387,6 +387,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           display: flex;
           color: #8A8A8A;
           position: absolute;
+          text-align: center;
           align-items: center;
           flex-direction: column;
           justify-content: center;
@@ -660,13 +661,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       ? this.__initializeLazyLoad()
       : afterNextRender(this, () => this.__filterItems());
 
-    this.$.grid.$.outerscroller.addEventListener('scroll', () => this.__paintGridActiveRow());
-
     // Set event listeners.
     this.__bindClickEvents();
     this.__bindFiltersEvents();
     this.__bindKeyDownEvents();
     this.__bindContextMenuEvents();
+
+    this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
+    this.$.grid.$.outerscroller.addEventListener('scroll', () => this.__paintGridActiveRow());
   }
 
   /**
@@ -674,7 +676,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * when the user uses the grid sort columns.
    */
   __bindClickEvents () {
-    this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
     this.$.grid.addEventListener('click', event => {
       this.__paintGridActiveRow();
 
@@ -781,13 +782,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       }
 
       this.__paintGridActiveRow(true);
+
       // If the active item changed, debounce the active item change.
-      if (this.__activeItem !== this.activeItem) {
-        this.__activeItemDebouncer = Debouncer.debounce(
-          this.__activeItemDebouncer,
-          timeOut.after(150),
-          () => { this.activeItem = this.__activeItem; }
-        );
+      if (this.__activeItem !== this.__scheduleActiveItem) {
+        // This property is used to avoid delaying infinitely activating the same item which is caused when the user
+        // maintains the up / down arrows after reaching the first / last result in the table.
+        this.__scheduleActiveItem = this.__activeItem;
+        this.__debounce('__activeItemDebouncer', () => {
+          this.activeItem = this.__scheduleActiveItem;
+        });
       }
     });
   }
@@ -818,20 +821,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * Debounce the items filtering after the search input's value changes.
    */
   _freeFilterChanged () {
-    this.__freeFilterChangedDebouncer = Debouncer.debounce(
-      this.__freeFilterChangedDebouncer,
-      timeOut.after(this.resourceFilterDebounceMs),
-      () => {
-        // Do not re-filter the items if the current value matches the last one.
-        if (this.$.filterInput.value === this._lastFreeFilter) return;
+    this.__debounce('__freeFilterChangedDebouncer', () => {
+      // Do not re-filter the items if the current value matches the last one.
+      if (this.$.filterInput.value === this._lastFreeFilter) return;
 
-        !this.lazyLoad
-          ? this.__filterItems()
-          : this.__filterLazyLoadItems();
+      !this.lazyLoad
+        ? this.__filterItems()
+        : this.__filterLazyLoadItems();
 
-        this._lastFreeFilter = this.$.filterInput.value;
-      }
-    );
+      this._lastFreeFilter = this.$.filterInput.value;
+    });
   }
 
   /**
@@ -1219,6 +1218,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    */
   __mirrorGridInternalItems () {
     this.__gridInternalItems = Object.keys(this.$.grid._cache.items).map(itemIndex => this.$.grid._cache.items[itemIndex]);;
+  }
+
+  /**
+   * This function is a wrapper for the Polymer's debounce method.
+   *
+   * @param {String} debouncerProperty The casper-moac's property that will hold the current debounce status.
+   * @param {Function} callback The function that will be invoked afterwards.
+   * @param {Number} timeOutMilliseconds Number of milliseconds after the last invoke that will trigger the callback.
+   */
+  __debounce (debouncerProperty, callback, timeOutMilliseconds = 250) {
+    this[debouncerProperty] = Debouncer.debounce(
+      this[debouncerProperty],
+      timeOut.after(timeOutMilliseconds),
+      () => { callback(); }
+    );
   }
 }
 

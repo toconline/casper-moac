@@ -1,6 +1,4 @@
 import { CasperMoacOperators, CasperMoacSort } from './casper-moac-constants.js';
-import { timeOut } from '@polymer/polymer/lib/utils/async.js';
-import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 export const CasperMoacLazyLoadMixin = superClass => {
@@ -30,15 +28,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
          */
         resourceListAttributes: {
           type: Array
-        },
-        /**
-         * Number of milliseconds the UI must wait after the user stopped typing
-         * so that it can fire a new request to the JSONAPI.
-         * @type {Number}
-         */
-        resourceFilterDebounceMs: {
-          type: Number,
-          value: 250
         },
         /**
          * Function used to format the items that are returned from the JSON API.
@@ -100,15 +89,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
          */
         resourceDefaultFilters: {
           type: String
-        },
-        /**
-         * Number of milliseconds to wait after the last intent to fetch items from the JSON API
-         * so that we can reduce the number of requests.
-         * @type {Number}
-         */
-        __fetchResourceItemsDebouncerTimeout: {
-          type: Number,
-          value: 250
         }
       };
     }
@@ -180,11 +160,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     __debounceFetchResourceItems (parameters, callback) {
-      this.__fetchResourceItemsDebouncer = Debouncer.debounce(
-        this.__fetchResourceItemsDebouncer,
-        timeOut.after(this.__fetchResourceItemsDebouncerTimeout),
-        () => { this.__fetchResourceItems(parameters, callback); }
-      );
+      this.__debounce('__fetchResourceItemsDebouncer', () => {
+        this.__fetchResourceItems(parameters, callback);
+      });
     }
 
     /**
@@ -323,7 +301,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * active filters (casper-select, paper-input, etc).
      */
     __buildResourceUrlFixedFilters () {
-      if (!this.__filters) return [];
+      if (!this.__filters) return;
 
       return this.__filters
         .filter(filterItem => {
