@@ -421,10 +421,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           justify-content: space-between;
         }
 
-        .left-side-container .grid-multiple-selection-container[hidden] {
-          display: none;
-        }
-
         .left-side-container .grid-multiple-selection-container .grid-multiple-selection-label {
           font-size: 0.75em;
           color: var(--primary-color);
@@ -556,12 +552,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
           <slot name="left"></slot>
 
-          <div class="grid-multiple-selection-container" hidden$="[[!__hasSelectedItems]]">
-            <div class="grid-multiple-selection-label">
-              Selecção Múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
-            </div>
-            <div class="grid-multiple-selection-icons">
-              <slot name="actions-multiple-selected"></slot>
+          <div hidden$="[[!__hasSelectedItems]]">
+            <div class="grid-multiple-selection-container" >
+              <div class="grid-multiple-selection-label">
+                Selecção Múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
+              </div>
+              <div class="grid-multiple-selection-icons">
+                <slot name="actions-multiple-selected"></slot>
+              </div>
             </div>
           </div>
 
