@@ -269,7 +269,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         }
 
         .left-side-container .header-container .generic-filter-container #filterInput iron-icon {
-          height: 50%;
+          height: 75%;
           color: var(--primary-color);
         }
 
@@ -278,8 +278,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           height: 100%;
           flex-grow: 1;
           outline: none;
-          font-size: 0.75em;
-          text-align: center;
+          font-size: 13px;
           background: transparent;
         }
 
