@@ -45,6 +45,7 @@ class CasperMoacSidebarItem extends PolymerElement {
           justify-content: space-between;
           padding: 15px;
           background-color: #E2E2E2;
+          border-bottom: 1px solid #CCCCCC;
           transition: background-color 100ms linear;
         }
 
