@@ -662,13 +662,20 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       : afterNextRender(this, () => this.__filterItems());
 
     // Set event listeners.
+    this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
     this.__bindClickEvents();
     this.__bindFiltersEvents();
-    this.__bindKeyDownEvents();
     this.__bindContextMenuEvents();
+    this.__boundKeyDownEvents = this.__bindKeyDownEvents.bind(this);
 
-    this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
+    document.addEventListener('keydown', this.__boundKeyDownEvents);
     this.$.grid.$.outerscroller.addEventListener('scroll', () => this.__paintGridActiveRow());
+  }
+
+  disconnectedCallback () {
+    super.disconnectedCallback();
+
+    document.removeEventListener('keydown', this.__boundKeyDownEvents);
   }
 
   /**
@@ -748,51 +755,49 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * Bind event listeners for when the user presses down the Enter or the down / up arrow keys.
    */
-  __bindKeyDownEvents () {
-    document.addEventListener('keydown', event => {
-      const keyCode = event.code;
+  __bindKeyDownEvents (event) {
+    const keyCode = event.code;
 
-      if (!['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode) || (
-        (!this.__internalItems || this.__internalItems.length === 0) &&
-        (!this.__gridInternalItems || this.__gridInternalItems.length === 0)
-      )) return;
+    if (!['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode) || (
+      (!this.__internalItems || this.__internalItems.length === 0) &&
+      (!this.__gridInternalItems || this.__gridInternalItems.length === 0)
+    )) return;
 
-      const displayedItems = this.__internalItems || this.__gridInternalItems;
+    const displayedItems = this.__internalItems || this.__gridInternalItems;
 
-      // When there are no active items, select the first one.
-      if (!this.__activeItem) {
-        this.__activeItem = displayedItems[0];
-      } else {
-        // Find the index of the current active item.
-        const activeItemIndex = displayedItems.findIndex(item => item === this.__activeItem);
+    // When there are no active items, select the first one.
+    if (!this.__activeItem) {
+      this.__activeItem = displayedItems[0];
+    } else {
+      // Find the index of the current active item.
+      const activeItemIndex = displayedItems.findIndex(item => item === this.__activeItem);
 
-        if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
-          this.__activeItem = displayedItems[activeItemIndex - 1];
-        }
-
-        if (keyCode === 'ArrowDown' && activeItemIndex + 1 < displayedItems.length) {
-          this.__activeItem = displayedItems[activeItemIndex + 1];
-        }
-
-        if (keyCode === 'Enter') {
-          !this.selectedItems.includes(this.__activeItem)
-            ? this.$.grid.selectItem(this.__activeItem)
-            : this.$.grid.deselectItem(this.__activeItem);
-        }
+      if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
+        this.__activeItem = displayedItems[activeItemIndex - 1];
       }
 
-      this.__paintGridActiveRow(true);
-
-      // If the active item changed, debounce the active item change.
-      if (this.__activeItem !== this.__scheduleActiveItem) {
-        // This property is used to avoid delaying infinitely activating the same item which is caused when the user
-        // maintains the up / down arrows after reaching the first / last result in the table.
-        this.__scheduleActiveItem = this.__activeItem;
-        this.__debounce('__activeItemDebouncer', () => {
-          this.activeItem = this.__scheduleActiveItem;
-        });
+      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < displayedItems.length) {
+        this.__activeItem = displayedItems[activeItemIndex + 1];
       }
-    });
+
+      if (keyCode === 'Enter') {
+        !this.selectedItems.includes(this.__activeItem)
+          ? this.$.grid.selectItem(this.__activeItem)
+          : this.$.grid.deselectItem(this.__activeItem);
+      }
+    }
+
+    this.__paintGridActiveRow(true);
+
+    // If the active item changed, debounce the active item change.
+    if (this.__activeItem !== this.__scheduleActiveItem) {
+      // This property is used to avoid delaying infinitely activating the same item which is caused when the user
+      // maintains the up / down arrows after reaching the first / last result in the table.
+      this.__scheduleActiveItem = this.__activeItem;
+      this.__debounce('__activeItemDebouncer', () => {
+        this.activeItem = this.__scheduleActiveItem;
+      });
+    }
   }
 
   /**
