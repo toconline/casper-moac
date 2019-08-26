@@ -132,6 +132,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       filters: {
         type: Object,
         notify: true,
+        value: {},
         observer: '__filtersChanged'
       },
       /**
@@ -249,7 +250,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           text-align: center;
           display: flex;
           flex-direction: column;
-          justify-content: center;
         }
 
         /* Filter paper-input */
@@ -477,10 +477,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
             <!--Casper-moac-menu-->
             <slot name="menu"></slot>
             <div class="generic-filter-container">
-
               <!--Generic Filter input-->
               <iron-input id="filterInput">
-                <input placeholder="[[filterInputPlaceholder]]" />
+                <input placeholder="[[filterInputPlaceholder]]" id="filterInternalInput" />
                 <iron-icon icon="casper-icons:search"></iron-icon>
               </iron-input>
 
@@ -494,17 +493,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
             </div>
 
             <!--Active filters-->
-            <template is="dom-if" if="[[__hasFilters]]">
-              <div class="active-filters">
-                <div class="header">
-                  <strong>Filtros ativos:</strong>
-                  <template is="dom-if" if="[[!hideNumberResults]]">
-                    [[__numberOfResults]]
-                  </template>
-                </div>
-                <div class="active-filters-list" id="activeFilters"></div>
+            <div class="active-filters">
+              <div class="header">
+                <strong>Filtros ativos:</strong>
+                <template is="dom-if" if="[[!hideNumberResults]]">
+                  [[__numberOfResults]]
+                </template>
               </div>
-            </template>
+              <div class="active-filters-list" id="activeFilters"></div>
+            </div>
           </div>
 
           <div hidden$="[[!__displayAllFilters]]">
@@ -710,10 +707,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * Bind event listeners to the generic search input and to the ones present in the filters property.
    */
   __bindFiltersEvents () {
-    this.$.filterInput.addEventListener('keyup', () => this.__freeFilterChanged());
-    const filterInput = this.$.filterInput.querySelector('input');
-    filterInput.addEventListener('blur', () => { this.$.filterInput.style.border = ''; });
-    filterInput.addEventListener('focus', () => { this.$.filterInput.style.border = '1px solid var(--primary-color)'; });
+    this.$.filterInternalInput.addEventListener('keyup', () => this.__freeFilterChanged());
+    this.$.filterInternalInput.addEventListener('blur', () => { this.$.filterInput.style.border = ''; });
+    this.$.filterInternalInput.addEventListener('focus', () => { this.$.filterInput.style.border = '1px solid var(--primary-color)'; });
 
     afterNextRender(this, () => {
       this.shadowRoot.querySelectorAll(`
@@ -841,13 +837,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   __freeFilterChanged () {
     this.__debounce('__freeFilterChangedDebouncer', () => {
       // Do not re-filter the items if the current value matches the last one.
-      if (this.$.filterInput.value === this._lastFreeFilter) return;
+      if (this.$.filterInput.value === this.__lastFreeFilter) return;
 
       !this.lazyLoad
         ? this.__filterItems()
         : this.__filterLazyLoadItems();
 
-      this._lastFreeFilter = this.$.filterInput.value;
+      this.__renderActiveFilters();
+      this.__lastFreeFilter = this.$.filterInput.value;
     });
   }
 
@@ -858,9 +855,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * @param {Object} filters
    */
   __filtersChanged (filters) {
-    this.__hasFilters = !!this.filters;
-
-    if (!this.filters) return;
+    this.__hasFilters = !!this.filters && Object.keys(this.filters) > 0;
 
     // Transform the filters object into an array to use in a dom-repeat.
     this.__filters = Object.keys(filters).map(filterKey => ({
@@ -1021,8 +1016,35 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * will be reponsible for displaying the filter's input overlay when possible.
    */
   __renderActiveFilters () {
-    this.__activeFiltersContainer = this.__activeFiltersContainer || this.shadowRoot.querySelector('#activeFilters');
-    this.__activeFiltersContainer.innerHTML = '';
+    this.$.activeFilters.innerHTML = '';
+
+    this.__renderActiveFixedFilters();
+    this.__renderActiveFreeFilters();
+
+    // Create the no active filters placeholder.
+    if (!this.$.activeFilters.innerHTML) {
+      const noActiveFiltersPlaceholder = document.createElement('span');
+      noActiveFiltersPlaceholder.className = 'no-active-filters';
+      noActiveFiltersPlaceholder.innerHTML = '(Não há filtros activos)';
+
+      this.$.activeFilters.appendChild(noActiveFiltersPlaceholder);
+    }
+  }
+
+  /**
+   * This method renders the current free filter being applied by the generic input.
+   */
+  __renderActiveFreeFilters () {
+    if (!this.$.filterInput.value) return;
+
+    this.__renderActiveFilterDOM('Pesquisa Livre', this.$.filterInput.value, () => this.$.filterInternalInput.focus());
+  }
+
+  /**
+   * This method renders the current fixed filters that are being applied.
+   */
+  __renderActiveFixedFilters () {
+    if (!this.__filters) return;
 
     const activeFiltersValues = {};
     this.__filters.forEach(filterItem => {
@@ -1040,28 +1062,37 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
     this.__filters.forEach(filterItem => {
       if (this.__valueIsNotEmpty(filterItem.filter.value)) {
-        const activeFilter = document.createElement('div');
-        activeFilter.className = 'active-filter';
-
-        const activeFilterLabel = document.createTextNode(`${filterItem.filter.label}: `);
-        const activeFilterValue = document.createElement('strong');
-        activeFilterValue.dataset.filter = filterItem.filterKey;
-        activeFilterValue.innerHTML = activeFiltersValues[filterItem.filterKey];
-        activeFilterValue.addEventListener('click', event => this.__displayInlineFilters(event));
-
-        activeFilter.appendChild(activeFilterLabel);
-        activeFilter.appendChild(activeFilterValue);
-        this.__activeFiltersContainer.appendChild(activeFilter);
+        this.__renderActiveFilterDOM(
+          filterItem.filter.label,
+          activeFiltersValues[filterItem.filterKey],
+          event => this.__displayInlineFilters(event),
+          filterItem.filterKey
+        );
       }
     });
+  }
 
-    if (!this.__activeFiltersContainer.innerHTML) {
-      const noActiveFiltersPlaceholder = document.createElement('span');
-      noActiveFiltersPlaceholder.className = 'no-active-filters';
-      noActiveFiltersPlaceholder.innerHTML = '(Não há filtros activos)';
+  /**
+   * This method actually creates the elements in the DOM and binds the click event listener.
+   * @param {String} filterLabel The filter's label.
+   * @param {String} filterValue The filter's current value.
+   * @param {Function} clickEventListener The filter's click event listener.
+   * @param {String} datasetKey For fixed filters, this represents the key that uniquely identifies it.
+   */
 
-      this.__activeFiltersContainer.appendChild(noActiveFiltersPlaceholder);
-    }
+  __renderActiveFilterDOM (filterLabel, filterValue, clickEventListener, datasetKey) {
+    const activeFilter = document.createElement('div');
+    activeFilter.className = 'active-filter';
+
+    const activeFilterLabel = document.createTextNode(`${filterLabel}: `);
+    const activeFilterValue = document.createElement('strong');
+    activeFilterValue.innerHTML = filterValue;
+    activeFilterValue.dataset.filter = datasetKey;
+    activeFilterValue.addEventListener('click', clickEventListener);
+
+    activeFilter.appendChild(activeFilterLabel);
+    activeFilter.appendChild(activeFilterValue);
+    this.$.activeFilters.appendChild(activeFilter);
   }
 
   /**
@@ -1235,7 +1266,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method will store the vaadin-grid's sorted and filtered items into casper-moac's __gridInternalItems property.
    */
   __mirrorGridInternalItems () {
-    this.__gridInternalItems = Object.keys(this.$.grid._cache.items).map(itemIndex => this.$.grid._cache.items[itemIndex]);;
+    this.__gridInternalItems = Object.keys(this.$.grid._cache.items).map(itemIndex => this.$.grid._cache.items[itemIndex]);
   }
 
   /**
