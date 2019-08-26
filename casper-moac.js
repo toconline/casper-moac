@@ -651,11 +651,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       afterNextRender(this, () => this.epaper = this.shadowRoot.querySelector('casper-epaper'));
     }
 
-    // Hide the vaadin-split-layout handler.
-    if (!this.__displayEpaper && !this.__displaySidebar) {
-      this.$.splitLayout.shadowRoot.getElementById('splitter').style.display = 'none';
-    }
-
     // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
     this.lazyLoad
       ? this.__initializeLazyLoad()
@@ -666,16 +661,34 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.__bindClickEvents();
     this.__bindFiltersEvents();
     this.__bindContextMenuEvents();
-    this.__boundKeyDownEvents = this.__bindKeyDownEvents.bind(this);
+    this.__monkeyPatchVaadinElements();
 
+    this.__boundKeyDownEvents = this.__bindKeyDownEvents.bind(this);
     document.addEventListener('keydown', this.__boundKeyDownEvents);
-    this.$.grid.$.outerscroller.addEventListener('scroll', () => this.__paintGridActiveRow());
   }
 
   disconnectedCallback () {
     super.disconnectedCallback();
 
     document.removeEventListener('keydown', this.__boundKeyDownEvents);
+  }
+
+  /**
+   * As the name suggests, this method applies some monkey-patches to the vaadin elements. Firstly
+   * it hides the grid's vertical scrollbars since the grid behaves poorly when jumping into a specific scroll position when the items
+   * are lazily loaded. Then it adds a scroll event listener to paint the active row due to the grid's constant re-usage of rows.
+   * It also hides the vaadin-split-layout handler if there is no epaper / sidebar.
+   */
+  __monkeyPatchVaadinElements () {
+    this.$.grid.$.outerscroller.addEventListener('scroll', () => this.__paintGridActiveRow());
+
+    if (this.lazyLoad) {
+      this.$.grid.$.table.style.overflow = 'hidden';
+    }
+
+    if (!this.__displayEpaper && !this.__displaySidebar) {
+      this.$.splitLayout.$.splitter.style.display = 'none';
+    }
   }
 
   /**
