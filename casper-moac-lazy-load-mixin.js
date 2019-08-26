@@ -139,7 +139,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
           this.__allItemsSelected = event.detail.value;
 
           // This means the checked observer was fired internally.
-          if (this.__checkboxObserverLock) return;
+          if (this.__selectAllCheckboxObserverLock) return;
 
           this.selectedItems = this.__allItemsSelected ? [...this.__internalItems] : [];
         });
