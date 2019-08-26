@@ -690,7 +690,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * Bind event listeners to the generic search input and to the ones present in the filters property.
    */
   __bindFiltersEvents () {
-    this.$.filterInput.addEventListener('keyup', () => this._freeFilterChanged());
+    this.$.filterInput.addEventListener('keyup', () => this.__freeFilterChanged());
     const filterInput = this.$.filterInput.querySelector('input');
     filterInput.addEventListener('blur', () => { this.$.filterInput.style.border = ''; });
     filterInput.addEventListener('focus', () => { this.$.filterInput.style.border = '1px solid var(--primary-color)'; });
@@ -820,7 +820,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   /**
    * Debounce the items filtering after the search input's value changes.
    */
-  _freeFilterChanged () {
+  __freeFilterChanged () {
     this.__debounce('__freeFilterChangedDebouncer', () => {
       // Do not re-filter the items if the current value matches the last one.
       if (this.$.filterInput.value === this._lastFreeFilter) return;
