@@ -923,7 +923,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     // If the search input is empty or there are no items at the moment.
     if (!this.$.filterInput.value || !this.items) {
       this.__filteredItems = this.items || [];
-      this.__numberOfResults = `${this.__filteredItems.length} resultado(s)`;
+      this.__numberOfResults = `${this.__filteredItems.length} ${this.multiSelectionLabel}`;
       this.__mirrorGridInternalItems();
       this.__activateFirstItem();
       return;
@@ -951,7 +951,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         return this.__normalizeVariable(item[filterAttribute]).includes(filterTerm);
       }));
 
-      this.__numberOfResults = `${this.__filteredItems.length} de ${this.items.length} resultado(s)`;
+      this.__numberOfResults = `${this.__filteredItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
       this.__mirrorGridInternalItems();
       this.__activateFirstItem();
     }
