@@ -1219,6 +1219,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * @param {Event} event
    */
   __openContextMenu (event) {
+    const contextMenuItem = this.$.grid.getEventContext(event).item;
     this.__lastContextMenuTarget = this.__contextMenuOpenedOnce ? this.__contextMenu.positionTarget : event.target;
 
     // Check if the context menu was already opened.
@@ -1229,6 +1230,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     if (!this.__contextMenu.opened) {
       this.__contextMenu.open();
       this.__contextMenuOpenedOnce = true;
+
+      afterNextRender(this, () => this.activeItem = contextMenuItem);
     }
   }
 
