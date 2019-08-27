@@ -7,6 +7,7 @@ export const CasperMoacTypes = {
 
 export const CasperMoacFilterTypes = {
   PAPER_INPUT: 'PAPER_INPUT',
+  PAPER_CHECKBOX: 'PAPER_CHECKBOX',
   CASPER_SELECT: 'CASPER_SELECT',
   CASPER_DATE_PICKER: 'CASPER_DATE_PICKER',
 };

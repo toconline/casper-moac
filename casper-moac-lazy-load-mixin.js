@@ -186,8 +186,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
         callback(socketResponse.data, parseInt(socketResponse.meta.total));
         this.__numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
-          ? `${this.$.grid.items.length} resultado(s)`
-          : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} resultado(s)`;
+          ? `${this.$.grid.items.length} ${this.multiSelectionLabel}`
+          : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} ${this.multiSelectionLabel}`;
 
         this.__updateInternalItems(parameters.page, socketResponse.data);
         this.__activateFirstItem();

@@ -11,6 +11,8 @@ import '@casper2020/casper-date-picker/casper-date-picker.js';
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-input/iron-input.js';
+import '@polymer/paper-input/paper-input.js';
+import '@polymer/paper-checkbox/paper-checkbox.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
@@ -368,9 +370,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         }
 
         .left-side-container .filters-container .filter-container paper-input,
+        .left-side-container .filters-container .filter-container paper-checkbox,
         .left-side-container .filters-container .filter-container casper-select,
         .left-side-container .filters-container .filter-container casper-date-picker {
           width: 100%;
+        }
+
+        .left-side-container .filters-container .filter-container paper-checkbox {
+          margin-top: 25px;
         }
 
         /* Vaadin-grid */
@@ -543,6 +550,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
                       input-placeholder="[[item.filter.inputOptions.label]]">
                     </casper-date-picker>
                   </template>
+
+                  <!--Paper-Checkbox Filter-->
+                  <template is="dom-if" if="[[__isFilterPaperCheckbox(item.filter.type)]]">
+                    <paper-checkbox
+                      data-filter$="[[item.filterKey]]"
+                      checked="{{item.filter.value}}">
+                      [[item.filter.inputOptions.label]]
+                    </paper-checkbox>
+                  </template>
                 </div>
               </template>
             </div>
@@ -633,6 +649,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   }
 
   __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
+  __isFilterPaperCheckbox (itemType) { return itemType === CasperMoacFilterTypes.PAPER_CHECKBOX; }
   __isFilterCasperSelect (itemType) { return itemType === CasperMoacFilterTypes.CASPER_SELECT; }
   __isFilterCasperDatePicker (itemType) { return itemType === CasperMoacFilterTypes.CASPER_DATE_PICKER; }
 
@@ -711,18 +728,25 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.$.filterInternalInput.addEventListener('blur', () => { this.$.filterInput.style.border = ''; });
     this.$.filterInternalInput.addEventListener('focus', () => { this.$.filterInput.style.border = '1px solid var(--primary-color)'; });
 
+    const filterChangedCallback = () => {
+      this.dispatchEvent(new CustomEvent('filters-changed'));
+      this.__renderActiveFilters();
+
+      // If this is a lazy-loaded vaadin-grid, trigger the re-fetch of the resource.
+      if (this.lazyLoad) this.__filterLazyLoadItems();
+    };
+
     afterNextRender(this, () => {
       this.shadowRoot.querySelectorAll(`
         paper-input[data-filter],
+        paper-checkbox[data-filter],
         casper-select[data-filter],
         casper-date-picker[data-filter]
-      `).forEach(input => input.addEventListener('value-changed', () => {
-          this.dispatchEvent(new CustomEvent('filters-changed'));
-          this.__renderActiveFilters();
-
-          // If this is a lazy-loaded vaadin-grid, trigger the re-fetch of the resource.
-          if (this.lazyLoad) this.__filterLazyLoadItems();
-      }));
+      `).forEach(filter => {
+        filter.nodeName.toLowerCase() !== 'paper-checkbox'
+          ? filter.addEventListener('value-changed', filterChangedCallback)
+          : filter.addEventListener('checked-changed', filterChangedCallback);
+      });
     });
   }
 
@@ -1008,6 +1032,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         this.__displayAllFilters = true;
         this.shadowRoot.querySelector(`casper-date-picker[data-filter="${filterKey}"]`).open();
         break;
+      case CasperMoacFilterTypes.PAPER_CHECKBOX:
+        this.__displayAllFilters = true;
+        this.shadowRoot.querySelector(`paper-checkbox[data-filter="${filterKey}"]`).focus();
+        break;
     }
   }
 
@@ -1102,7 +1130,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * @param {String | Number | Array | Object} value
    */
   __valueIsNotEmpty (value) {
-    return ![null, undefined, ''].includes(value);
+    return ![null, undefined, false, ''].includes(value);
   }
 
   /**
@@ -1118,6 +1146,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       case CasperMoacFilterTypes.PAPER_INPUT:
       case CasperMoacFilterTypes.CASPER_DATE_PICKER:
         return filterItem.filter.value;
+      case CasperMoacFilterTypes.PAPER_CHECKBOX:
+        return filterItem.filter.inputOptions.label;
       case CasperMoacFilterTypes.CASPER_SELECT:
         const casperSelect = this.shadowRoot.querySelector(`casper-select[data-filter="${filterItem.filterKey}"]`);
 
