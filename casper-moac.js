@@ -523,7 +523,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
                       list-width="20vw"
                       list-height="50vh"
                       value="{{item.filter.value}}"
-                      items="[[item.filter.options]]"
+                      items="[[item.filter.inputOptions.items]]"
                       label="[[item.filter.inputOptions.label]]"
                       disable-clear$="[[item.filter.inputOptions.disableClear]]"
                       multi-selection$="[[item.filter.inputOptions.multiSelection]]"
