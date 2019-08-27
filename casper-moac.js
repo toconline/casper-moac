@@ -760,6 +760,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
     if (!this.__contextMenu) return;
 
+    this.__contextMenu.noOverlap = true;
+    this.__contextMenu.dynamicAlign = true;
+    this.__contextMenu.verticalAlign = 'auto';
+    this.__contextMenu.horizontalAlign = 'auto';
+
     // Hide the context menu when one of its items is clicked.
     this.__contextMenu.addEventListener('click', event => {
       if (this.__eventPathContainsNode(event, 'casper-menu-item')) {
