@@ -866,14 +866,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   __freeFilterChanged () {
     this.__debounce('__freeFilterChangedDebouncer', () => {
       // Do not re-filter the items if the current value matches the last one.
-      if (this.$.filterInput.value === this.__lastFreeFilter) return;
+      if (this.$.filterInput.value.trim() === this.__lastFreeFilter) return;
 
       !this.lazyLoad
         ? this.__filterItems()
         : this.__filterLazyLoadItems();
 
       this.__renderActiveFilters();
-      this.__lastFreeFilter = this.$.filterInput.value;
+      this.__lastFreeFilter = this.$.filterInput.value.trim();
     });
   }
 
@@ -963,7 +963,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.selectedItems = [];
 
     // If the search input is empty or there are no items at the moment.
-    if (!this.$.filterInput.value || !this.items) {
+    if (!this.$.filterInput.value.trim() || !this.items) {
       this.__filteredItems = this.items || [];
       this.__numberOfResults = `${this.__filteredItems.length} ${this.multiSelectionLabel}`;
       this.__mirrorGridInternalItems();
@@ -1068,9 +1068,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method renders the current free filter being applied by the generic input.
    */
   __renderActiveFreeFilters () {
-    if (!this.$.filterInput.value) return;
+    if (!this.$.filterInput.value.trim()) return;
 
-    this.__renderActiveFilterDOM('Pesquisa Livre', this.$.filterInput.value, () => this.$.filterInternalInput.focus());
+    this.__renderActiveFilterDOM('Pesquisa Livre', this.$.filterInput.value.trim(), () => this.$.filterInternalInput.focus());
   }
 
   /**

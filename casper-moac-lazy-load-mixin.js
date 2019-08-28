@@ -342,6 +342,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
     __sanitizeValue (value) {
       return value
         .toString()
+        .trim()
         .replace(/[%\\]/g, '\\$&')
         .replace(/[&]/g, '_');
     }
