@@ -108,6 +108,7 @@ class CasperMoacMenu extends PolymerElement {
 
     afterNextRender(this, () => {
       this.__bindMouseEnterAndLeave();
+      this.__boundCloseOnEscapePress = this.__closeOnEscapePress.bind(this);
 
       this.$.menuTrigger.addEventListener('click', () => { this.toggle(); });
       this.$.menuTrigger.addEventListener('mouseover', () => { this.open(); });
@@ -177,17 +178,26 @@ class CasperMoacMenu extends PolymerElement {
    * Public method to open the menu.
    */
   open () {
-    this.$.menuItems.open();
-    document.addEventListener('keydown', this.__closeOnEscapePress.bind(this));
+    document.addEventListener('keydown', this.__boundCloseOnEscapePress);
 
-    afterNextRender(this, () => {
-      const circleMinimumDimensions = 500;
-      const menuItemsDimensions = Math.max(this.$.menuItems.offsetHeight, this.$.menuItems.offsetWidth) * 2;
-      const circleDimensions = Math.max(circleMinimumDimensions, menuItemsDimensions);
+    if (!this.__circleDimensions) {
+      // Open the menu invisibly to calculate its dimensions.
+      this.$.menuItems.style.visibility = 'hidden';
+      this.$.menuItems.open();
 
-      this.$.circleBackground.style.width = `${circleDimensions}px`;
-      this.$.circleBackground.style.height = `${circleDimensions}px`;
-    });
+      afterNextRender(this, () => {
+        const menuItemsDimensions = Math.max(this.$.menuItems.scrollHeight, this.$.menuItems.scrollWidth) * 2;
+        this.__circleDimensions = Math.max(500, menuItemsDimensions);
+
+        this.$.circleBackground.style.width = `${this.__circleDimensions}px`;
+        this.$.circleBackground.style.height = `${this.__circleDimensions}px`;
+        this.$.menuItems.style.visibility = 'visible';
+      });
+    } else {
+      this.$.menuItems.open();
+      this.$.circleBackground.style.width = `${this.__circleDimensions}px`;
+      this.$.circleBackground.style.height = `${this.__circleDimensions}px`;
+    }
   }
 
   /**
@@ -197,7 +207,7 @@ class CasperMoacMenu extends PolymerElement {
     this.$.menuItems.close();
     this.$.circleBackground.style.width = 0;
     this.$.circleBackground.style.height = 0;
-    document.removeEventListener('keydown', this.__closeOnEscapePress.bind(this));
+    document.removeEventListener('keydown', this.__boundCloseOnEscapePress);
   }
 
   /**
