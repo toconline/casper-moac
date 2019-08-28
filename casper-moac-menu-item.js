@@ -92,6 +92,19 @@ export class CasperMoacMenuItem extends PolymerElement {
     };
   }
 
+  ready () {
+    super.ready();
+
+    this.shadowRoot.addEventListener('click', () => {
+      const slotAssignedElements = this.shadowRoot.querySelector('slot').assignedElements();
+
+      // Trigger the click manually when there is an anchor.
+      if (slotAssignedElements.length > 0 && slotAssignedElements[0].nodeName.toLowerCase() === 'a') {
+        slotAssignedElements[0].click();
+      }
+    });
+  }
+
   /**
    * Observer that fires when the menu item is enabled / disabled and react accordingly.
    */
