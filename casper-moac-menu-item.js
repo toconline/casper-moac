@@ -17,23 +17,30 @@ export class CasperMoacMenuItem extends PolymerElement {
           color: #212121;
           font-size: 15px;
           user-select: none;
-          border-radius: 5px;
           align-items: center;
           padding: 8px 25px 8px 15px;
         }
 
-        #container[disabled] {
-          color: #A8A8A8;
+        #container ::slotted(a) {
+          color: #212121;
+          height: 100%;
+          text-decoration: none;
         }
 
-        #container:not([disabled]):hover {
+        #container[disabled],
+        #container[disabled] ::slotted(a) {
+          color: #A8A8A8;
+          pointer-events: none;
+        }
+
+        #container:hover,
+        #container:hover ::slotted(a) {
           color: white;
           cursor: pointer;
           text-decoration: underline;
           transition: background-color 100ms linear;
         }
 
-        /* Paper-icon-button */
         #container paper-icon-button {
           flex: 0 0 30px;
           height: 30px;
@@ -44,6 +51,11 @@ export class CasperMoacMenuItem extends PolymerElement {
           background-color: var(--primary-color);
         }
 
+        #container[disabled] paper-icon-button {
+          color: #A8A8A8;
+          background-color: transparent;
+        }
+
         #container:not([disabled]) paper-icon-button {
           color: white;
         }
@@ -51,11 +63,6 @@ export class CasperMoacMenuItem extends PolymerElement {
         #container:not([disabled]):hover paper-icon-button {
           background-color: white;
           color: var(--primary-color);
-        }
-
-        #container[disabled] paper-icon-button {
-          color: #A8A8A8;
-          background-color: transparent;
         }
       </style>
       <div id="container" disabled$="[[disabled]]">

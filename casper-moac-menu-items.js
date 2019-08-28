@@ -12,7 +12,7 @@ class CasperMoacMenuItems extends mixinBehaviors(IronOverlayBehavior, PolymerEle
     return html`
       <style>
         :host {
-          max-width: 15vw;
+          max-width: 25vw;
         }
 
         .items-container {
