@@ -15,6 +15,7 @@ import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
+import { templatize } from '@polymer/polymer/lib/utils/templatize.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
@@ -154,15 +155,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       hideNumberResults: {
         type: Boolean,
         value: false
-      },
-      /**
-       * Stylesheet to be injected in order to style the vaadin-grid inner components.
-       *
-       * @type {String}
-       */
-      stylesheet: {
-        type: String,
-        observer: '__stylesheetChanged'
       },
       /**
        * Icon that will be used when the vaadin-grid has no items to display.
@@ -487,6 +479,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         }
       </style>
 
+      <slot name="grid-custom-styles"></slot>
+
       <vaadin-split-layout id="splitLayout">
         <div class="left-side-container" style="[[__leftSideInitialWidth()]]">
           <div class="header-container">
@@ -682,12 +676,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       ? this.__initializeLazyLoad()
       : afterNextRender(this, () => this.__filterItems());
 
-    // Set event listeners.
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
     this.__bindClickEvents();
     this.__bindFiltersEvents();
     this.__bindContextMenuEvents();
     this.__monkeyPatchVaadinElements();
+    this.__stampGridCustomStylesTemplate();
 
     this.__boundKeyDownEvents = this.__bindKeyDownEvents.bind(this);
     document.addEventListener('keydown', this.__boundKeyDownEvents);
@@ -697,6 +691,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     super.disconnectedCallback();
 
     document.removeEventListener('keydown', this.__boundKeyDownEvents);
+  }
+
+  /**
+   * This method checks if the named slot "grid-custom-styles" has a template assigned to it. If it has,
+   * it will stamp it in the actual DOM.
+   */
+  __stampGridCustomStylesTemplate () {
+    afterNextRender(this, () => {
+      const customStylesSlot = this.shadowRoot.querySelector('slot[name="grid-custom-styles"]');
+      if (customStylesSlot.assignedElements().length > 0) {
+        const template = customStylesSlot.assignedElements()[0];
+        const templateClass = templatize(template);
+        this.shadowRoot.appendChild(new templateClass().root);
+      }
+    });
   }
 
   /**
@@ -941,28 +950,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       this.__selectAllCheckbox.checked = this.__internalItems.length === this.selectedItems.length && this.selectedItems.length > 0;
       this.__selectAllCheckbox.indeterminate = this.__internalItems.length !== this.selectedItems.length && this.selectedItems.length > 0;
       this.__selectAllCheckboxObserverLock = false;
-    }
-  }
-
-  /**
-   * Observer that fires when the stylesheet property changes which will delete the previous
-   * <style> tag and create a new one with the most recent styles.
-   *
-   * @param {String} stylesheet
-   */
-  __stylesheetChanged (stylesheet) {
-    const stylesheetTagId = 'custom-grid-styles';
-    let stylesheetTag = this.shadowRoot.getElementById(stylesheetTagId);
-    if (stylesheetTag) {
-      this.shadowRoot.removeChild(stylesheetTag);
-    }
-
-    if (stylesheet) {
-      stylesheetTag = document.createElement('style');
-      stylesheetTag.id = stylesheetTagId;
-      stylesheetTag.textContent = stylesheet;
-
-      this.shadowRoot.appendChild(stylesheetTag);
     }
   }
 
