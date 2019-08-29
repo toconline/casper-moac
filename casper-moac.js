@@ -202,6 +202,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         value: false
       },
       /**
+       * Boolean that states if the vaadin-grid should have the selection column or not.
+       *
+       * @type {Boolean}
+       */
+      disableSelection: {
+        type: Boolean,
+        value: false,
+      },
+      /**
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
        *
        * @type {Boolean}
@@ -588,7 +597,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               active-item="{{activeItem}}"
               page-size="[[resourcePageSize]]"
               selected-items="{{selectedItems}}">
-              <vaadin-grid-selection-column width="45px" flex-grow="0" text-align="center"></vaadin-grid-selection-column>
+
+              <template is="dom-if" if="[[!disableSelection]]">
+                <vaadin-grid-selection-column width="45px" flex-grow="0"></vaadin-grid-selection-column>
+              </template>
 
               <slot name="grid"></slot>
 

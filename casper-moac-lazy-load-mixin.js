@@ -132,22 +132,24 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       this.$.grid.dataProvider = (parameters, callback) => this.__debounceFetchResourceItems(parameters, callback);
 
-      afterNextRender(this, () => {
-        // Replace the vaadin-checkbox since the default one has event listeners not compatible with the lazy-load mode.
-        this.__selectAllCheckbox = document.createElement('vaadin-checkbox');
-        this.__selectAllCheckbox.addEventListener('checked-changed', event => {
-          this.__allItemsSelected = event.detail.value;
+      if (!this.disableSelection) {
+        afterNextRender(this, () => {
+          // Replace the vaadin-checkbox since the default one has event listeners not compatible with the lazy-load mode.
+          this.__selectAllCheckbox = document.createElement('vaadin-checkbox');
+          this.__selectAllCheckbox.addEventListener('checked-changed', event => {
+            this.__allItemsSelected = event.detail.value;
 
-          // This means the checked observer was fired internally.
-          if (this.__selectAllCheckboxObserverLock) return;
+            // This means the checked observer was fired internally.
+            if (this.__selectAllCheckboxObserverLock) return;
 
-          this.selectedItems = this.__allItemsSelected ? [...this.__internalItems] : [];
+            this.selectedItems = this.__allItemsSelected ? [...this.__internalItems] : [];
+          });
+
+          const vaadinCheckboxParent = this.$.grid.shadowRoot.querySelector('thead tr th:first-child slot').assignedNodes().shift();
+          vaadinCheckboxParent.removeChild(vaadinCheckboxParent.firstElementChild);
+          vaadinCheckboxParent.appendChild(this.__selectAllCheckbox);
         });
-
-        const vaadinCheckboxParent = this.$.grid.shadowRoot.querySelector('thead tr th:first-child slot').assignedNodes().shift();
-        vaadinCheckboxParent.removeChild(vaadinCheckboxParent.firstElementChild);
-        vaadinCheckboxParent.appendChild(this.__selectAllCheckbox);
-      });
+      }
 
       this.__lazyLoadInitialized = true;
     }
