@@ -384,7 +384,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         /* Vaadin-grid */
         .left-side-container .grid-container {
           flex-grow: 1;
-          position: relative;
+          display: flex;
         }
 
         .left-side-container .grid-no-items {
@@ -750,8 +750,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.$.filterInternalInput.addEventListener('focus', () => { this.$.filterInput.style.border = '1px solid var(--primary-color)'; });
 
     const filterChangedCallback = () => {
-      this.dispatchEvent(new CustomEvent('filters-changed'));
       this.__renderActiveFilters();
+      this.dispatchEvent(new CustomEvent('filters-changed', {
+        bubbles: true,
+        composed: true
+      }));
 
       // If this is a lazy-loaded vaadin-grid, trigger the re-fetch of the resource.
       if (this.lazyLoad) this.__filterLazyLoadItems();
