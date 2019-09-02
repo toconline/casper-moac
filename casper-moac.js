@@ -385,6 +385,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         .left-side-container .grid-container {
           flex-grow: 1;
           display: flex;
+          position: relative;
         }
 
         .left-side-container .grid-no-items {
