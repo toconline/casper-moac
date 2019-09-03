@@ -20,6 +20,14 @@ class CasperMoacSidebarItem extends PolymerElement {
         type: String
       },
       /**
+       * The sidebar item's title.
+       *
+       * @type {String}
+       */
+      title: {
+        type: String
+      },
+      /**
        * Boolean that states if the current sidebar item is opened or not.
        * 
        * @type {Boolean}
@@ -55,7 +63,7 @@ class CasperMoacSidebarItem extends PolymerElement {
         }
 
         .sidebar-item-header iron-icon {
-          color: #676767;
+          color: #3C3C3C;
           transition: transform 200ms linear;
         }
 
@@ -65,6 +73,12 @@ class CasperMoacSidebarItem extends PolymerElement {
 
         .sidebar-item-header:hover iron-icon {
           color: #3E3E3E;
+        }
+
+        .sidebar-item-header .sidebar-item-header-title {
+          display: flex;
+          color: #3C3C3C;
+          align-items: center;
         }
 
         .sidebar-item-body {
@@ -78,7 +92,11 @@ class CasperMoacSidebarItem extends PolymerElement {
         }
       </style>
       <div class="sidebar-item-header" id="header">
-        <iron-icon icon="[[icon]]"></iron-icon>
+        <div class="sidebar-item-header-title">
+          <iron-icon icon="[[icon]]"></iron-icon>
+          [[title]]
+        </div>
+
         <iron-icon icon="casper-icons:arrow-drop-down" id="headerDropDownIcon"></iron-icon>
       </div>
       <div class="sidebar-item-body" id="body">
