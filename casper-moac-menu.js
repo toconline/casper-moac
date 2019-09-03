@@ -81,9 +81,8 @@ class CasperMoacMenu extends PolymerElement {
           opacity: 0.95;
           position: absolute;
           border-radius: 50%;
-          filter: brightness(200%);
           transform: translate(-35%, -35%);
-          background-color: var(--primary-color);
+          background-color: var(--casper-moac-menu-background-color);
         }
       </style>
       <paper-icon-button

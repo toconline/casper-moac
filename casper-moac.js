@@ -594,7 +594,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               selected-items="{{selectedItems}}">
 
               <template is="dom-if" if="[[!disableSelection]]">
-                <vaadin-grid-selection-column width="45px" flex-grow="0"></vaadin-grid-selection-column>
+                <vaadin-grid-selection-column width="40px" flex-grow="0"></vaadin-grid-selection-column>
               </template>
 
               <slot name="grid"></slot>
