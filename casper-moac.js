@@ -55,6 +55,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         observer: '__itemsChanged'
       },
       /**
+       * The items that are being currently displayed with all the applied filters.
+       *
+       * @type {Array}
+       */
+      displayedItems: {
+        type: Array,
+        notify: true,
+        readoOnly: true
+      },
+      /**
        * List of attributes that should be used to filter.
        *
        * @type {Array}
@@ -967,7 +977,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
     // If the search input is empty or there are no items at the moment.
     if (!this.$.filterInput.value.trim() || !this.items) {
-      this.__filteredItems = this.items || [];
+      this.__filteredItems = this.displayedItems = this.items || [];
       this.__numberOfResults = `${this.__filteredItems.length} ${this.multiSelectionLabel}`;
       this.__mirrorGridInternalItems();
       this.__activateFirstItem();
@@ -983,7 +993,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     if (filterAttributes && this.items.length > 0) {
       const filterTerm = this.__normalizeVariable(this.$.filterInput.value);
 
-      this.__filteredItems = this.items.filter(item => filterAttributes.some(filterAttribute => {
+      this.__filteredItems = this.displayedItems = this.items.filter(item => filterAttributes.some(filterAttribute => {
         if (filterAttribute.constructor === Object) {
           switch (filterAttribute.operator) {
             case CasperMoacOperators.EXACT_MATCH: return this.__normalizeVariable(item[filterAttribute.field]) === filterTerm;

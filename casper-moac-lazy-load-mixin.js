@@ -211,7 +211,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       // This means the filters were re-applied so clear all the selected items and reset the internal items.
       if (currentPage === 0) {
         this.selectedItems = [];
-        this.__internalItems = socketResponseData;
+        this.__internalItems = this.displayedItems = socketResponseData;
 
         // When the component is still initializing the __selectAllCheckbox might still be undefined.
         if (this.__selectAllCheckbox) this.__selectAllCheckbox.checked = false;
@@ -219,7 +219,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       }
 
       // Append the new items and select all of them if that's the case.
-      this.__internalItems = [...this.__internalItems, ...socketResponseData];
+      this.__internalItems = this.displayedItems = [...this.__internalItems, ...socketResponseData];
       if (this.__allItemsSelected) {
         this.selectedItems = [...this.__internalItems];
       }
