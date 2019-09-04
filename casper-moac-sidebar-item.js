@@ -64,6 +64,7 @@ class CasperMoacSidebarItem extends PolymerElement {
 
         .sidebar-item-header iron-icon {
           color: #3C3C3C;
+          margin-right: 10px;
           transition: transform 200ms linear;
         }
 
@@ -82,9 +83,10 @@ class CasperMoacSidebarItem extends PolymerElement {
         }
 
         .sidebar-item-body {
-          height: 0;
+          height: auto;
+          max-height: 0;
           overflow: hidden;
-          transition: height 150ms ease-in;
+          transition: max-height 150ms ease-in;
         }
         
         .sidebar-item-body .sidebar-item-content {
@@ -135,6 +137,13 @@ class CasperMoacSidebarItem extends PolymerElement {
   }
 
   /**
+   * Re-calculate the total height of the sidebar item.
+   */
+  resize () {
+    this.__openedChanged(this.opened);
+  }
+
+  /**
    * Observer that gets fired when the opened property changes and triggers the sidebar item opening / close animation.
    *
    * @param {Boolean} opened The current opened state of the sidebar item.
@@ -142,10 +151,10 @@ class CasperMoacSidebarItem extends PolymerElement {
   __openedChanged (opened) {
     afterNextRender(this, () => {
       if (opened) {
-        this.$.body.style.height = `${this.$.body.scrollHeight}px`;
+        this.$.body.style.maxHeight = `${this.$.body.scrollHeight}px`;
         this.$.headerDropDownIcon.setAttribute('rotate', true);
       } else {
-        this.$.body.style.height = 0;
+        this.$.body.style.maxHeight = 0;
         this.$.headerDropDownIcon.removeAttribute('rotate');
       }
     });

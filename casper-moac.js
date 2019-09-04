@@ -486,6 +486,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         .right-side-container .sidebar-container {
           flex: 1 0 25%;
           display: flex;
+          overflow: auto;
           flex-direction: column;
         }
       </style>
@@ -734,6 +735,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
     if (!this.__displayEpaper && !this.__displaySidebar) {
       this.$.splitLayout.$.splitter.style.display = 'none';
+    } else {
+      const sidebarItems = Array.from(this.children).filter(child => child.getAttribute('slot') === 'sidebar');
+      if (sidebarItems.length > 0) {
+        this.$.splitLayout.addEventListener('splitter-dragend', () => {
+          sidebarItems.forEach(sidebarItem => sidebarItem.resize());
+        });
+      }
     }
   }
 
