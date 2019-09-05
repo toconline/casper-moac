@@ -148,9 +148,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
             this.selectedItems = this.__allItemsSelected ? [...this.__internalItems] : [];
           });
 
-          const vaadinCheckboxParent = this.$.grid.shadowRoot.querySelector('thead tr th:first-child slot').assignedNodes().shift();
-          vaadinCheckboxParent.removeChild(vaadinCheckboxParent.firstElementChild);
-          vaadinCheckboxParent.appendChild(this.__selectAllCheckbox);
+          this.$.grid.shadowRoot.querySelectorAll('thead tr th slot').forEach(headerSlot => {
+            const headerSlotElement = headerSlot.assignedElements().shift();
+            if (headerSlotElement.firstElementChild && headerSlotElement.firstElementChild.nodeName.toLowerCase() === 'vaadin-checkbox') {
+              headerSlotElement.removeChild(headerSlotElement.firstElementChild);
+              headerSlotElement.appendChild(this.__selectAllCheckbox);
+            }
+          });
         });
       }
 
