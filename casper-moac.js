@@ -138,6 +138,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         notify: true
       },
       /**
+       * The items that are currently expanded in the vaadin-grid.
+       *
+       * @type {Array}
+       */
+      expandedItems: {
+        type: Array,
+        notify: true
+      },
+      /**
        * The array of filters that are available to filter the results presents on the page.
        *
        * @type {Array}
@@ -602,7 +611,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               items="[[__filteredItems]]"
               active-item="{{activeItem}}"
               page-size="[[resourcePageSize]]"
-              selected-items="{{selectedItems}}">
+              selected-items="{{selectedItems}}"
+              expanded-items="{{expandedItems}}">
 
               <slot name="grid-before"></slot>
 
