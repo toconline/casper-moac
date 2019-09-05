@@ -89,6 +89,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
          */
         resourceDefaultFilters: {
           type: String
+        },
+        resourceFetchChildrenQuery: {
+          type: String,
         }
       };
     }
@@ -163,7 +166,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
     __debounceFetchResourceItems (parameters, callback) {
       this.__debounce('__fetchResourceItemsDebouncer', () => {
-        this.__fetchResourceItems(parameters, callback);
+        !parameters.parentItem
+          ? this.__fetchResourceItems(parameters, callback)
+          : this.__fetchChildrenResourceItems(parameters, callback);
       });
     }
 
@@ -191,6 +196,28 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
         this.__updateInternalItems(parameters.page, socketResponse.data);
         this.__activateFirstItem();
+      } catch (exception) {
+        console.error(exception);
+
+        this.app.openToast({
+          text: 'Ocorreu um erro ao obter os dados.',
+          backgroundColor: 'red'
+        });
+      }
+    }
+
+    /**
+     * Function that is invoked by the vaadin-grid to fetch children items from the remote source which is
+     * the JSON API in this case.
+     * @param {Object} parameters Object that contains the parent item which we are fetching children from.
+     * @param {Function} callback Callback that will be called as soon as the items are returned from the JSON API. 
+     */
+    async __fetchChildrenResourceItems (parameters, callback) {
+      try {
+        const fetchChildrenQuery = this.resourceFetchChildrenQuery.replace('%{parentId}', parameters.parentItem[this.idProperty]);
+        const socketResponse = await app.socket.jget(fetchChildrenQuery, this.resourceTimeoutMs);
+
+        callback(socketResponse.data);
       } catch (exception) {
         console.error(exception);
 
