@@ -184,7 +184,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
      */
     async __fetchResourceItems (parameters, callback) {
       try {
-        const socketResponse = await app.socket.jget(this.__buildResourceUrl(parameters), this.resourceTimeoutMs);
+        const socketResponse = await this.app.socket.jget(this.__buildResourceUrl(parameters), this.resourceTimeoutMs);
 
         if (socketResponse.errors) return;
 

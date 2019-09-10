@@ -28,6 +28,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   static get properties () {
     return {
       /**
+       * Since the page load process will change there might be sometimes where this property is not
+       * defined so we initialize it this way to enure that nothing breaks.
+       *
+       * @type {Object}
+       */
+      app: {
+        type: Object,
+        value: window.app
+      },
+      /**
        * This states what kind of MOAC we're dealing with so that certain items are displayed / hidden.
        *
        * @type {String}
