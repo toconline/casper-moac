@@ -12,7 +12,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
          */
         resourcePageSize: {
           type: Number,
-          value: 50
+          value: 100
         },
         /**
          * The JSON API resource name that will be used to build the URL.
