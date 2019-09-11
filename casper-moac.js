@@ -1193,8 +1193,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
         if (!casperSelect || !casperSelect.items || casperSelect.items.length === 0) return;
 
+        const filterValues = !filterItem.filter.inputOptions.multiSelection
+          ? [filterItem.filter.value.toString()]
+          : filterItem.filter.value.split(casperSelect.multiSelectionValueSeparator);
+
         return casperSelect.items
-          .filter(item => item[casperSelect.keyColumn].toString() === filterItem.filter.value.toString())
+          .filter(item => filterValues.includes(item[casperSelect.keyColumn].toString()))
           .map(item => item[casperSelect.itemColumn]).join(', ');
     }
   }
