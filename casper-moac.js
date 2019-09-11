@@ -201,7 +201,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
        */
       noItemsText: {
         type: String,
-        value: 'Não existem qualquer resultados para mostrar.'
+        value: 'Não existem quaisquer resultados para mostrar.'
       },
       /**
        * Boolean that when set to true, forces one item to be active all the time.
