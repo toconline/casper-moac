@@ -791,14 +791,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.$.filterInternalInput.addEventListener('focus', () => { this.$.filterInput.style.border = '1px solid var(--primary-color)'; });
 
     const filterChangedCallback = () => {
-      this.__renderActiveFilters();
       this.dispatchEvent(new CustomEvent('filters-changed', {
         bubbles: true,
         composed: true
       }));
 
-      // If this is a lazy-loaded vaadin-grid, trigger the re-fetch of the resource.
-      if (this.lazyLoad) this.__filterLazyLoadItems();
+      // Force the re-fetch of items if one the filter changes.
+      if (this.lazyLoad) this.refreshItems();
+
+      this.__renderActiveFilters();
     };
 
     afterNextRender(this, () => {
@@ -957,7 +958,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       filter: this.filters[filterKey]
     }));
 
-    afterNextRender(this, () => this.__renderActiveFilters());
+    // Force the re-fetch of items if one the filter changes.
+    if (this.lazyLoad) this.refreshItems();
+
+    this.__renderActiveFilters();
   }
 
   /**
@@ -1070,7 +1074,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       case CasperMoacFilterTypes.CASPER_SELECT:
         !filter.inputOptions.multiSelection
           ? this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(event.target)
-          : this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(this.__activeFiltersContainer);
+          : this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(this.$.activeFilters);
         break;
       case CasperMoacFilterTypes.PAPER_INPUT:
         this.__displayAllFilters = true;
@@ -1092,19 +1096,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * will be reponsible for displaying the filter's input overlay when possible.
    */
   __renderActiveFilters () {
-    this.$.activeFilters.innerHTML = '';
+    this.__debounce('__renderActiveFiltersDebouncer', () => {
+      this.$.activeFilters.innerHTML = '';
 
-    this.__renderActiveFixedFilters();
-    this.__renderActiveFreeFilters();
+      this.__renderActiveFixedFilters();
+      this.__renderActiveFreeFilters();
 
-    // Create the no active filters placeholder.
-    if (!this.$.activeFilters.innerHTML) {
-      const noActiveFiltersPlaceholder = document.createElement('span');
-      noActiveFiltersPlaceholder.className = 'no-active-filters';
-      noActiveFiltersPlaceholder.innerHTML = '(Não há filtros activos)';
+      // Create the no active filters placeholder.
+      if (!this.$.activeFilters.innerHTML) {
+        const noActiveFiltersPlaceholder = document.createElement('span');
+        noActiveFiltersPlaceholder.className = 'no-active-filters';
+        noActiveFiltersPlaceholder.innerHTML = '(Não há filtros activos)';
 
-      this.$.activeFilters.appendChild(noActiveFiltersPlaceholder);
-    }
+        this.$.activeFilters.appendChild(noActiveFiltersPlaceholder);
+      }
+    });
   }
 
   /**
@@ -1122,25 +1128,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   __renderActiveFixedFilters () {
     if (!this.__filters) return;
 
-    const activeFiltersValues = {};
-    this.__filters.forEach(filterItem => {
-      const activeFilterValue = this.__activeFilterValue(filterItem);
-      if (this.__valueIsNotEmpty(activeFilterValue)) {
-        activeFiltersValues[filterItem.filterKey] = activeFilterValue;
-      }
-    });
-
-    // This means that it wasn't possible obtain all the values from the filters components and therefore we schedule a new render.
-    if (this.__filters.filter(filterItem => this.__valueIsNotEmpty(filterItem.filter.value)).length !== Object.keys(activeFiltersValues).length) {
-      afterNextRender(this, () => this.__renderActiveFilters());
-      return;
-    }
-
     this.__filters.forEach(filterItem => {
       if (this.__valueIsNotEmpty(filterItem.filter.value)) {
         this.__renderActiveFilterDOM(
           filterItem.filter.label,
-          activeFiltersValues[filterItem.filterKey],
+          this.__activeFilterValue(filterItem),
           event => this.__displayInlineFilters(event),
           filterItem.filterKey
         );
@@ -1199,13 +1191,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       case CasperMoacFilterTypes.CASPER_SELECT:
         const casperSelect = this.shadowRoot.querySelector(`casper-select[data-filter="${filterItem.filterKey}"]`);
 
-        if (!casperSelect || !casperSelect.selectedItems || casperSelect.selectedItems.length === 0) return;
+        if (!casperSelect || !casperSelect.items || casperSelect.items.length === 0) return;
 
-        const casperSelectSelectedItems = casperSelect.multiSelection
-          ? casperSelect.selectedItems
-          : [casperSelect.selectedItems];
-
-        return casperSelectSelectedItems.map(selectedItem => selectedItem[casperSelect.itemColumn]).join(', ');
+        return casperSelect.items
+          .filter(item => item[casperSelect.keyColumn].toString() === filterItem.filter.value.toString())
+          .map(item => item[casperSelect.itemColumn]).join(', ');
     }
   }
 
