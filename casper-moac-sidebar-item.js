@@ -13,7 +13,7 @@ class CasperMoacSidebarItem extends PolymerElement {
     return {
       /**
        * The icon that will be used on the sidebar item's header.
-       * 
+       *
        * @type {String}
        */
       icon: {
@@ -29,7 +29,7 @@ class CasperMoacSidebarItem extends PolymerElement {
       },
       /**
        * Boolean that states if the current sidebar item is opened or not.
-       * 
+       *
        * @type {Boolean}
        */
       opened: {
@@ -50,6 +50,7 @@ class CasperMoacSidebarItem extends PolymerElement {
 
         .sidebar-item-header {
           display: flex;
+          user-select: none;
           justify-content: space-between;
           padding: 15px;
           background-color: #E2E2E2;
@@ -88,7 +89,7 @@ class CasperMoacSidebarItem extends PolymerElement {
           overflow: hidden;
           transition: max-height 150ms ease-in;
         }
-        
+
         .sidebar-item-body .sidebar-item-content {
           padding: 15px;
         }
