@@ -35,9 +35,9 @@ export class CasperMoacMenuItem extends PolymerElement {
 
         #container:hover,
         #container:hover ::slotted(a) {
-          color: white;
+          color: var(--primary-color);
           cursor: pointer;
-          text-decoration: underline;
+          text-decoration: none;
           transition: background-color 100ms linear;
         }
 
