@@ -606,7 +606,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
                 Selecção Múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
               </div>
               <div class="grid-multiple-selection-icons">
-                <slot name="actions-multiple-selected"></slot>
+                <slot name="multi-selection"></slot>
               </div>
             </div>
           </div>
