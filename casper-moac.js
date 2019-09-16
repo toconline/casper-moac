@@ -253,31 +253,43 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   static get template () {
     return html`
       <style include="casper-common-styles">
-        vaadin-split-layout {
+
+        .main-container {
+          display: flex;
           height: 100%;
-          transform: unset;
-          overflow: visible !important;
         }
 
-        .left-side-container {
+        .main-container .sidebar-container {
+          flex-grow: 0;
+          flex-basis: 250px;
+          border-left: 1px solid #E2E2E2;
+        }
+
+        .main-container vaadin-split-layout {
+          height: 100%;
+          flex-grow: 1;
+          transform: unset;
+        }
+
+        .main-container vaadin-split-layout .left-side-container {
           padding: 15px;
           display: flex;
           flex-direction: column;
           background-color: white;
         }
 
-        .left-side-container .header-container {
+        .main-container vaadin-split-layout .left-side-container .header-container {
           display: flex;
           flex-wrap: wrap;
           margin-bottom: 10px;
           justify-content: center;
         }
 
-        .left-side-container .header-container > * {
+        .main-container vaadin-split-layout .left-side-container .header-container > * {
           flex: 1;
         }
 
-        .left-side-container .header-container .generic-filter-container {
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container {
           padding: 0 10px;
           text-align: center;
           display: flex;
@@ -285,7 +297,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         }
 
         /* Filter paper-input */
-        .left-side-container .header-container .generic-filter-container #filterInput {
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput {
           height: 35px;
           display: flex;
           padding: 0 10px;
@@ -295,17 +307,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           transition: border 250ms linear;
         }
 
-        .left-side-container .header-container .generic-filter-container #filterInput:focus,
-        .left-side-container .header-container .generic-filter-container #filterInput:hover {
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput:focus,
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput:hover {
           border-color: var(--primary-color);
         }
 
-        .left-side-container .header-container .generic-filter-container #filterInput iron-icon {
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput iron-icon {
           height: 75%;
           color: var(--primary-color);
         }
 
-        .left-side-container .header-container .generic-filter-container #filterInput input {
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput input {
           border: none;
           height: 100%;
           flex-grow: 1;
@@ -314,7 +326,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           background: transparent;
         }
 
-        .left-side-container .header-container .generic-filter-container #displayAllFilters {
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters {
           margin: 0;
           width: 100%;
           line-height: 15px;
@@ -325,55 +337,55 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           transition: background-color 100ms linear;
         }
 
-        .left-side-container .header-container .generic-filter-container #displayAllFilters:hover {
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters:hover {
           background-color: rgba(var(--primary-color-rgb), 0.2);
         }
 
-        .left-side-container .header-container .generic-filter-container #displayAllFilters iron-icon {
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters iron-icon {
           width: 15px;
           height: 15px;
           margin-left: 5px;
           transition: transform 200ms linear;
         }
 
-        .left-side-container .header-container .generic-filter-container #displayAllFilters iron-icon[rotate] {
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters iron-icon[rotate] {
           transform: rotate(180deg);
         }
 
         /* Active filters summary */
-        .left-side-container .header-container .active-filters {
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters {
           display: flex;
           font-size: 0.85em;
           flex-direction: column;
         }
 
-        .left-side-container .header-container .active-filters .header {
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header {
           display: flex;
           margin-bottom: 10px;
           justify-content: space-between;
         }
 
-        .left-side-container .header-container .active-filters .active-filters-list {
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .active-filters-list {
           display: flex;
           flex-wrap: wrap;
         }
 
-        .left-side-container .header-container .active-filters .no-active-filters {
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .no-active-filters {
           color: #A5A5A5;
         }
 
-        .left-side-container .header-container .active-filters .active-filters-list .active-filter strong {
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .active-filters-list .active-filter strong {
           cursor: pointer;
           margin-right: 5px;
           color: var(--primary-color);
         }
 
-        .left-side-container .header-container .active-filters .active-filters-list .active-filter strong:hover {
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .active-filters-list .active-filter strong:hover {
           color: var(--dark-primary-color);
         }
 
         /* Active filters */
-        .left-side-container .filters-container {
+        .main-container vaadin-split-layout .left-side-container .filters-container {
           display: grid;
           grid-row-gap: 10px;
           grid-column-gap: 10px;
@@ -384,40 +396,40 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           border-bottom: 1px solid var(--primary-color);
         }
 
-        .left-side-container .filters-container.filters-container-inline {
+        .main-container vaadin-split-layout .left-side-container .filters-container.filters-container-inline {
           display: flex;
           padding: 10px;
         }
 
-        .left-side-container .filters-container.filters-container-inline .filter-container {
+        .main-container vaadin-split-layout .left-side-container .filters-container.filters-container-inline .filter-container {
           flex: 1;
           margin: 0 5px;
         }
 
-        .left-side-container .filters-container .filter-container span {
+        .main-container vaadin-split-layout .left-side-container .filters-container .filter-container span {
           font-weight: bold;
           color: var(--primary-color);
         }
 
-        .left-side-container .filters-container .filter-container paper-input,
-        .left-side-container .filters-container .filter-container paper-checkbox,
-        .left-side-container .filters-container .filter-container casper-select,
-        .left-side-container .filters-container .filter-container casper-date-picker {
+        .main-container vaadin-split-layout .left-side-container .filters-container .filter-container paper-input,
+        .main-container vaadin-split-layout .left-side-container .filters-container .filter-container paper-checkbox,
+        .main-container vaadin-split-layout .left-side-container .filters-container .filter-container casper-select,
+        .main-container vaadin-split-layout .left-side-container .filters-container .filter-container casper-date-picker {
           width: 100%;
         }
 
-        .left-side-container .filters-container .filter-container paper-checkbox {
+        .main-container vaadin-split-layout .left-side-container .filters-container .filter-container paper-checkbox {
           margin-top: 25px;
         }
 
         /* Vaadin-grid */
-        .left-side-container .grid-container {
+        .main-container vaadin-split-layout .left-side-container .grid-container {
           flex-grow: 1;
           display: flex;
           position: relative;
         }
 
-        .left-side-container .grid-no-items {
+        .main-container vaadin-split-layout .left-side-container .grid-no-items {
           top: 0;
           left: 0;
           width: 100%;
@@ -432,12 +444,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           background: rgba(0, 0, 0, 0.1);
         }
 
-        .left-side-container .grid-no-items iron-icon {
+        .main-container vaadin-split-layout .left-side-container .grid-no-items iron-icon {
           width: 100px;
           height: 100px;
         }
 
-        .left-side-container paper-spinner {
+        .main-container vaadin-split-layout .left-side-container paper-spinner {
           width: 75px;
           height: 75px;
           position: absolute;
@@ -451,7 +463,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           --paper-spinner-layer-4-color: var(--primary-color);
         }
 
-        .left-side-container .grid-multiple-selection-container {
+        .main-container vaadin-split-layout .left-side-container .grid-multiple-selection-container {
           display: flex;
           padding: 10px;
           border-radius: 5px;
@@ -460,24 +472,24 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           justify-content: space-between;
         }
 
-        .left-side-container .grid-multiple-selection-container .grid-multiple-selection-label {
+        .main-container vaadin-split-layout .left-side-container .grid-multiple-selection-container .grid-multiple-selection-label {
           font-size: 0.75em;
           color: var(--primary-color);
         }
 
-        .left-side-container .grid-multiple-selection-container .grid-multiple-selection-icons {
+        .main-container vaadin-split-layout .left-side-container .grid-multiple-selection-container .grid-multiple-selection-icons {
           display: flex;
           flex-wrap: wrap;
           margin: -10px 0 0 0;
         }
 
-        .left-side-container .grid-container vaadin-grid {
+        .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
           height: 100%;
           overflow: hidden;
           border-radius: 5px;
         }
 
-        .left-side-container .grid-container vaadin-grid .context-menu-icon {
+        .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid .context-menu-icon {
           width: 20px;
           height: 20px;
           border-radius: 50%;
@@ -485,7 +497,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           display: var(--display-actions-on-hover);
         }
 
-        .left-side-container .grid-container vaadin-grid .context-menu-icon:hover {
+        .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid .context-menu-icon:hover {
           color: white;
           cursor: pointer;
           background-color: var(--primary-color);
@@ -512,177 +524,179 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
       <slot name="grid-custom-styles"></slot>
 
-      <vaadin-split-layout id="splitLayout">
-        <div class="left-side-container" style="[[__leftSideInitialWidth()]]">
-          <div class="header-container">
-            <!--Casper-moac-menu-->
-            <slot name="menu"></slot>
-            <div class="generic-filter-container">
-              <!--Generic Filter input-->
-              <iron-input id="filterInput">
-                <input placeholder="[[filterInputPlaceholder]]" id="filterInternalInput" />
-                <iron-icon icon="casper-icons:search"></iron-icon>
-              </iron-input>
+      <div class="main-container">
+        <vaadin-split-layout id="splitLayout">
+          <div class="left-side-container" style="[[__leftSideInitialWidth()]]">
+            <div class="header-container">
+              <!--Casper-moac-menu-->
+              <slot name="menu"></slot>
+              <div class="generic-filter-container">
+                <!--Generic Filter input-->
+                <iron-input id="filterInput">
+                  <input placeholder="[[filterInputPlaceholder]]" id="filterInternalInput" />
+                  <iron-icon icon="casper-icons:search"></iron-icon>
+                </iron-input>
 
-              <!--Show/hide the active filters-->
-              <template is="dom-if" if="[[__hasFilters]]">
-                <paper-button id="displayAllFilters" on-click="__toggleDisplayAllFilters">
-                  <span>Ver todos os filtros</span>
-                  <iron-icon icon="casper-icons:arrow-drop-down"></iron-icon>
-                </paper-button>
-              </template>
-            </div>
-
-            <!--Active filters-->
-            <div class="active-filters">
-              <div class="header">
-                <strong>Filtros ativos:</strong>
-                <template is="dom-if" if="[[!hideNumberResults]]">
-                  [[__numberOfResults]]
+                <!--Show/hide the active filters-->
+                <template is="dom-if" if="[[__hasFilters]]">
+                  <paper-button id="displayAllFilters" on-click="__toggleDisplayAllFilters">
+                    <span>Ver todos os filtros</span>
+                    <iron-icon icon="casper-icons:arrow-drop-down"></iron-icon>
+                  </paper-button>
                 </template>
               </div>
-              <div class="active-filters-list" id="activeFilters"></div>
-            </div>
-          </div>
 
-          <div hidden$="[[!__displayAllFilters]]">
-            <div class$="[[__filtersContainerClassName()]]">
-              <template is="dom-repeat" items="[[__filters]]">
-                <div class="filter-container">
-                  <span>[[item.filter.label]]:</span>
-                  <!--Casper-Select filter-->
-                  <template is="dom-if" if="[[__isFilterCasperSelect(item.filter.type)]]">
-                    <casper-select
-                      data-filter$="[[item.filterKey]]"
-                      list-width="20vw"
-                      list-height="50vh"
-                      value="{{item.filter.value}}"
-                      items="[[item.filter.inputOptions.items]]"
-                      label="[[item.filter.inputOptions.label]]"
-                      disable-clear$="[[item.filter.inputOptions.disableClear]]"
-                      multi-selection$="[[item.filter.inputOptions.multiSelection]]"
-                      lazy-load-resource="[[item.filter.inputOptions.lazyLoadResource]]"
-                      lazy-load-callback="[[item.filter.inputOptions.lazyLoadCallback]]"
-                      lazy-load-filter-fields="[[item.filter.inputOptions.lazyLoadFilterFields]]">
-                    </casper-select>
-                  </template>
-
-                  <!--Paper-Input filter-->
-                  <template is="dom-if" if="[[__isFilterPaperInput(item.filter.type)]]">
-                    <paper-input
-                      data-filter$="[[item.filterKey]]"
-                      value="{{item.filter.value}}"
-                      label="[[item.filter.inputOptions.label]]">
-                    </paper-input>
-                  </template>
-
-                  <!--Casper-Date-Picker filter-->
-                  <template is="dom-if" if="[[__isFilterCasperDatePicker(item.filter.type)]]">
-                    <casper-date-picker
-                      data-filter$="[[item.filterKey]]"
-                      value="{{item.filter.value}}"
-                      input-placeholder="[[item.filter.inputOptions.label]]">
-                    </casper-date-picker>
-                  </template>
-
-                  <!--Paper-Checkbox Filter-->
-                  <template is="dom-if" if="[[__isFilterPaperCheckbox(item.filter.type)]]">
-                    <paper-checkbox
-                      data-filter$="[[item.filterKey]]"
-                      checked="{{item.filter.value}}">
-                      [[item.filter.inputOptions.label]]
-                    </paper-checkbox>
+              <!--Active filters-->
+              <div class="active-filters">
+                <div class="header">
+                  <strong>Filtros ativos:</strong>
+                  <template is="dom-if" if="[[!hideNumberResults]]">
+                    [[__numberOfResults]]
                   </template>
                 </div>
+                <div class="active-filters-list" id="activeFilters"></div>
+              </div>
+            </div>
+
+            <div hidden$="[[!__displayAllFilters]]">
+              <div class$="[[__filtersContainerClassName()]]">
+                <template is="dom-repeat" items="[[__filters]]">
+                  <div class="filter-container">
+                    <span>[[item.filter.label]]:</span>
+                    <!--Casper-Select filter-->
+                    <template is="dom-if" if="[[__isFilterCasperSelect(item.filter.type)]]">
+                      <casper-select
+                        data-filter$="[[item.filterKey]]"
+                        list-width="20vw"
+                        list-height="50vh"
+                        value="{{item.filter.value}}"
+                        items="[[item.filter.inputOptions.items]]"
+                        label="[[item.filter.inputOptions.label]]"
+                        disable-clear$="[[item.filter.inputOptions.disableClear]]"
+                        multi-selection$="[[item.filter.inputOptions.multiSelection]]"
+                        lazy-load-resource="[[item.filter.inputOptions.lazyLoadResource]]"
+                        lazy-load-callback="[[item.filter.inputOptions.lazyLoadCallback]]"
+                        lazy-load-filter-fields="[[item.filter.inputOptions.lazyLoadFilterFields]]">
+                      </casper-select>
+                    </template>
+
+                    <!--Paper-Input filter-->
+                    <template is="dom-if" if="[[__isFilterPaperInput(item.filter.type)]]">
+                      <paper-input
+                        data-filter$="[[item.filterKey]]"
+                        value="{{item.filter.value}}"
+                        label="[[item.filter.inputOptions.label]]">
+                      </paper-input>
+                    </template>
+
+                    <!--Casper-Date-Picker filter-->
+                    <template is="dom-if" if="[[__isFilterCasperDatePicker(item.filter.type)]]">
+                      <casper-date-picker
+                        data-filter$="[[item.filterKey]]"
+                        value="{{item.filter.value}}"
+                        input-placeholder="[[item.filter.inputOptions.label]]">
+                      </casper-date-picker>
+                    </template>
+
+                    <!--Paper-Checkbox Filter-->
+                    <template is="dom-if" if="[[__isFilterPaperCheckbox(item.filter.type)]]">
+                      <paper-checkbox
+                        data-filter$="[[item.filterKey]]"
+                        checked="{{item.filter.value}}">
+                        [[item.filter.inputOptions.label]]
+                      </paper-checkbox>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <slot name="left"></slot>
+
+            <div hidden$="[[!__hasSelectedItems]]">
+              <div class="grid-multiple-selection-container" >
+                <div class="grid-multiple-selection-label">
+                  Seleção múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
+                </div>
+                <div class="grid-multiple-selection-icons">
+                  <slot name="multi-selection"></slot>
+                </div>
+              </div>
+            </div>
+
+            <!--Vaadin grid container-->
+            <div class="grid-container">
+              <vaadin-grid
+                id="grid"
+                class="moac"
+                theme="row-stripes"
+                loading="{{__gridLoading}}"
+                items="[[__filteredItems]]"
+                active-item="{{activeItem}}"
+                page-size="[[resourcePageSize]]"
+                selected-items="{{selectedItems}}"
+                expanded-items="{{expandedItems}}">
+
+                <slot name="grid-before"></slot>
+
+                <template is="dom-if" if="[[!disableSelection]]">
+                  <vaadin-grid-selection-column width="40px" flex-grow="0"></vaadin-grid-selection-column>
+                </template>
+
+                <slot name="grid"></slot>
+
+                <!--Context Menu-->
+                <template is="dom-if" if="[[__displayContextMenu]]">
+                  <vaadin-grid-column flex-grow="0" width="40px">
+                    <template>
+                      <iron-icon
+                        class="context-menu-icon"
+                        on-click="__openContextMenu"
+                        icon="casper-icons:arrow-drop-down">
+                      </iron-icon>
+                    </template>
+                  </vaadin-grid-column>
+                </template>
+
+                <!--vaadin-grid-column with the id property to make sure the correct active item is highlighted-->
+                <vaadin-grid-column width="0px" flex-grow="0" path="[[idProperty]]" hidden></vaadin-grid-column>
+              </vaadin-grid>
+
+              <!--No items placeholder-->
+              <template is="dom-if" if="[[__hasNoItems(__filteredItems, __internalItems, __gridLoading, loading)]]">
+                <div class="grid-no-items">
+                  <iron-icon icon="[[noItemsIcon]]"></iron-icon>
+                  [[noItemsText]]
+                </div>
               </template>
+
+              <!--Loading paper-spinner-->
+              <paper-spinner active="[[__displaySpinner(__gridLoading, loading)]]"></paper-spinner>
             </div>
           </div>
 
-          <slot name="left"></slot>
-
-          <div hidden$="[[!__hasSelectedItems]]">
-            <div class="grid-multiple-selection-container" >
-              <div class="grid-multiple-selection-label">
-                Seleção Múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
-              </div>
-              <div class="grid-multiple-selection-icons">
-                <slot name="multi-selection"></slot>
-              </div>
-            </div>
-          </div>
-
-          <!--Vaadin grid container-->
-          <div class="grid-container">
-            <vaadin-grid
-              id="grid"
-              class="moac"
-              theme="row-stripes"
-              loading="{{__gridLoading}}"
-              items="[[__filteredItems]]"
-              active-item="{{activeItem}}"
-              page-size="[[resourcePageSize]]"
-              selected-items="{{selectedItems}}"
-              expanded-items="{{expandedItems}}">
-
-              <slot name="grid-before"></slot>
-
-              <template is="dom-if" if="[[!disableSelection]]">
-                <vaadin-grid-selection-column width="40px" flex-grow="0"></vaadin-grid-selection-column>
-              </template>
-
-              <slot name="grid"></slot>
-
-              <!--Context Menu-->
-              <template is="dom-if" if="[[__displayContextMenu]]">
-                <vaadin-grid-column flex-grow="0" width="40px">
-                  <template>
-                    <iron-icon
-                      class="context-menu-icon"
-                      on-click="__openContextMenu"
-                      icon="casper-icons:arrow-drop-down">
-                    </iron-icon>
-                  </template>
-                </vaadin-grid-column>
-              </template>
-
-              <!--vaadin-grid-column with the id property to make sure the correct active item is highlighted-->
-              <vaadin-grid-column width="0px" flex-grow="0" path="[[idProperty]]" hidden></vaadin-grid-column>
-            </vaadin-grid>
-
-            <!--No items placeholder-->
-            <template is="dom-if" if="[[__hasNoItems(__filteredItems, __internalItems, __gridLoading, loading)]]">
-              <div class="grid-no-items">
-                <iron-icon icon="[[noItemsIcon]]"></iron-icon>
-                [[noItemsText]]
+          <div class="right-side-container" style="[[__rightSideInitialWidth()]]">
+            <!--Epaper-->
+            <template is="dom-if" if="[[__displayEpaper]]">
+              <div class="epaper-container">
+                <slot name="right"></slot>
+                <casper-epaper app="[[app]]">
+                  <slot name="casper-epaper-tabs" slot="casper-epaper-tabs"></slot>
+                  <slot name="casper-epaper-actions" slot="casper-epaper-actions"></slot>
+                  <slot name="casper-epaper-context-menu" slot="casper-epaper-context-menu"></slot>
+                </casper-epaper>
               </div>
             </template>
-
-            <!--Loading paper-spinner-->
-            <paper-spinner active="[[__displaySpinner(__gridLoading, loading)]]"></paper-spinner>
           </div>
-        </div>
+        </vaadin-split-layout>
 
-        <div class="right-side-container" style="[[__rightSideInitialWidth()]]">
-          <!--Epaper-->
-          <template is="dom-if" if="[[__displayEpaper]]">
-            <div class="epaper-container">
-              <slot name="right"></slot>
-              <casper-epaper app="[[app]]">
-                <slot name="casper-epaper-tabs" slot="casper-epaper-tabs"></slot>
-                <slot name="casper-epaper-actions" slot="casper-epaper-actions"></slot>
-                <slot name="casper-epaper-context-menu" slot="casper-epaper-context-menu"></slot>
-              </casper-epaper>
-            </div>
-          </template>
-
-          <!--Sidebar-->
-          <template is="dom-if" if="[[__displaySidebar]]">
-            <div class="sidebar-container">
-              <slot name="sidebar"></slot>
-            </div>
-          </template>
-        </div>
-      </vaadin-split-layout>
+        <!--Sidebar-->
+        <template is="dom-if" if="[[__displaySidebar]]">
+          <div class="sidebar-container">
+            <slot name="sidebar"></slot>
+          </div>
+        </template>
+      </div>
 
       <slot name="context-menu"></slot>
     `;
@@ -755,15 +769,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       this.$.grid.$.table.style.overflow = 'hidden';
     }
 
-    if (!this.__displayEpaper && !this.__displaySidebar) {
+    if (!this.__displayEpaper) {
       this.$.splitLayout.$.splitter.style.display = 'none';
-    } else {
-      const sidebarItems = Array.from(this.children).filter(child => child.getAttribute('slot') === 'sidebar');
-      if (sidebarItems.length > 0) {
-        this.$.splitLayout.addEventListener('splitter-dragend', () => {
-          sidebarItems.forEach(sidebarItem => sidebarItem.resize());
-        });
-      }
     }
   }
 
@@ -1277,7 +1284,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * correct percentual width for the left side of the component.
    */
   __leftSideInitialWidth () {
-    return this.moacType === CasperMoacTypes.GRID
+    return [CasperMoacTypes.GRID, CasperMoacTypes.GRID_SIDEBAR].includes(this.moacType)
       ? 'width: 100%;'
       : `width: ${this.leftSideInitialWidth}%;`;
   }
@@ -1287,7 +1294,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * correct percentual width for the right side of the component.
    */
   __rightSideInitialWidth () {
-    return this.moacType === CasperMoacTypes.GRID
+    return [CasperMoacTypes.GRID, CasperMoacTypes.GRID_SIDEBAR].includes(this.moacType)
       ? 'width: 0%;'
       : `width: ${100 - parseInt(this.leftSideInitialWidth)}%;`;
   }

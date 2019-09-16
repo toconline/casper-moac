@@ -138,13 +138,6 @@ class CasperMoacSidebarItem extends PolymerElement {
   }
 
   /**
-   * Re-calculate the total height of the sidebar item.
-   */
-  resize () {
-    this.__openedChanged(this.opened);
-  }
-
-  /**
    * Observer that gets fired when the opened property changes and triggers the sidebar item opening / close animation.
    *
    * @param {Boolean} opened The current opened state of the sidebar item.
