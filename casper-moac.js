@@ -463,21 +463,29 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           --paper-spinner-layer-4-color: var(--primary-color);
         }
 
-        .main-container vaadin-split-layout .left-side-container .grid-multiple-selection-container {
+        .main-container vaadin-split-layout .left-side-container #multiSelectionContainer {
+          height: 0;
+          overflow: hidden;
+          transition: height 100ms linear;
+        }
+
+        .main-container vaadin-split-layout .left-side-container #multiSelectionContainer .grid-multiple-selection {
           display: flex;
-          padding: 10px;
+          overflow: hidden;
           border-radius: 5px;
+          padding: 10px;
           align-items: center;
           background-color: #1A39601A;
           justify-content: space-between;
+          transition: height 100ms linear;
         }
 
-        .main-container vaadin-split-layout .left-side-container .grid-multiple-selection-container .grid-multiple-selection-label {
+        .main-container vaadin-split-layout .left-side-container #multiSelectionContainer .grid-multiple-selection .grid-multiple-selection-label {
           font-size: 0.75em;
           color: var(--primary-color);
         }
 
-        .main-container vaadin-split-layout .left-side-container .grid-multiple-selection-container .grid-multiple-selection-icons {
+        .main-container vaadin-split-layout .left-side-container #multiSelectionContainer .grid-multiple-selection .grid-multiple-selection-icons {
           display: flex;
           flex-wrap: wrap;
           margin: -10px 0 0 0;
@@ -612,9 +620,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
             </div>
 
             <slot name="left"></slot>
-
-            <div hidden$="[[!__hasSelectedItems]]">
-              <div class="grid-multiple-selection-container" >
+            <div id="multiSelectionContainer">
+              <div class="grid-multiple-selection">
                 <div class="grid-multiple-selection-label">
                   Seleção múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
                 </div>
@@ -999,6 +1006,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    */
   __selectedItemsChanged () {
     this.__hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
+
+    !this.__hasSelectedItems
+      ? this.$.multiSelectionContainer.style.height = ''
+      : this.$.multiSelectionContainer.style.height = `${this.$.multiSelectionContainer.firstElementChild.scrollHeight}px`;
 
     if (this.lazyLoad && this.__internalItems && this.__selectAllCheckbox) {
       this.__selectAllCheckboxObserverLock = true;
