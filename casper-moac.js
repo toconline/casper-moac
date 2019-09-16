@@ -1027,6 +1027,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.activeItem = null;
     this.selectedItems = [];
 
+    // Scroll to the top of the grid after the vaadin-grid displays the new items.
+    afterNextRender(this, () => { this.$.grid.$.outerscroller.scrollTop = 0; });
+
     // If the search input is empty or there are no items at the moment.
     if (!this.$.filterInput.value.trim() || !this.items) {
       this.__filteredItems = this.displayedItems = this.items || [];
@@ -1061,6 +1064,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       this.__numberOfResults = `${this.__filteredItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
       this.__mirrorGridInternalItems();
       this.__activateFirstItem();
+
     }
   }
 
