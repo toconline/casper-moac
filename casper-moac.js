@@ -898,7 +898,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         this.__activeItem = displayedItems[activeItemIndex + 1];
       }
 
-      if (keyCode === 'Enter') {
+      if (keyCode === 'Enter' && !this.disableSelection) {
         !this.selectedItems.includes(this.__activeItem)
           ? this.$.grid.selectItem(this.__activeItem)
           : this.$.grid.deselectItem(this.__activeItem);
