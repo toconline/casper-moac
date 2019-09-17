@@ -87,7 +87,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
        */
       filterInputPlaceholder: {
         type: String,
-        value: 'Filtrar Resultados'
+        value: 'Filtrar resultados'
       },
       /**
        * Label that will be used on the header when multiple items are selected in
