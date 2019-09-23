@@ -1064,7 +1064,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       this.__numberOfResults = `${this.__filteredItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
       this.__mirrorGridInternalItems();
       this.__activateFirstItem();
-
     }
   }
 
@@ -1239,7 +1238,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         const isRowActive = row.lastElementChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
 
         Array.from(row.children).forEach(rowCell => {
-          rowCell.style.backgroundColor = isRowActive ? 'rgba(var(--primary-color-rgb), 0.2)' : '';
+          rowCell.style.backgroundColor = isRowActive ? 'var(--casper-moc-active-item-background-color)' : '';
         });
 
         if (isRowActive && focusActiveCell) row.firstElementChild.focus();
