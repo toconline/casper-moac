@@ -1241,7 +1241,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           rowCell.style.backgroundColor = isRowActive ? 'var(--casper-moc-active-item-background-color)' : '';
         });
 
-        if (isRowActive && focusActiveCell) row.firstElementChild.focus();
+        if (isRowActive && focusActiveCell && !this.$.grid.shadowRoot.activeElement) {
+          row.firstElementChild.focus();
+        }
       });
     });
   }
