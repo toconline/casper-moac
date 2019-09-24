@@ -62,6 +62,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
        */
       items: {
         type: Array,
+        value: [],
         observer: '__itemsChanged'
       },
       /**
@@ -240,6 +241,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         type: Boolean,
         value: false,
         observer: '__displayAllFiltersChanged'
+      },
+      __filteredItems: {
+        type: Array,
+        observer: '__filteredItemsChanged'
       }
     };
   }
@@ -637,10 +642,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
                 id="grid"
                 class="moac"
                 theme="row-stripes"
-                loading="{{__gridLoading}}"
                 items="[[__filteredItems]]"
                 active-item="{{activeItem}}"
-                page-size="[[resourcePageSize]]"
                 selected-items="{{selectedItems}}"
                 expanded-items="{{expandedItems}}">
 
@@ -670,7 +673,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               </vaadin-grid>
 
               <!--No items placeholder-->
-              <template is="dom-if" if="[[__hasNoItems(__filteredItems, __internalItems, __gridLoading, loading)]]">
+              <template is="dom-if" if="[[__hasNoItems(__filteredItems, __internalItems, loading)]]">
                 <div class="grid-no-items">
                   <iron-icon icon="[[noItemsIcon]]"></iron-icon>
                   [[noItemsText]]
@@ -678,7 +681,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               </template>
 
               <!--Loading paper-spinner-->
-              <paper-spinner active="[[__displaySpinner(__gridLoading, loading)]]"></paper-spinner>
+              <paper-spinner active="[[loading]]"></paper-spinner>
             </div>
           </div>
 
@@ -718,6 +721,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     super.ready();
 
     this.grid             = this.$.grid;
+    this.__gridScroller   = this.$.grid.$.outerscroller;
     this.__displayEpaper  = [CasperMoacTypes.GRID_EPAPER_SIDEBAR, CasperMoacTypes.GRID_EPAPER].includes(this.moacType);
     this.__displaySidebar = [CasperMoacTypes.GRID_EPAPER_SIDEBAR, CasperMoacTypes.GRID_SIDEBAR].includes(this.moacType);
 
@@ -770,11 +774,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * It also hides the vaadin-split-layout handler if there is no epaper / sidebar.
    */
   __monkeyPatchVaadinElements () {
-    this.$.grid.$.outerscroller.addEventListener('scroll', () => this.__paintGridActiveRow());
-
-    if (this.lazyLoad) {
-      this.$.grid.$.table.style.overflow = 'hidden';
-    }
+    this.__gridScroller.addEventListener('scroll', () => this.__paintGridActiveRow());
 
     if (!this.__displayEpaper) {
       this.$.splitLayout.$.splitter.style.display = 'none';
@@ -789,9 +789,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.$.grid.addEventListener('click', event => {
       this.__paintGridActiveRow();
 
-      // When the grid is not lazy-loaded, when the user clicks on the header make sure the __filteredItems matches the vaadin-grid items.
-      if (!this.lazyLoad && this.__eventPathContainsNode(event, 'thead')) {
-        this.__mirrorGridInternalItems();
+      // If the user clicked on a vaadin-grid-sorter, either reload all the items when the grid is lazy loaded
+      // or make sure the __internalItems matches what's currently rendered.
+      if (this.__eventPathContainsNode(event, 'vaadin-grid-sorter')) {
+        this.lazyLoad
+          ? this.refreshItems()
+          : this.__mirrorGridInternalItems();
       }
     });
   }
@@ -876,26 +879,23 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   __bindKeyDownEvents (event) {
     const keyCode = event.code;
 
-    if (!['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode) || (
-      (!this.__internalItems || this.__internalItems.length === 0) &&
-      (!this.__gridInternalItems || this.__gridInternalItems.length === 0)
-    )) return;
-
-    const displayedItems = this.__internalItems || this.__gridInternalItems;
+    if (!this.__gridInternalItems
+      || this.__gridInternalItems.length === 0
+      || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
 
     // When there are no active items, select the first one.
     if (!this.__activeItem) {
-      this.__activeItem = displayedItems[0];
+      this.__activeItem = this.__gridInternalItems[0];
     } else {
       // Find the index of the current active item.
-      const activeItemIndex = displayedItems.findIndex(item => item === this.__activeItem);
+      const activeItemIndex = this.__gridInternalItems.findIndex(item => item === this.__activeItem);
 
       if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
-        this.__activeItem = displayedItems[activeItemIndex - 1];
+        this.__activeItem = this.__gridInternalItems[activeItemIndex - 1];
       }
 
-      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < displayedItems.length) {
-        this.__activeItem = displayedItems[activeItemIndex + 1];
+      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < this.__gridInternalItems.length) {
+        this.__activeItem = this.__gridInternalItems[activeItemIndex + 1];
       }
 
       if (keyCode === 'Enter' && !this.disableSelection) {
@@ -1010,13 +1010,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     !this.__hasSelectedItems
       ? this.$.multiSelectionContainer.style.height = ''
       : this.$.multiSelectionContainer.style.height = `${this.$.multiSelectionContainer.firstElementChild.scrollHeight}px`;
-
-    if (this.lazyLoad && this.__internalItems && this.__selectAllCheckbox) {
-      this.__selectAllCheckboxObserverLock = true;
-      this.__selectAllCheckbox.checked = this.__internalItems.length === this.selectedItems.length && this.selectedItems.length > 0;
-      this.__selectAllCheckbox.indeterminate = this.__internalItems.length !== this.selectedItems.length && this.selectedItems.length > 0;
-      this.__selectAllCheckboxObserverLock = false;
-    }
   }
 
   /**
@@ -1028,14 +1021,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.selectedItems = [];
 
     // Scroll to the top of the grid after the vaadin-grid displays the new items.
-    afterNextRender(this, () => { this.$.grid.$.outerscroller.scrollTop = 0; });
+    afterNextRender(this, () => { this.__gridScroller.scrollTop = 0; });
 
     // If the search input is empty or there are no items at the moment.
     if (!this.$.filterInput.value.trim() || !this.items) {
       this.__filteredItems = this.displayedItems = this.items || [];
       this.__numberOfResults = `${this.__filteredItems.length} ${this.multiSelectionLabel}`;
-      this.__mirrorGridInternalItems();
-      this.__activateFirstItem();
       return;
     }
 
@@ -1062,22 +1053,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       }));
 
       this.__numberOfResults = `${this.__filteredItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
-      this.__mirrorGridInternalItems();
-      this.__activateFirstItem();
     }
+  }
+
+  __filteredItemsChanged () {
+    this.__mirrorGridInternalItems();
+    this.__activateFirstItem();
   }
 
   /**
    * This method activates the first result since this is invoked when the items change.
    */
   __activateFirstItem () {
-    if (this.forceActiveItem && (
-      (this.__internalItems && this.__internalItems.length > 0) ||
-      (this.__gridInternalItems && this.__gridInternalItems.length > 0))) {
+    if (this.forceActiveItem && this.__gridInternalItems && this.__gridInternalItems.length > 0) {
       // Fetch the first item from different sources depending if it's lazy-load or not.
-      this.activeItem = this.lazyLoad
-        ? this.__internalItems[0]
-        : this.__gridInternalItems[0];
+      this.activeItem = this.__gridInternalItems[0];
     }
   }
 
@@ -1334,20 +1324,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * @param {Boolean} gridLoading
    * @param {Boolean} loading
    */
-  __hasNoItems (filteredItems, internalItems, gridLoading, loading) {
-    return !gridLoading && !loading && (
+  __hasNoItems (filteredItems, internalItems, loading) {
+    return !loading && (
       (filteredItems && filteredItems.length === 0) ||
       (internalItems && internalItems.length === 0));
-  }
-
-  /**
-   * Method used to toggle the paper-spinner's visibility.
-   *
-   * @param {Boolean} gridLoading
-   * @param {Boolean} loading
-   */
-  __displaySpinner (gridLoading, loading) {
-    return gridLoading || loading;
   }
 
   /**

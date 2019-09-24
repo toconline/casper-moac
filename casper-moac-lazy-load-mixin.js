@@ -1,5 +1,4 @@
 import { CasperMoacOperators, CasperMoacSort, CasperMoacFilterTypes } from './casper-moac-constants.js';
-import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 export const CasperMoacLazyLoadMixin = superClass => {
   return class extends superClass {
@@ -90,8 +89,15 @@ export const CasperMoacLazyLoadMixin = superClass => {
         resourceDefaultFilters: {
           type: String
         },
+        /**
+         * Query that will be used to fetch the expanded / children items.
+         */
         resourceFetchChildrenQuery: {
           type: String,
+        },
+        __currentPage: {
+          type: Number,
+          value: 0
         }
       };
     }
@@ -101,20 +107,10 @@ export const CasperMoacLazyLoadMixin = superClass => {
      */
     refreshItems () {
       // Scroll to the top of the grid to reset the current page being displayed.
-      this.$.grid.$.outerscroller.scrollTop = 0;
-      this.$.grid.clearCache();
-    }
-
-    /**
-     * This observer gets fired as soon as the JSON API resource changes and the
-     * method is responsible for refreshing or initializing the vaadin-grid lazy load.
-     */
-    __resourceNameChanged () {
-      if (this.__lazyLoadInitialized) {
-        this.refreshItems();
-      } else {
-        this.__initializeLazyLoad();
-      }
+      if (this.__gridScroller) this.__gridScroller.scrollTop = 0;
+      this.__currentPage = 0;
+      this.__ignoreScrollEvents = false;
+      this.__debounceFetchResourceItems();
     }
 
     /**
@@ -133,32 +129,18 @@ export const CasperMoacLazyLoadMixin = superClass => {
       // Check if all the required parameters were provided.
       if (missingProperties.length > 0) return;
 
-      this.$.grid.dataProvider = (parameters, callback) => this.__debounceFetchResourceItems(parameters, callback);
+      this.__gridScroller.addEventListener('scroll', () => {
+        if (this.__ignoreScrollEvents) return;
 
-      if (!this.disableSelection) {
-        afterNextRender(this, () => {
-          // Replace the vaadin-checkbox since the default one has event listeners not compatible with the lazy-load mode.
-          this.__selectAllCheckbox = document.createElement('vaadin-checkbox');
-          this.__selectAllCheckbox.addEventListener('checked-changed', event => {
-            this.__allItemsSelected = event.detail.value;
+        const gridScrollerHeight = this.__gridScroller.scrollHeight;
+        const gridScrollerPosition = this.__gridScroller.scrollTop +  this.__gridScroller.clientHeight;
 
-            // This means the checked observer was fired internally.
-            if (this.__selectAllCheckboxObserverLock) return;
+        if (gridScrollerHeight - gridScrollerPosition <= 100) {
+          this.__debounceFetchResourceItems();
+        }
+      });
 
-            this.selectedItems = this.__allItemsSelected ? [...this.__internalItems] : [];
-          });
-
-          this.$.grid.shadowRoot.querySelectorAll('thead tr th slot').forEach(headerSlot => {
-            const headerSlotElement = headerSlot.assignedElements().shift();
-            if (headerSlotElement.firstElementChild && headerSlotElement.firstElementChild.nodeName.toLowerCase() === 'vaadin-checkbox') {
-              headerSlotElement.removeChild(headerSlotElement.firstElementChild);
-              headerSlotElement.appendChild(this.__selectAllCheckbox);
-            }
-          });
-        });
-      }
-
-      this.__lazyLoadInitialized = true;
+      this.__debounceFetchResourceItems();
     }
 
     /**
@@ -168,11 +150,22 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.refreshItems();
     }
 
-    __debounceFetchResourceItems (parameters, callback) {
+    __debounceFetchResourceItems () {
       this.__debounce('__fetchResourceItemsDebouncer', () => {
+        this.__currentPage++;
+
+        const parameters = {
+          page: this.__currentPage,
+          pageSize: this.resourcePageSize,
+          sortOrders: this.$.grid._sorters.map(sorter => ({
+            path: sorter.path,
+            direction: sorter.direction
+          }))
+        };
+
         !parameters.parentItem
-          ? this.__fetchResourceItems(parameters, callback)
-          : this.__fetchChildrenResourceItems(parameters, callback);
+          ? this.__fetchResourceItems(parameters)
+          : this.__fetchChildrenResourceItems(parameters);
       });
     }
 
@@ -180,26 +173,33 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * Function that is invoked by the vaadin-grid to fetch items from the remote source which is
      * the JSON API in this case.
      * @param {Object} parameters Object that contains the number of items per page, the current page number and sort settings.
-     * @param {Function} callback Callback that will be called as soon as the items are returned from the JSON API. 
+     * @param {Function} callback Callback that will be called as soon as the items are returned from the JSON API.
      */
-    async __fetchResourceItems (parameters, callback) {
+    async __fetchResourceItems (parameters) {
       try {
+        this.loading = true;
+
         const socketResponse = await this.app.socket.jget(this.__buildResourceUrl(parameters), this.resourceTimeoutMs);
+
+        this.loading = false;
 
         if (socketResponse.errors) return;
 
         // Format the elements returned by the JSON API.
-        if (this.resourceFormatter) {
-          socketResponse.data.forEach(item => this.resourceFormatter(item));
-        }
+        if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter(item));
 
-        callback(socketResponse.data, parseInt(socketResponse.meta.total));
+
+        this.__filteredItems = this.displayedItems = this.__currentPage === 1
+          ? socketResponse.data
+          : [...this.__filteredItems, ...socketResponse.data];
+
+        // Disable the scroll event listeners when there are no more items.
+        this.__ignoreScrollEvents = socketResponse.data.length === 0;
+
+        // Update the paging information.
         this.__numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
-          ? `${this.$.grid.items.length} ${this.multiSelectionLabel}`
-          : `${this.$.grid.items.length} de ${socketResponse.meta['grand-total']} ${this.multiSelectionLabel}`;
-
-        this.__updateInternalItems(parameters.page, socketResponse.data);
-        this.__activateFirstItem();
+          ? `${socketResponse.meta.total} ${this.multiSelectionLabel}`
+          : `${socketResponse.meta.total} de ${socketResponse.meta['grand-total']} ${this.multiSelectionLabel}`;
       } catch (exception) {
         console.error(exception);
 
@@ -214,7 +214,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * Function that is invoked by the vaadin-grid to fetch children items from the remote source which is
      * the JSON API in this case.
      * @param {Object} parameters Object that contains the parent item which we are fetching children from.
-     * @param {Function} callback Callback that will be called as soon as the items are returned from the JSON API. 
+     * @param {Function} callback Callback that will be called as soon as the items are returned from the JSON API.
      */
     async __fetchChildrenResourceItems (parameters, callback) {
       try {
@@ -263,7 +263,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
     __buildResourceUrl (parameters) {
       let resourceUrlParams = [
         this.resourceTotalsMetaParam,
-        `${this.resourcePageParam}=${parameters.page + 1}`,
+        `${this.resourcePageParam}=${parameters.page}`,
         `${this.resourcePageSizeParam}=${parameters.pageSize}`
       ];
 
