@@ -673,7 +673,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               </vaadin-grid>
 
               <!--No items placeholder-->
-              <template is="dom-if" if="[[__hasNoItems(__filteredItems, __internalItems, loading)]]">
+              <template is="dom-if" if="[[__hasNoItems(__filteredItems, loading)]]">
                 <div class="grid-no-items">
                   <iron-icon icon="[[noItemsIcon]]"></iron-icon>
                   [[noItemsText]]
@@ -1027,6 +1027,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     if (!this.$.filterInput.value.trim() || !this.items) {
       this.__filteredItems = this.displayedItems = this.items || [];
       this.__numberOfResults = `${this.__filteredItems.length} ${this.multiSelectionLabel}`;
+      this.__mirrorGridInternalItems();
+      this.__activateFirstItem();
       return;
     }
 
@@ -1053,12 +1055,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       }));
 
       this.__numberOfResults = `${this.__filteredItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
+      this.__mirrorGridInternalItems();
+      this.__activateFirstItem();
     }
-  }
-
-  __filteredItemsChanged () {
-    this.__mirrorGridInternalItems();
-    this.__activateFirstItem();
   }
 
   /**
@@ -1320,14 +1319,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * vaadin-grid no items placeholder.
    *
    * @param {Array} filteredItems
-   * @param {Array} internalItems
-   * @param {Boolean} gridLoading
    * @param {Boolean} loading
    */
-  __hasNoItems (filteredItems, internalItems, loading) {
-    return !loading && (
-      (filteredItems && filteredItems.length === 0) ||
-      (internalItems && internalItems.length === 0));
+  __hasNoItems (filteredItems, loading) {
+    return !loading && filteredItems && filteredItems.length === 0;
   }
 
   /**
@@ -1344,6 +1339,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method will store the vaadin-grid's sorted and filtered items into casper-moac's __gridInternalItems property.
    */
   __mirrorGridInternalItems () {
+    debugger
     this.__gridInternalItems = Object.keys(this.$.grid._cache.items).map(itemIndex => this.$.grid._cache.items[itemIndex]);
   }
 

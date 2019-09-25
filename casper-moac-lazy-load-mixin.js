@@ -1,4 +1,5 @@
 import { CasperMoacOperators, CasperMoacSort, CasperMoacFilterTypes } from './casper-moac-constants.js';
+import { afterNextRender } from '@polymer/polymer/lib/utils/render-status';
 
 export const CasperMoacLazyLoadMixin = superClass => {
   return class extends superClass {
@@ -18,8 +19,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
          * @type {String}
          */
         resourceName: {
-          type: String,
-          observer: '__resourceNameChanged'
+          type: String
         },
         /**
          * List of attributes that should be fetch via JSON API.
@@ -135,7 +135,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
         const gridScrollerHeight = this.__gridScroller.scrollHeight;
         const gridScrollerPosition = this.__gridScroller.scrollTop +  this.__gridScroller.clientHeight;
 
-        if (gridScrollerHeight - gridScrollerPosition <= 100) {
+        // Re-fetch new items when the users scrolls past the 200px threshold.
+        if (gridScrollerHeight - gridScrollerPosition <= 200) {
           this.__debounceFetchResourceItems();
         }
       });
@@ -188,13 +189,19 @@ export const CasperMoacLazyLoadMixin = superClass => {
         // Format the elements returned by the JSON API.
         if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter(item));
 
+        if (this.__currentPage !== 1) {
+          this.__filteredItems = [...this.__filteredItems, ...socketResponse.data];
+          this.__mirrorGridInternalItems();
+        } else {
+          this.__filteredItems = socketResponse.data;
+          afterNextRender(this, () => { this.__gridScroller.scrollTop = 0; });
+          this.__mirrorGridInternalItems();
+          this.__activateFirstItem();
+        }
 
-        this.__filteredItems = this.displayedItems = this.__currentPage === 1
-          ? socketResponse.data
-          : [...this.__filteredItems, ...socketResponse.data];
 
         // Disable the scroll event listeners when there are no more items.
-        this.__ignoreScrollEvents = socketResponse.data.length === 0;
+        this.__ignoreScrollEvents = socketResponse.data.length < this.resourcePageSize;
 
         // Update the paging information.
         this.__numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
