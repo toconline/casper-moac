@@ -110,8 +110,40 @@ export const CasperMoacLazyLoadMixin = superClass => {
       // Scroll to the top of the grid to reset the current page being displayed.
       if (this.__gridScroller) this.__gridScroller.scrollTop = 0;
       this.__currentPage = 0;
+      this.__staleDataset = false;
       this.__ignoreScrollEvents = false;
       this.__debounceFetchResourceItems();
+    }
+
+    /**
+     * Adds manually a new item to the beginning of the existing ones ignoring
+     * the currently applied filters.
+     *
+     * @param {Object} item The item to be added to the current dataset.
+     */
+    addItem (item) {
+      if (this.lazyLoad) {
+        this.__staleDataset = true;
+        this.__filteredItems = [item, ...this.__filteredItems];
+        this.grid._scrollToIndex(0);
+        this.__activateFirstItem();
+      }
+    }
+
+    /**
+     * Updates manually the item provided by its id propery.
+     *
+     * @param {Object} item The item that will should be updated.
+     */
+    updateItem (item) {
+      if (this.lazyLoad) {
+        this.__staleDataset = true;
+        const itemToUpdateIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty] === item[this.idProperty]);
+        this.__filteredItems[itemToUpdateIndex] = item;
+        this.grid._scrollToIndex(itemToUpdateIndex);
+        this.grid.clearCache();
+        this.activeItem = item;
+      }
     }
 
     /**
