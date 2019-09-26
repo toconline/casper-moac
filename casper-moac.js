@@ -788,12 +788,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     this.$.grid.addEventListener('click', event => {
       this.__paintGridActiveRow();
 
-      // If the user clicked on a vaadin-grid-sorter, either reload all the items when the grid is lazy loaded
-      // or make sure the __internalItems matches what's currently rendered.
-      if (this.__eventPathContainsNode(event, 'vaadin-grid-sorter')) {
-        this.lazyLoad
-          ? this.refreshItems()
-          : this.__mirrorGridInternalItems();
+      // If the user clicked on a vaadin-grid-sorter, reload all the items when the grid is lazy loaded.
+      if (this.lazyLoad && this.__eventPathContainsNode(event, 'vaadin-grid-sorter')) {
+        this.refreshItems();
       }
     });
   }
@@ -877,25 +874,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    */
   __bindKeyDownEvents (event) {
     const keyCode = event.code;
-    const gridCachedItems = Object.keys(this.grid._cache.items).map(index => ({
-      index: index,
-      item: this.grid._cache.items[index]
-    }));
+    const gridCachedItems = this.__normalizeGridCachedItems();
 
     if (!gridCachedItems || gridCachedItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
 
     // When there are no active items, select the first one.
     if (!this.__activeItem) {
-      this.__activeItem = gridCachedItems[Object.keys(gridCachedItems)[0]];
+      this.__activeItem = gridCachedItems[0];
     } else {
       // Find the index of the current active item.
-      const activeItemIndex = parseInt(Object.keys(gridCachedItems).find(index => gridCachedItems[index] === this.__activeItem));
+      const activeItemIndex = gridCachedItems.findIndex(gridCachedItem => gridCachedItem === this.__activeItem);
 
       if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
         this.__activeItem = gridCachedItems[activeItemIndex - 1];
       }
 
-      if (keyCode === 'ArrowDown' && Object.keys(gridCachedItems)) {
+      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < gridCachedItems.length) {
         this.__activeItem = gridCachedItems[activeItemIndex + 1];
       }
 
@@ -1028,7 +1022,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     if (!this.$.filterInput.value.trim() || !this.items) {
       this.__filteredItems = this.displayedItems = this.items || [];
       this.__numberOfResults = `${this.__filteredItems.length} ${this.multiSelectionLabel}`;
-      this.__mirrorGridInternalItems();
       this.__activateFirstItem();
       return;
     }
@@ -1056,7 +1049,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       }));
 
       this.__numberOfResults = `${this.__filteredItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
-      this.__mirrorGridInternalItems();
       this.__activateFirstItem();
     }
   }
@@ -1065,9 +1057,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method activates the first result since this is invoked when the items change.
    */
   __activateFirstItem () {
-    if (this.forceActiveItem && this.__gridInternalItems && this.__gridInternalItems.length > 0) {
+    const gridCachedItems = this.__normalizeGridCachedItems();
+    if (this.forceActiveItem && gridCachedItems && gridCachedItems.length > 0) {
       // Fetch the first item from different sources depending if it's lazy-load or not.
-      this.activeItem = this.__gridInternalItems[0];
+      this.activeItem = gridCachedItems[0];
     }
   }
 
@@ -1337,10 +1330,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   }
 
   /**
-   * This method will store the vaadin-grid's sorted and filtered items into casper-moac's __gridInternalItems property.
+   * This method will transform the vaadin-grid's internal items which are stored in an object into an array
+   * which is way easier to manipulate.
    */
-  __mirrorGridInternalItems () {
-    this.__gridInternalItems = Object.keys(this.$.grid._cache.items).map(itemIndex => this.$.grid._cache.items[itemIndex]);
+  __normalizeGridCachedItems () {
+    return Object.keys(this.$.grid._cache.items).map(index => this.$.grid._cache.items[index]);
   }
 
   /**

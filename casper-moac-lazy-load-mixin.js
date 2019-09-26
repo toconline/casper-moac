@@ -196,11 +196,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
         if (this.__currentPage !== 1) {
           this.__filteredItems = [...this.__filteredItems, ...socketResponse.data];
-          this.__mirrorGridInternalItems();
         } else {
           this.__filteredItems = socketResponse.data;
           afterNextRender(this, () => { this.__gridScroller.scrollTop = 0; });
-          this.__mirrorGridInternalItems();
           this.__activateFirstItem();
         }
 
