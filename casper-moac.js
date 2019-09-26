@@ -241,9 +241,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
         value: false,
         observer: '__displayAllFiltersChanged'
       },
+      /**
+       * The items that are currently displayed in the vaadin-grid.
+       *
+       * @type {Array}
+       */
       __filteredItems: {
         type: Array,
-        observer: '__filteredItemsChanged'
+        value: []
       }
     };
   }
@@ -711,11 +716,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     `;
   }
 
-  __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
-  __isFilterPaperCheckbox (itemType) { return itemType === CasperMoacFilterTypes.PAPER_CHECKBOX; }
-  __isFilterCasperSelect (itemType) { return itemType === CasperMoacFilterTypes.CASPER_SELECT; }
-  __isFilterCasperDatePicker (itemType) { return itemType === CasperMoacFilterTypes.CASPER_DATE_PICKER; }
-
   ready () {
     super.ready();
 
@@ -751,6 +751,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     document.removeEventListener('keydown', this.__boundKeyDownEvents);
   }
 
+  __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
+  __isFilterPaperCheckbox (itemType) { return itemType === CasperMoacFilterTypes.PAPER_CHECKBOX; }
+  __isFilterCasperSelect (itemType) { return itemType === CasperMoacFilterTypes.CASPER_SELECT; }
+  __isFilterCasperDatePicker (itemType) { return itemType === CasperMoacFilterTypes.CASPER_DATE_PICKER; }
+
   /**
    * This method checks if the named slot "grid-custom-styles" has a template assigned to it. If it has,
    * it will stamp it in the actual DOM.
@@ -768,15 +773,36 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
   /**
    * As the name suggests, this method applies some monkey-patches to the vaadin elements. Firstly
-   * it hides the grid's vertical scrollbars since the grid behaves poorly when jumping into a specific scroll position when the items
-   * are lazily loaded. Then it adds a scroll event listener to paint the active row due to the grid's constant re-usage of rows.
-   * It also hides the vaadin-split-layout handler if there is no epaper / sidebar.
+   * it adds a scroll event listener to paint the active row due to the grid's constant re-usage of rows.
+   * It also hides the vaadin-split-layout handler if there is no epaper / sidebar and replaces the existing
+   * vaadin-checkbox header since its current implementation is faulty.
    */
   __monkeyPatchVaadinElements () {
     this.__gridScroller.addEventListener('scroll', () => this.__paintGridActiveRow());
 
     if (!this.__displayEpaper) {
       this.$.splitLayout.$.splitter.style.display = 'none';
+    }
+
+    if (!this.disableSelection) {
+      afterNextRender(this, () => {
+        this.grid.shadowRoot.querySelectorAll('table thead th').forEach(header => {
+          const selectAllCheckbox = header.querySelector('slot').assignedElements()[0].firstElementChild;
+          if (selectAllCheckbox && selectAllCheckbox.nodeName.toLowerCase() === 'vaadin-checkbox') {
+            // Create a vaadin-checkbox to replace the default one which has bugs.
+            this.__selectAllCheckbox = document.createElement('vaadin-checkbox');
+            this.__selectAllCheckbox.addEventListener('checked-changed', event => {
+              // Lock the vaadin-checkbox event handler to avoid infinite loops.
+              if (this.__selectAllCheckboxLock) return;
+
+              this.selectedItems = event.detail.value ? [...this.__filteredItems] : [];
+            });
+
+            selectAllCheckbox.parentElement.appendChild(this.__selectAllCheckbox);
+            selectAllCheckbox.parentElement.removeChild(selectAllCheckbox);
+          }
+        });
+      });
     }
   }
 
@@ -871,6 +897,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
   /**
    * Bind event listeners for when the user presses down the Enter or the down / up arrow keys.
+   *
+   * @param {Object} event The event's object.
    */
   __bindKeyDownEvents (event) {
     const keyCode = event.code;
@@ -956,7 +984,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * Observer that fires after the filters object change from the outside which
    * will cause a re-render of the active filters.
    *
-   * @param {Object} filters
+   * @param {Object} filters The filters that are currently being applied to the dataset.
    */
   __filtersChanged (filters) {
     this.__hasFilters = !!this.filters && Object.keys(this.filters).length > 0;
@@ -974,10 +1002,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   }
 
   /**
-   * Force the vaadin-grid to always have an activeItem.
+   * Observer that gets called when the vaadin-grid activeItem changes.
    *
-   * @param {Object} newActiveItem
-   * @param {Object} previousActiveItem
+   * @param {Object} newActiveItem The new vaadin-grid activeItem.
+   * @param {Object} previousActiveItem the previous vaadin-grid activeItem.
    */
   __activeItemChanged (newActiveItem, previousActiveItem) {
     if (!newActiveItem && previousActiveItem && this.forceActiveItem) {
@@ -1005,6 +1033,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     !this.__hasSelectedItems
       ? this.$.multiSelectionContainer.style.height = ''
       : this.$.multiSelectionContainer.style.height = `${this.$.multiSelectionContainer.firstElementChild.scrollHeight}px`;
+
+    if (!this.__selectAllCheckbox) return;
+
+    // Lock the vaadin-checkbox event handler to avoid infinite loops.
+    this.__selectAllCheckboxLock = true;
+    this.__selectAllCheckbox.checked = this.selectedItems.length > 0 && this.__filteredItems.length === this.selectedItems.length;
+    this.__selectAllCheckbox.indeterminate = this.selectedItems.length > 0 && this.__filteredItems.length !== this.selectedItems.length;
+    this.__selectAllCheckboxLock = false;
   }
 
   /**

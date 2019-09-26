@@ -196,6 +196,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
         if (this.__currentPage !== 1) {
           this.__filteredItems = [...this.__filteredItems, ...socketResponse.data];
+
+          // Select all the new items if the existing ones are all selected.
+          if (this.__selectAllCheckbox.checked && !this.__selectAllCheckbox.indeterminate) {
+            this.selectedItems = [...this.__filteredItems];
+          }
         } else {
           this.__filteredItems = socketResponse.data;
           afterNextRender(this, () => { this.__gridScroller.scrollTop = 0; });
