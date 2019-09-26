@@ -62,7 +62,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
        */
       items: {
         type: Array,
-        value: [],
         observer: '__itemsChanged'
       },
       /**
@@ -454,7 +453,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
           height: 100px;
         }
 
-        .main-container vaadin-split-layout .left-side-container paper-spinner {
+        .main-container vaadin-split-layout .left-side-container #spinner {
           width: 75px;
           height: 75px;
           position: absolute;
@@ -681,7 +680,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
               </template>
 
               <!--Loading paper-spinner-->
-              <paper-spinner active="[[loading]]"></paper-spinner>
+              <paper-spinner id="spinner" active="[[loading]]"></paper-spinner>
             </div>
           </div>
 
@@ -878,24 +877,26 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    */
   __bindKeyDownEvents (event) {
     const keyCode = event.code;
+    const gridCachedItems = Object.keys(this.grid._cache.items).map(index => ({
+      index: index,
+      item: this.grid._cache.items[index]
+    }));
 
-    if (!this.__gridInternalItems
-      || this.__gridInternalItems.length === 0
-      || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
+    if (!gridCachedItems || gridCachedItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
 
     // When there are no active items, select the first one.
     if (!this.__activeItem) {
-      this.__activeItem = this.__gridInternalItems[0];
+      this.__activeItem = gridCachedItems[Object.keys(gridCachedItems)[0]];
     } else {
       // Find the index of the current active item.
-      const activeItemIndex = this.__gridInternalItems.findIndex(item => item === this.__activeItem);
+      const activeItemIndex = parseInt(Object.keys(gridCachedItems).find(index => gridCachedItems[index] === this.__activeItem));
 
       if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
-        this.__activeItem = this.__gridInternalItems[activeItemIndex - 1];
+        this.__activeItem = gridCachedItems[activeItemIndex - 1];
       }
 
-      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < this.__gridInternalItems.length) {
-        this.__activeItem = this.__gridInternalItems[activeItemIndex + 1];
+      if (keyCode === 'ArrowDown' && Object.keys(gridCachedItems)) {
+        this.__activeItem = gridCachedItems[activeItemIndex + 1];
       }
 
       if (keyCode === 'Enter' && !this.disableSelection) {
@@ -1339,12 +1340,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method will store the vaadin-grid's sorted and filtered items into casper-moac's __gridInternalItems property.
    */
   __mirrorGridInternalItems () {
-    debugger
     this.__gridInternalItems = Object.keys(this.$.grid._cache.items).map(itemIndex => this.$.grid._cache.items[itemIndex]);
   }
 
   /**
    * This function is a wrapper for the Polymer's debounce method.
+   *
    *
    * @param {String} debouncerProperty The casper-moac's property that will hold the current debounce status.
    * @param {Function} callback The function that will be invoked afterwards.

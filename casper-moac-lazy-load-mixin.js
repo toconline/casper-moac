@@ -19,7 +19,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
          * @type {String}
          */
         resourceName: {
-          type: String
+          type: String,
+          observer: '__debounceFetchResourceItems'
         },
         /**
          * List of attributes that should be fetch via JSON API.
@@ -118,17 +119,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * that interacts with the JSON API.
      */
     __initializeLazyLoad () {
-      const missingProperties = [
-        'resourceName',
-        'resourceSortParam',
-        'resourcePageParam',
-        'resourcePageSizeParam',
-        'resourceTotalsMetaParam',
-      ].filter(property => !this[property]);
-
-      // Check if all the required parameters were provided.
-      if (missingProperties.length > 0) return;
-
       this.__gridScroller.addEventListener('scroll', () => {
         if (this.__ignoreScrollEvents) return;
 
@@ -136,7 +126,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         const gridScrollerPosition = this.__gridScroller.scrollTop +  this.__gridScroller.clientHeight;
 
         // Re-fetch new items when the users scrolls past the 200px threshold.
-        if (gridScrollerHeight - gridScrollerPosition <= 200) {
+        if (gridScrollerHeight - gridScrollerPosition <= 500) {
           this.__debounceFetchResourceItems();
         }
       });
@@ -151,8 +141,23 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.refreshItems();
     }
 
+    /**
+     * Method that will remotely fetch the resource items via JSON API. This method call suffers
+     * debounce to avoid spamming the database.
+     */
     __debounceFetchResourceItems () {
       this.__debounce('__fetchResourceItemsDebouncer', () => {
+        const missingProperties = [
+          'resourceName',
+          'resourceSortParam',
+          'resourcePageParam',
+          'resourcePageSizeParam',
+          'resourceTotalsMetaParam',
+        ].filter(property => !this[property]);
+
+        // Check if all the required parameters were provided.
+        if (missingProperties.length > 0) return;
+
         this.__currentPage++;
 
         const parameters = {
@@ -199,7 +204,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
           this.__activateFirstItem();
         }
 
-
         // Disable the scroll event listeners when there are no more items.
         this.__ignoreScrollEvents = socketResponse.data.length < this.resourcePageSize;
 
@@ -236,30 +240,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
           text: 'Ocorreu um erro ao obter os dados.',
           backgroundColor: 'red'
         });
-      }
-    }
-
-    /**
-     * This method is responsible for selecting all the new items if the user is scrolling with that option active
-     * or wiping all selected items if the filters have changed.
-     * @param {Number} currentPage The current vaadin-grid's page.
-     * @param {Array} socketResponse The newly fetched data from the JSON API.
-     */
-    __updateInternalItems (currentPage, socketResponseData) {
-      // This means the filters were re-applied so clear all the selected items and reset the internal items.
-      if (currentPage === 0) {
-        this.selectedItems = [];
-        this.__internalItems = this.displayedItems = socketResponseData;
-
-        // When the component is still initializing the __selectAllCheckbox might still be undefined.
-        if (this.__selectAllCheckbox) this.__selectAllCheckbox.checked = false;
-        return;
-      }
-
-      // Append the new items and select all of them if that's the case.
-      this.__internalItems = this.displayedItems = [...this.__internalItems, ...socketResponseData];
-      if (this.__allItemsSelected) {
-        this.selectedItems = [...this.__internalItems];
       }
     }
 
