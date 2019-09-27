@@ -116,56 +116,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     /**
-     * Adds manually a new item to the beginning of the existing ones ignoring
-     * the currently applied filters.
-     *
-     * @param {Object} item The item to be added to the current dataset.
-     */
-    addItem (item) {
-      if (!this.lazyLoad) return;
-
-      this.__staleDataset = true;
-      this.__filteredItems = [item, ...this.__filteredItems];
-      this.grid._scrollToIndex(0);
-      this.grid.clearCache();
-      this.activeItem = item;
-    }
-
-    /**
-     * Updates manually the item provided by its id propery.
-     *
-     * @param {Object} item The item that will be updated.
-     */
-    updateItem (item) {
-      if (!this.lazyLoad) return;
-
-      this.__staleDataset = true;
-      const itemIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty] === item[this.idProperty]);
-      this.__filteredItems[itemIndex] = item;
-      this.grid.clearCache();
-      this.activeItem = item;
-    }
-
-    /**
-     * Deletes manually the item provided by its id propery.
-     *
-     * @param {Object} itemId The identifier to find the item that will be removed.
-     */
-    removeItem (itemId) {
-      if (!this.lazyLoad) return;
-
-      this.__staleDataset = true;
-      const itemIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty].toString() === itemId.toString());
-      this.__filteredItems.splice(itemIndex, 1);
-      this.grid.clearCache();
-
-      // Activate the previous item if there are still items at the grid.
-      if (this.__filteredItems.length > itemIndex - 1) {
-        this.activeItem = this.__filteredItems[itemIndex - 1];
-      }
-    }
-
-    /**
      * This method initializes the vaadin-grid lazy load behavior by provinding the function
      * that interacts with the JSON API.
      */
@@ -254,8 +204,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
           }
         } else {
           this.__filteredItems = socketResponse.data;
-          afterNextRender(this, () => { this.__gridScroller.scrollTop = 0; });
-          this.__activateFirstItem();
+          this.grid._scrollToIndex(0);
+          this.__activateItemAtIndex();
         }
 
         // Disable the scroll event listeners when there are no more items.

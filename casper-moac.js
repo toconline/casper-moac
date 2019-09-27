@@ -751,6 +751,48 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     document.removeEventListener('keydown', this.__boundKeyDownEvents);
   }
 
+  /**
+   * Adds manually a new item to the beginning of the existing ones ignoring
+   * the currently applied filters.
+   *
+   * @param {Object} item The item to be added to the current dataset.
+   */
+  addItem (item) {
+    this.__staleDataset = true;
+    this.__filteredItems = [item, ...this.__filteredItems];
+    this.grid._scrollToIndex(0);
+    this.grid.clearCache();
+    this.activeItem = item;
+  }
+
+  /**
+   * Updates manually the item provided by its id propery.
+   *
+   * @param {Object} item The item that will be updated.
+   */
+  updateItem (item) {
+    this.__staleDataset = true;
+    const itemIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty] === item[this.idProperty]);
+    this.__filteredItems[itemIndex] = item;
+    this.grid.clearCache();
+    this.activeItem = item;
+  }
+
+  /**
+   * Deletes manually the item provided by its id propery.
+   *
+   * @param {String | Number} itemId The identifier to find the item that will be removed.
+   */
+  removeItem (itemId) {
+    this.__staleDataset = true;
+    const itemIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty].toString() === itemId.toString());
+    this.__filteredItems.splice(itemIndex, 1);
+    this.grid.clearCache();
+
+    // Activate the previous item if there are still items at the grid.
+    this.__activateItemAtIndex(itemIndex);
+  }
+
   __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
   __isFilterPaperCheckbox (itemType) { return itemType === CasperMoacFilterTypes.PAPER_CHECKBOX; }
   __isFilterCasperSelect (itemType) { return itemType === CasperMoacFilterTypes.CASPER_SELECT; }
@@ -1058,7 +1100,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     if (!this.$.filterInput.value.trim() || !this.items) {
       this.__filteredItems = this.displayedItems = this.items || [];
       this.__numberOfResults = `${this.__filteredItems.length} ${this.multiSelectionLabel}`;
-      this.__activateFirstItem();
+      this.__activateItemAtIndex();
       return;
     }
 
@@ -1085,18 +1127,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       }));
 
       this.__numberOfResults = `${this.__filteredItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
-      this.__activateFirstItem();
+      this.__activateItemAtIndex();
     }
   }
 
   /**
    * This method activates the first result since this is invoked when the items change.
    */
-  __activateFirstItem () {
+  __activateItemAtIndex (index = 0) {
     const gridCachedItems = this.__normalizeGridCachedItems();
-    if (this.forceActiveItem && gridCachedItems && gridCachedItems.length > 0) {
+    if (gridCachedItems && gridCachedItems.length > index) {
       // Fetch the first item from different sources depending if it's lazy-load or not.
-      this.activeItem = gridCachedItems[0];
+      this.activeItem = gridCachedItems[index];
     }
   }
 
