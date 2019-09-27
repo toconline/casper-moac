@@ -164,10 +164,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         const parameters = {
           page: this.__currentPage,
           pageSize: this.resourcePageSize,
-          sortOrders: this.$.grid._sorters.map(sorter => ({
-            path: sorter.path,
-            direction: sorter.direction
-          }))
+          sortOrders: this.$.grid._mapSorters()
         };
 
         !parameters.parentItem

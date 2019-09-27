@@ -758,11 +758,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * @param {Object} item The item to be added to the current dataset.
    */
   addItem (item) {
-    this.__staleDataset = true;
     this.__filteredItems = [item, ...this.__filteredItems];
-    this.grid._scrollToIndex(0);
+
     this.grid.clearCache();
     this.activeItem = item;
+    this.__scrollToItemIfNotVisible(item[this.idProperty]);
   }
 
   /**
@@ -771,11 +771,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * @param {Object} item The item that will be updated.
    */
   updateItem (item) {
-    this.__staleDataset = true;
-    const itemIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty] === item[this.idProperty]);
+    const itemIndex = this.__findItemIndexById(this.__filteredItems, item[this.idProperty]);
     this.__filteredItems[itemIndex] = item;
+
     this.grid.clearCache();
     this.activeItem = item;
+    this.__scrollToItemIfNotVisible(item[this.idProperty]);
   }
 
   /**
@@ -784,13 +785,58 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * @param {String | Number} itemId The identifier to find the item that will be removed.
    */
   removeItem (itemId) {
-    this.__staleDataset = true;
-    const itemIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty].toString() === itemId.toString());
-    this.__filteredItems.splice(itemIndex, 1);
-    this.grid.clearCache();
+    // Scroll to the item if it's not into view taking into account the grid's internal items.
+    this.__scrollToItemIfNotVisible(itemId);
 
-    // Activate the previous item if there are still items at the grid.
-    this.__activateItemAtIndex(itemIndex);
+    const itemIndex = this.__findItemIndexById(this.__filteredItems, itemId);
+    this.__filteredItems.splice(itemIndex, 1);
+  }
+
+  /**
+   * Scrolls to a specific item if he's not currently visible.
+   *
+   * @param {Number | String} itemId The item that should be scrolled to if he's not currently visible.
+   */
+  async __scrollToItemIfNotVisible (itemId) {
+    // Scroll to the item if it's not into view taking into account the grid's internal items.
+    if (!this.__isItemIntoView(itemId)) {
+      const gridInternalItems = await this.__retrieveGridInternalItems();
+      this.grid._scrollToIndex(this.__findItemIndexById(gridInternalItems, itemId));
+    }
+  }
+
+  /**
+   * Given the casper-moac's __fiteredItems or the grid's internal items, look for the index
+   * of a specific item.
+   *
+   * @param {Array} items The list of items that will be used to find a specific item.
+   * @param {Number | String} itemId The item's identifier that we'll looking for.
+   */
+  __findItemIndexById (items, itemId) {
+    return items.findIndex(item => item[this.idProperty].toString() === itemId.toString());
+  }
+
+  /**
+   * This function is used to see the if the provided item is visible or not in the grid.
+   *
+   * @param {Number | String} itemId The item that should be into view or not.
+   */
+  __isItemIntoView (itemId) {
+    const rows = this.grid.shadowRoot.querySelectorAll('table tbody tr');
+
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+      if (rows[rowIndex]._item[this.idProperty].toString() === itemId.toString()) {
+        const rowBoundingClientRect = rows[rowIndex].getBoundingClientRect();
+        const gridBoundingClientRect = this.grid.getBoundingClientRect();
+        const gridHeaderHeight = this.grid.shadowRoot.querySelector('thead').getBoundingClientRect().height;
+
+        return rowBoundingClientRect.top >= gridBoundingClientRect.top + gridHeaderHeight
+          && rowBoundingClientRect.bottom <= gridBoundingClientRect.bottom;
+      }
+    }
+
+    // If we got here, no visible row or the ones at the top / bottom has the item we're looking for.
+    return false;
   }
 
   __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
@@ -806,7 +852,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     afterNextRender(this, () => {
       const customStylesSlot = this.shadowRoot.querySelector('slot[name="grid-custom-styles"]');
       if (customStylesSlot.assignedElements().length > 0) {
-        const template = customStylesSlot.assignedElements()[0];
+        const template = customStylesSlot.assignedElements().shift();
         const templateClass = templatize(template);
         this.shadowRoot.appendChild(new templateClass().root);
       }
@@ -829,7 +875,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     if (!this.disableSelection) {
       afterNextRender(this, () => {
         this.grid.shadowRoot.querySelectorAll('table thead th').forEach(header => {
-          const selectAllCheckbox = header.querySelector('slot').assignedElements()[0].firstElementChild;
+          const selectAllCheckbox = header.querySelector('slot').assignedElements().shift().firstElementChild;
           if (selectAllCheckbox && selectAllCheckbox.nodeName.toLowerCase() === 'vaadin-checkbox') {
             // Create a vaadin-checkbox to replace the default one which has bugs.
             this.__selectAllCheckbox = document.createElement('vaadin-checkbox');
@@ -942,25 +988,25 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    *
    * @param {Object} event The event's object.
    */
-  __bindKeyDownEvents (event) {
+  async __bindKeyDownEvents (event) {
     const keyCode = event.code;
-    const gridCachedItems = this.__normalizeGridCachedItems();
+    const gridInternalItems = await this.__retrieveGridInternalItems();
 
-    if (!gridCachedItems || gridCachedItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
+    if (!gridInternalItems || gridInternalItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
 
     // When there are no active items, select the first one.
     if (!this.__activeItem) {
-      this.__activeItem = gridCachedItems[0];
+      this.__activeItem = gridInternalItems[0];
     } else {
       // Find the index of the current active item.
-      const activeItemIndex = gridCachedItems.findIndex(gridCachedItem => gridCachedItem === this.__activeItem);
+      const activeItemIndex = gridInternalItems.findIndex(gridCachedItem => gridCachedItem === this.__activeItem);
 
       if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
-        this.__activeItem = gridCachedItems[activeItemIndex - 1];
+        this.__activeItem = gridInternalItems[activeItemIndex - 1];
       }
 
-      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < gridCachedItems.length) {
-        this.__activeItem = gridCachedItems[activeItemIndex + 1];
+      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < gridInternalItems.length) {
+        this.__activeItem = gridInternalItems[activeItemIndex + 1];
       }
 
       if (keyCode === 'Enter' && !this.disableSelection) {
@@ -1132,13 +1178,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   }
 
   /**
-   * This method activates the first result since this is invoked when the items change.
+   * This method activates the item that is present in the specified index.
    */
-  __activateItemAtIndex (index = 0) {
-    const gridCachedItems = this.__normalizeGridCachedItems();
-    if (gridCachedItems && gridCachedItems.length > index) {
-      // Fetch the first item from different sources depending if it's lazy-load or not.
-      this.activeItem = gridCachedItems[index];
+  async __activateItemAtIndex (index = 0) {
+    const gridInternalItems = await this.__retrieveGridInternalItems();
+
+    if (gridInternalItems && gridInternalItems.length > index) {
+      this.activeItem = gridInternalItems[index];
     }
   }
 
@@ -1295,7 +1341,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       const activeItemId = this.__activeItem ? String(this.__activeItem[this.idProperty]) : null;
 
       // Loop through each grid row and paint the active one.
-      this.$.grid.shadowRoot.querySelectorAll('tbody tr').forEach((row, rowIndex) => {
+      this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach((row, rowIndex) => {
         const isRowActive = row.lastElementChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
 
         Array.from(row.children).forEach(rowCell => {
@@ -1411,8 +1457,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * This method will transform the vaadin-grid's internal items which are stored in an object into an array
    * which is way easier to manipulate.
    */
-  __normalizeGridCachedItems () {
-    return Object.keys(this.$.grid._cache.items).map(index => this.$.grid._cache.items[index]);
+  __retrieveGridInternalItems () {
+    return new Promise(resolve => {
+      this.grid.dataProvider({
+        page: 0,
+        pageSize: this.__filteredItems.length,
+        sortOrders: this.grid._mapSorters()
+      }, items => resolve(items));
+    });
   }
 
   /**
