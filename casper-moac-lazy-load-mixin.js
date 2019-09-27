@@ -122,44 +122,46 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * @param {Object} item The item to be added to the current dataset.
      */
     addItem (item) {
-      if (this.lazyLoad) {
-        this.__staleDataset = true;
-        this.__filteredItems = [item, ...this.__filteredItems];
-        this.grid._scrollToIndex(0);
-        this.__activateFirstItem();
-      }
+      if (!this.lazyLoad) return;
+
+      this.__staleDataset = true;
+      this.__filteredItems = [item, ...this.__filteredItems];
+      this.grid._scrollToIndex(0);
+      this.grid.clearCache();
+      this.activeItem = item;
     }
 
     /**
      * Updates manually the item provided by its id propery.
      *
-     * @param {Object} item The item that will should be updated.
+     * @param {Object} item The item that will be updated.
      */
     updateItem (item) {
-      if (this.lazyLoad) {
-        this.__staleDataset = true;
-        const itemIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty] === item[this.idProperty]);
-        this.__filteredItems[itemIndex] = item;
-        this.grid.clearCache();
-        this.activeItem = item;
-      }
+      if (!this.lazyLoad) return;
+
+      this.__staleDataset = true;
+      const itemIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty] === item[this.idProperty]);
+      this.__filteredItems[itemIndex] = item;
+      this.grid.clearCache();
+      this.activeItem = item;
     }
 
     /**
      * Deletes manually the item provided by its id propery.
      *
-     * @param {Object} item The item that will should be updated.
+     * @param {Object} itemId The identifier to find the item that will be removed.
      */
-    removeItem (item) {
-      if (this.lazyLoad) {
-        this.__staleDataset = true;
-        const itemIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty] === item[this.idProperty]);
-        this.__filteredItems.splice(itemIndex, 1);
-        this.grid.clearCache();
+    removeItem (itemId) {
+      if (!this.lazyLoad) return;
 
-        if (this.__filteredItems.length > itemIndex) {
-          this.activeItem = this.__filteredItems[itemIndex];
-        }
+      this.__staleDataset = true;
+      const itemIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty].toString() === itemId.toString());
+      this.__filteredItems.splice(itemIndex, 1);
+      this.grid.clearCache();
+
+      // Activate the previous item if there are still items at the grid.
+      if (this.__filteredItems.length > itemIndex - 1) {
+        this.activeItem = this.__filteredItems[itemIndex - 1];
       }
     }
 
