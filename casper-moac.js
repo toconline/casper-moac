@@ -1005,7 +1005,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    * Observer that gets called when the vaadin-grid activeItem changes.
    *
    * @param {Object} newActiveItem The new vaadin-grid activeItem.
-   * @param {Object} previousActiveItem the previous vaadin-grid activeItem.
+   * @param {Object} previousActiveItem The previous vaadin-grid activeItem.
    */
   __activeItemChanged (newActiveItem, previousActiveItem) {
     if (!newActiveItem && previousActiveItem && this.forceActiveItem) {

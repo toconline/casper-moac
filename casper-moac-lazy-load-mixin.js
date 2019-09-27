@@ -138,11 +138,28 @@ export const CasperMoacLazyLoadMixin = superClass => {
     updateItem (item) {
       if (this.lazyLoad) {
         this.__staleDataset = true;
-        const itemToUpdateIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty] === item[this.idProperty]);
-        this.__filteredItems[itemToUpdateIndex] = item;
-        this.grid._scrollToIndex(itemToUpdateIndex);
+        const itemIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty] === item[this.idProperty]);
+        this.__filteredItems[itemIndex] = item;
         this.grid.clearCache();
         this.activeItem = item;
+      }
+    }
+
+    /**
+     * Deletes manually the item provided by its id propery.
+     *
+     * @param {Object} item The item that will should be updated.
+     */
+    removeItem (item) {
+      if (this.lazyLoad) {
+        this.__staleDataset = true;
+        const itemIndex = this.__filteredItems.findIndex(filteredItem => filteredItem[this.idProperty] === item[this.idProperty]);
+        this.__filteredItems.splice(itemIndex, 1);
+        this.grid.clearCache();
+
+        if (this.__filteredItems.length > itemIndex) {
+          this.activeItem = this.__filteredItems[itemIndex];
+        }
       }
     }
 
