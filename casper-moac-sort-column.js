@@ -1,6 +1,6 @@
 import { html } from '@polymer/polymer/polymer-element.js';
-import { CasperMoacSortTypes, CasperMoacSortDirections } from './casper-moac-constants';
 import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js';
+import { CasperMoacSortTypes, CasperMoacSortDirections } from './casper-moac-constants';
 
 class CasperMoacSortColumn extends GridColumnElement {
 
@@ -17,8 +17,7 @@ class CasperMoacSortColumn extends GridColumnElement {
       },
       direction: {
         type: String,
-        notify: true,
-        reflectToAttribute: true
+        notify: true
       }
     }
   }
@@ -42,23 +41,19 @@ class CasperMoacSortColumn extends GridColumnElement {
           }
 
           #header-container #header-sort-order {
+            width: 10px;
             font-size: 10px;
           }
 
           #header-container #header-title {
-            margin-left: 10px;
-          }
-
-          :host([direction="asc"]) #header-container #header-sort iron-icon,
-          :host([direction="desc"]) #header-container #header-sort iron-icon {
-            opacity: 1 !important;
+            margin-right: 5px;
           }
         </style>
 
         <div id="header-container" on-click="__toggleDirection">
-          <iron-icon icon="[[__getIcon()]]"></iron-icon>
-          <span id="header-sort-order">[[sortOrder]]</span>
           <span id="header-title">[[header]]</span>
+          <iron-icon icon="[[__getIcon()]]" style="[[__getIconOpacity()]]"></iron-icon>
+          <span id="header-sort-order">[[sortOrder]]</span>
         </div>
       </template>
     `;
@@ -85,11 +80,14 @@ class CasperMoacSortColumn extends GridColumnElement {
     // Manipulate the icon and opacity.
     this.__headerIcon = this.__headerIcon || event.target.closest('#header-container').querySelector('iron-icon');
     this.__headerIcon.icon = this.__getIcon();
-    this.__headerIcon.style.opacity = !!this.direction ? 1 : 0.5;
+    this.__headerIcon.style.opacity = this.__getIconOpacity();
   }
 
+  /**
+   * This method returns the casper-icon depending on the current direction of the sorter.
+   */
   __getIcon () {
-    switch(this.direction) {
+    switch (this.direction) {
       case CasperMoacSortDirections.ASCENDING:
         return 'casper-icons:sort-up';
       case CasperMoacSortDirections.DESCENDING:
@@ -97,6 +95,13 @@ class CasperMoacSortColumn extends GridColumnElement {
       default:
         return 'casper-icons:sort';
     }
+  }
+
+  /**
+   * This method returns the casper-icon's opacity depending on the current direction of the sorter.
+   */
+  __getIconOpacity () {
+    return !this.direction ? 'opacity: 0.5;' : 'opacity: 1;';
   }
 }
 

@@ -3,6 +3,10 @@ import { CasperMoacSortTypes, CasperMoacSortDirections } from './casper-moac-con
 export const CasperMoacSortingMixin = superClass => {
   return class extends superClass {
 
+    /**
+     * This method will handle the currently active sorters and re-fetch the items when the grid is lazy loaded
+     * or sort locally otherwise everytime a sorter changes.
+     */
     __bindSorterEvents () {
       this.__activeSorters = [];
       this.__sorters = [
@@ -41,6 +45,11 @@ export const CasperMoacSortingMixin = superClass => {
       });
     }
 
+    /**
+     * Sort the provided items with the currently active sorters.
+     *
+     * @param {Array} items The items that will be sorted.
+     */
     __sortItems (items) {
       if (this.__activeSorters.length === 0) return items;
 
@@ -69,6 +78,7 @@ export const CasperMoacSortingMixin = superClass => {
           }
         }
 
+        // If we got here, it means the objects properties that were compared are exactly the same.
         return 0;
       });
     }
