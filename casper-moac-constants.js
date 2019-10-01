@@ -31,7 +31,12 @@ export const CasperMoacOperators = {
   CUSTOM: 'CUSTOM'
 };
 
-export const CasperMoacSort = {
+export const CasperMoacSortTypes = {
+  STRING: 'string',
+  NUMBER: 'number'
+};
+
+export const CasperMoacSortDirections = {
   ASCENDING: 'asc',
   DESCENDING: 'desc'
 };

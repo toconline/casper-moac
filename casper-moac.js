@@ -1,4 +1,5 @@
 import { CasperMoacTypes, CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
+import { CasperMoacSortingMixin } from './casper-moac-sorting-mixin.js';
 import { CasperMoacLazyLoadMixin } from './casper-moac-lazy-load-mixin.js';
 
 import '@vaadin/vaadin-grid/vaadin-grid.js';
@@ -19,7 +20,7 @@ import { templatize } from '@polymer/polymer/lib/utils/templatize.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
-export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
+export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(PolymerElement)) {
 
   static get is () {
     return 'casper-moac';
@@ -736,6 +737,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
 
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
     this.__bindClickEvents();
+    this.__bindSorterEvents();
     this.__bindFiltersEvents();
     this.__bindContextMenuEvents();
     this.__monkeyPatchVaadinElements();
@@ -788,8 +790,46 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     // Scroll to the item if it's not into view taking into account the grid's internal items.
     this.__scrollToItemIfNotVisible(itemId);
 
-    const itemIndex = this.__findItemIndexById(this.__filteredItems, itemId);
-    this.__filteredItems.splice(itemIndex, 1);
+    afterNextRender(this, () => {
+      this.__blinkRow(itemId, '#FFB3B3', () => {
+        const itemIndex = this.__findItemIndexById(this.__filteredItems, itemId);
+        this.__filteredItems.splice(itemIndex, 1);
+        this.grid.clearCache();
+
+        const newItemIndex = Math.max(0, itemIndex - 1);
+
+        if (this.__filteredItems.length > newItemIndex) {
+          this.activeItem = this.__filteredItems[newItemIndex];
+          this.__paintGridActiveRow();
+          this.__scrollToItemIfNotVisible(this.activeItem[this.idProperty]);
+        }
+      });
+    })
+  }
+
+  __blinkRow (itemId, backgroundColor, callback = undefined) {
+    const rows = this.$.grid.shadowRoot.querySelectorAll('table tbody tr');
+
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+      const row = rows[rowIndex];
+      const isRowActive = row.lastElementChild.querySelector('slot').assignedElements().shift().innerHTML === itemId.toString();
+
+      if (!isRowActive) continue;
+
+      Array.from(row.children).forEach(cell => {
+        cell.style.backgroundColor = backgroundColor;
+        cell.setAttribute('blink', true);
+      });
+
+      setTimeout(() => {
+        Array.from(row.children).forEach(cell => {
+          cell.style.backgroundColor = '';
+          cell.removeAttribute('blink');
+        });
+
+        if (callback) callback();
+      }, 2000);
+    }
   }
 
   /**
@@ -800,8 +840,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
   async __scrollToItemIfNotVisible (itemId) {
     // Scroll to the item if it's not into view taking into account the grid's internal items.
     if (!this.__isItemIntoView(itemId)) {
-      const gridInternalItems = await this.__retrieveGridInternalItems();
-      this.grid._scrollToIndex(this.__findItemIndexById(gridInternalItems, itemId));
+      this.grid._scrollToIndex(this.__findItemIndexById(this.__filteredItems, itemId));
     }
   }
 
@@ -990,23 +1029,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    */
   async __bindKeyDownEvents (event) {
     const keyCode = event.code;
-    const gridInternalItems = await this.__retrieveGridInternalItems();
 
-    if (!gridInternalItems || gridInternalItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
+    if (this.__filteredItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
 
     // When there are no active items, select the first one.
     if (!this.__activeItem) {
-      this.__activeItem = gridInternalItems[0];
+      this.__activeItem = this.__filteredItems[0];
     } else {
       // Find the index of the current active item.
-      const activeItemIndex = gridInternalItems.findIndex(gridCachedItem => gridCachedItem === this.__activeItem);
+      const activeItemIndex = this.__filteredItems.findIndex(gridCachedItem => gridCachedItem === this.__activeItem);
 
       if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
-        this.__activeItem = gridInternalItems[activeItemIndex - 1];
+        this.__activeItem = this.__filteredItems[activeItemIndex - 1];
       }
 
-      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < gridInternalItems.length) {
-        this.__activeItem = gridInternalItems[activeItemIndex + 1];
+      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < this.__filteredItems.length) {
+        this.__activeItem = this.__filteredItems[activeItemIndex + 1];
       }
 
       if (keyCode === 'Enter' && !this.disableSelection) {
@@ -1142,49 +1180,47 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
     // Scroll to the top of the grid after the vaadin-grid displays the new items.
     afterNextRender(this, () => { this.__gridScroller.scrollTop = 0; });
 
-    // If the search input is empty or there are no items at the moment.
-    if (!this.$.filterInput.value.trim() || !this.items) {
-      this.__filteredItems = this.displayedItems = this.items || [];
-      this.__numberOfResults = `${this.__filteredItems.length} ${this.multiSelectionLabel}`;
-      this.__activateItemAtIndex();
-      return;
-    }
+    // Use spread operator to avoid messing with the original dataset by sorting.
+    let originalItems = [...(this.items || [])]
+    let filteredItems = [...(this.items || [])];
 
-    // Either retrieve the list of filter attributes from the properties or from the item's existing keys.
-    let filterAttributes = this.resourceFilterAttributes;
-    if (!filterAttributes && this.items.length > 0) {
-      filterAttributes = Object.keys(this.items[0]);
-    }
+    if (this.$.filterInput.value.trim() && originalItems.length > 0) {
+      // Either retrieve the list of filter attributes from the properties or from the first item's existing keys.
+      let filterAttributes = this.resourceFilterAttributes;
+      if (!filterAttributes) filterAttributes = Object.keys(originalItems[0]);
 
-    if (filterAttributes && this.items.length > 0) {
-      const filterTerm = this.__normalizeVariable(this.$.filterInput.value);
+      if (filterAttributes) {
+        const filterTerm = this.__normalizeVariable(this.$.filterInput.value);
 
-      this.__filteredItems = this.displayedItems = this.items.filter(item => filterAttributes.some(filterAttribute => {
-        if (filterAttribute.constructor === Object) {
-          switch (filterAttribute.operator) {
-            case CasperMoacOperators.EXACT_MATCH: return this.__normalizeVariable(item[filterAttribute.field]) === filterTerm;
-            case CasperMoacOperators.CONTAINS: return this.__normalizeVariable(item[filterAttribute.field]).includes(filterTerm);
-            case CasperMoacOperators.ENDS_WITH: return this.__normalizeVariable(item[filterAttribute.field]).endsWith(filterTerm);
-            case CasperMoacOperators.STARTS_WITH: return this.__normalizeVariable(item[filterAttribute.field]).startsWith(filterTerm);
+        filteredItems = originalItems.filter(item => filterAttributes.some(filterAttribute => {
+          if (filterAttribute.constructor === Object) {
+            switch (filterAttribute.operator) {
+              case CasperMoacOperators.EXACT_MATCH: return this.__normalizeVariable(item[filterAttribute.field]) === filterTerm;
+              case CasperMoacOperators.CONTAINS: return this.__normalizeVariable(item[filterAttribute.field]).includes(filterTerm);
+              case CasperMoacOperators.ENDS_WITH: return this.__normalizeVariable(item[filterAttribute.field]).endsWith(filterTerm);
+              case CasperMoacOperators.STARTS_WITH: return this.__normalizeVariable(item[filterAttribute.field]).startsWith(filterTerm);
+            }
           }
-        }
 
-        return this.__normalizeVariable(item[filterAttribute]).includes(filterTerm);
-      }));
-
-      this.__numberOfResults = `${this.__filteredItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
-      this.__activateItemAtIndex();
+          return this.__normalizeVariable(item[filterAttribute]).includes(filterTerm);
+        }));
+      }
     }
+
+    this.__filteredItems = this.displayedItems = this.__sortItems(filteredItems);
+    this.grid.clearCache();
+    this.__activateItemAtIndex();
+    this.__numberOfResults = filteredItems.length === originalItems.length
+      ? `${filteredItems.length} ${this.multiSelectionLabel}`
+      : `${filteredItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
   }
 
   /**
    * This method activates the item that is present in the specified index.
    */
   async __activateItemAtIndex (index = 0) {
-    const gridInternalItems = await this.__retrieveGridInternalItems();
-
-    if (gridInternalItems && gridInternalItems.length > index) {
-      this.activeItem = gridInternalItems[index];
+    if (this.__filteredItems && this.__filteredItems.length > index) {
+      this.activeItem = this.__filteredItems[index];
     }
   }
 
@@ -1341,11 +1377,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
       const activeItemId = this.__activeItem ? String(this.__activeItem[this.idProperty]) : null;
 
       // Loop through each grid row and paint the active one.
-      this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach((row, rowIndex) => {
+      this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
         const isRowActive = row.lastElementChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
 
-        Array.from(row.children).forEach(rowCell => {
-          rowCell.style.backgroundColor = isRowActive ? 'var(--casper-moc-active-item-background-color)' : '';
+        Array.from(row.children).forEach(cell => {
+          // This means an animation with a backgroundColor is already occurring.
+          if (!cell.hasAttribute('blink')) {
+            cell.style.backgroundColor = isRowActive ? 'var(--casper-moc-active-item-background-color)' : '';
+          }
         });
 
         if (isRowActive && focusActiveCell && !this.$.grid.shadowRoot.activeElement) {
@@ -1451,20 +1490,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(PolymerElement) {
    */
   __eventPathContainsNode (event, nodeName) {
     return event.composedPath().some(element => element.nodeName && element.nodeName.toLowerCase() === nodeName);
-  }
-
-  /**
-   * This method will transform the vaadin-grid's internal items which are stored in an object into an array
-   * which is way easier to manipulate.
-   */
-  __retrieveGridInternalItems () {
-    return new Promise(resolve => {
-      this.grid.dataProvider({
-        page: 0,
-        pageSize: this.__filteredItems.length,
-        sortOrders: this.grid._mapSorters()
-      }, items => resolve(items));
-    });
   }
 
   /**

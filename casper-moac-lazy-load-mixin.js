@@ -1,5 +1,4 @@
-import { CasperMoacOperators, CasperMoacSort, CasperMoacFilterTypes } from './casper-moac-constants.js';
-import { afterNextRender } from '@polymer/polymer/lib/utils/render-status';
+import { CasperMoacOperators, CasperMoacSortDirections, CasperMoacFilterTypes } from './casper-moac-constants.js';
 
 export const CasperMoacLazyLoadMixin = superClass => {
   return class extends superClass {
@@ -110,7 +109,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
       // Scroll to the top of the grid to reset the current page being displayed.
       if (this.__gridScroller) this.__gridScroller.scrollTop = 0;
       this.__currentPage = 0;
-      this.__staleDataset = false;
       this.__ignoreScrollEvents = false;
       this.__debounceFetchResourceItems();
     }
@@ -164,7 +162,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         const parameters = {
           page: this.__currentPage,
           pageSize: this.resourcePageSize,
-          sortOrders: this.$.grid._mapSorters()
+          sorters: this.__activeSorters
         };
 
         !parameters.parentItem
@@ -261,11 +259,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
       }
 
       // Sort by ascending or descending.
-      if (parameters.sortOrders.length > 0) {
-        const sortSettings = parameters.sortOrders[0];
-        resourceUrlParams = sortSettings.direction === CasperMoacSort.ASCENDING
-          ? [...resourceUrlParams, `${this.resourceSortParam}=${sortSettings.path}`]
-          : [...resourceUrlParams, `${this.resourceSortParam}=-${sortSettings.path}`];
+      if (parameters.sorters.length > 0) {
+        const sortParameters = parameters.sorters.map(sorter => sorter.direction === CasperMoacSortDirections.ASCENDING ? sorter.path : `-${sorter.path}`);
+        resourceUrlParams = [...resourceUrlParams, `${this.resourceSortParam}=${sortParameters.join(',')}`];
       }
 
       const filterResourceUrlParams = [
