@@ -69,6 +69,11 @@ class CasperMoacSortColumn extends GridColumnElement {
     return headerTemplate;
   }
 
+  /**
+   * This method is invoked when the user clicks on the sort column header which shall change its direction.
+   *
+   * @param {Object} event The event's object.
+   */
   __toggleDirection (event) {
     const directions = [undefined, CasperMoacSortDirections.ASCENDING, CasperMoacSortDirections.DESCENDING];
     const currentDirection = directions.findIndex(direction => direction === this.direction);
@@ -80,7 +85,7 @@ class CasperMoacSortColumn extends GridColumnElement {
     // Manipulate the icon and opacity.
     this.__headerIcon = this.__headerIcon || event.target.closest('#header-container').querySelector('iron-icon');
     this.__headerIcon.icon = this.__getIcon();
-    this.__headerIcon.style.opacity = this.__getIconOpacity();
+    this.__headerIcon.style = this.__getIconOpacity();
   }
 
   /**
