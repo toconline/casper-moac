@@ -27,7 +27,8 @@ class CasperMoacSortColumn extends GridColumnElement {
       <template class="header">
         <style>
           #header-container {
-            display: flex;
+            width: 100%;
+            display: inline-flex;
             user-select: none;
           }
 
@@ -36,7 +37,6 @@ class CasperMoacSortColumn extends GridColumnElement {
           }
 
           #header-container #header-title {
-            width: 100%;
             flex-shrink: 1;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -58,7 +58,7 @@ class CasperMoacSortColumn extends GridColumnElement {
           }
         </style>
 
-        <div id="header-container" on-click="__toggleDirection">
+        <div id="header-container" on-click="__toggleDirection" style="[[__getHeaderContainerAlignment()]]">
           <span id="header-title">[[header]]</span>
 
           <div id="header-sort">
@@ -118,6 +118,20 @@ class CasperMoacSortColumn extends GridColumnElement {
    */
   __getIconOpacity () {
     return `opacity: ${!this.direction ? '0.2' : '1'}`;
+  }
+
+  /**
+   * This method returns the styling required to horizontally align the title.
+   */
+  __getHeaderContainerAlignment () {
+    switch (this.textAlign) {
+      case 'center':
+        return 'justify-content: center';
+      case 'end':
+        return 'justify-content: flex-end';
+      case 'start':
+        return 'justify-content: flex-start';
+    }
   }
 }
 
