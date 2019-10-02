@@ -44,6 +44,7 @@ class CasperMoacSortColumn extends GridColumnElement {
 
           #header-container #header-sort {
             flex-shrink: 0;
+            margin-left: 5px;
           }
 
           #header-container #header-sort iron-icon {
