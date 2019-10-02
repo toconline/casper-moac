@@ -29,14 +29,19 @@ class CasperMoacSortColumn extends GridColumnElement {
           #header-container {
             display: flex;
             user-select: none;
-            align-items: center;
+          }
+
+          #header-container:hover {
+            cursor: pointer;
+          }
+
+          #header-container #header-sort {
+            flex-shrink: 0;
           }
 
           #header-container iron-icon {
             width: 15px;
             height: 15px;
-            opacity: 0.5;
-            flex-shrink: 0;
             --iron-icon-fill-color: white;
           }
 
@@ -46,14 +51,20 @@ class CasperMoacSortColumn extends GridColumnElement {
           }
 
           #header-container #header-title {
-            margin-right: 5px;
+            width: 100%;
+            flex-shrink: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
         </style>
 
         <div id="header-container" on-click="__toggleDirection">
           <span id="header-title">[[header]]</span>
-          <iron-icon icon="[[__getIcon()]]" style="[[__getIconOpacity()]]"></iron-icon>
-          <span id="header-sort-order">[[sortOrder]]</span>
+
+          <div id="header-sort">
+            <iron-icon icon="[[__getIcon()]]" style="[[__getIconOpacity()]]"></iron-icon>
+            <span id="header-sort-order">[[sortOrder]]</span>
+          </div>
         </div>
       </template>
     `;
@@ -106,7 +117,7 @@ class CasperMoacSortColumn extends GridColumnElement {
    * This method returns the casper-icon's opacity depending on the current direction of the sorter.
    */
   __getIconOpacity () {
-    return !this.direction ? 'opacity: 0.5;' : 'opacity: 1;';
+    return `opacity: ${!this.direction ? '0.5' : '1'}`;
   }
 }
 
