@@ -786,7 +786,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {String | Number} itemId The identifier to find the item that will be removed.
    */
   removeItem (itemId) {
-    // Scroll to the item if it's not into view taking into account the grid's internal items.
     this.__scrollToItemIfNotVisible(itemId);
 
     afterNextRender(this, () => {
@@ -799,14 +798,20 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         if (this.__filteredItems.length > newItemIndex) {
           this.activeItem = this.__filteredItems[newItemIndex];
-          this.__paintGridActiveRow();
           this.__scrollToItemIfNotVisible(this.activeItem[this.idProperty]);
         }
       });
     })
   }
 
-  __blinkRow (itemId, backgroundColor, callback = undefined) {
+  /**
+   * This method will cause a specific row to blink and then execute the provided callback as soon as the animation ends.
+   *
+   * @param {String | Number} itemId The item's identifier.
+   * @param {String} backgroundColor The color that will be used in the background for the blinking animation.
+   * @param {Function} callback The code that will be executed when the animation ends.
+   */
+  __blinkRow (itemId, backgroundColor, callback) {
     const rows = this.$.grid.shadowRoot.querySelectorAll('table tbody tr');
 
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
@@ -826,8 +831,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           cell.removeAttribute('blink');
         });
 
-        if (callback) callback();
+        callback();
       }, 2000);
+
+      return;
     }
   }
 

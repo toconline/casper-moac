@@ -91,8 +91,10 @@ export const CasperMoacSortingMixin = superClass => {
      */
     __castSortItemProperty (item, sorter) {
       switch (sorter.dataType) {
-        case CasperMoacSortTypes.STRING: return (item[sorter.path] || '').toString().toLowerCase();
-        case CasperMoacSortTypes.NUMBER: return parseFloat(item[sorter.path]);
+        case CasperMoacSortTypes.STRING:
+          return (item[sorter.path] || '').toString().toLowerCase();
+        case CasperMoacSortTypes.NUMBER:
+          return parseFloat(item[sorter.path]);
       }
     }
   }
