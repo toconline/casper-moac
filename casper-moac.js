@@ -736,7 +736,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       : afterNextRender(this, () => this.__filterItems());
 
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
-    this.__bindClickEvents();
     this.__bindSorterEvents();
     this.__bindFiltersEvents();
     this.__bindContextMenuEvents();
@@ -773,7 +772,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Object} item The item that will be updated.
    */
   updateItem (item) {
-    const itemIndex = this.__findItemIndexById(this.__filteredItems, item[this.idProperty]);
+    const itemIndex = this.__findItemIndexById(item[this.idProperty]);
     this.__filteredItems[itemIndex] = item;
 
     this.grid.clearCache();
@@ -792,7 +791,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     afterNextRender(this, () => {
       this.__blinkRow(itemId, '#FFB3B3', () => {
-        const itemIndex = this.__findItemIndexById(this.__filteredItems, itemId);
+        const itemIndex = this.__findItemIndexById(itemId);
         this.__filteredItems.splice(itemIndex, 1);
         this.grid.clearCache();
 
@@ -840,19 +839,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   async __scrollToItemIfNotVisible (itemId) {
     // Scroll to the item if it's not into view taking into account the grid's internal items.
     if (!this.__isItemIntoView(itemId)) {
-      this.grid._scrollToIndex(this.__findItemIndexById(this.__filteredItems, itemId));
+      this.grid._scrollToIndex(this.__findItemIndexById(itemId));
     }
   }
 
   /**
-   * Given the casper-moac's __fiteredItems or the grid's internal items, look for the index
-   * of a specific item.
+   * Look for the index of a specific item.
    *
    * @param {Array} items The list of items that will be used to find a specific item.
    * @param {Number | String} itemId The item's identifier that we'll looking for.
    */
-  __findItemIndexById (items, itemId) {
-    return items.findIndex(item => item[this.idProperty].toString() === itemId.toString());
+  __findItemIndexById (itemId) {
+    return this.__filteredItems.findIndex(item => item[this.idProperty].toString() === itemId.toString());
   }
 
   /**
@@ -931,21 +929,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         });
       });
     }
-  }
-
-  /**
-   * Bind click events in order to paint the current active item and to update the __filteredItems
-   * when the user uses the grid sort columns.
-   */
-  __bindClickEvents () {
-    this.$.grid.addEventListener('click', event => {
-      this.__paintGridActiveRow();
-
-      // If the user clicked on a vaadin-grid-sorter, reload all the items when the grid is lazy loaded.
-      if (this.lazyLoad && this.__eventPathContainsNode(event, 'vaadin-grid-sorter')) {
-        this.refreshItems();
-      }
-    });
   }
 
   /**
@@ -1037,7 +1020,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       this.__activeItem = this.__filteredItems[0];
     } else {
       // Find the index of the current active item.
-      const activeItemIndex = this.__filteredItems.findIndex(gridCachedItem => gridCachedItem === this.__activeItem);
+      const activeItemIndex = this.__findItemIndexById(this.__activeItem[this.idProperty]);
 
       if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
         this.__activeItem = this.__filteredItems[activeItemIndex - 1];

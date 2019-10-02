@@ -35,26 +35,26 @@ class CasperMoacSortColumn extends GridColumnElement {
             cursor: pointer;
           }
 
-          #header-container #header-sort {
-            flex-shrink: 0;
-          }
-
-          #header-container iron-icon {
-            width: 15px;
-            height: 15px;
-            --iron-icon-fill-color: white;
-          }
-
-          #header-container #header-sort-order {
-            width: 10px;
-            font-size: 10px;
-          }
-
           #header-container #header-title {
             width: 100%;
             flex-shrink: 1;
             overflow: hidden;
             text-overflow: ellipsis;
+          }
+
+          #header-container #header-sort {
+            flex-shrink: 0;
+          }
+
+          #header-container #header-sort iron-icon {
+            width: 15px;
+            height: 15px;
+            --iron-icon-fill-color: white;
+          }
+
+          #header-container #header-sort #header-sort-order {
+            width: 10px;
+            font-size: 10px;
           }
         </style>
 
