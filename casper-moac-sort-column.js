@@ -117,7 +117,7 @@ class CasperMoacSortColumn extends GridColumnElement {
    * This method returns the casper-icon's opacity depending on the current direction of the sorter.
    */
   __getIconOpacity () {
-    return `opacity: ${!this.direction ? '0.5' : '1'}`;
+    return `opacity: ${!this.direction ? '0.2' : '1'}`;
   }
 }
 
