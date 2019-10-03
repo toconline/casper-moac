@@ -285,7 +285,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           padding: 15px;
           display: flex;
           flex-direction: column;
-          background-color: white;
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container {
@@ -317,7 +316,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           transition: border 250ms linear;
         }
 
-        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput:focus,
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput:hover {
           border-color: var(--primary-color);
         }
@@ -388,6 +386,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           cursor: pointer;
           margin-right: 5px;
           color: var(--primary-color);
+          transition: color 100ms linear;
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container .active-filters .active-filters-list .active-filter strong:hover {
@@ -445,12 +444,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           width: 100%;
           height: 100%;
           display: flex;
-          color: #8A8A8A;
           position: absolute;
           text-align: center;
           align-items: center;
           flex-direction: column;
           justify-content: center;
+          color: var(--status-gray);
           background: rgba(0, 0, 0, 0.1);
         }
 
@@ -521,22 +520,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           background-color: var(--primary-color);
         }
 
-        .right-side-container {
-          display: flex;
-          max-height: 100%;
-          overflow: hidden;
-        }
-
         .right-side-container .epaper-container {
-          flex: 1 0 75%;
-          overflow: hidden;
-        }
-
-        .right-side-container .sidebar-container {
-          flex: 1 0 25%;
-          display: flex;
-          overflow: auto;
-          flex-direction: column;
+          width: 100%;
+          height: 100%;
         }
       </style>
 
