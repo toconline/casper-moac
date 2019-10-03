@@ -672,9 +672,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                     </template>
                   </vaadin-grid-column>
                 </template>
-
-                <!--vaadin-grid-column with the id property to make sure the correct active item is highlighted-->
-                <vaadin-grid-column width="0px" flex-grow="0" path="[[idProperty]]" hidden></vaadin-grid-column>
               </vaadin-grid>
 
               <!--No items placeholder-->
@@ -816,7 +813,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       const row = rows[rowIndex];
-      const isRowActive = row.lastElementChild.querySelector('slot').assignedElements().shift().innerHTML === itemId.toString();
+      const isRowActive = String(row._item[this.idProperty]) === String(itemId);
 
       if (!isRowActive) continue;
 
@@ -1364,11 +1361,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __paintGridActiveRow (focusActiveCell = false) {
     afterNextRender(this, () => {
-      const activeItemId = this.__activeItem ? String(this.__activeItem[this.idProperty]) : null;
-
       // Loop through each grid row and paint the active one.
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
-        const isRowActive = row.lastElementChild.querySelector('slot').assignedElements().shift().innerHTML === activeItemId;
+        const isRowActive = String(row._item[this.idProperty]) === String(this.__activeItem[this.idProperty]);
 
         Array.from(row.children).forEach(cell => {
           // This means an animation with a backgroundColor is already occurring.
