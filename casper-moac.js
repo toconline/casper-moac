@@ -1380,7 +1380,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     afterNextRender(this, () => {
       // Loop through each grid row and paint the active one.
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
-        const isRowActive = String(row._item[this.idProperty]) === String(this.__activeItem[this.idProperty]);
+        const isRowActive = this.__activeItem && String(row._item[this.idProperty]) === String(this.__activeItem[this.idProperty]);
 
         Array.from(row.children).forEach(cell => {
           // This means an animation with a backgroundColor is already occurring.
