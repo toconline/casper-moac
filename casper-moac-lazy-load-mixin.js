@@ -107,7 +107,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
      */
     refreshItems () {
       // Scroll to the top of the grid to reset the current page being displayed.
-      if (this.__gridScroller) this.__gridScroller.scrollTop = 0;
+      if (this.gridScroller) this.gridScroller.scrollTop = 0;
 
       this.selectedItems = [];
       this.__currentPage = 0;
@@ -120,11 +120,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * that interacts with the JSON API.
      */
     __initializeLazyLoad () {
-      this.__gridScroller.addEventListener('scroll', () => {
+      this.gridScroller.addEventListener('scroll', () => {
         if (this.__ignoreScrollEvents) return;
 
-        const gridScrollerHeight = this.__gridScroller.scrollHeight;
-        const gridScrollerPosition = this.__gridScroller.scrollTop +  this.__gridScroller.clientHeight;
+        const gridScrollerHeight = this.gridScroller.scrollHeight;
+        const gridScrollerPosition = this.gridScroller.scrollTop + this.gridScroller.clientHeight;
 
         // Re-fetch new items when the users scrolls past the 200px threshold.
         if (gridScrollerHeight - gridScrollerPosition <= 500) {

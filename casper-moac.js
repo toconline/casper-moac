@@ -704,7 +704,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     super.ready();
 
     this.grid             = this.$.grid;
-    this.__gridScroller   = this.$.grid.$.outerscroller;
+    this.gridScroller     = this.$.grid.$.outerscroller;
     this.__displayEpaper  = [CasperMoacTypes.GRID_EPAPER_SIDEBAR, CasperMoacTypes.GRID_EPAPER].includes(this.moacType);
     this.__displaySidebar = [CasperMoacTypes.GRID_EPAPER_SIDEBAR, CasperMoacTypes.GRID_SIDEBAR].includes(this.moacType);
 
@@ -893,7 +893,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * vaadin-checkbox header since its current implementation is faulty.
    */
   __monkeyPatchVaadinElements () {
-    this.__gridScroller.addEventListener('scroll', () => this.__paintGridActiveRow());
+    this.gridScroller.addEventListener('scroll', () => this.__paintGridActiveRow());
 
     if (!this.__displayEpaper) {
       this.$.splitLayout.$.splitter.style.display = 'none';
@@ -1151,7 +1151,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.selectedItems = [];
 
     // Scroll to the top of the grid after the vaadin-grid displays the new items.
-    afterNextRender(this, () => { this.__gridScroller.scrollTop = 0; });
+    afterNextRender(this, () => { this.gridScroller.scrollTop = 0; });
 
     // Use spread operator to avoid messing with the original dataset by sorting.
     let originalItems = [...(this.items || [])]
