@@ -130,6 +130,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         notify: true
       },
       /**
+       * A reference to the vaadin-grid's scroller so that developers can attach event listeners to it.
+       *
+       * @type {Object}
+       */
+      gridScroller: {
+        type: Object,
+        notify: true
+      },
+      /**
        * The item that is currently active in the vaadin-grid.
        *
        * @type {Object}
