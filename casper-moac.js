@@ -169,7 +169,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         observer: '__filtersChanged'
       },
       /**
-       * The initial width of the left~side container.
+       * The minimum percentual width of the left~side container.
+       *
+       * @type {Number}
+       */
+      leftSideMinimumWidth: Number,
+      /**
+       * The maximum percentual width of the left~side container.
+       *
+       * @type {Number}
+       */
+      leftSideMaximumWidth: Number,
+      /**
+       * The initial percentual width of the left~side container.
        *
        * @type {Number}
        */
@@ -530,7 +542,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
       <div class="main-container">
         <vaadin-split-layout id="splitLayout">
-          <div class="left-side-container" style="[[__leftSideInitialWidth()]]">
+          <div class="left-side-container" style="[[__leftSideStyling()]]">
             <div class="header-container">
               <!--Casper-moac-menu-->
               <slot name="menu"></slot>
@@ -788,6 +800,39 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 
   /**
+   * This function is used to see the if the provided item is visible or not in the grid.
+   *
+   * @param {Number | String} itemId The item that should be into view or not.
+   */
+  isItemIntoView (itemId) {
+    const rows = this.grid.shadowRoot.querySelectorAll('table tbody tr');
+
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+      if (rows[rowIndex]._item[this.idProperty].toString() === itemId.toString()) {
+        return this.isRowIntoView(rows[rowIndex]);
+      }
+    }
+
+    // If we got here, no visible row or the ones at the top / bottom has the item we're looking for.
+    return false;
+  }
+
+  /**
+   * This function is used to see if a physical row is totally into view or not.
+   *
+   * @param {Element} row The row's element object.
+   * @param {Number} offset The offset in pixels to apply to the calculations.
+   */
+  isRowIntoView (row, offset = 0) {
+    const rowBoundingClientRect = row.getBoundingClientRect();
+    const gridBoundingClientRect = this.grid.getBoundingClientRect();
+    const gridHeaderHeight = this.grid.shadowRoot.querySelector('thead').getBoundingClientRect().height;
+
+    return parseInt(rowBoundingClientRect.top) >= parseInt(gridBoundingClientRect.top + gridHeaderHeight - offset)
+      && parseInt(rowBoundingClientRect.bottom) <= parseInt(gridBoundingClientRect.bottom + offset);
+  }
+
+  /**
    * This method will cause a specific row to blink and then execute the provided callback as soon as the animation ends.
    *
    * @param {String | Number} itemId The item's identifier.
@@ -828,7 +873,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   async __scrollToItemIfNotVisible (itemId) {
     // Scroll to the item if it's not into view taking into account the grid's internal items.
-    if (!this.__isItemIntoView(itemId)) {
+    if (!this.isItemIntoView(itemId)) {
       this.grid._scrollToIndex(this.__findItemIndexById(itemId));
     }
   }
@@ -841,29 +886,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __findItemIndexById (itemId) {
     return this.__filteredItems.findIndex(item => item[this.idProperty].toString() === itemId.toString());
-  }
-
-  /**
-   * This function is used to see the if the provided item is visible or not in the grid.
-   *
-   * @param {Number | String} itemId The item that should be into view or not.
-   */
-  __isItemIntoView (itemId) {
-    const rows = this.grid.shadowRoot.querySelectorAll('table tbody tr');
-
-    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      if (rows[rowIndex]._item[this.idProperty].toString() === itemId.toString()) {
-        const rowBoundingClientRect = rows[rowIndex].getBoundingClientRect();
-        const gridBoundingClientRect = this.grid.getBoundingClientRect();
-        const gridHeaderHeight = this.grid.shadowRoot.querySelector('thead').getBoundingClientRect().height;
-
-        return rowBoundingClientRect.top >= gridBoundingClientRect.top + gridHeaderHeight
-          && rowBoundingClientRect.bottom <= gridBoundingClientRect.bottom;
-      }
-    }
-
-    // If we got here, no visible row or the ones at the top / bottom has the item we're looking for.
-    return false;
   }
 
   __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
@@ -1416,10 +1438,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * This method is invoked directly in the template so that the vaadin-split-layout has the
    * correct percentual width for the left side of the component.
    */
-  __leftSideInitialWidth () {
-    return [CasperMoacTypes.GRID, CasperMoacTypes.GRID_SIDEBAR].includes(this.moacType)
-      ? 'width: 100%;'
-      : `width: ${this.leftSideInitialWidth}%;`;
+  __leftSideStyling (a, b, c) {
+    const width = [CasperMoacTypes.GRID, CasperMoacTypes.GRID_SIDEBAR].includes(this.moacType) ? 'width: 100%' : `width: ${this.leftSideInitialWidth}%`;
+    const maximumWidth = this.leftSideMaximumWidth ? `max-width: ${this.leftSideMaximumWidth}%` : null;
+    const minimumWidth = this.leftSideMinimumWidth ? `min-width: ${this.leftSideMinimumWidth}%` : null;
+
+    return [width, maximumWidth, minimumWidth].filter(cssRule => !!cssRule).join(';');
   }
 
   /**
