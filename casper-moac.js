@@ -254,6 +254,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: false,
       },
       /**
+       * Boolean that states if we should or shouldn't display the epaper's blank page when there is no active item.
+       *
+       * @type {Boolean}
+       */
+      disableResetEpaper: {
+        type: Boolean,
+        value: false,
+      },
+      /**
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
        *
        * @type {Boolean}
@@ -1140,7 +1149,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __activeItemChanged (newActiveItem, previousActiveItem) {
     if (!newActiveItem && previousActiveItem && this.forceActiveItem) {
-      this.$.grid.activeItem = previousActiveItem;
+      this.activeItem = previousActiveItem;
+    }
+
+    // Clean the epaper when there is no active item and the developer didn't disabled this behavior.
+    if (!this.activeItem && this.epaper && !this.disableResetEpaper) {
+      this.epaper.displayBlankPage();
     }
 
     this.__activeItem = this.activeItem;
