@@ -795,7 +795,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     afterNextRender(this, () => {
       this.__blinkRow(itemId, '#FFB3B3', () => {
         const itemIndex = this.__findItemIndexById(itemId);
-        this.__filteredItems.splice(itemIndex, 1);
+        this.__filteredItems = [...this.__filteredItems.slice(0, itemIndex), ...this.__filteredItems.slice(itemIndex + 1)];
         this.grid.clearCache();
 
         const newItemIndex = Math.max(0, itemIndex - 1);
