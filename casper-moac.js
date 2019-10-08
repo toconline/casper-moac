@@ -703,7 +703,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             </div>
           </div>
 
-          <div class="right-side-container" style="[[__rightSideInitialWidth()]]">
+          <div class="right-side-container" style="[[__rightSideStyling()]]">
             <!--Epaper-->
             <template is="dom-if" if="[[__displayEpaper]]">
               <div class="epaper-container">
@@ -1474,7 +1474,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * This method is invoked directly in the template so that the vaadin-split-layout has the
    * correct percentual width for the right side of the component.
    */
-  __rightSideInitialWidth () {
+  __rightSideStyling () {
     return [CasperMoacTypes.GRID, CasperMoacTypes.GRID_SIDEBAR].includes(this.moacType)
       ? 'width: 0%;'
       : `width: ${100 - parseInt(this.leftSideInitialWidth)}%;`;
