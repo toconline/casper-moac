@@ -2,6 +2,7 @@ import { CasperMoacTypes, CasperMoacFilterTypes, CasperMoacOperators } from './c
 import { CasperMoacSortingMixin } from './casper-moac-sorting-mixin.js';
 import { CasperMoacLazyLoadMixin } from './casper-moac-lazy-load-mixin.js';
 
+import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
 import '@vaadin/vaadin-grid/vaadin-grid-column.js';
 import '@vaadin/vaadin-grid/vaadin-grid-selection-column.js';
@@ -9,7 +10,6 @@ import '@casper2020/casper-icons/casper-icons.js';
 import '@casper2020/casper-epaper/casper-epaper.js';
 import '@casper2020/casper-select/casper-select.js';
 import '@casper2020/casper-date-picker/casper-date-picker.js';
-import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-input/iron-input.js';
 import '@polymer/paper-input/paper-input.js';
@@ -1462,7 +1462,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * This method is invoked directly in the template so that the vaadin-split-layout has the
    * correct percentual width for the left side of the component.
    */
-  __leftSideStyling (a, b, c) {
+  __leftSideStyling () {
     const width = [CasperMoacTypes.GRID, CasperMoacTypes.GRID_SIDEBAR].includes(this.moacType) ? 'width: 100%' : `width: ${this.leftSideInitialWidth}%`;
     const maximumWidth = this.leftSideMaximumWidth ? `max-width: ${this.leftSideMaximumWidth}%` : null;
     const minimumWidth = this.leftSideMinimumWidth ? `min-width: ${this.leftSideMinimumWidth}%` : null;
@@ -1485,7 +1485,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * adding the 'filters-container-inline' class or not.
    */
   __filtersContainerClassName () {
-    return this.moacType === CasperMoacTypes.GRID_EPAPER || this.moacType === CasperMoacTypes.GRID_EPAPER_SIDEBAR
+    return [CasperMoacTypes.GRID_EPAPER, CasperMoacTypes.GRID_EPAPER_SIDEBAR].includes(this.moacType)
       ? 'filters-container'
       : 'filters-container filters-container-inline';
   }
