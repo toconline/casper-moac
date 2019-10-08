@@ -1154,7 +1154,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     // Clean the epaper when there is no active item and the developer didn't disabled this behavior.
     if (!this.activeItem && this.epaper && !this.disableResetEpaper) {
-      this.epaper.displayBlankPage();
+      this.epaper.openBlankPage();
     }
 
     this.__activeItem = this.activeItem;
