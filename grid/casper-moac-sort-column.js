@@ -1,6 +1,6 @@
 import { html } from '@polymer/polymer/polymer-element.js';
 import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js';
-import { CasperMoacSortTypes, CasperMoacSortDirections } from './casper-moac-constants';
+import { CasperMoacSortTypes, CasperMoacSortDirections } from '../casper-moac-constants';
 
 class CasperMoacSortColumn extends GridColumnElement {
 

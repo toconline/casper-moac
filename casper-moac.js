@@ -1,6 +1,6 @@
 import { CasperMoacTypes, CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
-import { CasperMoacSortingMixin } from './casper-moac-sorting-mixin.js';
-import { CasperMoacLazyLoadMixin } from './casper-moac-lazy-load-mixin.js';
+import { CasperMoacSortingMixin } from './mixins/casper-moac-sorting-mixin.js';
+import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
 
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
@@ -158,15 +158,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         notify: true
       },
       /**
-       * The items that are currently expanded in the vaadin-grid.
-       *
-       * @type {Array}
-       */
-      expandedItems: {
-        type: Array,
-        notify: true
-      },
-      /**
        * The array of filters that are available to filter the results presents on the page.
        *
        * @type {Array}
@@ -280,6 +271,23 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       __filteredItems: {
         type: Array,
         value: []
+      },
+      /**
+       * The local property where the items children are.
+       *
+       * @type {Array}
+       */
+      childrenProperty: {
+        type: String,
+        value: 'children'
+      },
+      /**
+       * The children's local property where this component will save their parent identifier
+       * to easily remove them later.
+       */
+      parentInternalProperty: {
+        type: String,
+        value: '__parent'
       }
     };
   }
@@ -665,8 +673,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                 theme="row-stripes"
                 items="[[__filteredItems]]"
                 active-item="{{activeItem}}"
-                selected-items="{{selectedItems}}"
-                expanded-items="{{expandedItems}}">
+                selected-items="{{selectedItems}}">
 
                 <slot name="grid-before"></slot>
 
@@ -936,6 +943,30 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   __monkeyPatchVaadinElements () {
     this.gridScroller.addEventListener('scroll', () => this.__paintGridActiveRow());
 
+    this.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', async (event) => {
+      const parentItem = this.activeItem = this.grid.getEventContext(event).item;
+
+      // If the toggle is not expanded remove the items that were previously expanded.
+      if (!event.detail.expanded) {
+        this.__filteredItems = this.__filteredItems.filter(item => String(item[this.parentInternalProperty]) !== String(parentItem[this.idProperty]));
+      } else {
+        const parentItemIndex = this.__findItemIndexById(parentItem[this.idProperty]);
+
+        // Either query the database or use the local property depending on the current type of grid.
+        const parentItemChildren = this.lazyLoad
+          ? await this.__fetchChildrenResourceItems(parentItem)
+          : (Array.isArray(parentItem[this.childrenProperty]) ? parentItem[this.childrenProperty] : []);
+
+          parentItemChildren.forEach(child => child[this.parentInternalProperty] = parentItem[this.idProperty]);
+
+          this.__filteredItems = [
+            ...this.__filteredItems.slice(0, parentItemIndex + 1),
+            ...parentItemChildren,
+            ...this.__filteredItems.slice(parentItemIndex + 1)
+          ];
+      }
+    });
+
     if (!this.__displayEpaper) {
       this.$.splitLayout.$.splitter.style.display = 'none';
     }
@@ -1013,7 +1044,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     // Hide the context menu when one of its items is clicked.
     this.__contextMenu.addEventListener('click', event => {
-      if (this.__eventPathContainsNode(event, 'casper-menu-item')) {
+      if (!!this.__eventPathContainsNode(event, 'casper-menu-item')) {
         this.__contextMenu.positionTarget.removeAttribute('style');
       }
     });
@@ -1508,7 +1539,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {String} nodeName The node type that should be present in the event's path.
    */
   __eventPathContainsNode (event, nodeName) {
-    return event.composedPath().some(element => element.nodeName && element.nodeName.toLowerCase() === nodeName);
+    return event.composedPath().find(element => element.nodeName && element.nodeName.toLowerCase() === nodeName);
   }
 
   /**

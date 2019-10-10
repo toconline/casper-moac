@@ -1,4 +1,4 @@
-import { CasperMoacSortTypes, CasperMoacSortDirections } from './casper-moac-constants';
+import { CasperMoacSortTypes, CasperMoacSortDirections } from '../casper-moac-constants.js';
 
 export const CasperMoacSortingMixin = superClass => {
   return class extends superClass {

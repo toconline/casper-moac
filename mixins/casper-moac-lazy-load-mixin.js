@@ -1,4 +1,4 @@
-import { CasperMoacOperators, CasperMoacSortDirections, CasperMoacFilterTypes } from './casper-moac-constants.js';
+import { CasperMoacOperators, CasperMoacSortDirections, CasperMoacFilterTypes } from '../casper-moac-constants.js';
 
 export const CasperMoacLazyLoadMixin = superClass => {
   return class extends superClass {
@@ -167,17 +167,15 @@ export const CasperMoacLazyLoadMixin = superClass => {
           sorters: this.__activeSorters
         };
 
-        !parameters.parentItem
-          ? this.__fetchResourceItems(parameters)
-          : this.__fetchChildrenResourceItems(parameters);
+        this.__fetchResourceItems(parameters);
       });
     }
 
     /**
      * Function that is invoked by the vaadin-grid to fetch items from the remote source which is
      * the JSON API in this case.
+     *
      * @param {Object} parameters Object that contains the number of items per page, the current page number and sort settings.
-     * @param {Function} callback Callback that will be called as soon as the items are returned from the JSON API.
      */
     async __fetchResourceItems (parameters) {
       try {
@@ -225,15 +223,15 @@ export const CasperMoacLazyLoadMixin = superClass => {
     /**
      * Function that is invoked by the vaadin-grid to fetch children items from the remote source which is
      * the JSON API in this case.
-     * @param {Object} parameters Object that contains the parent item which we are fetching children from.
-     * @param {Function} callback Callback that will be called as soon as the items are returned from the JSON API.
+     *
+     * @param {Objcet} parentItem Object that contains the parent item which we are fetching children from.
      */
-    async __fetchChildrenResourceItems (parameters, callback) {
+    async __fetchChildrenResourceItems (parentItem) {
       try {
-        const fetchChildrenQuery = this.resourceFetchChildrenQuery.replace('%{parentId}', parameters.parentItem[this.idProperty]);
+        const fetchChildrenQuery = this.resourceFetchChildrenQuery.replace('%{parentId}', parentItem[this.idProperty]);
         const socketResponse = await app.socket.jget(fetchChildrenQuery, this.resourceTimeoutMs);
 
-        callback(socketResponse.data);
+        return socketResponse.data;
       } catch (exception) {
         console.error(exception);
 
@@ -323,12 +321,12 @@ export const CasperMoacLazyLoadMixin = superClass => {
       if (!this.__filters) return;
 
       return this.__filters
-        .filter(filterItem => {
-          return this.__valueIsNotEmpty(filterItem.filter.value)
+        .filter(filterItem =>
+          this.__valueIsNotEmpty(filterItem.filter.value)
             && filterItem.filter.lazyLoad
             && filterItem.filter.lazyLoad.field
             && filterItem.filter.lazyLoad.operator
-        })
+        )
         .map(filterItem => {
           const filter = filterItem.filter;
 
