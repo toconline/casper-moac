@@ -953,17 +953,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         const parentItemIndex = this.__findItemIndexById(parentItem[this.idProperty]);
 
         // Either query the database or use the local property depending on the current type of grid.
-        const parentItemChildren = this.lazyLoad
-          ? await this.__fetchChildrenResourceItems(parentItem)
-          : (Array.isArray(parentItem[this.childrenProperty]) ? parentItem[this.childrenProperty] : []);
+        let parentItemChildren = !this.lazyLoad
+          ? parentItem[this.childrenProperty]
+          : await this.__fetchChildrenResourceItems(parentItem);
 
-          parentItemChildren.forEach(child => child[this.parentInternalProperty] = parentItem[this.idProperty]);
+        // Safeguard for an empty response from the server or an empty local property.
+        parentItemChildren = Array.isArray(parentItemChildren) ? parentItemChildren : [];
+        parentItemChildren.forEach(child => child[this.parentInternalProperty] = parentItem[this.idProperty]);
 
-          this.__filteredItems = [
-            ...this.__filteredItems.slice(0, parentItemIndex + 1),
-            ...parentItemChildren,
-            ...this.__filteredItems.slice(parentItemIndex + 1)
-          ];
+        this.__filteredItems = [
+          ...this.__filteredItems.slice(0, parentItemIndex + 1),
+          ...parentItemChildren,
+          ...this.__filteredItems.slice(parentItemIndex + 1)
+        ];
       }
     });
 

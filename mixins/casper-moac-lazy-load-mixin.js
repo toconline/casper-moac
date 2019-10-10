@@ -179,7 +179,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
     async __fetchResourceItems (parameters) {
       const socketResponse = await this.__fetchRequest(this.__buildResourceUrl(parameters));
 
-      if (socketResponse.errors) return;
+      if (!socketResponse) return;
 
       // Format the elements returned by the JSON API.
       if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter(item));
@@ -213,6 +213,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
      */
     async __fetchChildrenResourceItems (parentItem) {
       const socketResponse = await this.__fetchRequest(this.resourceFetchChildrenQuery.replace('%{parentId}', parentItem[this.idProperty]));
+
+      if (!socketResponse) return;
 
       // Format the elements returned by the JSON API.
       if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter(item));
