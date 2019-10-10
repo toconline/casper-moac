@@ -1530,7 +1530,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Array} filteredItems
    * @param {Boolean} loading
    */
-  __hasNoItems (filteredItems, loading) {
+  __hasNoItems (filteredItems, loading) {
     return !loading && filteredItems && filteredItems.length === 0;
   }
 

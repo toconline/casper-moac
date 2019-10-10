@@ -10,11 +10,27 @@ class CasperMoacSortColumn extends GridColumnElement {
 
   static get properties () {
     return {
+      /**
+       * If there are multiple sorters being applied, this states its order / priority.
+       *
+       * @type {Number}
+       */
       sortOrder: Number,
+      /**
+       * This property specifies the column data type so that the component knows how to sort the items.
+       *
+       * @type {String}
+       */
       dataType: {
         type: String,
         value: CasperMoacSortTypes.STRING
       },
+      /**
+       * This property states the direction in which the items are being sorted, either ascending
+       * or deescending.
+       *
+       * @type {String}
+       */
       direction: {
         type: String,
         notify: true
