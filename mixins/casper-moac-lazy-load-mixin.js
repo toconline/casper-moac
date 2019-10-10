@@ -172,73 +172,71 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     /**
-     * Function that is invoked by the vaadin-grid to fetch items from the remote source which is
-     * the JSON API in this case.
+     * Function that is invoked to fetch items from the remote source which is the JSON API in this case.
      *
      * @param {Object} parameters Object that contains the number of items per page, the current page number and sort settings.
      */
     async __fetchResourceItems (parameters) {
-      try {
-        this.loading = true;
+      const socketResponse = await this.__fetchRequest(this.__buildResourceUrl(parameters));
 
-        const socketResponse = await this.app.socket.jget(this.__buildResourceUrl(parameters), this.resourceTimeoutMs);
+      if (socketResponse.errors) return;
 
-        this.loading = false;
+      // Format the elements returned by the JSON API.
+      if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter(item));
 
-        if (socketResponse.errors) return;
+      if (this.__currentPage !== 1) {
+        this.__filteredItems = [...this.__filteredItems, ...socketResponse.data];
 
-        // Format the elements returned by the JSON API.
-        if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter(item));
-
-        if (this.__currentPage !== 1) {
-          this.__filteredItems = [...this.__filteredItems, ...socketResponse.data];
-
-          // Select all the new items if the existing ones are all selected.
-          if (this.__selectAllCheckbox.checked && !this.__selectAllCheckbox.indeterminate) {
-            this.selectedItems = [...this.__filteredItems];
-          }
-        } else {
-          this.__filteredItems = socketResponse.data;
-          this.grid._scrollToIndex(0);
-          this.__activateItemAtIndex();
+        // Select all the new items if the existing ones are all selected.
+        if (this.__selectAllCheckbox.checked && !this.__selectAllCheckbox.indeterminate) {
+          this.selectedItems = [...this.__filteredItems];
         }
-
-        // Disable the scroll event listeners when there are no more items.
-        this.__ignoreScrollEvents = socketResponse.data.length < this.resourcePageSize;
-
-        // Update the paging information.
-        this.__numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
-          ? `${socketResponse.meta.total} ${this.multiSelectionLabel}`
-          : `${socketResponse.meta.total} de ${socketResponse.meta['grand-total']} ${this.multiSelectionLabel}`;
-      } catch (exception) {
-        console.error(exception);
-
-        this.app.openToast({
-          text: 'Ocorreu um erro ao obter os dados.',
-          backgroundColor: 'red'
-        });
+      } else {
+        this.__filteredItems = socketResponse.data;
+        this.grid._scrollToIndex(0);
+        this.__activateItemAtIndex();
       }
+
+      // Disable the scroll event listeners when there are no more items.
+      this.__ignoreScrollEvents = socketResponse.data.length < this.resourcePageSize;
+
+      // Update the paging information.
+      this.__numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
+        ? `${socketResponse.meta.total} ${this.multiSelectionLabel}`
+        : `${socketResponse.meta.total} de ${socketResponse.meta['grand-total']} ${this.multiSelectionLabel}`;
     }
 
     /**
-     * Function that is invoked by the vaadin-grid to fetch children items from the remote source which is
-     * the JSON API in this case.
+     * Function that is invoked to fetch children items from the remote source which is the JSON API in this case.
      *
-     * @param {Objcet} parentItem Object that contains the parent item which we are fetching children from.
+     * @param {Object} parentItem Object that contains the parent item which we are fetching children from.
      */
     async __fetchChildrenResourceItems (parentItem) {
-      try {
-        const fetchChildrenQuery = this.resourceFetchChildrenQuery.replace('%{parentId}', parentItem[this.idProperty]);
-        const socketResponse = await app.socket.jget(fetchChildrenQuery, this.resourceTimeoutMs);
+      const socketResponse = await this.__fetchRequest(this.resourceFetchChildrenQuery.replace('%{parentId}', parentItem[this.idProperty]));
 
-        return socketResponse.data;
-      } catch (exception) {
+      // Format the elements returned by the JSON API.
+      if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter(item));
+
+      return socketResponse.data;
+    }
+
+    /**
+     * Performs a request to the JSON API with the provided URL and handles the errors that may arise from it.
+     *
+     * @param {String} url The request's URL.
+     */
+    async __fetchRequest (url) {
+      try {
+        this.loading = true
+        const socketResponse = await this.app.socket.jget(url, this.resourceTimeoutMs);
+        this.loading = false;
+
+        return socketResponse;
+      } catch (error) {
         console.error(exception);
 
-        this.app.openToast({
-          text: 'Ocorreu um erro ao obter os dados.',
-          backgroundColor: 'red'
-        });
+        this.loading = false;
+        this.app.openToast({ text: 'Ocorreu um erro ao obter os dados.', backgroundColor: 'red' });
       }
     }
 

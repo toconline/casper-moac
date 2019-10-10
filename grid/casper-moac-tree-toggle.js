@@ -59,6 +59,7 @@ class CasperMoacTreeToggle extends PolymerElement {
         :host #tree-toggle-container iron-icon {
           width: 10px;
           height: 10px;
+          margin-right: 3px;
         }
 
         :host([expanded]) #tree-toggle-container iron-icon {
