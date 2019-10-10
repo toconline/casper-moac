@@ -233,7 +233,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
         return socketResponse;
       } catch (error) {
-        console.error(exception);
+        console.error(error);
 
         this.loading = false;
         this.app.openToast({ text: 'Ocorreu um erro ao obter os dados.', backgroundColor: 'red' });
