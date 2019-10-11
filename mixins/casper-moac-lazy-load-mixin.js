@@ -95,6 +95,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
         resourceFetchChildrenQuery: {
           type: String,
         },
+        /**
+         * This property states the current page.
+         */
         __currentPage: {
           type: Number,
           value: 0
@@ -111,6 +114,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       this.selectedItems = [];
       this.__currentPage = 0;
+      this.__staleDataset = false;
       this.__ignoreScrollEvents = false;
       this.__debounceFetchResourceItems();
     }
@@ -192,13 +196,28 @@ export const CasperMoacLazyLoadMixin = superClass => {
           this.selectedItems = [...this.__filteredItems];
         }
       } else {
+        // Reset the totals when requesting the first page.
+        this.__resourceTotal = undefined;
+        this.__resourceGrandTotal = undefined;
+
         this.__filteredItems = socketResponse.data;
         this.grid._scrollToIndex(0);
         this.__activateItemAtIndex();
       }
 
+      // Check if the totals are different which means something changed in the server's dataset.
+      if (!this.__staleDataset && (
+        (this.__resourceTotal && this.__resourceTotal !== socketResponse.meta.total) ||
+        (this.__resourceGrandTotal && this.__resourceGrandTotal !== socketResponse.meta['grand-total'])
+      )) {
+        this.__staleDataset = true;
+      }
+
+      this.__resourceTotal = socketResponse.meta.total;
+      this.__resourceGrandTotal = socketResponse.meta['grand-total'];
+
       // Disable the scroll event listeners when there are no more items.
-      this.__ignoreScrollEvents = socketResponse.data.length < this.resourcePageSize;
+      this.__ignoreScrollEvents = this.__filteredItems.length === parseInt(socketResponse.meta.total);
 
       // Update the paging information.
       this.__numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']

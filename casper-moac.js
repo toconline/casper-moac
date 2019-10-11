@@ -407,8 +407,24 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header {
           display: flex;
+          line-height: 20px;
           margin-bottom: 10px;
           justify-content: space-between;
+        }
+
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header paper-icon-button {
+          color: white;
+          width: 20px;
+          height: 20px;
+          padding: 2px;
+          margin-right: 5px;
+          border-radius: 50%;
+          background-color: var(--primary-color);
+        }
+
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header paper-icon-button:hover {
+          cursor: pointer;
+          background-color: var(--dark-primary-color);
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container .active-filters .active-filters-list {
@@ -591,7 +607,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               <!--Active filters-->
               <div class="active-filters">
                 <div class="header">
-                  <strong>Filtros ativos:</strong>
+                  <div>
+                    <template is="dom-if" if="[[__staleDataset]]">
+                      <paper-icon-button
+                        on-click="refreshItems"
+                        icon="casper-icons:repeat"
+                        tooltip="Os dados poderão estar desactualizados. Clique aqui para recarreegar a grelha">
+                      </paper-icon-button>
+                    </template>
+                    <strong>Filtros ativos:</strong>
+                  </div>
+
                   <template is="dom-if" if="[[!hideNumberResults]]">
                     [[__numberOfResults]]
                   </template>
@@ -784,6 +810,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     this.grid.clearCache();
     this.activeItem = item;
+    this.__staleDataset = true;
     this.__scrollToItemIfNotVisible(item[this.idProperty]);
   }
 
@@ -798,6 +825,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     this.grid.clearCache();
     this.activeItem = item;
+    this.__staleDataset = true;
     this.__scrollToItemIfNotVisible(item[this.idProperty]);
   }
 
@@ -819,6 +847,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         if (this.__filteredItems.length > newItemIndex) {
           this.activeItem = this.__filteredItems[newItemIndex];
+          this.__staleDataset = true;
           this.__scrollToItemIfNotVisible(this.activeItem[this.idProperty]);
         }
       });
