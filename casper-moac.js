@@ -1046,8 +1046,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
       // Force the re-fetch of items if one the filter changes.
       if (this.lazyLoad) {
-        if (this.page && typeof this.page.beforeRefreshItems === 'function') {
-          this.page.beforeRefreshItems();
+        if (this.page && typeof this.page.__beforeRefreshItems === 'function') {
+          this.page.__beforeRefreshItems();
         }
       }
 
