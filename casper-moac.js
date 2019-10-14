@@ -39,6 +39,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: window.app
       },
       /**
+       * The page that is currently using the casper-moac component.
+       *
+       * @type {Object}
+       */
+      page: Object,
+      /**
        * This states what kind of MOAC we're dealing with so that certain items are displayed / hidden.
        *
        * @type {String}
@@ -1039,7 +1045,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }));
 
       // Force the re-fetch of items if one the filter changes.
-      if (this.lazyLoad) this.refreshItems();
+      if (this.lazyLoad) {
+        if (this.page && typeof this.page.beforeRefreshItems === 'function') {
+          this.page.beforeRefreshItems();
+        }
+      }
 
       this.__renderActiveFilters();
     };

@@ -345,6 +345,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
             && filterItem.filter.lazyLoad
             && filterItem.filter.lazyLoad.field
             && filterItem.filter.lazyLoad.operator
+            && !filterItem.filter.lazyLoad.disabled
         )
         .map(filterItem => {
           const filter = filterItem.filter;
