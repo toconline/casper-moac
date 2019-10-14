@@ -1,7 +1,7 @@
 {
   "description": "Mother of all containers to easily display JSON API resources.",
   "name": "@casper2020/casper-moac",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "resolutions": {
     "inherits": "2.0.3",
     "samsam": "1.1.3",
