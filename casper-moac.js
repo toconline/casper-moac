@@ -1210,7 +1210,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Object} previousActiveItem The previous vaadin-grid activeItem.
    */
   __activeItemChanged (newActiveItem, previousActiveItem) {
-    if (!newActiveItem && previousActiveItem && this.forceActiveItem) {
+    if (!newActiveItem && previousActiveItem && this.forceActiveItem && this.__filteredItems && this.__filteredItems.length > 0) {
       this.activeItem = previousActiveItem;
     }
 
@@ -1300,16 +1300,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * This method activates the item that is present in the specified index.
    */
   async __activateItemAtIndex (index = 0) {
-    this.activeItem = this.__filteredItems && this.__filteredItems.length > index
-      ? this.__filteredItems[index]
-      : null;
+    if (this.__filteredItems && this.__filteredItems.length > index) {
+      this.activeItem = this.__filteredItems[index];
+    } else {
+      this.activeItem = null;
+    }
   }
 
   /**
    * Event listener which is fired when the user clicks on a filter's value in the summary. This will try to move
    * the filter's overlay for UX purposes (casper-select) or display all the filters focusing the correct one.
    *
-   * @param {Event} event
+   * @param {Event} event The event's object.
    */
   __displayInlineFilters (event) {
     const filterKey = event.target.dataset.filter
