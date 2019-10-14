@@ -1049,6 +1049,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         if (this.page && typeof this.page.__beforeRefreshItems === 'function') {
           this.page.__beforeRefreshItems();
         }
+
+        this.refreshItems();
       }
 
       this.__renderActiveFilters();
