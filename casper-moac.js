@@ -915,7 +915,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         });
 
         callback();
-      }, 2000);
+      }, 1000);
 
       return;
     }
