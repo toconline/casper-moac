@@ -814,7 +814,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   addItem (item) {
     this.__filteredItems = [item, ...this.__filteredItems];
 
-    this.grid.clearCache();
+    this.forceGridRedraw();
     this.activeItem = item;
     this.__staleDataset = true;
     this.__scrollToItemIfNotVisible(item[this.idProperty]);
@@ -829,7 +829,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     const itemIndex = this.__findItemIndexById(item[this.idProperty]);
     this.__filteredItems[itemIndex] = item;
 
-    this.grid.clearCache();
+    this.forceGridRedraw();
     this.activeItem = item;
     this.__staleDataset = true;
     this.__scrollToItemIfNotVisible(item[this.idProperty]);
@@ -847,7 +847,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       this.__blinkRow(itemId, '#FFB3B3', () => {
         const itemIndex = this.__findItemIndexById(itemId);
         this.__filteredItems = [...this.__filteredItems.slice(0, itemIndex), ...this.__filteredItems.slice(itemIndex + 1)];
-        this.grid.clearCache();
+        this.forceGridRedraw();
 
         const newItemIndex = Math.max(0, itemIndex - 1);
 
@@ -891,6 +891,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     return parseInt(rowBoundingClientRect.top) >= parseInt(gridBoundingClientRect.top + gridHeaderHeight - offset)
       && parseInt(rowBoundingClientRect.bottom) <= parseInt(gridBoundingClientRect.bottom + offset);
+  }
+
+  /**
+   * This method forces the vaadin-grid to redraw all its rows.
+   */
+  forceGridRedraw () {
+    this.grid.clearCache();
   }
 
   /**
@@ -1301,7 +1308,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     }
 
     this.__filteredItems = this.displayedItems = this.__sortItems(filteredItems);
-    this.grid.clearCache();
+    this.forceGridRedraw();
     this.__activateItemAtIndex();
     this.__numberOfResults = filteredItems.length === originalItems.length
       ? `${filteredItems.length} ${this.multiSelectionLabel}`
