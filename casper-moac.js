@@ -988,6 +988,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', async (event) => {
       const parentItem = this.activeItem = this.grid.getEventContext(event).item;
 
+      const treeToggleComponent = event.composedPath().shift();
+      treeToggleComponent.disabled = true;
+
       // If the toggle is not expanded remove the items that were previously expanded.
       if (!event.detail.expanded) {
         this.__filteredItems = this.__filteredItems.filter(item => String(item[this.parentInternalProperty]) !== String(parentItem[this.idProperty]));
@@ -1009,6 +1012,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           ...this.__filteredItems.slice(parentItemIndex + 1)
         ];
       }
+
+      treeToggleComponent.disabled = false;
     });
 
     if (!this.__displayEpaper) {

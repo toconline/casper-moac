@@ -34,7 +34,16 @@ class CasperMoacTreeToggle extends PolymerElement {
        *
        * @type {Number}
        */
-      childrenCount: Number
+      childrenCount: Number,
+      /**
+       * Flag that states if the contraction / expansion of the component is enabled.
+       *
+       * @type {Boolean}
+       */
+      disabled: {
+        type: Boolean,
+        value: false
+      }
     };
   }
 
@@ -81,26 +90,23 @@ class CasperMoacTreeToggle extends PolymerElement {
   ready () {
     super.ready();
 
-
     this.addEventListener('click', event => {
       // This is used to avoid activating / de-activating the items.
       event.stopImmediatePropagation();
 
+      if (this.disabled) return;
+
       this.expanded = !this.expanded;
 
-      this.__clickDebouncer = Debouncer.debounce(this.__clickDebouncer, timeOut.after(150), () => {
-        if (this.expanded !== this.__eventExpanded) {
-          // This control variable is used to not notify the casper-moac's if the toggle hasn't changed its previous expanded state.
-          this.__eventExpanded = this.expanded;
+      // This control variable is used to not notify the casper-moac's if the toggle hasn't changed its previous expanded state.
+      this.__eventExpanded = this.expanded;
 
-          // Dispatch an event to inform the casper-moac element that a toggle was changed.
-          this.dispatchEvent(new CustomEvent('casper-moac-tree-toggle-expanded-changed', {
-            bubbles: true,
-            composed: true,
-            detail: { expanded: this.expanded }
-          }));
-        }
-      });
+      // Dispatch an event to inform the casper-moac element that a toggle was changed.
+      this.dispatchEvent(new CustomEvent('casper-moac-tree-toggle-expanded-changed', {
+        bubbles: true,
+        composed: true,
+        detail: { expanded: this.expanded }
+      }));
     });
   }
 }

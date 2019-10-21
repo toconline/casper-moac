@@ -7,6 +7,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       return {
         /**
          * Number of results that will be displayed per page.
+         *
          * @type {Number}
          */
         resourcePageSize: {
@@ -15,6 +16,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         },
         /**
          * The JSON API resource name that will be used to build the URL.
+         *
          * @type {String}
          */
         resourceName: {
@@ -23,6 +25,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         },
         /**
          * List of attributes that should be fetch via JSON API.
+         *
          * @type {Array}
          */
         resourceListAttributes: {
@@ -30,6 +33,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         },
         /**
          * Function used to format the items that are returned from the JSON API.
+         *
          * @type {Function}
          */
         resourceFormatter: {
@@ -37,6 +41,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         },
         /**
          * URL parameter that will contain the number of results per page.
+         *
          * @type {String}
          */
         resourcePageSizeParam: {
@@ -45,6 +50,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         },
         /**
          * URL parameter that will contain the current page.
+         *
          * @type {String}
          */
         resourcePageParam: {
@@ -53,6 +59,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         },
         /**
          * URL parameter to obtain the total number of results for the current query.
+         *
          * @type {String}
          */
         resourceTotalsMetaParam: {
@@ -61,6 +68,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         },
         /**
          * URL parameter to sort the results by a specific attribute.
+         *
          * @type {String}
         */
         resourceSortParam: {
@@ -69,14 +77,16 @@ export const CasperMoacLazyLoadMixin = superClass => {
         },
         /**
          * URL parameter to filter the results by matching a substring with a specific attribute.
+         *
          * @type {String}
-        */
+         */
         resourceFilterParam: {
           type: String,
           value: 'filter'
         },
         /**
-         * The JSON API resource timeout value in ms.
+         * The JSON API resource timeout value in milliseconds.
+         *
          * @type {Number}
          */
         resourceTimeoutMs: {
@@ -84,23 +94,42 @@ export const CasperMoacLazyLoadMixin = superClass => {
           value: 5000
         },
         /**
+         * Number of milliseconds, during which, we should not re-fetch children items and use their locally cached version.
+         *
+         * @type {Number}
+         */
+        resourceChildrenCacheDuration: {
+          type: Number,
+          value: 10000
+        },
+        /**
          * Filters that should be always applied to the JSON API resource regardless of the current filters.
+         *
+         * @type {String}
          */
         resourceDefaultFilters: {
           type: String
         },
         /**
          * Query that will be used to fetch the expanded / children items.
+         *
+         * @type {String}
          */
         resourceFetchChildrenQuery: {
           type: String,
         },
         /**
          * This property states the current page.
+         *
+         * @type {Number}
          */
         __currentPage: {
           type: Number,
           value: 0
+        },
+        __resourceChildrenCache: {
+          type: Object,
+          value: {}
         }
       };
     }
@@ -231,12 +260,32 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * @param {Object} parentItem Object that contains the parent item which we are fetching children from.
      */
     async __fetchChildrenResourceItems (parentItem) {
+      const parentId = parentItem[this.idProperty];
+
+      // First do a cleanup to the cache object to lower the memory footprint.
+      const currentTimestamp = new Date().getTime();
+      Object.keys(this.__resourceChildrenCache).forEach(parentId => {
+        if (this.__resourceChildrenCache[parentId].expiresAfter <= currentTimestamp) {
+          delete this.__resourceChildrenCache[parentId];
+        }
+      });
+
+      // If the key still exists, it means that the information is not stale yet.
+      if (this.__resourceChildrenCache.hasOwnProperty(parentId)) {
+        return this.__resourceChildrenCache[parentId].children;
+      }
+
       const socketResponse = await this.__fetchRequest(this.resourceFetchChildrenQuery.replace('%{parentId}', parentItem[this.idProperty]));
 
       if (!socketResponse) return;
 
       // Format the elements returned by the JSON API.
       if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter(item));
+
+      this.__resourceChildrenCache[parentId] = {
+        children: socketResponse.data,
+        expiresAfter: new Date().getTime() + this.resourceChildrenCacheDuration
+      };
 
       return socketResponse.data;
     }
