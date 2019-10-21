@@ -1,6 +1,8 @@
-import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@casper2020/casper-icons/casper-icons.js';
+import { timeOut } from '@polymer/polymer/lib/utils/async.js';
+import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
+import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
 class CasperMoacTreeToggle extends PolymerElement {
 
@@ -83,14 +85,16 @@ class CasperMoacTreeToggle extends PolymerElement {
       // This is used to avoid activating / de-activating the items.
       event.stopImmediatePropagation();
 
-      this.expanded = !this.expanded;
+      this.__clickDebouncer = Debouncer.debounce(this.__clickDebouncer, timeOut.after(150), () => {
+        this.expanded = !this.expanded;
 
-      // Dispatch an event to inform the casper-moac element that a toggle was changed.
-      this.dispatchEvent(new CustomEvent('casper-moac-tree-toggle-expanded-changed', {
-        bubbles: true,
-        composed: true,
-        detail: { expanded: this.expanded }
-      }));
+        // Dispatch an event to inform the casper-moac element that a toggle was changed.
+        this.dispatchEvent(new CustomEvent('casper-moac-tree-toggle-expanded-changed', {
+          bubbles: true,
+          composed: true,
+          detail: { expanded: this.expanded }
+        }));
+      });
     });
   }
 }
