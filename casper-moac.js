@@ -294,6 +294,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       parentInternalProperty: {
         type: String,
         value: '__parent'
+      },
+      /**
+       * Flag that is passed to the casper-epaper component which disables the sticky
+       * mouseenter / mouseleave animation.
+       *
+       * @type {Boolean}
+       */
+      disableStickyAnimation: {
+        type: Boolean,
+        value: false
       }
     };
   }
@@ -747,7 +757,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             <template is="dom-if" if="[[__displayEpaper]]">
               <div class="epaper-container">
                 <slot name="right"></slot>
-                <casper-epaper app="[[app]]">
+                <casper-epaper
+                  app="[[app]]"
+                  disable-sticky-animation="[[disableStickyAnimation]]">
                   <slot name="casper-epaper-tabs" slot="casper-epaper-tabs"></slot>
                   <slot name="casper-epaper-actions" slot="casper-epaper-actions"></slot>
                   <slot name="casper-epaper-context-menu" slot="casper-epaper-context-menu"></slot>
