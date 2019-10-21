@@ -1597,7 +1597,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   /**
    * This function is a wrapper for the Polymer's debounce method.
    *
-   *
    * @param {String} debouncerProperty The casper-moac's property that will hold the current debounce status.
    * @param {Function} callback The function that will be invoked afterwards.
    * @param {Number} timeOutMilliseconds Number of milliseconds after the last invoke that will trigger the callback.
