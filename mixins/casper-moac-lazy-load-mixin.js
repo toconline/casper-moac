@@ -189,7 +189,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter(item));
 
       if (this.__currentPage !== 1) {
-        this.__filteredItems = [...this.__filteredItems, ...socketResponse.data];
+        this.__filteredItems = this.displayedItems = [...this.__filteredItems, ...socketResponse.data];
 
         // Select all the new items if the existing ones are all selected.
         if (this.__selectAllCheckbox.checked && !this.__selectAllCheckbox.indeterminate) {
@@ -200,7 +200,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.__resourceTotal = undefined;
         this.__resourceGrandTotal = undefined;
 
-        this.__filteredItems = socketResponse.data;
+        this.__filteredItems = this.displayedItems = socketResponse.data;
         this.grid._scrollToIndex(0);
         this.__activateItemAtIndex();
       }
