@@ -304,6 +304,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       disableStickyAnimation: {
         type: Boolean,
         value: false
+      },
+      /**
+       * Property that is passed to the casper-epaper component which states the maximum height in pixels
+       * the sticky can have.
+       *
+       * @type {Number}
+       */
+      stickyMaximumHeight: {
+        type: Number
       }
     };
   }
@@ -759,6 +768,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                 <slot name="right"></slot>
                 <casper-epaper
                   app="[[app]]"
+                  sticky-maximum-height="[[stickyMaximumHeight]]"
                   disable-sticky-animation="[[disableStickyAnimation]]">
                   <slot name="casper-epaper-tabs" slot="casper-epaper-tabs"></slot>
                   <slot name="casper-epaper-actions" slot="casper-epaper-actions"></slot>
