@@ -665,6 +665,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                         value="{{item.filter.value}}"
                         items="[[item.filter.inputOptions.items]]"
                         label="[[item.filter.inputOptions.label]]"
+                        template="[[item.filter.inputOptions.template]]"
                         disable-clear$="[[item.filter.inputOptions.disableClear]]"
                         multi-selection$="[[item.filter.inputOptions.multiSelection]]"
                         lazy-load-resource="[[item.filter.inputOptions.lazyLoadResource]]"
