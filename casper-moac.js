@@ -1001,7 +1001,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   /**
    * As the name suggests, this method applies some monkey-patches to the vaadin elements. Firstly
    * it adds a scroll event listener to paint the active row due to the grid's constant re-usage of rows.
-   * It also hides the vaadin-split-layout handler if there is no epaper / sidebar and replaces the existing
+   * It also hides the vaadin-split-layout handler if there is no epaper and replaces the existing
    * vaadin-checkbox header since its current implementation is faulty.
    */
   __monkeyPatchVaadinElements () {
