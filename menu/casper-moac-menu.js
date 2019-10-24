@@ -88,7 +88,7 @@ class CasperMoacMenu extends PolymerElement {
       <paper-icon-button
         id="menuTrigger"
         disabled="[[disabled]]"
-        icon="[[__menuIcon(__opened)]]"
+        icon="[[__menuIcon(__opened, openIcon, closeIcon)]]"
         data-menu-opened$="[[__opened]]">
       </paper-icon-button>
       <casper-moac-menu-items
