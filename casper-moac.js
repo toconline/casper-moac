@@ -924,6 +924,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 
   /**
+   * This method will restamp the casper-select templates used in the filters.
+   */
+  restampSelectTemplates () {
+    this.shadowRoot.querySelectorAll('casper-select').forEach(select => {
+      select.restampTemplate();
+    });
+  }
+
+  /**
    * This method will cause a specific row to blink and then execute the provided callback as soon as the animation ends.
    *
    * @param {String | Number} itemId The item's identifier.
