@@ -1110,6 +1110,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         filter.nodeName.toLowerCase() !== 'paper-checkbox'
           ? filter.addEventListener('value-changed', filterChangedCallback)
           : filter.addEventListener('checked-changed', filterChangedCallback);
+
+        // This is used to clean possible empty filters due to the casper-select dropdown being open at the time.
+        if (filter.nodeName.toLowerCase() === 'casper-select') {
+          filter.addEventListener('opened-changed', event => {
+            if (!event.target.opened) this.__renderActiveFilters();
+          });
+        }
       });
     });
   }
@@ -1375,9 +1382,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     switch (filter.type) {
       case CasperMoacFilterTypes.CASPER_SELECT:
-        !filter.inputOptions.multiSelection
-          ? this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(event.target)
-          : this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`).openDropdown(this.$.activeFilters);
+        const selectElement = this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`);
+
+        selectElement.opened
+          ? selectElement.closeDropdown()
+          : selectElement.openDropdown(this.$.activeFilters);
         break;
       case CasperMoacFilterTypes.PAPER_INPUT:
         this.__displayAllFilters = true;
@@ -1432,7 +1441,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (!this.__filters) return;
 
     this.__filters.forEach(filterItem => {
-      if (this.__valueIsNotEmpty(filterItem.filter.value)) {
+      // Do not hide the "shortcut" when the casper-select is currently open.
+      let isFilterCurrentlyOpen = false;
+      if (filterItem.filter.type === CasperMoacFilterTypes.CASPER_SELECT) {
+        const selectElement = this.shadowRoot.querySelector(`casper-select[data-filter="${filterItem.filterKey}"]`);
+
+        isFilterCurrentlyOpen = selectElement && selectElement.opened;
+      }
+
+      if (isFilterCurrentlyOpen || this.__valueIsNotEmpty(filterItem.filter.value)) {
         this.__renderActiveFilterDOM(
           filterItem.filter.label,
           this.__activeFilterValue(filterItem),
@@ -1483,7 +1500,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Object} filterItem
    */
   __activeFilterValue (filterItem) {
-    if (!this.__valueIsNotEmpty(filterItem.filter.value)) return;
+    if (!this.__valueIsNotEmpty(filterItem.filter.value)) return '(Filtro Vazio)';
 
     switch (filterItem.filter.type) {
       case CasperMoacFilterTypes.PAPER_INPUT:
@@ -1494,7 +1511,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       case CasperMoacFilterTypes.CASPER_SELECT:
         const casperSelect = this.shadowRoot.querySelector(`casper-select[data-filter="${filterItem.filterKey}"]`);
 
-        if (!casperSelect || !casperSelect.items || casperSelect.items.length === 0) return;
+        if (!casperSelect || !casperSelect.items || casperSelect.items.length === 0) return '(Filtro Vazio)';
 
         const filterValues = !filterItem.filter.inputOptions.multiSelection
           ? [filterItem.filter.value.toString()]
