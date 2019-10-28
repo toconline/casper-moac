@@ -260,25 +260,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: false,
       },
       /**
-       * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
-       *
-       * @type {Boolean}
-       */
-      __displayAllFilters: {
-        type: Boolean,
-        value: false,
-        observer: '__displayAllFiltersChanged'
-      },
-      /**
-       * The items that are currently displayed in the vaadin-grid.
-       *
-       * @type {Array}
-       */
-      __filteredItems: {
-        type: Array,
-        value: []
-      },
-      /**
        * The local property where the items children are.
        *
        * @type {Array}
@@ -290,10 +271,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       /**
        * The children's local property where this component will save their parent identifier
        * to easily remove them later.
+       *
+       * @type {String}
        */
       parentInternalProperty: {
         type: String,
         value: '__parent'
+      },
+      /**
+       * The filters's local property where this component will save if his event listeners were already attached or not.
+       *
+       * @type {String}
+       */
+      attachedEventListenersInternalProperty: {
+        type: String,
+        value: '__attachedEventListeners'
       },
       /**
        * Flag that is passed to the casper-epaper component which disables the sticky
@@ -313,7 +305,26 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
        */
       stickyMaximumHeight: {
         type: Number
-      }
+      },
+      /**
+       * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
+       *
+       * @type {Boolean}
+       */
+      __displayAllFilters: {
+        type: Boolean,
+        value: false,
+        observer: '__displayAllFiltersChanged'
+      },
+      /**
+       * The items that are currently displayed in the vaadin-grid.
+       *
+       * @type {Array}
+       */
+      __filteredItems: {
+        type: Array,
+        value: []
+      },
     };
   }
 
@@ -813,7 +824,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
     this.__bindSorterEvents();
-    this.__bindFiltersEvents();
+    this.__bindSearchInputEvents();
     this.__bindContextMenuEvents();
     this.__monkeyPatchVaadinElements();
     this.__stampGridCustomStylesTemplate();
@@ -1075,13 +1086,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 
   /**
-   * Bind event listeners to the generic search input and to the ones present in the filters property.
+   * Bind event listeners to the generic search input.
    */
-  __bindFiltersEvents () {
+  __bindSearchInputEvents () {
     this.$.filterInternalInput.addEventListener('keyup', () => this.__freeFilterChanged());
     this.$.filterInternalInput.addEventListener('blur', () => { this.$.filterInput.style.border = ''; });
     this.$.filterInternalInput.addEventListener('focus', () => { this.$.filterInput.style.border = '1px solid var(--primary-color)'; });
+  }
 
+  /**
+   * Bind event listeners to all the elements used to filter the dataset.
+   */
+  __bindFiltersEvents () {
     const filterChangedCallback = () => {
       this.dispatchEvent(new CustomEvent('filters-changed', {
         bubbles: true,
@@ -1107,6 +1123,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         casper-select[data-filter],
         casper-date-picker[data-filter]
       `).forEach(filter => {
+        if (filter[this.attachedEventListenersInternalProperty]) return;
+
         filter.nodeName.toLowerCase() !== 'paper-checkbox'
           ? filter.addEventListener('value-changed', filterChangedCallback)
           : filter.addEventListener('checked-changed', filterChangedCallback);
@@ -1117,6 +1135,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             if (!event.target.opened) this.__renderActiveFilters();
           });
         }
+
+        filter[this.attachedEventListenersInternalProperty] = true;
       });
     });
   }
@@ -1253,6 +1273,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __filtersChanged (filters) {
     this.__hasFilters = !!this.filters && Object.keys(this.filters).length > 0;
+    this.__bindFiltersEvents();
 
     // Transform the filters object into an array to use in a dom-repeat.
     this.__filters = Object.keys(filters).map(filterKey => ({
