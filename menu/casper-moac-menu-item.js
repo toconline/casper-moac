@@ -95,7 +95,9 @@ export class CasperMoacMenuItem extends PolymerElement {
   ready () {
     super.ready();
 
-    this.shadowRoot.addEventListener('click', () => {
+    this.shadowRoot.addEventListener('click', event => {
+      if (event.composedPath().some(element => element.nodeName && element.nodeName.toLowerCase() === 'a')) return;
+
       const slotAssignedElements = this.shadowRoot.querySelector('slot').assignedElements();
 
       // Trigger the click manually when there is an anchor.
