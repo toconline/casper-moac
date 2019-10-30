@@ -1098,10 +1098,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * Bind event listeners to all the elements used to filter the dataset.
    */
   __bindFiltersEvents () {
-    const filterChangedCallback = () => {
+    const filterChangedCallback = event => {
       this.dispatchEvent(new CustomEvent('filters-changed', {
         bubbles: true,
-        composed: true
+        composed: true,
+        detail: {
+          filter: event.composedPath().shift().dataset.filter
+        }
       }));
 
       // Force the re-fetch of items if one the filter changes.
