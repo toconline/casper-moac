@@ -1,6 +1,6 @@
 import './casper-moac-menu-item';
 import './casper-moac-menu-items';
-import '@casper2020/casper-icons/casper-icons.js';
+import '@casper2020/casper-icons/casper-icon.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';

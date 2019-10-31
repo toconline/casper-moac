@@ -1,6 +1,4 @@
-import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-button/paper-button.js';
-import '@casper2020/casper-icons/casper-icons.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
 export class CasperMoacMenuItem extends PolymerElement {

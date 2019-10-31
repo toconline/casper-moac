@@ -6,11 +6,11 @@ import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
 import '@vaadin/vaadin-grid/vaadin-grid-column.js';
 import '@vaadin/vaadin-grid/vaadin-grid-selection-column.js';
+import '@casper2020/casper-icons/casper-icon.js';
 import '@casper2020/casper-icons/casper-icons.js';
 import '@casper2020/casper-epaper/casper-epaper.js';
 import '@casper2020/casper-select/casper-select.js';
 import '@casper2020/casper-date-picker/casper-date-picker.js';
-import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-input/iron-input.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
@@ -211,7 +211,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
        */
       noItemsIcon: {
         type: String,
-        value: 'casper-icons:empty-data'
+        value: 'fa-light:clipboard'
       },
       /**
        * Text that will be used when the vaadin-grid has no items to display.
@@ -394,9 +394,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           border-color: var(--primary-color);
         }
 
-        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput iron-icon {
-          height: 75%;
-          color: var(--primary-color);
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput casper-icon {
+          width: 15px;
+          height: 15px;
+          --casper-icon-fill-color: var(--primary-color);
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput input {
@@ -423,14 +424,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           background-color: rgba(var(--primary-color-rgb), 0.2);
         }
 
-        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters iron-icon {
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters casper-icon {
           width: 15px;
           height: 15px;
           margin-left: 5px;
           transition: transform 200ms linear;
+          --casper-icon-fill-color: var(--primary-color);
         }
 
-        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters iron-icon[rotate] {
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters casper-icon[rotate] {
           transform: rotate(180deg);
         }
 
@@ -445,20 +447,27 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           display: flex;
           line-height: 20px;
           margin-bottom: 10px;
+          align-items: center;
           justify-content: space-between;
         }
 
-        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header paper-icon-button {
-          color: white;
-          width: 20px;
-          height: 20px;
-          padding: 2px;
-          margin-right: 5px;
-          border-radius: 50%;
-          background-color: var(--primary-color);
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header .header-title {
+          display: flex;
+          align-items: center;
         }
 
-        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header paper-icon-button:hover {
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header .header-title casper-icon {
+          width: 20px;
+          height: 20px;
+          padding: 5px;
+          border-radius: 50%;
+          margin-right: 5px;
+          box-sizing: border-box;
+          background-color: var(--primary-color);
+          --casper-icon-fill-color: white;
+        }
+
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header .header-title casper-icon:hover {
           cursor: pointer;
           background-color: var(--dark-primary-color);
         }
@@ -534,6 +543,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           width: 100%;
           height: 100%;
           display: flex;
+          font-size: 18px;
+          font-weight: bold;
           position: absolute;
           text-align: center;
           align-items: center;
@@ -543,9 +554,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           background: rgba(0, 0, 0, 0.1);
         }
 
-        .main-container vaadin-split-layout .left-side-container .grid-no-items iron-icon {
+        .main-container vaadin-split-layout .left-side-container .grid-no-items casper-icon {
           width: 100px;
           height: 100px;
+          margin-bottom: 25px;
+          --casper-icon-fill-color: var(--status-gray);
         }
 
         .main-container vaadin-split-layout .left-side-container #spinner {
@@ -600,14 +613,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          color: var(--primary-color);
           display: var(--display-actions-on-hover);
+          --casper-icon-fill-color: var(--primary-color);
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid .context-menu-icon:hover {
-          color: white;
           cursor: pointer;
           background-color: var(--primary-color);
+          --casper-icon-fill-color: white;
         }
 
         .right-side-container .epaper-container {
@@ -628,14 +641,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                 <!--Generic Filter input-->
                 <iron-input id="filterInput">
                   <input placeholder="[[filterInputPlaceholder]]" id="filterInternalInput" />
-                  <iron-icon icon="casper-icons:search"></iron-icon>
+                  <casper-icon icon="fa-regular:search"></casper-icon>
                 </iron-input>
 
                 <!--Show/hide the active filters-->
                 <template is="dom-if" if="[[__hasFilters]]">
                   <paper-button id="displayAllFilters" on-click="__toggleDisplayAllFilters">
                     <span>Ver todos os filtros</span>
-                    <iron-icon icon="casper-icons:arrow-drop-down"></iron-icon>
+                    <casper-icon icon="fa-regular:angle-down"></casper-icon>
                   </paper-button>
                 </template>
               </div>
@@ -643,13 +656,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               <!--Active filters-->
               <div class="active-filters">
                 <div class="header">
-                  <div>
+                  <div class="header-title">
                     <template is="dom-if" if="[[__staleDataset]]">
-                      <paper-icon-button
+                      <casper-icon
                         on-click="refreshItems"
-                        icon="casper-icons:repeat"
+                        icon="fa-regular:sync"
                         tooltip="Os dados poderão estar desactualizados. Clique aqui para recarreegar a grelha">
-                      </paper-icon-button>
+                      </casper-icon>
                     </template>
                     <strong>Filtros ativos:</strong>
                   </div>
@@ -747,23 +760,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                 <slot name="grid"></slot>
 
                 <!--Context Menu-->
-                <template is="dom-if" if="[[__displayContextMenu]]">
-                  <vaadin-grid-column flex-grow="0" width="40px">
+                <vaadin-grid-column flex-grow="0" width="40px" text-align="center">
+                  <template is="dom-if" if="[[__displayContextMenu]]">
                     <template>
-                      <iron-icon
-                        class="context-menu-icon"
-                        on-click="__openContextMenu"
-                        icon="casper-icons:arrow-drop-down">
-                      </iron-icon>
+                      <casper-icon class="context-menu-icon" on-click="__openContextMenu" icon="fa-regular:angle-down"></casper-icon>
                     </template>
-                  </vaadin-grid-column>
-                </template>
+                  </template>
+                </vaadin-grid-column>
               </vaadin-grid>
 
               <!--No items placeholder-->
               <template is="dom-if" if="[[__hasNoItems(__filteredItems, loading)]]">
                 <div class="grid-no-items">
-                  <iron-icon icon="[[noItemsIcon]]"></iron-icon>
+                  <casper-icon icon="[[noItemsIcon]]"></casper-icon>
                   [[noItemsText]]
                 </div>
               </template>
@@ -1009,7 +1018,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    *
    * @param {Number | String} itemId The item that should be scrolled to if he's not currently visible.
    */
-  async __scrollToItemIfNotVisible (itemId) {
+  __scrollToItemIfNotVisible (itemId) {
     // Scroll to the item if it's not into view taking into account the grid's internal items.
     if (!this.isItemIntoView(itemId)) {
       this.grid._scrollToIndex(this.__findItemIndexById(itemId));
@@ -1266,7 +1275,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     afterNextRender(this, () => {
       this.__displayAllFiltersButton = this.__displayAllFiltersButton || this.shadowRoot.querySelector('#displayAllFilters');
       this.__displayAllFiltersButtonSpan = this.__displayAllFiltersButtonSpan || this.__displayAllFiltersButton.querySelector('span');
-      this.__displayAllFiltersButtonIcon = this.__displayAllFiltersButtonIcon || this.__displayAllFiltersButton.querySelector('iron-icon');
+      this.__displayAllFiltersButtonIcon = this.__displayAllFiltersButtonIcon || this.__displayAllFiltersButton.querySelector('casper-icon');
 
       if (this.__displayAllFilters) {
         this.__displayAllFiltersButtonIcon.setAttribute('rotate', true);

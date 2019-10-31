@@ -1,5 +1,4 @@
-import '@casper2020/casper-icons/casper-icons.js';
-import '@polymer/iron-icon/iron-icon.js';
+import '@casper2020/casper-icons/casper-icon.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
@@ -63,8 +62,8 @@ class CasperMoacSidebarItem extends PolymerElement {
           background-color: darkgray;
         }
 
-        .sidebar-item-header iron-icon {
-          color: #3C3C3C;
+        .sidebar-item-header casper-icon {
+          --casper-icon-fill-color: #3C3C3C;
           margin-right: 10px;
           transition: transform 200ms linear;
         }
@@ -73,8 +72,8 @@ class CasperMoacSidebarItem extends PolymerElement {
           transform: rotate(180deg);
         }
 
-        .sidebar-item-header:hover iron-icon {
-          color: #3E3E3E;
+        .sidebar-item-header:hover casper-icon {
+          --casper-icon-fill-color: #3E3E3E;
         }
 
         .sidebar-item-header .sidebar-item-header-title {
@@ -96,11 +95,11 @@ class CasperMoacSidebarItem extends PolymerElement {
       </style>
       <div class="sidebar-item-header" id="header">
         <div class="sidebar-item-header-title">
-          <iron-icon icon="[[icon]]"></iron-icon>
+          <casper-icon icon="[[icon]]"></casper-icon>
           [[title]]
         </div>
 
-        <iron-icon icon="casper-icons:arrow-drop-down" id="headerDropDownIcon"></iron-icon>
+        <casper-icon icon="fa-regular:angle-down" id="headerDropDownIcon"></casper-icon>
       </div>
       <div class="sidebar-item-body" id="body">
         <div class="sidebar-item-content">

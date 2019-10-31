@@ -1,4 +1,4 @@
-import '@polymer/iron-icon/iron-icon.js';
+import '@casper2020/casper-icons/casper-icon.js';
 import '@polymer/paper-button/paper-button.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
@@ -57,14 +57,14 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
           border-radius: 50%;
         }
 
-        #button iron-icon {
+        #button casper-icon {
           width: 19px;
           height: 19px;
         }
       </style>
 
       <paper-button id="button" disabled="[[disabled]]">
-        <iron-icon icon="[[icon]]"></iron-icon>
+        <casper-icon icon="[[icon]]"></casper-icon>
         <slot></slot>
       </paper-button>
     `;

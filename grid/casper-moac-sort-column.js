@@ -1,3 +1,4 @@
+import '@casper2020/casper-icons/casper-icon.js';
 import { html } from '@polymer/polymer/polymer-element.js';
 import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js';
 import { CasperMoacSortTypes, CasperMoacSortDirections } from '../casper-moac-constants';
@@ -61,12 +62,14 @@ class CasperMoacSortColumn extends GridColumnElement {
           #header-container #header-sort {
             flex-shrink: 0;
             margin-left: 5px;
+            display: flex;
+            align-items: center;
           }
 
-          #header-container #header-sort iron-icon {
+          #header-container #header-sort casper-icon {
             width: 15px;
             height: 15px;
-            --iron-icon-fill-color: white;
+            --casper-icon-fill-color: white;
           }
 
           #header-container #header-sort #header-sort-order {
@@ -79,7 +82,7 @@ class CasperMoacSortColumn extends GridColumnElement {
           <span id="header-title">[[header]]</span>
 
           <div id="header-sort">
-            <iron-icon icon="[[__getIcon()]]" style="[[__getIconOpacity()]]"></iron-icon>
+            <casper-icon icon="[[__getIcon()]]" style="[[__getIconOpacity()]]"></casper-icon>
             <span id="header-sort-order">[[sortOrder]]</span>
           </div>
         </div>
@@ -111,7 +114,7 @@ class CasperMoacSortColumn extends GridColumnElement {
       : directions[0];
 
     // Manipulate the icon and opacity.
-    this.__headerIcon = this.__headerIcon || event.target.closest('#header-container').querySelector('iron-icon');
+    this.__headerIcon = this.__headerIcon || event.target.closest('#header-container').querySelector('casper-icon');
     this.__headerIcon.icon = this.__getIcon();
     this.__headerIcon.style = this.__getIconOpacity();
   }
@@ -122,11 +125,11 @@ class CasperMoacSortColumn extends GridColumnElement {
   __getIcon () {
     switch (this.direction) {
       case CasperMoacSortDirections.ASCENDING:
-        return 'casper-icons:sort-up';
+        return 'fa-solid:sort-up';
       case CasperMoacSortDirections.DESCENDING:
-        return 'casper-icons:sort-down';
+        return 'fa-solid:sort-down';
       default:
-        return 'casper-icons:sort';
+        return 'fa-solid:sort';
     }
   }
 

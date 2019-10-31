@@ -1,5 +1,4 @@
-import '@polymer/iron-icon/iron-icon.js';
-import '@casper2020/casper-icons/casper-icons.js';
+import '@casper2020/casper-icons/casper-icon.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
 class CasperMoacTreeToggle extends PolymerElement {
@@ -59,26 +58,32 @@ class CasperMoacTreeToggle extends PolymerElement {
         :host #tree-toggle-container:hover {
           cursor: pointer;
           color: var(--primary-color);
+          --casper-icon-fill-color: var(--primary-color);
         }
 
         :host([expanded]) #tree-toggle-container {
           color: var(--primary-color);
         }
 
-        :host #tree-toggle-container iron-icon {
-          width: 10px;
-          height: 10px;
-          margin-right: 3px;
+        :host #tree-toggle-container:hover casper-icon,
+        :host([expanded]) #tree-toggle-container casper-icon {
+          --casper-icon-fill-color: var(--primary-color);
         }
 
-        :host([expanded]) #tree-toggle-container iron-icon {
+        :host #tree-toggle-container casper-icon {
+          width: 15px;
+          height: 15px;
+          --casper-icon-fill-color: darkgrey;
+        }
+
+        :host([expanded]) #tree-toggle-container casper-icon {
           transform: rotate(90deg);
         }
       </style>
 
       <template is="dom-if" if="[[hasChildren]]">
         <div id="tree-toggle-container">
-          <iron-icon icon="casper-icons:caret-right"></iron-icon>
+          <casper-icon icon="fa-solid:caret-right"></casper-icon>
           [[childrenCount]]
         </div>
       </template>
