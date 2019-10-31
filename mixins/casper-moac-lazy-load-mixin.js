@@ -362,7 +362,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         && this.resourceFilterAttributes.length > 0) {
 
         freeFilters = this.resourceFilterAttributes.map(filterAttribute => {
-          if (filterAttribute.constructor === Object) {
+          if (filterAttribute.constructor.name === 'Object') {
             switch (filterAttribute.operator) {
               case CasperMoacOperators.CONTAINS: return `${filterAttribute.field}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}%'`;
               case CasperMoacOperators.ENDS_WITH: return `${filterAttribute.field}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}'`;

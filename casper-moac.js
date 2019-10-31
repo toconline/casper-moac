@@ -848,11 +848,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    addItem (item) {
      let itemToActivate;
 
-     if (item.constructor === Object) {
+     if (item.constructor.name === 'Object') {
        // Add a single item.
        itemToActivate = item;
        this.__filteredItems = [item, ...this.__filteredItems];
-     } else if (item.constructor === Array) {
+     } else if (item.constructor.name === 'Array') {
        // Early exit if by some reason, the list is empty.
        if (item.length === 0) return;
 
@@ -875,11 +875,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    updateItem (item) {
      let itemToActivate;
 
-     if (item.constructor === Object) {
+     if (item.constructor.name === 'Object') {
        // Update a single object.
        itemToActivate = item;
        this.__filteredItems[this.__findItemIndexById(item[this.idProperty])] = item;
-     } else if (item.constructor === Array) {
+     } else if (item.constructor.name === 'Array') {
        // Early exit if by some reason, the list is empty.
        if (item.length === 0) return;
 
@@ -1388,7 +1388,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         const filterTerm = this.__normalizeVariable(this.$.filterInput.value);
 
         filteredItems = originalItems.filter(item => filterAttributes.some(filterAttribute => {
-          if (filterAttribute.constructor === Object) {
+          if (filterAttribute.constructor.name === 'Object') {
             switch (filterAttribute.operator) {
               case CasperMoacOperators.EXACT_MATCH: return this.__normalizeVariable(item[filterAttribute.field]) === filterTerm;
               case CasperMoacOperators.CONTAINS: return this.__normalizeVariable(item[filterAttribute.field]).includes(filterTerm);
