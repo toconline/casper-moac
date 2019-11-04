@@ -39,32 +39,33 @@ export class CasperMoacMenuItem extends PolymerElement {
           transition: background-color 100ms linear;
         }
 
-        #container paper-icon-button {
+        #container casper-icon {
           flex: 0 0 30px;
           height: 30px;
-          padding: 5px;
+          padding: 7px;
+          box-sizing: border-box;
           margin-left: 0;
           border-radius: 50%;
           margin-right: 10px;
           background-color: var(--primary-color);
         }
 
-        #container[disabled] paper-icon-button {
-          color: #A8A8A8;
+        #container[disabled] casper-icon {
+          --casper-icon-fill-color: #A8A8A8;
           background-color: transparent;
         }
 
-        #container:not([disabled]) paper-icon-button {
-          color: white;
+        #container:not([disabled]) casper-icon {
+          --casper-icon-fill-color: white;
         }
 
-        #container:not([disabled]):hover paper-icon-button {
+        #container:not([disabled]):hover casper-icon {
           background-color: white;
-          color: var(--primary-color);
+          --casper-icon-fill-color: var(--primary-color);
         }
       </style>
       <div id="container" disabled$="[[disabled]]">
-        <paper-icon-button icon="[[icon]]"></paper-icon-button>
+        <casper-icon icon="[[icon]]"></casper-icon>
         <slot></slot>
       </div>
     `;

@@ -46,7 +46,6 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
         }
 
         #button:not([disabled]) {
-          color: white;
           background-color: var(--primary-color);
         }
 
@@ -60,6 +59,8 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
         #button casper-icon {
           width: 19px;
           height: 19px;
+          padding: 5px;
+          --casper-icon-fill-color: white;
         }
       </style>
 
