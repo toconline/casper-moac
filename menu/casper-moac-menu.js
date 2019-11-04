@@ -51,13 +51,14 @@ class CasperMoacMenu extends PolymerElement {
         }
 
         #menuTrigger {
-          padding: 0;
           z-index: 2;
           width: 55px;
           height: 55px;
-          color: white;
+          padding: 10px;
           border-radius: 50%;
+          box-sizing: border-box;
           background-color: var(--primary-color);
+          --casper-icon-fill-color: white;
         }
 
         #menuTrigger[disabled] {
@@ -85,12 +86,12 @@ class CasperMoacMenu extends PolymerElement {
           background-color: var(--casper-moac-menu-background-color);
         }
       </style>
-      <paper-icon-button
+      <casper-icon
         id="menuTrigger"
         disabled="[[disabled]]"
         icon="[[__menuIcon(__opened, openIcon, closeIcon)]]"
         data-menu-opened$="[[__opened]]">
-      </paper-icon-button>
+      </casper-icon>
       <casper-moac-menu-items
         id="menuItems"
         opened="{{__opened}}"
