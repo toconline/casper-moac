@@ -345,8 +345,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         .main-container .sidebar-container {
           flex-grow: 0;
-          flex-basis: 250px;
           border-left: 1px solid #E2E2E2;
+          flex-basis: var(--casper-moac-sidebar-width, 250px);
         }
 
         .main-container vaadin-split-layout {
