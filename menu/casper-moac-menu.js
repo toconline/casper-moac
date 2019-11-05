@@ -169,6 +169,9 @@ class CasperMoacMenu extends PolymerElement {
     if (disabled) this.close();
   }
 
+  /**
+   * Close the casper-moac-menu when the user presses the key Escape.
+   */
   __closeOnEscapePress (event) {
     if (event.code === 'Escape') this.close();
   }
