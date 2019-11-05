@@ -23,8 +23,7 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
        */
       disabled: {
         type: Boolean,
-        value: false,
-        observer: '__disabledChanged'
+        value: false
       }
     };
   }
@@ -97,13 +96,6 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
     if (this.shadowRoot.querySelector('slot').assignedNodes().length === 0) {
       this.$.button.classList.add('only-icon');
     }
-  }
-
-  /**
-   * Observer that fires when the multi selection action is enabled / disabled and react accordingly.
-   */
-  __disabledChanged () {
-    this.shadowRoot.host.style.pointerEvents = this.disabled ? 'none' : '';
   }
 }
 
