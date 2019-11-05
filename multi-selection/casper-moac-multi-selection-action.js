@@ -35,31 +35,51 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
         :host {
           height: 25px;
           margin-top: 10px;
+          margin-left: 2px;
+          margin-right: 2px;
         }
 
         #button {
+          color: white;
           height: 25px;
           font-size: 10px;
           font-weight: bold;
           border-radius: 15px;
-          padding: 0 7px 0 5px;
+          padding: 2px 8px;
+        }
+
+        #button.only-icon {
+          width: 25px;
+          padding: 0;
+          font-size: 0;
+          border-radius: 50%;
+        }
+
+        #button[disabled] {
+          color: darkgrey;
+          pointer-events: none;
+          background-color: lightgrey;
         }
 
         #button:not([disabled]) {
           background-color: var(--primary-color);
         }
 
-        #button.only-icon {
-          width: 25px;
-          padding: 0;
-          min-width: unset;
-          border-radius: 50%;
+        #button casper-icon {
+          width: 15px;
+          height: 15px;
+          margin-right: 5px;
         }
 
-        #button casper-icon {
-          width: 19px;
-          height: 19px;
-          padding: 5px;
+        #button.only-icon casper-icon {
+          margin-right: 0;
+        }
+
+        #button[disabled] casper-icon {
+          --casper-icon-fill-color: darkgrey;
+        }
+
+        #button:not([disabled]) casper-icon {
           --casper-icon-fill-color: white;
         }
       </style>

@@ -575,13 +575,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           --paper-spinner-layer-4-color: var(--primary-color);
         }
 
-        .main-container vaadin-split-layout .left-side-container #multiSelectionContainer {
+        .main-container vaadin-split-layout .left-side-container #multi-selection-container {
           height: 0;
           overflow: hidden;
           transition: height 100ms linear;
         }
 
-        .main-container vaadin-split-layout .left-side-container #multiSelectionContainer .grid-multiple-selection {
+        .main-container vaadin-split-layout .left-side-container #multi-selection-container .grid-multiple-selection {
           display: flex;
           overflow: hidden;
           border-radius: 5px;
@@ -592,12 +592,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           transition: height 100ms linear;
         }
 
-        .main-container vaadin-split-layout .left-side-container #multiSelectionContainer .grid-multiple-selection .grid-multiple-selection-label {
+        .main-container vaadin-split-layout .left-side-container #multi-selection-container .grid-multiple-selection .grid-multiple-selection-label {
           font-size: 0.75em;
           color: var(--primary-color);
         }
 
-        .main-container vaadin-split-layout .left-side-container #multiSelectionContainer .grid-multiple-selection .grid-multiple-selection-icons {
+        .main-container vaadin-split-layout .left-side-container #multi-selection-container .grid-multiple-selection .grid-multiple-selection-icons {
           display: flex;
           flex-wrap: wrap;
           margin: -10px 0 0 0;
@@ -730,7 +730,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             </div>
 
             <slot name="left"></slot>
-            <div id="multiSelectionContainer">
+            <div id="multi-selection-container">
               <div class="grid-multiple-selection">
                 <div class="grid-multiple-selection-label">
                   Seleção múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
@@ -1361,8 +1361,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
 
     !this.__hasSelectedItems
-      ? this.$.multiSelectionContainer.style.height = ''
-      : this.$.multiSelectionContainer.style.height = `${this.$.multiSelectionContainer.firstElementChild.scrollHeight}px`;
+      ? this.$['multi-selection-container'].style.height = ''
+      : this.$['multi-selection-container'].style.height = `${this.$['multi-selection-container'].firstElementChild.scrollHeight}px`;
 
     if (!this.__selectAllCheckbox) return;
 
