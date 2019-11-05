@@ -45,12 +45,17 @@ class CasperMoacMenu extends PolymerElement {
   static get template () {
     return html`
       <style>
+        :host  {
+          z-index: 1;
+        }
+
         #menuTrigger {
           z-index: 2;
           width: 55px;
           height: 55px;
           padding: 10px;
           border-radius: 50%;
+          position: relative;
           box-sizing: border-box;
           background-color: var(--primary-color);
           --casper-icon-fill-color: white;
@@ -73,7 +78,6 @@ class CasperMoacMenu extends PolymerElement {
         }
 
         #circleBackground {
-          z-index: 1;
           opacity: 0.95;
           position: absolute;
           border-radius: 50%;
