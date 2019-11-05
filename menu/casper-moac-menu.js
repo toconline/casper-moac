@@ -1,7 +1,6 @@
 import './casper-moac-menu-item';
 import './casper-moac-menu-items';
 import '@casper2020/casper-icons/casper-icon.js';
-import '@polymer/paper-icon-button/paper-icon-button.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
@@ -29,7 +28,7 @@ class CasperMoacMenu extends PolymerElement {
         */
        openIcon: {
          type: String,
-         value: 'casper-icons:plus'
+         value: 'fa-light:plus'
        },
        /**
         * Icon that will appear when the casper-moac-menu
@@ -38,7 +37,7 @@ class CasperMoacMenu extends PolymerElement {
         */
        closeIcon: {
         type: String,
-        value: 'casper-icons:clear'
+        value: 'fa-light:times'
       }
     };
   }
@@ -46,10 +45,6 @@ class CasperMoacMenu extends PolymerElement {
   static get template () {
     return html`
       <style>
-        :host {
-          z-index: 2;
-        }
-
         #menuTrigger {
           z-index: 2;
           width: 55px;
@@ -73,7 +68,7 @@ class CasperMoacMenu extends PolymerElement {
 
         #menuTrigger[data-menu-opened] {
           background-color: white;
-          color: var(--primary-color);
+          --casper-icon-fill-color: var(--primary-color);
           box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.25);
         }
 
