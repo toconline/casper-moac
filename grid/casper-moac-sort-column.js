@@ -1,5 +1,6 @@
 import '@casper2020/casper-icons/casper-icon.js';
 import { html } from '@polymer/polymer/polymer-element.js';
+import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js';
 import { CasperMoacSortTypes, CasperMoacSortDirections } from '../casper-moac-constants';
 
@@ -16,7 +17,10 @@ class CasperMoacSortColumn extends GridColumnElement {
        *
        * @type {Number}
        */
-      sortOrder: Number,
+      sortOrder: {
+        type: Number,
+        observer: '__sortOrderChanged',
+      },
       /**
        * This property specifies the column data type so that the component knows how to sort the items.
        *
@@ -83,7 +87,11 @@ class CasperMoacSortColumn extends GridColumnElement {
 
           <div id="header-sort">
             <casper-icon icon="[[__getIcon()]]" style="[[__getIconOpacity()]]"></casper-icon>
-            <span id="header-sort-order">[[sortOrder]]</span>
+
+            <!--Only display the sort order when there is more than one sort-->
+            <template is="dom-if" if="[[sortOrder]]">
+              <span id="header-sort-order">[[sortOrder]]</span>
+            </template>
           </div>
         </div>
       </template>
