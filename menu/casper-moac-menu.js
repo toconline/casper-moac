@@ -1,6 +1,7 @@
 import './casper-moac-menu-item';
 import './casper-moac-menu-items';
 import '@casper2020/casper-icons/casper-icon.js';
+import '@casper2020/casper-icons/casper-icon-button.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
@@ -53,27 +54,9 @@ class CasperMoacMenu extends PolymerElement {
           z-index: 2;
           width: 55px;
           height: 55px;
-          padding: 10px;
-          border-radius: 50%;
-          position: relative;
-          box-sizing: border-box;
-          background-color: var(--primary-color);
-          --casper-icon-fill-color: white;
-        }
-
-        #menuTrigger[disabled] {
-          color: #A8A8A8;
-          background-color: #EAEAEA;
-        }
-
-        #menuTrigger:not(disabled):hover {
-          filter: brightness(90%);
-          transition: filter 200ms linear;
         }
 
         #menuTrigger[data-menu-opened] {
-          background-color: white;
-          --casper-icon-fill-color: var(--primary-color);
           box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.25);
         }
 
@@ -85,12 +68,13 @@ class CasperMoacMenu extends PolymerElement {
           background-color: var(--casper-moac-menu-background-color);
         }
       </style>
-      <casper-icon
+      <casper-icon-button
         id="menuTrigger"
         disabled="[[disabled]]"
         icon="[[__menuIcon(__opened, openIcon, closeIcon)]]"
         data-menu-opened$="[[__opened]]">
-      </casper-icon>
+      </casper-icon-button>
+
       <casper-moac-menu-items
         id="menuItems"
         opened="{{__opened}}"
