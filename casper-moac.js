@@ -604,7 +604,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
-          height: 100%;
+          min-height: 100%;
           overflow: hidden;
           border-radius: 5px;
         }
