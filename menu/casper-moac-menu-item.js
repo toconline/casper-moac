@@ -10,6 +10,10 @@ export class CasperMoacMenuItem extends PolymerElement {
   static get template () {
     return html`
       <style>
+        :host([disabled]) {
+          pointer-events: none;
+        }
+
         #container {
           display: flex;
           color: #212121;
@@ -20,14 +24,14 @@ export class CasperMoacMenuItem extends PolymerElement {
         }
 
         #container ::slotted(a) {
-          color: #212121;
           height: 100%;
+          color: #212121;
           text-decoration: none;
         }
 
-        #container[disabled],
-        #container[disabled] ::slotted(a) {
-          color: #A8A8A8;
+        :host([disabled]) #container,
+        :host([disabled]) #container ::slotted(a) {
+          color: var(--disabled-text-color);
           pointer-events: none;
         }
 
@@ -39,33 +43,16 @@ export class CasperMoacMenuItem extends PolymerElement {
           transition: background-color 100ms linear;
         }
 
-        #container casper-icon {
+        #container casper-icon-button {
           flex: 0 0 30px;
           height: 30px;
           padding: 7px;
-          box-sizing: border-box;
-          margin-left: 0;
-          border-radius: 50%;
           margin-right: 10px;
-          background-color: var(--primary-color);
-        }
-
-        #container[disabled] casper-icon {
-          --casper-icon-fill-color: #A8A8A8;
-          background-color: transparent;
-        }
-
-        #container:not([disabled]) casper-icon {
-          --casper-icon-fill-color: white;
-        }
-
-        #container:not([disabled]):hover casper-icon {
-          background-color: white;
-          --casper-icon-fill-color: var(--primary-color);
+          box-sizing: border-box;
         }
       </style>
-      <div id="container" disabled$="[[disabled]]">
-        <casper-icon icon="[[icon]]"></casper-icon>
+      <div id="container">
+        <casper-icon-button disabled="[[disabled]]" icon="[[icon]]"></casper-icon-button>
         <slot></slot>
       </div>
     `;
@@ -86,7 +73,7 @@ export class CasperMoacMenuItem extends PolymerElement {
       disabled: {
         type: Boolean,
         value: false,
-        observer: '__disabledChanged'
+        reflectToAttribute: true
       }
     };
   }
@@ -104,13 +91,6 @@ export class CasperMoacMenuItem extends PolymerElement {
         slotAssignedElements[0].click();
       }
     });
-  }
-
-  /**
-   * Observer that fires when the menu item is enabled / disabled and react accordingly.
-   */
-  __disabledChanged () {
-    this.shadowRoot.host.style.pointerEvents = this.disabled ? 'none' : '';
   }
 }
 

@@ -1,4 +1,5 @@
 import '@casper2020/casper-icons/casper-icon.js';
+import '@casper2020/casper-icons/casper-icon-button.js';
 import '@polymer/paper-button/paper-button.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
@@ -23,7 +24,8 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
        */
       disabled: {
         type: Boolean,
-        value: false
+        value: false,
+        reflectToAttribute: true
       }
     };
   }
@@ -38,30 +40,36 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
           margin-right: 2px;
         }
 
+        :host([disabled]) {
+          cursor: not-allowed;
+          pointer-events: none;
+        }
+
+        casper-icon-button {
+          width: 25px;
+          height: 25px;
+          padding: 5px;
+        }
+
         #button {
-          color: white;
           height: 25px;
           font-size: 10px;
           font-weight: bold;
-          border-radius: 15px;
           padding: 2px 8px;
+          border-radius: 15px;
+          color: var(--on-primary-color);
+          background-color: var(--primary-color);
         }
 
-        #button.only-icon {
-          width: 25px;
-          padding: 0;
-          font-size: 0;
-          border-radius: 50%;
+        #button:hover {
+          color: var(--primary-color);
+          background-color: var(--on-primary-color);
         }
 
         #button[disabled] {
-          color: darkgrey;
           pointer-events: none;
-          background-color: lightgrey;
-        }
-
-        #button:not([disabled]) {
-          background-color: var(--primary-color);
+          color: var(--disabled-text-color);
+          background-color: var(--disabled-background-color);
         }
 
         #button casper-icon {
@@ -70,32 +78,36 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
           margin-right: 5px;
         }
 
-        #button.only-icon casper-icon {
-          margin-right: 0;
-        }
-
         #button[disabled] casper-icon {
-          --casper-icon-fill-color: darkgrey;
+          --casper-icon-fill-color: var(--disabled-text-color);
         }
 
         #button:not([disabled]) casper-icon {
-          --casper-icon-fill-color: white;
+          --casper-icon-fill-color: var(--on-primary-color);
+        }
+
+        #button:hover casper-icon {
+          --casper-icon-fill-color: var(--primary-color);
         }
       </style>
 
-      <paper-button id="button" disabled="[[disabled]]">
-        <casper-icon icon="[[icon]]"></casper-icon>
-        <slot></slot>
-      </paper-button>
+      <template is="dom-if" if="[[!__onlyIcon]]">
+        <paper-button id="button" disabled="[[disabled]]">
+          <casper-icon icon="[[icon]]"></casper-icon>
+          <slot></slot>
+        </paper-button>
+      </template>
+
+      <template is="dom-if" if="[[__onlyIcon]]">
+        <casper-icon-button icon="[[icon]]" disabled="[[disabled]]"></casper-icon-button>
+      </template>
     `;
   }
 
   ready () {
     super.ready();
 
-    if (this.shadowRoot.querySelector('slot').assignedNodes().length === 0) {
-      this.$.button.classList.add('only-icon');
-    }
+    this.__onlyIcon = this.childNodes.length === 0;
   }
 }
 
