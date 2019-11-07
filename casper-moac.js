@@ -287,12 +287,20 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: '__attachedEventListeners'
       },
       /**
+       * Array that contains the filter components since the developer might want to access them.
+       *
+       * @type {Array}
+       */
+      filterComponents: {
+        type: Array
+      },
+      /**
        * Flag that is passed to the casper-epaper component which disables the sticky
        * mouseenter / mouseleave animation.
        *
        * @type {Boolean}
        */
-      disableStickyAnimation: {
+      epaperDisableStickyAnimation: {
         type: Boolean,
         value: false
       },
@@ -302,16 +310,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
        *
        * @type {Number}
        */
-      stickyMaximumHeight: {
+      epaperStickyMaximumHeight: {
         type: Number
       },
       /**
-       * Array that contains the filter components since the developer might want to access them.
-       *
-       * @type {Array}
+       * Property that is passed to the casper-epaper component which sets its initial zoom.
        */
-      filterComponents: {
-        type: Array
+      epaperZoom: {
+        type: Number,
       },
       /**
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
@@ -796,8 +802,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                 <slot name="right"></slot>
                 <casper-epaper
                   app="[[app]]"
-                  sticky-maximum-height="[[stickyMaximumHeight]]"
-                  disable-sticky-animation="[[disableStickyAnimation]]">
+                  zoom="[[epaperZoom]]"
+                  sticky-maximum-height="[[epaperStickyMaximumHeight]]"
+                  disable-sticky-animation="[[epaperDisableStickyAnimation]]">
                   <slot name="casper-epaper-tabs" slot="casper-epaper-tabs"></slot>
                   <slot name="casper-epaper-actions" slot="casper-epaper-actions"></slot>
                   <slot name="casper-epaper-context-menu" slot="casper-epaper-context-menu"></slot>
