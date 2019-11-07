@@ -1206,7 +1206,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     // Hide the context menu when one of its items is clicked.
     this.__contextMenu.addEventListener('click', event => {
-      if (!!this.__eventPathContainsNode(event, 'casper-menu-item')) {
+      if (this.__eventPathContainsNode(event, 'casper-menu-item')) {
         this.__contextMenu.positionTarget.removeAttribute('style');
       }
     });
