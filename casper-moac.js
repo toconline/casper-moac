@@ -1,3 +1,4 @@
+import './sidebar/casper-moac-sidebar.js';
 import { CasperMoacTypes, CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 import { CasperMoacSortingMixin } from './mixins/casper-moac-sorting-mixin.js';
 import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
@@ -356,10 +357,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           height: 100%;
         }
 
-        .main-container .sidebar-container {
-          flex-grow: 0;
-          border-left: 1px solid #E2E2E2;
-          flex-basis: var(--casper-moac-sidebar-width, 250px);
+        .main-container casper-moac-sidebar {
+          --casper-moac-sidebar-width: var(--casper-moac-sidebar-width);
         }
 
         .main-container vaadin-split-layout {
@@ -817,9 +816,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         <!--Sidebar-->
         <template is="dom-if" if="[[__displaySidebar]]">
-          <div class="sidebar-container">
+          <casper-moac-sidebar>
             <slot name="sidebar"></slot>
-          </div>
+          </casper-moac-sidebar>
         </template>
       </div>
 
