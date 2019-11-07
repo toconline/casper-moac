@@ -54,6 +54,7 @@ class CasperMoacMenu extends PolymerElement {
           z-index: 2;
           width: 55px;
           height: 55px;
+          padding: 10px;
         }
 
         #menuTrigger[data-menu-opened] {

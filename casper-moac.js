@@ -78,8 +78,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
        */
       displayedItems: {
         type: Array,
-        notify: true,
-        readoOnly: true
+        notify: true
       },
       /**
        * List of attributes that should be used to filter.
@@ -305,6 +304,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
        */
       stickyMaximumHeight: {
         type: Number
+      },
+      /**
+       * Array that contains the filter components since the developer might want to access them.
+       *
+       * @type {Array}
+       */
+      filterComponents: {
+        type: Array
       },
       /**
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
@@ -1156,12 +1163,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     };
 
     afterNextRender(this, () => {
-      this.shadowRoot.querySelectorAll(`
+      this.filterComponents = Array.from(this.shadowRoot.querySelectorAll(`
         paper-input[data-filter],
         paper-checkbox[data-filter],
         casper-select[data-filter],
         casper-date-picker[data-filter]
-      `).forEach(filter => {
+      `));
+
+      this.filterComponents.forEach(filter => {
         if (filter[this.attachedEventListenersInternalProperty]) return;
 
         filter.nodeName.toLowerCase() !== 'paper-checkbox'
