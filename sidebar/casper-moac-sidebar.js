@@ -40,26 +40,30 @@ class CasperMoacSidebar extends PolymerElement {
         }
 
         #sidebar-trigger {
-          width: 50px;
-          height: 50px;
+          top: 8px;
+          left: -44px;
+          width: 35px;
+          height: 35px;
           display: flex;
+          position: absolute;
           align-items: center;
           justify-content: center;
-          position: absolute;
-          top: 75px;
-          left: -50px;
-          opacity: 0.2;
+          border-radius: 50%;
           background-color: #E2E2E2;
-          transition: opacity 200ms linear;
+          transition: background-color 200ms linear;
         }
 
         #sidebar-trigger:hover {
-          opacity: 1;
           cursor: pointer;
+          background-color: var(--primary-color);
         }
 
         #sidebar-trigger casper-icon {
           transition: transform 200ms linear;
+        }
+
+        #sidebar-trigger:hover casper-icon {
+          --casper-icon-fill-color: white;
         }
 
         #sidebar-trigger casper-icon[rotate] {
@@ -72,7 +76,7 @@ class CasperMoacSidebar extends PolymerElement {
       </div>
 
       <div id="sidebar-trigger">
-        <casper-icon rotate$="[[open]]" icon="fa-solid:chevron-left"><casper-icon>
+        <casper-icon rotate$="[[open]]" icon="fa-regular:angle-left"><casper-icon>
       </div>
     `;
   }

@@ -357,10 +357,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           height: 100%;
         }
 
-        .main-container casper-moac-sidebar {
-          --casper-moac-sidebar-width: var(--casper-moac-sidebar-width);
-        }
-
         .main-container vaadin-split-layout {
           height: 100%;
           flex-grow: 1;
@@ -635,7 +631,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           --casper-icon-fill-color: white;
         }
 
-        .right-side-container .epaper-container {
+        .main-container vaadin-split-layout .right-side-container .epaper-container {
           width: 100%;
           height: 100%;
         }
@@ -837,6 +833,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (this.__displayEpaper) {
       // Save the epaper in a notifiable property so it can be used outside.
       afterNextRender(this, () => this.epaper = this.shadowRoot.querySelector('casper-epaper'));
+    }
+
+    if (this.__displaySidebar) {
+      this.shadowRoot.querySelector('.header-container').style.paddingRight = '50px';
     }
 
     // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
