@@ -94,7 +94,7 @@ export const CasperMoacSortingMixin = superClass => {
         case CasperMoacSortTypes.STRING:
           return (item[sorter.path] || '').toString().toLowerCase();
         case CasperMoacSortTypes.NUMBER:
-          return parseFloat(item[sorter.path]);
+          return item[sorter.path] ? parseFloat(item[sorter.path]) : Infinity;
       }
     }
   }
