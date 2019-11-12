@@ -94,8 +94,17 @@ export const CasperMoacSortingMixin = superClass => {
         case CasperMoacSortTypes.STRING:
           return (item[sorter.path] || '').toString().toLowerCase();
         case CasperMoacSortTypes.NUMBER:
-          return item[sorter.path] ? parseFloat(item[sorter.path]) : Infinity;
+          return this.__isNumeric(item[sorter.path]) ? parseFloat(item[sorter.path]) : Infinity;
       }
+    }
+
+    /**
+     * Checks if the provided parameter contains a number or a numeric value.
+     *
+     * @param {String | Number} value The value that will be checked.
+     */
+    __isNumeric (value) {
+      return !isNaN(parseFloat(value)) && isFinite(value);
     }
   }
 }
