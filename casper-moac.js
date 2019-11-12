@@ -1224,9 +1224,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       if (eventPathElement.classList.contains('context-menu-icon')) {
         this.__lastContextMenuTarget.removeAttribute('style');
 
-        // Do not close the overlay if the event was triggered by another context menu icon.
         if (this.__lastContextMenuTarget !== eventPathElement) {
-          event.preventDefault();
+          afterNextRender(this, () => this.__contextMenu.open());
         }
       } else {
         // This means the iron-overlay-canceled event was called after some other element was clicked so we close the current menu.
