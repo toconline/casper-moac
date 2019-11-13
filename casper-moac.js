@@ -398,10 +398,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           transition: border 250ms linear;
         }
 
-        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput:hover {
-          border-color: var(--primary-color);
-        }
-
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput casper-icon {
           width: 15px;
           height: 15px;
@@ -1134,8 +1130,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __bindSearchInputEvents () {
     this.$.filterInternalInput.addEventListener('keyup', () => this.__freeFilterChanged());
-    this.$.filterInternalInput.addEventListener('blur', () => { this.$.filterInput.style.border = ''; });
-    this.$.filterInternalInput.addEventListener('focus', () => { this.$.filterInput.style.border = '1px solid var(--primary-color)'; });
+    this.$.filterInternalInput.addEventListener('focus', () => {
+      this.$.filterInput.style.border = '1px solid var(--primary-color)';
+    });
+    this.$.filterInternalInput.addEventListener('blur', () => {
+      !this.$.filterInput.value.trim()
+        ? this.$.filterInput.style.border = ''
+        : this.$.filterInput.style.border = '1px solid var(--primary-color)';
+    });
   }
 
   /**
@@ -1487,7 +1489,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       this.$.activeFilters.innerHTML = '';
 
       this.__renderActiveFixedFilters();
-      this.__renderActiveFreeFilters();
 
       // Create the no active filters placeholder.
       if (!this.$.activeFilters.innerHTML) {
@@ -1498,15 +1499,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         this.$.activeFilters.appendChild(noActiveFiltersPlaceholder);
       }
     });
-  }
-
-  /**
-   * This method renders the current free filter being applied by the generic input.
-   */
-  __renderActiveFreeFilters () {
-    if (!this.$.filterInput.value.trim()) return;
-
-    this.__renderActiveFilterDOM('Pesquisa Livre', this.$.filterInput.value.trim(), () => this.$.filterInternalInput.focus());
   }
 
   /**
