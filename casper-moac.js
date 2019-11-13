@@ -1132,11 +1132,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.$.filterInternalInput.addEventListener('keyup', () => this.__freeFilterChanged());
     this.$.filterInternalInput.addEventListener('focus', () => {
       this.$.filterInput.style.border = '1px solid var(--primary-color)';
+      this.$.filterInput.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.1)';
     });
+
     this.$.filterInternalInput.addEventListener('blur', () => {
-      !this.$.filterInput.value.trim()
-        ? this.$.filterInput.style.border = ''
-        : this.$.filterInput.style.border = '1px solid var(--primary-color)';
+      if (!this.$.filterInput.value.trim()) {
+        this.$.filterInput.style.border = '';
+        this.$.filterInput.style.backgroundColor = '';
+      }
     });
   }
 
