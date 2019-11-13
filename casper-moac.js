@@ -260,6 +260,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: false,
       },
       /**
+       * This property disables the odd / even row styling.
+       *
+       * @type {Boolean}
+       */
+      disableRowStripes: {
+        type: Boolean,
+        value: false
+      },
+      /**
        * The local property where the items children are.
        *
        * @type {Array}
@@ -286,6 +295,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       attachedEventListenersInternalProperty: {
         type: String,
         value: '__attachedEventListeners'
+      },
+      /**
+       * Internal property that an item can define which changes its row background color.
+       *
+       * @type {String}
+       */
+      rowBackgroundColorInternalProperty: {
+        type: String,
+        value: '__rowBackgroundColor'
       },
       /**
        * Array that contains the filter components since the developer might want to access them.
@@ -1066,7 +1084,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * vaadin-checkbox header since its current implementation is faulty.
    */
   __monkeyPatchVaadinElements () {
-    this.gridScroller.addEventListener('scroll', () => this.__paintGridActiveRow());
+    this.gridScroller.addEventListener('scroll', () => this.__paintGridRows());
 
     this.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', async (event) => {
       const parentItem = this.activeItem = this.grid.getEventContext(event).item;
@@ -1076,6 +1094,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
       // If the toggle is not expanded remove the items that were previously expanded.
       if (!event.detail.expanded) {
+        delete parentItem[this.rowBackgroundColorInternalProperty];
+
         this.__filteredItems = this.__filteredItems.filter(item => String(item[this.parentInternalProperty]) !== String(parentItem[this.idProperty]));
       } else {
         const parentItemIndex = this.__findItemIndexById(parentItem[this.idProperty]);
@@ -1087,7 +1107,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         // Safeguard for an empty response from the server or an empty local property.
         parentItemChildren = Array.isArray(parentItemChildren) ? parentItemChildren : [];
-        parentItemChildren.forEach(child => child[this.parentInternalProperty] = parentItem[this.idProperty]);
+        parentItemChildren.forEach(child => {
+          child[this.parentInternalProperty] = parentItem[this.idProperty];
+          child[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-child-item-background-color)';
+        });
+
+        parentItem[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-parent-item-background-color)';
 
         this.__filteredItems = [
           ...this.__filteredItems.slice(0, parentItemIndex + 1),
@@ -1096,6 +1121,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         ];
       }
 
+      this.__paintGridRows();
       treeToggleComponent.disabled = false;
     });
 
@@ -1266,7 +1292,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }
     }
 
-    this.__paintGridActiveRow(true);
+    this.__paintGridRows(true);
 
     // If the active item changed, debounce the active item change.
     if (this.__activeItem !== this.__scheduleActiveItem) {
@@ -1363,7 +1389,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     }
 
     this.__activeItem = this.activeItem;
-    this.__paintGridActiveRow();
+    this.__paintGridRows();
   }
 
   /**
@@ -1598,16 +1624,23 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * row has a different background color. This is required for scroll as well since the vaadin-grid re-uses
    * its rows and having this into account, the id property is used to avoid highlighting the wrong row.
    */
-  __paintGridActiveRow (focusActiveCell = false) {
+  __paintGridRows (focusActiveCell = false) {
     afterNextRender(this, () => {
       // Loop through each grid row and paint the active one.
-      this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
+      this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach((row, rowIndex) => {
         const isRowActive = this.__activeItem && String(row._item[this.idProperty]) === String(this.__activeItem[this.idProperty]);
+        const isRowBackgroundColored = !!row._item[this.rowBackgroundColorInternalProperty];
 
         Array.from(row.children).forEach(cell => {
-          // This means an animation with a backgroundColor is already occurring.
-          if (!cell.hasAttribute('blink')) {
-            cell.style.backgroundColor = isRowActive ? 'var(--casper-moc-active-item-background-color)' : '';
+          // Check if the row has no active animation and is either active or colored.
+          if (!row.hasAttribute('blink') && (isRowActive || isRowBackgroundColored)) {
+            // The active background color has priority.
+            isRowActive
+              ? cell.style.backgroundColor = 'var(--casper-moac-active-item-background-color)'
+              : cell.style.backgroundColor = row._item[this.rowBackgroundColorInternalProperty];
+          } else {
+            // If we got here, just remove the current cell background color.
+            cell.style.backgroundColor = !this.disableRowStripes && rowIndex % 2 === 1 ? 'var(--casper-moac-row-stripe-color)' : '';
           }
         });
 

@@ -59,6 +59,7 @@ class CasperMoacSidebar extends PolymerElement {
         }
 
         #sidebar-trigger casper-icon {
+          --casper-icon-fill-color: #3C3C3C;
           transition: transform 200ms linear;
         }
 
