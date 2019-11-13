@@ -754,7 +754,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               <vaadin-grid
                 id="grid"
                 class="moac"
-                theme="row-stripes"
                 items="[[__filteredItems]]"
                 active-item="{{activeItem}}"
                 selected-items="{{selectedItems}}">
@@ -1008,16 +1007,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
       if (!isRowActive) continue;
 
-      Array.from(row.children).forEach(cell => {
-        cell.style.backgroundColor = backgroundColor;
-        cell.setAttribute('blink', true);
-      });
+      Array.from(row.children).forEach(cell => { cell.style.backgroundColor = backgroundColor; });
+      row.setAttribute('blink', true);
 
       setTimeout(() => {
-        Array.from(row.children).forEach(cell => {
-          cell.style.backgroundColor = '';
-          cell.removeAttribute('blink');
-        });
+        Array.from(row.children).forEach(cell => { cell.style.backgroundColor = ''; });
+        row.removeAttribute('blink');
 
         callback();
       }, 1000);
@@ -1292,9 +1287,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       this.__displayAllFiltersButtonIcon = this.__displayAllFiltersButtonIcon || this.__displayAllFiltersButton.querySelector('casper-icon');
 
       if (this.__displayAllFilters) {
+        // This fix is required for smaller screens where the vaadin-grid has no height with the filters visible.
+        this.$.grid.style.flex = '';
+
         this.__displayAllFiltersButtonIcon.setAttribute('rotate', true);
         this.__displayAllFiltersButtonSpan.innerHTML = 'Esconder todos os filtros';
       } else {
+        // This fix is required for smaller screens where the vaadin-grid has no height with the filters visible.
+        this.$.grid.style.flex = 1;
+
         this.__displayAllFiltersButtonIcon.removeAttribute('rotate');
         this.__displayAllFiltersButtonSpan.innerHTML = 'Ver todos os filtros';
       }
