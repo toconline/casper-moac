@@ -242,6 +242,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: false
       },
       /**
+       * The function that is going to be called before the JSON API request.
+       *
+       * @type {Function}
+       */
+      beforeJsonApiRequest: {
+        type: Function,
+      },
+      /**
        * Boolean that states if the vaadin-grid should have the selection column or not.
        *
        * @type {Boolean}
@@ -1189,8 +1197,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
       // Force the re-fetch of items if one the filter changes.
       if (this.lazyLoad) {
-        if (this.page && typeof this.page.__beforeRefreshItems === 'function') {
-          this.page.__beforeRefreshItems();
+        if (this.page && this.beforeJsonApiRequest) {
+          this.beforeJsonApiRequest.apply(this.page || {});
         }
 
         this.refreshItems();
