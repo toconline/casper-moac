@@ -216,7 +216,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       // Format the elements returned by the JSON API.
       if (this.resourceFormatter) {
-        socketResponse.data.forEach(item => this.resourceFormatter.apply(this.page || {}, [item]));
+        socketResponse.data.forEach(item => this.resourceFormatter.call(this.page || {}, item));
       }
 
       if (this.__currentPage !== 1) {
