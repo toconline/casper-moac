@@ -1298,7 +1298,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (this.__activeItem !== this.__scheduleActiveItem) {
       // This property is used to avoid delaying infinitely activating the same item which is caused when the user
       // maintains the up / down arrows after reaching the first / last result in the table.
-      this.__scheduleActiveItem = this.__activeItem;
+      this.__scheduleActiveItem = {...this.__activeItem};
       this.__debounce('__activeItemDebouncer', () => {
         this.activeItem = this.__scheduleActiveItem;
       });
