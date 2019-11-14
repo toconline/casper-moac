@@ -1084,7 +1084,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * vaadin-checkbox header since its current implementation is faulty.
    */
   __monkeyPatchVaadinElements () {
-    this.gridScroller.addEventListener('scroll', () => this.__paintGridRows());
+    this.gridScroller.addEventListener('scroll', () => {
+      this.__paintGridRows();
+
+      this.__contextMenu.close();
+      this.__lastContextMenuTarget.style.display = '';
+    });
 
     this.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', async (event) => {
       const parentItem = this.activeItem = this.grid.getEventContext(event).item;
