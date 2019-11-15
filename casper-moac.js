@@ -887,27 +887,28 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * the currently applied filters.
    *
    * @param {Object} item The item / list of items to be added to the current dataset.
+   * @param {Object} afterItem The item which we'll the append the new item(s) after.
    */
-   addItem (item) {
-     let itemToActivate;
+   addItem (item, afterItem) {
+     // Cast the object as an array to avoid ternaries when appending the new item(s).
+     if (item.constructor.name === 'Object') item = [item];
 
-     if (item.constructor.name === 'Object') {
-       // Add a single item.
-       itemToActivate = item;
-       this.__filteredItems = [item, ...this.__filteredItems];
-     } else if (item.constructor.name === 'Array') {
-       // Early exit if by some reason, the list is empty.
-       if (item.length === 0) return;
-
-       // Add multiple items.
-       itemToActivate = item[0];
+     if (!afterItem) {
        this.__filteredItems = [...item, ...this.__filteredItems];
+     } else {
+       const insertAfterIndex = insertAfterIndex = this.__filteredItems.findIndex(item => item === afterItem);
+
+       this.__filteredItems = [
+         ...this.__filteredItems.slice(0, insertAfterIndex + 1),
+         ...item,
+         ...this.__filteredItems.slice(insertAfterIndex + 1)
+       ];
      }
 
      this.forceGridRedraw();
-     this.activeItem = itemToActivate;
+     this.activeItem = item[0];
      this.__staleDataset = true;
-     this.__scrollToItemIfNotVisible(itemToActivate[this.idProperty]);
+     this.__scrollToItemIfNotVisible(this.activeItem[this.idProperty]);
    }
 
    /**
