@@ -66,10 +66,6 @@ class CasperMoacSidebar extends PolymerElement {
         #sidebar-trigger:hover casper-icon {
           --casper-icon-fill-color: white;
         }
-
-        #sidebar-trigger casper-icon[rotate] {
-          transform: rotate(180deg);
-        }
       </style>
 
       <div id="sidebar-items-container">
@@ -77,7 +73,7 @@ class CasperMoacSidebar extends PolymerElement {
       </div>
 
       <div id="sidebar-trigger">
-        <casper-icon rotate$="[[open]]" icon="fa-regular:angle-left"><casper-icon>
+        <casper-icon icon="[[__getIcon(open)]]"><casper-icon>
       </div>
     `;
   }
@@ -88,6 +84,12 @@ class CasperMoacSidebar extends PolymerElement {
     this.$['sidebar-trigger'].addEventListener('click', () => {
       this.open = !this.open;
     });
+  }
+
+  __getIcon (open) {
+    return open
+      ? 'fa-regular:angle-right'
+      : 'fa-regular:angle-left';
   }
 }
 
