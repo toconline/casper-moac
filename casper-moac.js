@@ -970,7 +970,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     const rows = this.grid.shadowRoot.querySelectorAll('table tbody tr');
 
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      if (rows[rowIndex]._item[this.idProperty].toString() === itemId.toString()) {
+      if (String(rows[rowIndex]._item[this.idProperty]) === String(itemId)) {
         return this.isRowIntoView(rows[rowIndex]);
       }
     }
@@ -1059,7 +1059,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Number | String} itemId The item's identifier that we'll looking for.
    */
   __findItemIndexById (itemId) {
-    return this.__filteredItems.findIndex(item => item[this.idProperty].toString() === itemId.toString());
+    return this.__filteredItems.findIndex(item => String(item[this.idProperty]) === String(itemId));
   }
 
   __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
