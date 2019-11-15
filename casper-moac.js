@@ -856,10 +856,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       afterNextRender(this, () => this.epaper = this.shadowRoot.querySelector('casper-epaper'));
     }
 
-    if (this.__displaySidebar) {
-      this.shadowRoot.querySelector('.header-container').style.paddingRight = '50px';
-    }
-
     // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
     this.lazyLoad
       ? this.__initializeLazyLoad()
@@ -887,16 +883,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * the currently applied filters.
    *
    * @param {Object} item The item / list of items to be added to the current dataset.
-   * @param {Object} afterItem The item which we'll the append the new item(s) after.
+   * @param {Object} afterItemId The item's identifier which we'll the append the new item(s) after.
    */
-   addItem (item, afterItem) {
+   addItem (item, afterItemId) {
      // Cast the object as an array to avoid ternaries when appending the new item(s).
      if (item.constructor.name === 'Object') item = [item];
 
      if (!afterItem) {
        this.__filteredItems = [...item, ...this.__filteredItems];
      } else {
-       const insertAfterIndex = insertAfterIndex = this.__filteredItems.findIndex(item => item === afterItem);
+       const insertAfterIndex = insertAfterIndex = this.__filteredItems.findIndex(item => {
+         return String(item[this.idProperty]) === String(afterItemId);
+       });
 
        this.__filteredItems = [
          ...this.__filteredItems.slice(0, insertAfterIndex + 1),

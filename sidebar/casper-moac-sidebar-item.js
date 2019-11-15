@@ -27,6 +27,10 @@ class CasperMoacSidebarItem extends PolymerElement {
       title: {
         type: String
       },
+      disableExpansionCollapse: {
+        type: Boolean,
+        value: false
+      },
       /**
        * Boolean that states if the current sidebar item is opened or not.
        *
@@ -79,7 +83,7 @@ class CasperMoacSidebarItem extends PolymerElement {
           transition: transform 200ms linear;
         }
 
-        .sidebar-item-header #headerDropDownIcon[rotate] {
+        .sidebar-item-header #header-dropdown-icon[rotate] {
           transform: rotate(180deg);
         }
 
@@ -111,7 +115,9 @@ class CasperMoacSidebarItem extends PolymerElement {
           [[title]]
         </div>
 
-        <casper-icon icon="fa-regular:angle-down" id="headerDropDownIcon"></casper-icon>
+        <template is="dom-if" if="[[!disableExpansionCollapse]]">
+          <casper-icon icon="fa-regular:angle-down" id="header-dropdown-icon"></casper-icon>
+        </template>
       </div>
       <div class="sidebar-item-body" id="body">
         <div class="sidebar-item-content">
@@ -131,6 +137,8 @@ class CasperMoacSidebarItem extends PolymerElement {
    * Toggle the current opened state of the sidebar item.
    */
   toggle () {
+    if (this.disableExpansionCollapse) return;
+
     this.opened = !this.opened;
   }
 
@@ -138,6 +146,8 @@ class CasperMoacSidebarItem extends PolymerElement {
    * Open the sidebar item.
    */
   open () {
+    if (this.disableExpansionCollapse) return;
+
     this.opened = true;
   }
 
@@ -145,6 +155,8 @@ class CasperMoacSidebarItem extends PolymerElement {
    * Close the sidebar item.
    */
   close () {
+    if (this.disableExpansionCollapse) return;
+
     this.opened = false;
   }
 
@@ -154,13 +166,15 @@ class CasperMoacSidebarItem extends PolymerElement {
    * @param {Boolean} opened The current opened state of the sidebar item.
    */
   __openedChanged (opened) {
+    if (this.disableExpansionCollapse) return;
+
     afterNextRender(this, () => {
       if (opened) {
         this.$.body.style.maxHeight = `${this.$.body.scrollHeight}px`;
-        this.$.headerDropDownIcon.setAttribute('rotate', true);
+        this.shadowRoot.querySelector('#header-dropdown-icon').setAttribute('rotate', true);
       } else {
         this.$.body.style.maxHeight = 0;
-        this.$.headerDropDownIcon.removeAttribute('rotate');
+        this.shadowRoot.querySelector('#header-dropdown-icon').removeAttribute('rotate');
       }
     });
   }
