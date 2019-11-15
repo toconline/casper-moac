@@ -889,12 +889,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
      // Cast the object as an array to avoid ternaries when appending the new item(s).
      if (item.constructor.name === 'Object') item = [item];
 
-     if (!afterItem) {
+     if (!afterItemId) {
        this.__filteredItems = [...item, ...this.__filteredItems];
      } else {
-       const insertAfterIndex = insertAfterIndex = this.__filteredItems.findIndex(item => {
-         return String(item[this.idProperty]) === String(afterItemId);
-       });
+       const insertAfterIndex = this.__filteredItems.findIndex(item => String(item[this.idProperty]) === String(afterItemId));
 
        this.__filteredItems = [
          ...this.__filteredItems.slice(0, insertAfterIndex + 1),
