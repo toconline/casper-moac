@@ -242,6 +242,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: false
       },
       /**
+       * Boolean that when set to true freezes the selection column inserted automatically by the casper-moac component.
+       *
+       * @type {Boolean}
+       */
+      freezeSelectionColumn: {
+        type: Boolean,
+        value: false
+      },
+      /**
        * The function that is going to be called before the JSON API request.
        *
        * @type {Function}
@@ -783,7 +792,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                 <slot name="grid-before"></slot>
 
                 <template is="dom-if" if="[[!disableSelection]]">
-                  <vaadin-grid-selection-column width="40px" flex-grow="0"></vaadin-grid-selection-column>
+                  <vaadin-grid-selection-column width="40px" flex-grow="0" frozen$="[[freezeSelectionColumn]]"></vaadin-grid-selection-column>
                 </template>
 
                 <slot name="grid"></slot>

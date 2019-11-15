@@ -232,6 +232,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.__resourceGrandTotal = undefined;
 
         this.__filteredItems = this.displayedItems = socketResponse.data;
+
         this.grid._scrollToIndex(0);
         this.__activateItemAtIndex();
       }
