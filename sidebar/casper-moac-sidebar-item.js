@@ -1,4 +1,5 @@
 import '@casper2020/casper-icons/casper-icon.js';
+import '@polymer/paper-ripple/paper-ripple.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
@@ -48,6 +49,7 @@ class CasperMoacSidebarItem extends PolymerElement {
         }
 
         .sidebar-item-header {
+          position: relative;
           display: flex;
           user-select: none;
           justify-content: space-between;
@@ -60,6 +62,15 @@ class CasperMoacSidebarItem extends PolymerElement {
         .sidebar-item-header:hover {
           cursor: pointer;
           background-color: darkgray;
+        }
+
+        .sidebar-item-header paper-ripple {
+          pointer-events: none;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
         }
 
         .sidebar-item-header casper-icon {
@@ -94,6 +105,7 @@ class CasperMoacSidebarItem extends PolymerElement {
         }
       </style>
       <div class="sidebar-item-header" id="header">
+        <paper-ripple></paper-ripple>
         <div class="sidebar-item-header-title">
           <casper-icon icon="[[icon]]"></casper-icon>
           [[title]]
