@@ -10,7 +10,7 @@ class CasperMoacSidebar extends PolymerElement {
 
   static get properties () {
     return {
-      open: {
+      opened: {
         type: Boolean,
         value: true,
         reflectToAttribute: true
@@ -26,59 +26,32 @@ class CasperMoacSidebar extends PolymerElement {
         }
 
         :host #sidebar-items-container {
-          width: 0;
+          width: 50px;
           flex-grow: 0;
           flex-shrink: 0;
           overflow: auto;
           max-height: 100%;
           box-sizing: border-box;
-          transition: width 100ms linear;
+          background-color: #E2E2E2;
+          border-left: 1px solid #C5C5C5;
         }
 
-        :host([open]) #sidebar-items-container {
-          border-left: 1px solid #E2E2E2;
+        :host([opened]) #sidebar-items-container {
           width: var(--casper-moac-sidebar-width, 250px);
         }
 
-        :host #sidebar-shortcut {
-          width: 50px;
-          display: flex;
-          flex-direction: column;
-          background-color: white;
-          border-left: 1px solid #E2E2E2;
-          transition: width 100ms linear;
-        }
-
-        :host([open]) #sidebar-shortcut {
-          width: 0;
-        }
-
-        :host #sidebar-shortcut casper-icon {
-          width: 50px;
-          height: 50px;
-          padding: 13px;
-          box-sizing: border-box;
-          border-bottom: 1px solid #CCCCCC;
-          --casper-icon-fill-color: #3C3C3C;
-        }
-
-        :host #sidebar-shortcut casper-icon:hover {
-          cursor: pointer;
-          background-color: #E2E2E2;
+        :host #sidebar-items-container ::slotted(casper-moac-sidebar-item:last-child) {
+          box-shadow: 0 10px 20px 0 rgba(110, 110, 110, 0.65);
         }
       </style>
 
-      <div id="sidebar-items-container" open$="[[open]]">
+      <div id="sidebar-items-container" opened$="[[opened]]">
         <casper-moac-sidebar-item
           disable-expansion-collapse
-          title="[[__getTitle(open)]]"
-          icon="fa-regular:angle-right">
+          icon="[[__getIcon(opened)]]"
+          title="[[__getTitle(opened)]]">
         </casper-moac-sidebar-item>
         <slot></slot>
-      </div>
-
-      <div id="sidebar-shortcut">
-        <casper-icon icon="fa-regular:angle-left" on-click="__openSidebar"></casper-icon>
       </div>
     `;
   }
@@ -86,33 +59,74 @@ class CasperMoacSidebar extends PolymerElement {
   ready () {
     super.ready();
 
-    this.shadowRoot.querySelector('casper-moac-sidebar-item').addEventListener('click', () => {
-      this.open = !this.open;
-    });
-
     afterNextRender(this, () => {
-      this.shadowRoot.querySelector('slot').assignedElements().shift().assignedElements().forEach(sidebarItem => {
-        const casperIcon = document.createElement('casper-icon');
-        casperIcon.icon = sidebarItem.icon;
-        casperIcon.addEventListener('click', () => {
-          this.open = true;
+      this.__sidebarItems = this.shadowRoot.querySelector('slot').assignedElements().shift().assignedElements();
+      this.__sidebarItems.forEach((sidebarItem, sidebarItemIndex) => {
+        sidebarItem.addEventListener('click', event => {
+          // Ignore click events that do not happen in the header element.
+          if (!event.composedPath().some(element => element.classList && element.classList.contains('sidebar-item-header'))) return;
+
+          this.opened
+            ? sidebarItem.toggle()
+            : sidebarItem.open();
         });
 
-        this.$['sidebar-shortcut'].appendChild(casperIcon);
+        // Open the sidebar if it's closed and one of the items is opened in the meantime.
+        sidebarItem.addEventListener('opened-changed', () => {
+          if (sidebarItem.opened && !this.opened) {
+            this.__openSidebar();
+          }
+        });
       });
+    });
+
+    this.shadowRoot.querySelector('casper-moac-sidebar-item').addEventListener('click', () => {
+      this.opened
+        ? this.__closeSidebar()
+        : this.__openSidebar();
     });
   }
 
-  __getIcon (open) {
-    return open ? 'fa-regular:angle-right' : 'fa-regular:angle-left';
+  /**
+   * This method returns the icon that should be displayed in the first casper-moac-sidebar-item
+   * which is responsible for opening / closing the sidebar.
+   *
+   * @param {Boolean} opened The current opened state of the sidebar.
+   */
+  __getIcon (opened) {
+    return opened ? 'fa-regular:angle-right' : 'fa-regular:angle-left';
   }
 
-  __getTitle (open) {
-    return open ? 'Fechar' : 'Abrir';
+  /**
+   * This method returns the text that should be displayed in the first casper-moac-sidebar-item
+   * which is responsible for opening / closing the sidebar.
+   *
+   * @param {Boolean} opened The current opened state of the sidebar.
+   */
+  __getTitle (opened) {
+    return opened ? 'Fechar menu' : '';
   }
 
+  /**
+   * This method opens the sidebar as well as the casper-moac-sidebar-item that were previously open.
+   */
   __openSidebar () {
-    this.open = true;
+    this.opened = true;
+    this.__openedSidebarItems.forEach(sidebarItem => sidebarItem.opened = true);
+  }
+
+  /**
+   * This method closes the sidebar as well as all the casper-moac-sidebar-item.
+   */
+  __closeSidebar () {
+    this.opened = false;
+    this.__openedSidebarItems = [];
+    this.__sidebarItems.forEach(sidebarItem => {
+      if (sidebarItem.opened) {
+        this.__openedSidebarItems.push(sidebarItem);
+      }
+      sidebarItem.opened = false;
+    });
   }
 }
 

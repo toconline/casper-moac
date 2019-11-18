@@ -39,6 +39,7 @@ class CasperMoacSidebarItem extends PolymerElement {
       opened: {
         type: Boolean,
         value: false,
+        notify: true,
         observer: '__openedChanged'
       }
     };
@@ -59,7 +60,7 @@ class CasperMoacSidebarItem extends PolymerElement {
           justify-content: space-between;
           padding: 15px;
           background-color: #E2E2E2;
-          border-bottom: 1px solid #CCCCCC;
+          border-bottom: 1px solid #C5C5C5;
           transition: background-color 100ms linear;
         }
 
@@ -79,7 +80,7 @@ class CasperMoacSidebarItem extends PolymerElement {
 
         .sidebar-item-header casper-icon {
           --casper-icon-fill-color: #3C3C3C;
-          margin-right: 10px;
+          margin-right: 15px;
           transition: transform 200ms linear;
         }
 
@@ -101,6 +102,7 @@ class CasperMoacSidebarItem extends PolymerElement {
           height: auto;
           max-height: 0;
           overflow: hidden;
+          background-color: white;
           transition: max-height 150ms ease-in;
         }
 
@@ -125,12 +127,6 @@ class CasperMoacSidebarItem extends PolymerElement {
         </div>
       </div>
     `;
-  }
-
-  ready () {
-    super.ready();
-
-    this.$.header.addEventListener('click', () => this.toggle());
   }
 
   /**
