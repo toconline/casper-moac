@@ -430,7 +430,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           border-radius: 3px;
           align-items: center;
           border: 1px solid lightgrey;
-          transition: border 250ms linear;
+          transition: border 250ms linear,
+                      background-color 250ms linear;
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput casper-icon {
