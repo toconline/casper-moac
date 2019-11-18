@@ -40,7 +40,7 @@ class CasperMoacSidebar extends PolymerElement {
           width: var(--casper-moac-sidebar-width, 250px);
         }
 
-        :host #sidebar-items-container ::slotted(casper-moac-sidebar-item:last-child) {
+        :host #sidebar-items-container ::slotted(casper-moac-sidebar-item:last-of-type) {
           box-shadow: 0 10px 20px 0 rgba(110, 110, 110, 0.65);
         }
       </style>
