@@ -32,7 +32,7 @@ class CasperMoacSidebar extends PolymerElement {
           overflow: auto;
           max-height: 100%;
           box-sizing: border-box;
-          background-color: #E2E2E2;
+          background-color: white;
           border-left: 1px solid #C5C5C5;
         }
 
@@ -41,7 +41,7 @@ class CasperMoacSidebar extends PolymerElement {
         }
 
         :host #sidebar-items-container ::slotted(casper-moac-sidebar-item:last-of-type) {
-          box-shadow: 0 10px 20px 0 rgba(110, 110, 110, 0.65);
+          box-shadow: 0 10px 20px 0 rgba(110, 110, 110, 0.25);
         }
       </style>
 
