@@ -10,7 +10,7 @@ export class CasperMoacMenuItem extends PolymerElement {
   static get template () {
     return html`
       <style>
-        :host([disabled]) {
+        :host([disabled]) {
           pointer-events: none;
         }
 

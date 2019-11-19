@@ -10,7 +10,7 @@ class CasperMoacSidebarItem extends PolymerElement {
   }
 
   static get properties () {
-    return {
+    return {
       /**
        * The icon that will be used on the sidebar item's header.
        *
@@ -164,7 +164,7 @@ class CasperMoacSidebarItem extends PolymerElement {
   __openedChanged (opened) {
     if (this.disableExpansionCollapse) return;
 
-    afterNextRender(this, () => {
+    afterNextRender(this, () => {
       if (opened) {
         this.$.body.style.maxHeight = `${this.$.body.scrollHeight}px`;
         this.shadowRoot.querySelector('#header-dropdown-icon').setAttribute('rotate', true);

@@ -1,7 +1,7 @@
 import './sidebar/casper-moac-sidebar.js';
-import { CasperMoacTypes, CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 import { CasperMoacSortingMixin } from './mixins/casper-moac-sorting-mixin.js';
 import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
+import { CasperMoacTypes, CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
@@ -1583,7 +1583,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Function} clickEventListener The filter's click event listener.
    * @param {String} datasetKey For fixed filters, this represents the key that uniquely identifies it.
    */
-
   __renderActiveFilterDOM (filterLabel, filterValue, clickEventListener, datasetKey) {
     const activeFilter = document.createElement('div');
     activeFilter.className = 'active-filter';
