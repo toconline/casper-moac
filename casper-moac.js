@@ -788,6 +788,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                 class="moac"
                 items="[[__filteredItems]]"
                 active-item="{{activeItem}}"
+                item-id-path="[[idProperty]]"
                 selected-items="{{selectedItems}}">
 
                 <slot name="grid-before"></slot>
@@ -1306,7 +1307,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }
 
       if (keyCode === 'Enter' && !this.disableSelection) {
-        !this.selectedItems.includes(this.__activeItem)
+        !this.selectedItems.find(selectedItem => String(selectedItem[this.idProperty]) === String(this.__activeItem[this.idProperty]))
           ? this.$.grid.selectItem(this.__activeItem)
           : this.$.grid.deselectItem(this.__activeItem);
       }
