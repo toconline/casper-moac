@@ -915,7 +915,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
      this.forceGridRedraw();
      this.activeItem = item[0];
      this.__staleDataset = true;
-     this.__scrollToItemIfNotVisible(this.activeItem[this.idProperty]);
+
+     afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idProperty]));
    }
 
    /**
@@ -944,7 +945,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
      this.forceGridRedraw();
      this.activeItem = itemToActivate;
      this.__staleDataset = true;
-     this.__scrollToItemIfNotVisible(itemToActivate[this.idProperty]);
+
+     afterNextRender(this, () => this.__scrollToItemIfNotVisible(itemToActivate[this.idProperty]));
    }
 
   /**
