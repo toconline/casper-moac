@@ -896,58 +896,58 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Object} item The item / list of items to be added to the current dataset.
    * @param {Object} afterItemId The item's identifier which we'll the append the new item(s) after.
    */
-   addItem (item, afterItemId) {
-     // Cast the object as an array to avoid ternaries when appending the new item(s).
-     if (item.constructor.name === 'Object') item = [item];
+  addItem (item, afterItemId) {
+    // Cast the object as an array to avoid ternaries when appending the new item(s).
+    if (item.constructor.name === 'Object') item = [item];
 
-     if (!afterItemId) {
-       this.__filteredItems = [...item, ...this.__filteredItems];
-     } else {
-       const insertAfterIndex = this.__filteredItems.findIndex(item => String(item[this.idProperty]) === String(afterItemId));
+    if (!afterItemId) {
+      this.__filteredItems = [...item, ...this.__filteredItems];
+    } else {
+      const insertAfterIndex = this.__filteredItems.findIndex(item => String(item[this.idProperty]) === String(afterItemId));
 
-       this.__filteredItems = [
-         ...this.__filteredItems.slice(0, insertAfterIndex + 1),
-         ...item,
-         ...this.__filteredItems.slice(insertAfterIndex + 1)
-       ];
-     }
+      this.__filteredItems = [
+        ...this.__filteredItems.slice(0, insertAfterIndex + 1),
+        ...item,
+        ...this.__filteredItems.slice(insertAfterIndex + 1)
+      ];
+    }
 
-     this.forceGridRedraw();
-     this.activeItem = item[0];
-     this.__staleDataset = true;
+    this.forceGridRedraw();
+    this.activeItem = item[0];
+    this.__staleDataset = true;
 
-     afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idProperty]));
-   }
+    afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idProperty]));
+  }
 
-   /**
-    * Updates manually the item / list of items provided by its id propery.
-    *
-    * @param {Object | Array} item The item / list of items that will be updated.
-    */
-   updateItem (item) {
-     let itemToActivate;
+  /**
+   * Updates manually the item / list of items provided by its id propery.
+   *
+   * @param {Object | Array} item The item / list of items that will be updated.
+   */
+  updateItem (item) {
+    let itemToActivate;
 
-     if (item.constructor.name === 'Object') {
-       // Update a single object.
-       itemToActivate = item;
-       this.__filteredItems[this.__findItemIndexById(item[this.idProperty])] = item;
-     } else if (item.constructor.name === 'Array') {
-       // Early exit if by some reason, the list is empty.
-       if (item.length === 0) return;
+    if (item.constructor.name === 'Object') {
+      // Update a single object.
+      itemToActivate = item;
+      this.__filteredItems[this.__findItemIndexById(item[this.idProperty])] = item;
+    } else if (item.constructor.name === 'Array') {
+      // Early exit if by some reason, the list is empty.
+      if (item.length === 0) return;
 
-       // Update multiple objects at the same time.
-       itemToActivate = item[0];
-       item.forEach(itemToUpdate => {
-         this.__filteredItems[this.__findItemIndexById(itemToUpdate[this.idProperty])] = itemToUpdate;
-       });
-     }
+      // Update multiple objects at the same time.
+      itemToActivate = item[0];
+      item.forEach(itemToUpdate => {
+        this.__filteredItems[this.__findItemIndexById(itemToUpdate[this.idProperty])] = itemToUpdate;
+      });
+    }
 
-     this.forceGridRedraw();
-     this.activeItem = itemToActivate;
-     this.__staleDataset = true;
+    this.forceGridRedraw();
+    this.activeItem = itemToActivate;
+    this.__staleDataset = true;
 
-     afterNextRender(this, () => this.__scrollToItemIfNotVisible(itemToActivate[this.idProperty]));
-   }
+    afterNextRender(this, () => this.__scrollToItemIfNotVisible(itemToActivate[this.idProperty]));
+  }
 
   /**
    * Deletes manually the item provided by its id propery.
