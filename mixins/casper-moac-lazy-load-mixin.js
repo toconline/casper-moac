@@ -278,7 +278,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
         return this.__resourceChildrenCache[parentId].children;
       }
 
-      const socketResponse = await this.__fetchRequest(this.resourceFetchChildrenQuery.replace('%{parentId}', parentItem[this.idProperty]));
+      // Replace all the placeholders with the actual parent's property value.
+      let resourceFetchChildrenQuery = this.resourceFetchChildrenQuery;
+      [...resourceFetchChildrenQuery.matchAll(/%{(\w+)}/g)].forEach(match => {
+        resourceFetchChildrenQuery = resourceFetchChildrenQuery.replace(match[0], parentItem[match[1]]);
+      });
+
+      const socketResponse = await this.__fetchRequest(resourceFetchChildrenQuery);
 
       if (!socketResponse) return;
 
