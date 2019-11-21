@@ -55,13 +55,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: CasperMoacTypes.GRID_EPAPER
       },
       /**
-       * The identifier property that will be used when painting the active row.
+       * The external identifier property that will be used when painting the active row.
        *
        * @type {String}
        */
-      idProperty: {
+      idExternalProperty: {
         type: String,
         value: 'id'
+      },
+      /**
+       * The internal identifier property that will be used when painting the active row.
+       *
+       * @type {String}
+       */
+      idInternalProperty: {
+        type: String,
+        value: '__identifier'
       },
       /**
        * The list of items to be displayed.
@@ -372,7 +381,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
        */
       __filteredItems: {
         type: Array,
-        value: []
+        value: [],
+        observer: '__filteredItemsChanged'
       },
     };
   }
@@ -788,8 +798,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                 class="moac"
                 items="[[__filteredItems]]"
                 active-item="{{activeItem}}"
-                item-id-path="[[idProperty]]"
-                selected-items="{{selectedItems}}">
+                selected-items="{{selectedItems}}"
+                item-id-path="[[idInternalProperty]]">
 
                 <slot name="grid-before"></slot>
 
@@ -894,7 +904,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * the currently applied filters.
    *
    * @param {Object} item The item / list of items to be added to the current dataset.
-   * @param {Object} afterItemId The item's identifier which we'll the append the new item(s) after.
+   * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
    */
   addItem (item, afterItemId) {
     // Cast the object as an array to avoid ternaries when appending the new item(s).
@@ -903,7 +913,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (!afterItemId) {
       this.__filteredItems = [...item, ...this.__filteredItems];
     } else {
-      const insertAfterIndex = this.__filteredItems.findIndex(item => String(item[this.idProperty]) === String(afterItemId));
+      const insertAfterIndex = this.__filteredItems.findIndex(item => String(item[this.idExternalProperty]) === String(afterItemId));
 
       this.__filteredItems = [
         ...this.__filteredItems.slice(0, insertAfterIndex + 1),
@@ -916,7 +926,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.activeItem = item[0];
     this.__staleDataset = true;
 
-    afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idProperty]));
+    afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]));
   }
 
   /**
@@ -925,28 +935,25 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Object | Array} item The item / list of items that will be updated.
    */
   updateItem (item) {
-    let itemToActivate;
+    // Cast the object as an array to avoid ternaries when appending the new item(s).
+    if (item.constructor.name === 'Object') item = [item];
 
-    if (item.constructor.name === 'Object') {
-      // Update a single object.
-      itemToActivate = item;
-      this.__filteredItems[this.__findItemIndexById(item[this.idProperty])] = item;
-    } else if (item.constructor.name === 'Array') {
-      // Early exit if by some reason, the list is empty.
-      if (item.length === 0) return;
-
-      // Update multiple objects at the same time.
-      itemToActivate = item[0];
-      item.forEach(itemToUpdate => {
-        this.__filteredItems[this.__findItemIndexById(itemToUpdate[this.idProperty])] = itemToUpdate;
+    const filteredItems = [...this.__filteredItems];
+    item.forEach(itemToUpdate => {
+      filteredItems.forEach((item, itemIndex, filteredItems) => {
+        if (String(itemToUpdate[this.idExternalProperty]) === String(item[this.idExternalProperty])) {
+          filteredItems[itemIndex] = itemToUpdate
+        }
       });
-    }
+    });
+
+    this.__filteredItems = filteredItems;
 
     this.forceGridRedraw();
-    this.activeItem = itemToActivate;
+    this.activeItem = item[0];
     this.__staleDataset = true;
 
-    afterNextRender(this, () => this.__scrollToItemIfNotVisible(itemToActivate[this.idProperty]));
+    afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]));
   }
 
   /**
@@ -968,7 +975,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         if (this.__filteredItems.length > newItemIndex) {
           this.activeItem = this.__filteredItems[newItemIndex];
           this.__staleDataset = true;
-          this.__scrollToItemIfNotVisible(this.activeItem[this.idProperty]);
+          this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]);
         }
       });
     })
@@ -983,7 +990,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     const rows = this.grid.shadowRoot.querySelectorAll('table tbody tr');
 
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      if (String(rows[rowIndex]._item[this.idProperty]) === String(itemId)) {
+      if (String(rows[rowIndex]._item[this.idInternalProperty]) === String(itemId)) {
         return this.isRowIntoView(rows[rowIndex]);
       }
     }
@@ -1035,7 +1042,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       const row = rows[rowIndex];
-      const isRowActive = String(row._item[this.idProperty]) === String(itemId);
+      const isRowActive = String(row._item[this.idInternalProperty]) === String(itemId);
 
       if (!isRowActive) continue;
 
@@ -1072,7 +1079,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Number | String} itemId The item's identifier that we'll looking for.
    */
   __findItemIndexById (itemId) {
-    return this.__filteredItems.findIndex(item => String(item[this.idProperty]) === String(itemId));
+    return this.__filteredItems.findIndex(item => String(item[this.idInternalProperty]) === String(itemId));
   }
 
   __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
@@ -1119,9 +1126,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       if (!event.detail.expanded) {
         delete parentItem[this.rowBackgroundColorInternalProperty];
 
-        this.__filteredItems = this.__filteredItems.filter(item => String(item[this.parentInternalProperty]) !== String(parentItem[this.idProperty]));
+        this.__filteredItems = this.__filteredItems.filter(item => String(item[this.parentInternalProperty]) !== String(parentItem[this.idInternalProperty]));
       } else {
-        const parentItemIndex = this.__findItemIndexById(parentItem[this.idProperty]);
+        const parentItemIndex = this.__findItemIndexById(parentItem[this.idInternalProperty]);
 
         // Either query the database or use the local property depending on the current type of grid.
         let parentItemChildren = !this.lazyLoad
@@ -1131,7 +1138,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         // Safeguard for an empty response from the server or an empty local property.
         parentItemChildren = Array.isArray(parentItemChildren) ? parentItemChildren : [];
         parentItemChildren.forEach(child => {
-          child[this.parentInternalProperty] = parentItem[this.idProperty];
+          child[this.parentInternalProperty] = parentItem[this.idInternalProperty];
           child[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-child-item-background-color)';
         });
 
@@ -1298,7 +1305,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       this.__activeItem = this.__filteredItems[0];
     } else {
       // Find the index of the current active item.
-      const activeItemIndex = this.__findItemIndexById(this.__activeItem[this.idProperty]);
+      const activeItemIndex = this.__findItemIndexById(this.__activeItem[this.idInternalProperty]);
 
       if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
         this.__activeItem = this.__filteredItems[activeItemIndex - 1];
@@ -1309,7 +1316,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }
 
       if (keyCode === 'Enter' && !this.disableSelection) {
-        !this.selectedItems.find(selectedItem => String(selectedItem[this.idProperty]) === String(this.__activeItem[this.idProperty]))
+        !this.selectedItems.find(selectedItem => String(selectedItem[this.idInternalProperty]) === String(this.__activeItem[this.idInternalProperty]))
           ? this.$.grid.selectItem(this.__activeItem)
           : this.$.grid.deselectItem(this.__activeItem);
       }
@@ -1650,7 +1657,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     afterNextRender(this, () => {
       // Loop through each grid row and paint the active one.
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach((row, rowIndex) => {
-        const isRowActive = this.__activeItem && String(row._item[this.idProperty]) === String(this.__activeItem[this.idProperty]);
+        const isRowActive = this.__activeItem && String(row._item[this.idInternalProperty]) === String(this.__activeItem[this.idInternalProperty]);
         const isRowBackgroundColored = !!row._item[this.rowBackgroundColorInternalProperty];
 
         Array.from(row.children).forEach(cell => {
@@ -1662,7 +1669,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               : cell.style.backgroundColor = row._item[this.rowBackgroundColorInternalProperty];
           } else {
             // If we got here, just remove the current cell background color.
-            cell.style.backgroundColor = !this.disableRowStripes && rowIndex % 2 === 1 ? 'var(--casper-moac-row-stripe-color)' : '';
+            cell.style.backgroundColor = !this.disableRowStripes && rowIndex % 2 === 1 ? 'var(--casper-moac-row-stripe-color)' : 'white';
           }
         });
 
@@ -1786,6 +1793,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       timeOut.after(timeOutMilliseconds),
       () => { callback(); }
     );
+  }
+
+  /**
+   * This observer gets called when the internal property filteredItems changes.
+   */
+  __filteredItemsChanged () {
+    this.__filteredItems.forEach((item, itemIndex) => {
+      item[this.idInternalProperty] = `${item[this.idExternalProperty]}-${itemIndex}`;
+    });
   }
 }
 

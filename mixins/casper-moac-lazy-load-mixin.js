@@ -263,7 +263,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * @param {Object} parentItem Object that contains the parent item which we are fetching children from.
      */
     async __fetchChildrenResourceItems (parentItem) {
-      const parentId = parentItem[this.idProperty];
+      const parentId = parentItem[this.idInternalProperty];
 
       // First do a cleanup to the cache object to lower the memory footprint.
       const currentTimestamp = new Date().getTime();
@@ -289,7 +289,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
       if (!socketResponse) return;
 
       // Format the elements returned by the JSON API.
-      if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter(item));
+      if (this.resourceFormatter) {
+        socketResponse.data.forEach(item => this.resourceFormatter.call(this.page || {}, item));
+      }
 
       this.__resourceChildrenCache[parentId] = {
         children: socketResponse.data,
