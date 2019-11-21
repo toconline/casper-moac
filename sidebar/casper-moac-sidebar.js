@@ -10,10 +10,26 @@ class CasperMoacSidebar extends PolymerElement {
 
   static get properties () {
     return {
+      /**
+       * This property sets the current sidebar's opened state.
+       *
+       * @type {Boolean}
+       */
       opened: {
         type: Boolean,
         value: true,
-        reflectToAttribute: true
+        reflectToAttribute: true,
+        observer: '__openedChanged'
+      },
+      /**
+       * This property saves the opened sidebar items before closing so that they're re-opened
+       * when the sidebar is re-opened as well.
+       *
+       * @type {Array}
+       */
+      __openedSidebarItems: {
+        type: Array,
+        value: []
       }
     };
   }
@@ -29,7 +45,8 @@ class CasperMoacSidebar extends PolymerElement {
           width: 50px;
           flex-grow: 0;
           flex-shrink: 0;
-          overflow: auto;
+          overflow-y: auto;
+          overflow-x: hidden;
           max-height: 100%;
           box-sizing: border-box;
           background-color: white;
@@ -60,8 +77,7 @@ class CasperMoacSidebar extends PolymerElement {
     super.ready();
 
     afterNextRender(this, () => {
-      this.__sidebarItems = this.shadowRoot.querySelector('slot').assignedElements().shift().assignedElements();
-      this.__sidebarItems.forEach((sidebarItem, sidebarItemIndex) => {
+      this.shadowRoot.querySelector('slot').assignedElements().forEach(sidebarItem => {
         sidebarItem.addEventListener('click', event => {
           // Ignore click events that do not happen in the header element.
           if (!event.composedPath().some(element => element.classList && element.classList.contains('sidebar-item-header'))) return;
@@ -74,16 +90,14 @@ class CasperMoacSidebar extends PolymerElement {
         // Open the sidebar if it's closed and one of the items is opened in the meantime.
         sidebarItem.addEventListener('opened-changed', () => {
           if (sidebarItem.opened && !this.opened) {
-            this.__openSidebar();
+            this.opened = true;
           }
         });
       });
     });
 
     this.shadowRoot.querySelector('casper-moac-sidebar-item').addEventListener('click', () => {
-      this.opened
-        ? this.__closeSidebar()
-        : this.__openSidebar();
+      this.opened = !this.opened;
     });
   }
 
@@ -108,24 +122,21 @@ class CasperMoacSidebar extends PolymerElement {
   }
 
   /**
-   * This method opens the sidebar as well as the casper-moac-sidebar-item that were previously open.
+   * This observer gets fired when the sidebar opens and closes.
    */
-  __openSidebar () {
-    this.opened = true;
-    this.__openedSidebarItems.forEach(sidebarItem => sidebarItem.opened = true);
-  }
-
-  /**
-   * This method closes the sidebar as well as all the casper-moac-sidebar-item.
-   */
-  __closeSidebar () {
-    this.opened = false;
-    this.__openedSidebarItems = [];
-    this.__sidebarItems.forEach(sidebarItem => {
-      if (sidebarItem.opened) {
-        this.__openedSidebarItems.push(sidebarItem);
+  __openedChanged () {
+    afterNextRender(this, () => {
+      if (this.opened) {
+        this.__openedSidebarItems.forEach(sidebarItem => sidebarItem.opened = true);
+      } else {
+        this.__openedSidebarItems = [];
+        this.shadowRoot.querySelector('slot').assignedElements().forEach(sidebarItem => {
+          if (sidebarItem.opened) {
+            this.__openedSidebarItems.push(sidebarItem);
+          }
+          sidebarItem.opened = false;
+        });
       }
-      sidebarItem.opened = false;
     });
   }
 }

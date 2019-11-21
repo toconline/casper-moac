@@ -854,9 +854,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         <!--Sidebar-->
         <template is="dom-if" if="[[__displaySidebar]]">
-          <casper-moac-sidebar>
-            <slot name="sidebar"></slot>
-          </casper-moac-sidebar>
+          <slot name="sidebar"></slot>
         </template>
       </div>
 
