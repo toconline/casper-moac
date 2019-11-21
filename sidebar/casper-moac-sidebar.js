@@ -17,7 +17,7 @@ class CasperMoacSidebar extends PolymerElement {
        */
       opened: {
         type: Boolean,
-        value: true,
+        value: false,
         reflectToAttribute: true,
         observer: '__openedChanged'
       },
