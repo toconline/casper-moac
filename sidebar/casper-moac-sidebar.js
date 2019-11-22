@@ -58,7 +58,7 @@ class CasperMoacSidebar extends PolymerElement {
         }
 
         :host #sidebar-items-container ::slotted(casper-moac-sidebar-item:last-of-type) {
-          box-shadow: 0 10px 20px 0 rgba(110, 110, 110, 0.25);
+          box-shadow: 0 5px 10px 0 rgba(110, 110, 110, 0.25);
         }
       </style>
 
@@ -118,7 +118,7 @@ class CasperMoacSidebar extends PolymerElement {
    * @param {Boolean} opened The current opened state of the sidebar.
    */
   __getTitle (opened) {
-    return opened ? 'Fechar menu' : '';
+    return opened ? 'Fechar' : '';
   }
 
   /**
