@@ -1020,11 +1020,24 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 
   /**
-   * This method will restamp the casper-select templates used in the filters.
+   * This method will restamp the provided casper-selects used in the filters.
    */
-  restampSelectTemplates () {
-    this.shadowRoot.querySelectorAll('casper-select').forEach(select => {
-      select.restampTemplate();
+  restampSelectTemplate (filters) {
+    if (!filters) return;
+
+    let selectElements;
+    if (filters.constructor.name === 'String') {
+      // Select a single casper-select element.
+      selectElements = [this.shadowRoot.querySelector(`casper-select[data-filter="${filters}"]`)];
+    } else if (filters.constructor.name === 'Array') {
+      // Build a selector that contains all the casper-selects.
+      const selectorQuery = filters.map(filter => `casper-select[data-filter="${filter}"]`);
+
+      selectElements = this.shadowRoot.querySelectorAll(selectorQuery.join(','));
+    }
+
+    selectElements.forEach(selectElement => {
+      if (selectElement) selectElement.restampTemplate();
     });
   }
 
@@ -1323,13 +1336,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__paintGridRows(true);
 
     // If the active item changed, debounce the active item change.
-    if (this.__activeItem !== this.__scheduleActiveItem) {
+    if (!this.__scheduleActiveItem || String(this.__activeItem[this.idInternalProperty]) !== String(this.__scheduleActiveItem[this.idInternalProperty])) {
       // This property is used to avoid delaying infinitely activating the same item which is caused when the user
       // maintains the up / down arrows after reaching the first / last result in the table.
       this.__scheduleActiveItem = {...this.__activeItem};
       this.__debounce('__activeItemDebouncer', () => {
         this.activeItem = this.__scheduleActiveItem;
-      });
+      }, 300, true);
     }
   }
 
@@ -1785,11 +1798,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Function} callback The function that will be invoked afterwards.
    * @param {Number} timeOutMilliseconds Number of milliseconds after the last invoke that will trigger the callback.
    */
-  __debounce (debouncerProperty, callback, timeOutMilliseconds = 250) {
+  __debounce (debouncerProperty, callback, timeOutMilliseconds = 250, executeImmediately = false) {
+    let wasExecutedImmediately = false;
+    if (executeImmediately && (!this[debouncerProperty] || (this[debouncerProperty] && !this[debouncerProperty].isActive()))) {
+      wasExecutedImmediately = true;
+      callback();
+    }
+
     this[debouncerProperty] = Debouncer.debounce(
       this[debouncerProperty],
       timeOut.after(timeOutMilliseconds),
-      () => { callback(); }
+      () => {
+        if (!wasExecutedImmediately) callback();
+      }
     );
   }
 
