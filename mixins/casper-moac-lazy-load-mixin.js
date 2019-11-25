@@ -222,9 +222,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
       if (this.__currentPage !== 1) {
         this.__filteredItems = this.displayedItems = [...this.__filteredItems, ...socketResponse.data];
 
-        // Select all the new items if the existing ones are all selected.
+        // Since there are new items, set the select all checkbox to indeterminate if it's currently checked.
         if (this.__selectAllCheckbox.checked && !this.__selectAllCheckbox.indeterminate) {
-          this.selectedItems = [...this.__filteredItems];
+          this.__selectAllCheckbox.indeterminate = true;
         }
       } else {
         // Reset the totals when requesting the first page.
