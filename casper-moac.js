@@ -1115,7 +1115,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             });
 
             selectAllCheckbox.parentElement.appendChild(this.__selectAllCheckbox);
-            selectAllCheckbox.parentElement.removeChild(selectAllCheckbox);
+            selectAllCheckbox.remove();
           }
         });
       });
@@ -1662,11 +1662,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           }
 
           // Remove the vaadin-checkbox element if this items does not support selection.
-          if (!this.disableSelection && row._item[this.disableSelectionInternalProperty]) {
-            const cellSlottedElement = cell.firstElementChild.assignedElements().shift();
-            const vaadinCheckbox = cellSlottedElement.querySelector('vaadin-checkbox');
+          if (!this.disableSelection) {
+            const vaadinCheckbox = cell.firstElementChild.assignedElements().shift().querySelector('vaadin-checkbox');
             if (vaadinCheckbox) {
-              cellSlottedElement.removeChild(vaadinCheckbox);
+              !row._item[this.disableSelectionInternalProperty]
+                ? vaadinCheckbox.style.display = ''
+                : vaadinCheckbox.style.display = 'none';
             }
           }
         });
