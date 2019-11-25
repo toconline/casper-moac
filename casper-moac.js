@@ -900,28 +900,28 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * Adds manually a new item / list of items to the beginning of the existing ones ignoring
    * the currently applied filters.
    *
-   * @param {Object} item The item / list of items to be added to the current dataset.
+   * @param {Object} itemsToAdd The item / list of items to be added to the current dataset.
    * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
    */
-  addItem (item, afterItemId) {
+  addItem (itemsToAdd, afterItemId) {
     // Cast the object as an array to avoid ternaries when appending the new item(s).
-    if (item.constructor.name === 'Object') item = [item];
+    if (itemsToAdd.constructor.name === 'Object') itemsToAdd = [itemsToAdd];
 
     if (!afterItemId) {
-      this.__filteredItems = [...item, ...this.__filteredItems];
+      this.__filteredItems = [...itemsToAdd, ...this.__filteredItems];
     } else {
-      const insertAfterIndex = this.__filteredItems.findIndex(item => String(item[this.idExternalProperty]) === String(afterItemId));
+      const insertAfterIndex = this.__findItemIndexById(afterItemId, true);
 
       this.__filteredItems = [
         ...this.__filteredItems.slice(0, insertAfterIndex + 1),
-        ...item,
+        ...itemsToAdd,
         ...this.__filteredItems.slice(insertAfterIndex + 1)
       ];
     }
 
     this.forceGridRedraw();
-    this.activeItem = item[0];
     this.__staleDataset = true;
+    this.activeItem = itemsToAdd[0];
 
     afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]));
   }
@@ -929,17 +929,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   /**
    * Updates manually the item / list of items provided by its id propery.
    *
-   * @param {Object | Array} item The item / list of items that will be updated.
+   * @param {Object | Array} itemsToUpdate The item / list of items that will be updated.
    */
-  updateItem (item) {
+  updateItem (itemsToUpdate) {
     // Cast the object as an array to avoid ternaries when appending the new item(s).
-    if (item.constructor.name === 'Object') item = [item];
+    if (itemsToUpdate.constructor.name === 'Object') itemsToUpdate = [itemsToUpdate];
 
     const filteredItems = [...this.__filteredItems];
-    item.forEach(itemToUpdate => {
+    itemsToUpdate.forEach(itemToUpdate => {
       filteredItems.forEach((item, itemIndex, filteredItems) => {
-        if (this.__areItemsEqual(itemToUpdate, item)) {
-          filteredItems[itemIndex] = itemToUpdate
+        if (this.__compareItems(itemToUpdate, item, true)) {
+          filteredItems[itemIndex] = itemToUpdate;
         }
       });
     });
@@ -947,8 +947,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__filteredItems = filteredItems;
 
     this.forceGridRedraw();
-    this.activeItem = item[0];
     this.__staleDataset = true;
+    this.activeItem = itemsToUpdate[0];
 
     afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]));
   }
@@ -956,44 +956,43 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   /**
    * Deletes manually the item provided by its id propery.
    *
-   * @param {String | Number} itemId The identifier to find the item that will be removed.
+   * @param {String | Number | Array} itemsToRemove The identifier to find the item that will be removed.
    */
-  removeItem (itemId) {
-    this.__scrollToItemIfNotVisible(itemId);
+  removeItem (itemsToRemove) {
+    // Convert the parameter to an array of strings so it's easier afterwards.
+    itemsToRemove.constructor.name !== 'Array'
+      ? itemsToRemove = [String(itemsToRemove)]
+      : itemsToRemove = itemsToRemove.map(itemToRemove => String(itemToRemove));
+
+    const firstItemToRemoveIndex = Math.min(...itemsToRemove.map(itemToRemove => this.__findItemIndexById(itemToRemove, true)));
+    this.__scrollToItemIfNotVisible(firstItemToRemoveIndex, true);
 
     afterNextRender(this, () => {
-      this.__blinkRow(itemId, '#FFB3B3', () => {
-        const itemIndex = this.__findItemIndexById(itemId);
-        this.__filteredItems = [...this.__filteredItems.slice(0, itemIndex), ...this.__filteredItems.slice(itemIndex + 1)];
-        this.forceGridRedraw();
+      const rows = this.$.grid.shadowRoot.querySelectorAll('table tbody tr');
+      const blinkingRows = Array.from(rows).filter(row => itemsToRemove.includes(String(row._item[this.idExternalProperty])));
 
-        const newItemIndex = Math.max(0, itemIndex - 1);
-
-        if (this.__filteredItems.length > newItemIndex) {
-          this.activeItem = this.__filteredItems[newItemIndex];
-          this.__staleDataset = true;
-          this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]);
-        }
+      // Initiate the blinking animation for the rows.
+      blinkingRows.forEach(blinkingRow => {
+        blinkingRow.setAttribute('blink', true);
+        [...blinkingRow.children].forEach(cell => {
+          cell.style.backgroundColor = 'var(--casper-moac-blinking-item-background-color)';
+        });
       });
-    })
-  }
 
-  /**
-   * This function is used to see the if the provided item is visible or not in the grid.
-   *
-   * @param {Number | String} itemId The item that should be into view or not.
-   */
-  isItemIntoView (itemId) {
-    const rows = this.grid.shadowRoot.querySelectorAll('table tbody tr');
+      // After one second, remove all the blinking rows.
+      setTimeout(() => {
+        blinkingRows.forEach(blinkingRow => {
+          blinkingRow.removeAttribute('blink');
+          [...blinkingRow.children].forEach(cell => { cell.style.backgroundColor = ''; });
+        });
 
-    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      if (String(rows[rowIndex]._item[this.idInternalProperty]) === String(itemId)) {
-        return this.isRowIntoView(rows[rowIndex]);
-      }
-    }
-
-    // If we got here, no visible row or the ones at the top / bottom has the item we're looking for.
-    return false;
+        this.__staleDataset = true;
+        this.__filteredItems = this.__filteredItems.filter(item => !itemsToRemove.includes(String(item[this.idExternalProperty])));
+        this.__filteredItems.length === 0
+          ? this.activeItem = null
+          : this.activeItem = this.__filteredItems[Math.max(0, firstItemToRemoveIndex - 1)];
+      }, 1000);
+    });
   }
 
   /**
@@ -1041,55 +1040,23 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 
   /**
-   * This method will cause a specific row to blink and then execute the provided callback as soon as the animation ends.
-   *
-   * @param {String | Number} itemId The item's identifier.
-   * @param {String} backgroundColor The color that will be used in the background for the blinking animation.
-   * @param {Function} callback The code that will be executed when the animation ends.
-   */
-  __blinkRow (itemId, backgroundColor, callback) {
-    const rows = this.$.grid.shadowRoot.querySelectorAll('table tbody tr');
-
-    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      const row = rows[rowIndex];
-      const isRowActive = String(row._item[this.idInternalProperty]) === String(itemId);
-
-      if (!isRowActive) continue;
-
-      Array.from(row.children).forEach(cell => { cell.style.backgroundColor = backgroundColor; });
-      row.setAttribute('blink', true);
-
-      setTimeout(() => {
-        Array.from(row.children).forEach(cell => { cell.style.backgroundColor = ''; });
-        row.removeAttribute('blink');
-
-        callback();
-      }, 1000);
-
-      return;
-    }
-  }
-
-  /**
    * Scrolls to a specific item if he's not currently visible.
    *
    * @param {Number | String} itemId The item that should be scrolled to if he's not currently visible.
    */
-  __scrollToItemIfNotVisible (itemId) {
-    // Scroll to the item if it's not into view taking into account the grid's internal items.
-    if (!this.isItemIntoView(itemId)) {
-      this.grid._scrollToIndex(this.__findItemIndexById(itemId));
-    }
-  }
+  __scrollToItemIfNotVisible (itemId, useExternalProperty = false) {
+    const rows = this.grid.shadowRoot.querySelectorAll('table tbody tr');
 
-  /**
-   * Look for the index of a specific item.
-   *
-   * @param {Array} items The list of items that will be used to find a specific item.
-   * @param {Number | String} itemId The item's identifier that we'll looking for.
-   */
-  __findItemIndexById (itemId) {
-    return this.__filteredItems.findIndex(item => String(item[this.idInternalProperty]) === String(itemId));
+    let isRowIntoView = false;
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+      if (this.__compareItemWithId(rows[rowIndex]._item, itemId, useExternalProperty)) {
+        // Scroll to the item if it's not into view taking into account the grid's internal items.
+        isRowIntoView = this.isRowIntoView(rows[rowIndex]);
+        break;
+      }
+    }
+
+    if (!isRowIntoView) this.grid._scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
   }
 
   __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
@@ -1138,7 +1105,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         this.grid.shadowRoot.querySelectorAll('table thead th').forEach(header => {
           const selectAllCheckbox = header.querySelector('slot').assignedElements().shift().firstElementChild;
           if (selectAllCheckbox && selectAllCheckbox.nodeName.toLowerCase() === 'vaadin-checkbox') {
-            // Create a vaadin-checkbox to replace the default one which has bugs.
+           // Create a vaadin-checkbox to replace the default one which has bugs.
             this.__selectAllCheckbox = document.createElement('vaadin-checkbox');
             this.__selectAllCheckbox.addEventListener('checked-changed', event => {
               // Lock the vaadin-checkbox event handler to avoid infinite loops.
@@ -1290,7 +1257,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }
 
       if (keyCode === 'Enter' && !this.disableSelection && !this.__activeItem[this.disableSelectionInternalProperty]) {
-        !this.selectedItems.find(selectedItem => this.__areItemsEqual(selectedItem, this.__activeItem))
+        !this.selectedItems.find(selectedItem => this.__compareItems(selectedItem, this.__activeItem))
           ? this.$.grid.selectItem(this.__activeItem)
           : this.$.grid.deselectItem(this.__activeItem);
       }
@@ -1299,7 +1266,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__paintGridRows(true);
 
     // If the active item changed, debounce the active item change.
-    if (!this.__scheduleActiveItem || !this.__areItemsEqual(this.__activeItem, this.__scheduleActiveItem)) {
+    if (!this.__scheduleActiveItem || !this.__compareItems(this.__activeItem, this.__scheduleActiveItem)) {
       // This property is used to avoid delaying infinitely activating the same item which is caused when the user
       // maintains the up / down arrows after reaching the first / last result in the table.
       this.__scheduleActiveItem = {...this.__activeItem};
@@ -1324,7 +1291,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       if (!event.detail.expanded) {
         delete parentItem[this.rowBackgroundColorInternalProperty];
 
-        this.__filteredItems = this.displayedItems = this.__filteredItems.filter(item => this.__areItemsEqual(item, parentItem));
+        this.__filteredItems = this.__filteredItems.filter(item => String(item[this.parentInternalProperty]) !== String(parentItem[this.idExternalProperty]));
       } else {
         const parentItemIndex = this.__findItemIndexById(parentItem[this.idInternalProperty]);
 
@@ -1336,13 +1303,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         // Safeguard for an empty response from the server or an empty local property.
         parentItemChildren = Array.isArray(parentItemChildren) ? parentItemChildren : [];
         parentItemChildren.forEach(child => {
-          child[this.parentInternalProperty] = parentItem[this.idInternalProperty];
+          child[this.parentInternalProperty] = parentItem[this.idExternalProperty];
           child[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-child-item-background-color)';
         });
 
         parentItem[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-parent-item-background-color)';
 
-        this.__filteredItems = this.displayedItems = [
+        this.__filteredItems = [
           ...this.__filteredItems.slice(0, parentItemIndex + 1),
           ...parentItemChildren,
           ...this.__filteredItems.slice(parentItemIndex + 1)
@@ -1505,7 +1472,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }
     }
 
-    this.__filteredItems = this.displayedItems = this.__sortItems(filteredItems);
+    this.__filteredItems = this.__sortItems(filteredItems);
     this.forceGridRedraw();
     this.__activateItemAtIndex();
     this.__numberOfResults = filteredItems.length === originalItems.length
@@ -1675,12 +1642,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     afterNextRender(this, () => {
       // Loop through each grid row and paint the active one.
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
-        const isRowActive = this.__activeItem && this.__areItemsEqual(row._item, this.__activeItem);
+        const isRowActive = this.__activeItem && this.__compareItems(row._item, this.__activeItem);
         const isRowBackgroundColored = !!row._item[this.rowBackgroundColorInternalProperty];
 
         Array.from(row.children).forEach(cell => {
+          if(row.hasAttribute('blink')) return;
+
           // Check if the row has no active animation and is either active or colored.
-          if (!row.hasAttribute('blink') && (isRowActive || isRowBackgroundColored)) {
+          if (isRowActive || isRowBackgroundColored) {
             // The active background color has priority.
             isRowActive
               ? cell.style.backgroundColor = 'var(--casper-moac-active-item-background-color)'
@@ -1836,20 +1805,49 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * This observer gets called when the internal property filteredItems changes.
    */
   __filteredItemsChanged () {
+    this.displayedItems = this.__filteredItems;
+
     this.__filteredItems.forEach((item, itemIndex) => {
       item[this.idInternalProperty] = itemIndex;
     });
   }
 
   /**
-   * This method is used to compare two objects and state if they're equal or not based on the internal
-   * identifier property.
+   * Look for the index of a specific item based on the internal / external identifier property.
    *
-   * @param {Object} previousItem
-   * @param {Object} nextItem
+   * @param {Number | String} itemId The item's identifier that we'll looking for.
+   * @param {Boolean} useExternalProperty This flag states which identifier should be used.
    */
-  __areItemsEqual (previousItem, nextItem) {
-    return String(previousItem[this.idInternalProperty]) === String(nextItem[this.idInternalProperty]);
+  __findItemIndexById (itemId, useExternalProperty = false) {
+    return useExternalProperty
+      ? this.__filteredItems.findIndex(item => String(item[this.idExternalProperty]) === String(itemId))
+      : this.__filteredItems.findIndex(item => String(item[this.idInternalProperty]) === String(itemId));
+  }
+
+  /**
+   * This method is used to compare two objects and state if they're equal or not based on the
+   * internal / external identifier property.
+   *
+   * @param {Object} previousItem The first item that will be used for comparison.
+   * @param {Object} nextItem The next item that will be used for comparison.
+   * @param {Boolean} useExternalProperty This flag states which identifier should be used - internal ou external.
+   */
+  __compareItems (previousItem, nextItem, useExternalProperty = false) {
+    return useExternalProperty
+      ? String(previousItem[this.idExternalProperty]) === String(nextItem[this.idExternalProperty])
+      : String(previousItem[this.idInternalProperty]) === String(nextItem[this.idInternalProperty]);
+  }
+
+  /**
+   *
+   * @param {Object} item The item which internal / external idenifier will be used for comparison.
+   * @param {String | Number} itemId The item's identifier that we'll be used for comparison.
+   * @param {Boolean} useExternalProperty This flag states which identifier should be used - internal ou external.
+   */
+  __compareItemWithId (item, itemId, useExternalProperty = false) {
+    return useExternalProperty
+      ? String(item[this.idExternalProperty]) === String(itemId)
+      : String(item[this.idInternalProperty]) === String(itemId);
   }
 
   /**

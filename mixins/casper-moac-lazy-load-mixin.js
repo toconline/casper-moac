@@ -220,7 +220,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       }
 
       if (this.__currentPage !== 1) {
-        this.__filteredItems = this.displayedItems = [...this.__filteredItems, ...socketResponse.data];
+        this.__filteredItems = [...this.__filteredItems, ...socketResponse.data];
 
         // Since there are new items, set the select all checkbox to indeterminate if it's currently checked.
         if (this.__selectAllCheckbox.checked && !this.__selectAllCheckbox.indeterminate) {
@@ -231,7 +231,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.__resourceTotal = undefined;
         this.__resourceGrandTotal = undefined;
 
-        this.__filteredItems = this.displayedItems = socketResponse.data;
+        this.__filteredItems = socketResponse.data;
 
         this.grid._scrollToIndex(0);
         this.__activateItemAtIndex();
