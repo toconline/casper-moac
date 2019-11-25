@@ -55,24 +55,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: CasperMoacTypes.GRID_EPAPER
       },
       /**
-       * The external identifier property that will be used when painting the active row.
-       *
-       * @type {String}
-       */
-      idExternalProperty: {
-        type: String,
-        value: 'id'
-      },
-      /**
-       * The internal identifier property that will be used when painting the active row.
-       *
-       * @type {String}
-       */
-      idInternalProperty: {
-        type: String,
-        value: '__identifier'
-      },
-      /**
        * The list of items to be displayed.
        *
        * @type {Array}
@@ -304,6 +286,24 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: 'children'
       },
       /**
+       * The external identifier property that will be used when painting the active row.
+       *
+       * @type {String}
+       */
+      idExternalProperty: {
+        type: String,
+        value: 'id'
+      },
+      /**
+       * The internal identifier property that will be used when painting the active row.
+       *
+       * @type {String}
+       */
+      idInternalProperty: {
+        type: String,
+        value: '__identifier'
+      },
+      /**
        * The children's local property where this component will save their parent identifier
        * to easily remove them later.
        *
@@ -312,6 +312,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       parentInternalProperty: {
         type: String,
         value: '__parent'
+      },
+      /**
+       * This property disables the possibility of one item to be selected.
+       *
+       * @type {Boolean}
+       */
+      disableSelectionInternalProperty: {
+        type: String,
+        value: '__disableSelection'
       },
       /**
        * The filters's local property where this component will save if his event listeners were already attached or not.
@@ -1135,7 +1144,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               // Lock the vaadin-checkbox event handler to avoid infinite loops.
               if (this.__selectAllCheckboxLock) return;
 
-              this.selectedItems = event.detail.value ? [...this.__filteredItems] : [];
+              this.selectedItems = !event.detail.value ? [] : [...this.__selectableItems()];
             });
 
             selectAllCheckbox.parentElement.appendChild(this.__selectAllCheckbox);
@@ -1280,7 +1289,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         this.__activeItem = this.__filteredItems[activeItemIndex + 1];
       }
 
-      if (keyCode === 'Enter' && !this.disableSelection) {
+      if (keyCode === 'Enter' && !this.disableSelection && !this.__activeItem[this.disableSelectionInternalProperty]) {
         !this.selectedItems.find(selectedItem => this.__areItemsEqual(selectedItem, this.__activeItem))
           ? this.$.grid.selectItem(this.__activeItem)
           : this.$.grid.deselectItem(this.__activeItem);
@@ -1443,18 +1452,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * Observer that fires when the vaadin-grid selected items change.
    */
   __selectedItemsChanged () {
-    this.__hasSelectedItems = this.selectedItems && this.selectedItems.length > 0;
-
-    !this.__hasSelectedItems
+    this.selectedItems && this.selectedItems.length > 0
       ? this.$['multi-selection-container'].style.height = ''
       : this.$['multi-selection-container'].style.height = `${this.$['multi-selection-container'].firstElementChild.scrollHeight}px`;
 
     if (!this.__selectAllCheckbox) return;
 
+    const selectableItems = this.__selectableItems();
+
     // Lock the vaadin-checkbox event handler to avoid infinite loops.
     this.__selectAllCheckboxLock = true;
-    this.__selectAllCheckbox.checked = this.selectedItems.length > 0 && this.__filteredItems.length === this.selectedItems.length;
-    this.__selectAllCheckbox.indeterminate = this.selectedItems.length > 0 && this.__filteredItems.length !== this.selectedItems.length;
+    this.__selectAllCheckbox.checked = this.selectedItems.length > 0 && selectableItems.length === this.selectedItems.length;
+    this.__selectAllCheckbox.indeterminate = this.selectedItems.length > 0 && selectableItems.length !== this.selectedItems.length;
     this.__selectAllCheckboxLock = false;
   }
 
@@ -1678,10 +1687,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               : cell.style.backgroundColor = row._item[this.rowBackgroundColorInternalProperty];
           } else {
             // If we got here, just remove the current cell background color.
-            if (this.disableRowStripes || row._item[this.idInternalProperty] % 2 === 0) {
-              cell.style.backgroundColor = 'white';
-            } else {
-              cell.style.backgroundColor = 'var(--casper-moac-row-stripe-color)'
+            this.disableRowStripes || row._item[this.idInternalProperty] % 2 === 0
+              ? cell.style.backgroundColor = 'white'
+              : cell.style.backgroundColor = 'var(--casper-moac-row-stripe-color)';
+          }
+
+          // Remove the vaadin-checkbox element if this items does not support selection.
+          if (!this.disableSelection && row._item[this.disableSelectionInternalProperty]) {
+            const cellSlottedElement = cell.firstElementChild.assignedElements().shift();
+            const vaadinCheckbox = cellSlottedElement.querySelector('vaadin-checkbox');
+            if (vaadinCheckbox) {
+              cellSlottedElement.removeChild(vaadinCheckbox);
             }
           }
         });
@@ -1834,6 +1850,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __areItemsEqual (previousItem, nextItem) {
     return String(previousItem[this.idInternalProperty]) === String(nextItem[this.idInternalProperty]);
+  }
+
+  /**
+   * This method returns all the items that can be selected since one can disable the selection per item.
+   */
+  __selectableItems () {
+    return this.__filteredItems.filter(filteredItem => !filteredItem[this.disableSelectionInternalProperty]);
   }
 }
 
