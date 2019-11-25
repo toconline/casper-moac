@@ -1678,7 +1678,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               : cell.style.backgroundColor = row._item[this.rowBackgroundColorInternalProperty];
           } else {
             // If we got here, just remove the current cell background color.
-            cell.style.backgroundColor = !this.disableRowStripes && rowIndex % 2 === 1 ? 'var(--casper-moac-row-stripe-color)' : 'white';
+            if (this.disableRowStripes || row._item[this.idInternalProperty] % 2 === 0) {
+              cell.style.backgroundColor = 'white';
+            } else {
+              cell.style.backgroundColor = 'var(--casper-moac-row-stripe-color)'
+            }
           }
         });
 
@@ -1817,7 +1821,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __filteredItemsChanged () {
     this.__filteredItems.forEach((item, itemIndex) => {
-      item[this.idInternalProperty] = `${item[this.idExternalProperty]}-${itemIndex}`;
+      item[this.idInternalProperty] = itemIndex;
     });
   }
 
