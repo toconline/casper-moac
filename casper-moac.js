@@ -1299,7 +1299,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__paintGridRows(true);
 
     // If the active item changed, debounce the active item change.
-    if (!this.__scheduleActiveItem || this.__areItemsEqual(this.__activeItem, this.__scheduleActiveItem)) {
+    if (!this.__scheduleActiveItem || !this.__areItemsEqual(this.__activeItem, this.__scheduleActiveItem)) {
       // This property is used to avoid delaying infinitely activating the same item which is caused when the user
       // maintains the up / down arrows after reaching the first / last result in the table.
       this.__scheduleActiveItem = {...this.__activeItem};
