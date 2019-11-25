@@ -886,17 +886,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__bindContextMenuEvents();
     this.__monkeyPatchVaadinElements();
     this.__stampGridCustomStylesTemplate();
-
-    this.__boundKeyDownEvents = this.__bindKeyDownEvents.bind(this);
-    document.addEventListener('keydown', this.__boundKeyDownEvents);
   }
-
-  disconnectedCallback () {
-    super.disconnectedCallback();
-
-    document.removeEventListener('keydown', this.__boundKeyDownEvents);
-  }
-
   /**
    * Adds manually a new item / list of items to the beginning of the existing ones ignoring
    * the currently applied filters.
@@ -939,7 +929,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     const filteredItems = [...this.__filteredItems];
     item.forEach(itemToUpdate => {
       filteredItems.forEach((item, itemIndex, filteredItems) => {
-        if (String(itemToUpdate[this.idExternalProperty]) === String(item[this.idExternalProperty])) {
+        if (this.__areItemsEqual(itemToUpdate, item)) {
           filteredItems[itemIndex] = itemToUpdate
         }
       });
@@ -1127,44 +1117,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       this.__lastContextMenuTarget.style.display = '';
     });
 
-    this.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', async (event) => {
-      const parentItem = this.activeItem = this.grid.getEventContext(event).item;
-
-      const treeToggleComponent = event.composedPath().shift();
-      treeToggleComponent.disabled = true;
-
-      // If the toggle is not expanded remove the items that were previously expanded.
-      if (!event.detail.expanded) {
-        delete parentItem[this.rowBackgroundColorInternalProperty];
-
-        this.__filteredItems = this.__filteredItems.filter(item => String(item[this.parentInternalProperty]) !== String(parentItem[this.idInternalProperty]));
-      } else {
-        const parentItemIndex = this.__findItemIndexById(parentItem[this.idInternalProperty]);
-
-        // Either query the database or use the local property depending on the current type of grid.
-        let parentItemChildren = !this.lazyLoad
-          ? parentItem[this.childrenProperty]
-          : await this.__fetchChildrenResourceItems(parentItem);
-
-        // Safeguard for an empty response from the server or an empty local property.
-        parentItemChildren = Array.isArray(parentItemChildren) ? parentItemChildren : [];
-        parentItemChildren.forEach(child => {
-          child[this.parentInternalProperty] = parentItem[this.idInternalProperty];
-          child[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-child-item-background-color)';
-        });
-
-        parentItem[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-parent-item-background-color)';
-
-        this.__filteredItems = [
-          ...this.__filteredItems.slice(0, parentItemIndex + 1),
-          ...parentItemChildren,
-          ...this.__filteredItems.slice(parentItemIndex + 1)
-        ];
-      }
-
-      this.__paintGridRows();
-      treeToggleComponent.disabled = false;
-    });
+    this.grid.addEventListener('keydown', event => this.__handleGridKeyDownEvents(event));
+    this.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', event => this.__handleGridTreeToggleEvents(event));
 
     if (!this.__displayEpaper) {
       this.$.splitLayout.$.splitter.style.display = 'none';
@@ -1306,7 +1260,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    *
    * @param {Object} event The event's object.
    */
-  async __bindKeyDownEvents (event) {
+  async __handleGridKeyDownEvents (event) {
     const keyCode = event.code;
 
     if (this.__filteredItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
@@ -1327,7 +1281,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }
 
       if (keyCode === 'Enter' && !this.disableSelection) {
-        !this.selectedItems.find(selectedItem => String(selectedItem[this.idInternalProperty]) === String(this.__activeItem[this.idInternalProperty]))
+        !this.selectedItems.find(selectedItem => this.__areItemsEqual(selectedItem, this.__activeItem))
           ? this.$.grid.selectItem(this.__activeItem)
           : this.$.grid.deselectItem(this.__activeItem);
       }
@@ -1336,7 +1290,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__paintGridRows(true);
 
     // If the active item changed, debounce the active item change.
-    if (!this.__scheduleActiveItem || String(this.__activeItem[this.idInternalProperty]) !== String(this.__scheduleActiveItem[this.idInternalProperty])) {
+    if (!this.__scheduleActiveItem || this.__areItemsEqual(this.__activeItem, this.__scheduleActiveItem)) {
       // This property is used to avoid delaying infinitely activating the same item which is caused when the user
       // maintains the up / down arrows after reaching the first / last result in the table.
       this.__scheduleActiveItem = {...this.__activeItem};
@@ -1344,6 +1298,50 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         this.activeItem = this.__scheduleActiveItem;
       }, 300, true);
     }
+  }
+
+  /**
+   * This method handles the click on the casper-moac-tree-toggle components and expands / collapses the row.
+   *
+   * @param {Object} event The event's object.
+   */
+  async __handleGridTreeToggleEvents (event) {
+    const parentItem = this.activeItem = this.grid.getEventContext(event).item;
+
+      const treeToggleComponent = event.composedPath().shift();
+      treeToggleComponent.disabled = true;
+
+      // If the toggle is not expanded remove the items that were previously expanded.
+      if (!event.detail.expanded) {
+        delete parentItem[this.rowBackgroundColorInternalProperty];
+
+        this.__filteredItems = this.__filteredItems.filter(item => this.__areItemsEqual(item, parentItem));
+      } else {
+        const parentItemIndex = this.__findItemIndexById(parentItem[this.idInternalProperty]);
+
+        // Either query the database or use the local property depending on the current type of grid.
+        let parentItemChildren = !this.lazyLoad
+          ? parentItem[this.childrenProperty]
+          : await this.__fetchChildrenResourceItems(parentItem);
+
+        // Safeguard for an empty response from the server or an empty local property.
+        parentItemChildren = Array.isArray(parentItemChildren) ? parentItemChildren : [];
+        parentItemChildren.forEach(child => {
+          child[this.parentInternalProperty] = parentItem[this.idInternalProperty];
+          child[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-child-item-background-color)';
+        });
+
+        parentItem[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-parent-item-background-color)';
+
+        this.__filteredItems = [
+          ...this.__filteredItems.slice(0, parentItemIndex + 1),
+          ...parentItemChildren,
+          ...this.__filteredItems.slice(parentItemIndex + 1)
+        ];
+      }
+
+      this.__paintGridRows();
+      treeToggleComponent.disabled = false;
   }
 
   /**
@@ -1430,7 +1428,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     }
 
     this.__activeItem = this.activeItem;
-    this.__paintGridRows();
+    this.__paintGridRows(true);
   }
 
   /**
@@ -1668,7 +1666,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     afterNextRender(this, () => {
       // Loop through each grid row and paint the active one.
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach((row, rowIndex) => {
-        const isRowActive = this.__activeItem && String(row._item[this.idInternalProperty]) === String(this.__activeItem[this.idInternalProperty]);
+        const isRowActive = this.__activeItem && this.__areItemsEqual(row._item, this.__activeItem);
         const isRowBackgroundColored = !!row._item[this.rowBackgroundColorInternalProperty];
 
         Array.from(row.children).forEach(cell => {
@@ -1821,6 +1819,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__filteredItems.forEach((item, itemIndex) => {
       item[this.idInternalProperty] = `${item[this.idExternalProperty]}-${itemIndex}`;
     });
+  }
+
+  /**
+   * This method is used to compare two objects and state if they're equal or not based on the internal
+   * identifier property.
+   *
+   * @param {Object} previousItem
+   * @param {Object} nextItem
+   */
+  __areItemsEqual (previousItem, nextItem) {
+    return String(previousItem[this.idInternalProperty]) === String(nextItem[this.idInternalProperty]);
   }
 }
 
