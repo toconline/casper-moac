@@ -1324,7 +1324,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       if (!event.detail.expanded) {
         delete parentItem[this.rowBackgroundColorInternalProperty];
 
-        this.__filteredItems = this.__filteredItems.filter(item => this.__areItemsEqual(item, parentItem));
+        this.__filteredItems = this.displayedItems = this.__filteredItems.filter(item => this.__areItemsEqual(item, parentItem));
       } else {
         const parentItemIndex = this.__findItemIndexById(parentItem[this.idInternalProperty]);
 
@@ -1342,7 +1342,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         parentItem[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-parent-item-background-color)';
 
-        this.__filteredItems = [
+        this.__filteredItems = this.displayedItems = [
           ...this.__filteredItems.slice(0, parentItemIndex + 1),
           ...parentItemChildren,
           ...this.__filteredItems.slice(parentItemIndex + 1)
@@ -1453,8 +1453,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __selectedItemsChanged () {
     this.selectedItems && this.selectedItems.length > 0
-      ? this.$['multi-selection-container'].style.height = ''
-      : this.$['multi-selection-container'].style.height = `${this.$['multi-selection-container'].firstElementChild.scrollHeight}px`;
+      ? this.$['multi-selection-container'].style.height = `${this.$['multi-selection-container'].firstElementChild.scrollHeight}px`
+      : this.$['multi-selection-container'].style.height = '';
 
     if (!this.__selectAllCheckbox) return;
 
