@@ -630,6 +630,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         .main-container vaadin-split-layout .left-side-container #multi-selection-container {
           height: 0;
+          flex-shrink: 0;
           overflow: hidden;
           transition: height 100ms linear;
         }
@@ -657,6 +658,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container {
+          min-height: 100px;
           flex-grow: 1;
           display: flex;
           position: relative;
