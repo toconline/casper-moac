@@ -1484,11 +1484,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * This method activates the item that is present in the specified index.
    */
   async __activateItemAtIndex (index = 0) {
-    if (this.__filteredItems && this.__filteredItems.length > index) {
-      this.activeItem = this.__filteredItems[index];
-    } else {
-      this.activeItem = null;
-    }
+    this.__filteredItems && this.__filteredItems.length > index
+      ? this.activeItem = this.__filteredItems[index]
+      : this.activeItem = null;
   }
 
   /**
