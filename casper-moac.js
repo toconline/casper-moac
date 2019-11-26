@@ -1093,7 +1093,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       this.__paintGridRows();
 
       this.__contextMenu.close();
-      this.__lastContextMenuTarget.style.display = '';
     });
 
     this.grid.addEventListener('keydown', event => this.__handleGridKeyDownEvents(event));
@@ -1217,19 +1216,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }
     });
 
-    this.__contextMenu.addEventListener('iron-overlay-canceled', event => {
-      const eventPathElement = event.detail.path.shift();
-
-      // This means the iron-overlay-canceled event was called after a new menu was open so we hide the previous one.
-      if (eventPathElement.classList.contains('context-menu-icon')) {
-        this.__lastContextMenuTarget.removeAttribute('style');
-
-        if (this.__lastContextMenuTarget !== eventPathElement) {
-          afterNextRender(this, () => this.__contextMenu.open());
-        }
-      } else {
-        // This means the iron-overlay-canceled event was called after some other element was clicked so we close the current menu.
-        this.__contextMenu.positionTarget.removeAttribute('style');
+    this.__contextMenu.addEventListener('opened-changed', event => {
+      if (!event.detail.value) {
+        this.shadowRoot.querySelectorAll('.context-menu-icon').forEach(contextMenuIcon => {
+          contextMenuIcon.removeAttribute('style');
+        });
       }
     });
   }
@@ -1713,19 +1704,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __openContextMenu (event) {
     const contextMenuItem = this.$.grid.getEventContext(event).item;
-    this.__lastContextMenuTarget = this.__contextMenuOpenedOnce ? this.__contextMenu.positionTarget : event.target;
 
-    // Check if the context menu was already opened.
     this.__contextMenu.positionTarget = event.target;
-    this.__contextMenu.positionTarget.style.display = 'block';
-    this.__contextMenu.refit();
+    this.__contextMenu.close();
 
-    if (!this.__contextMenu.opened) {
+    afterNextRender(this, () => {
+      this.__contextMenu.positionTarget.style.display = 'block';
+      this.__contextMenu.refit();
       this.__contextMenu.open();
-      this.__contextMenuOpenedOnce = true;
-
-      afterNextRender(this, () => this.activeItem = contextMenuItem);
-    }
+      this.activeItem = contextMenuItem;
+    });
   }
 
   /**
