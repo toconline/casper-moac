@@ -398,7 +398,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
   static get observers () {
     return [
-      '__selectedItemsChanged(selectedItems.splices)'
+      '__selectedItemsChanged(__selectedItems.splices)'
     ];
   }
 
@@ -794,7 +794,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             <div id="multi-selection-container">
               <div class="grid-multiple-selection">
                 <div class="grid-multiple-selection-label">
-                  Seleção múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
+                  Seleção múltipla:&nbsp;<strong>[[__selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
                 </div>
                 <div class="grid-multiple-selection-icons">
                   <slot name="multi-selection"></slot>
@@ -809,7 +809,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                 class="moac"
                 items="[[__filteredItems]]"
                 active-item="{{activeItem}}"
-                selected-items="{{selectedItems}}"
+                selected-items="{{__selectedItems}}"
                 item-id-path="[[idInternalProperty]]">
 
                 <slot name="grid-before"></slot>
@@ -1113,7 +1113,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               // Lock the vaadin-checkbox event handler to avoid infinite loops.
               if (this.__selectAllCheckboxLock) return;
 
-              this.selectedItems = !event.detail.value ? [] : [...this.__selectableItems()];
+              this.__selectedItems = !event.detail.value ? [] : [...this.__selectableItems()];
             });
 
             selectAllCheckbox.parentElement.appendChild(this.__selectAllCheckbox);
@@ -1259,7 +1259,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }
 
       if (keyCode === 'Enter' && !this.disableSelection && !this.__activeItem[this.disableSelectionInternalProperty]) {
-        !this.selectedItems.find(selectedItem => this.__compareItems(selectedItem, this.__activeItem))
+        !this.__selectedItems.find(selectedItem => this.__compareItems(selectedItem, this.__activeItem))
           ? this.$.grid.selectItem(this.__activeItem)
           : this.$.grid.deselectItem(this.__activeItem);
       }
@@ -1421,7 +1421,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * Observer that fires when the vaadin-grid selected items change.
    */
   __selectedItemsChanged () {
-    this.selectedItems && this.selectedItems.length > 0
+    this.selectedItems = [...this.__selectedItems];
+    this.__selectedItems && this.__selectedItems.length > 0
       ? this.$['multi-selection-container'].style.height = `${this.$['multi-selection-container'].firstElementChild.scrollHeight}px`
       : this.$['multi-selection-container'].style.height = '';
 
@@ -1431,8 +1432,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     // Lock the vaadin-checkbox event handler to avoid infinite loops.
     this.__selectAllCheckboxLock = true;
-    this.__selectAllCheckbox.checked = this.selectedItems.length > 0 && selectableItems.length === this.selectedItems.length;
-    this.__selectAllCheckbox.indeterminate = this.selectedItems.length > 0 && selectableItems.length !== this.selectedItems.length;
+    this.__selectAllCheckbox.checked = this.__selectedItems.length > 0 && selectableItems.length === this.__selectedItems.length;
+    this.__selectAllCheckbox.indeterminate = this.__selectedItems.length > 0 && selectableItems.length !== this.__selectedItems.length;
     this.__selectAllCheckboxLock = false;
   }
 
@@ -1442,7 +1443,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __filterItems () {
     this.activeItem = null;
-    this.selectedItems = [];
+    this.__selectedItems = [];
 
     // Scroll to the top of the grid after the vaadin-grid displays the new items.
     afterNextRender(this, () => { this.gridScroller.scrollTop = 0; });

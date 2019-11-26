@@ -141,8 +141,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
       // Scroll to the top of the grid to reset the current page being displayed.
       if (this.gridScroller) this.gridScroller.scrollTop = 0;
 
-      this.selectedItems = [];
       this.__currentPage = 0;
+      this.__selectedItems = [];
       this.__staleDataset = false;
       this.__ignoreScrollEvents = false;
       this.__debounceFetchResourceItems();
