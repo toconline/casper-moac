@@ -101,9 +101,6 @@ class CasperMoacTreeToggle extends PolymerElement {
 
       this.expanded = !this.expanded;
 
-      // This control variable is used to not notify the casper-moac's if the toggle hasn't changed its previous expanded state.
-      this.__eventExpanded = this.expanded;
-
       // Dispatch an event to inform the casper-moac element that a toggle was changed.
       this.dispatchEvent(new CustomEvent('casper-moac-tree-toggle-expanded-changed', {
         bubbles: true,
