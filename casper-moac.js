@@ -1070,7 +1070,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }
     }
 
-    if (!isRowIntoView) this.grid._scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
+    if (!isRowIntoView) {
+      this.grid.scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
+    }
   }
 
   __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
@@ -1448,9 +1450,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.activeItem = null;
     this.__selectedItems = [];
 
-    // Scroll to the top of the grid after the vaadin-grid displays the new items.
-    afterNextRender(this, () => { this.gridScroller.scrollTop = 0; });
-
     // Use spread operator to avoid messing with the original dataset by sorting.
     let originalItems = [...(this.items || [])]
     let filteredItems = [...(this.items || [])];
@@ -1493,14 +1492,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     let itemIndex = 0;
     if (this.__activateItemId) {
       itemIndex = this.__findItemIndexById(this.__activateItemId, true);
+      this.__scrollToItemIfNotVisible(this.__activateItemId, true);
       this.__activateItemId = undefined;
     }
 
     this.__filteredItems && this.__filteredItems.length > itemIndex
       ? this.activeItem = this.__filteredItems[itemIndex]
       : this.activeItem = null;
-
-    afterNextRender(this, () => this.grid._scrollToIndex(itemIndex));
   }
 
   /**
