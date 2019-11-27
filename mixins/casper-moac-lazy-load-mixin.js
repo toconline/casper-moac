@@ -194,23 +194,15 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
         this.__currentPage++;
 
-        const parameters = {
-          page: this.__currentPage,
-          pageSize: this.resourcePageSize,
-          sorters: this.__activeSorters
-        };
-
-        this.__fetchResourceItems(parameters);
+        this.__fetchResourceItems();
       });
     }
 
     /**
      * Function that is invoked to fetch items from the remote source which is the JSON API in this case.
-     *
-     * @param {Object} parameters Object that contains the number of items per page, the current page number and sort settings.
      */
-    async __fetchResourceItems (parameters) {
-      const socketResponse = await this.__fetchRequest(this.__buildResourceUrl(parameters));
+    async __fetchResourceItems () {
+      const socketResponse = await this.__fetchRequest(this.buildResourceUrl());
 
       if (!socketResponse) return;
 
@@ -323,13 +315,12 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
     /**
      * This method will build the JSON API resource url with all the required parameters and filters.
-     * @param {Object} parameters Object that contains the number of items per page, the current page number and sort settings.
      */
-    __buildResourceUrl (parameters) {
+    buildResourceUrl () {
       let resourceUrlParams = [
         this.resourceTotalsMetaParam,
-        `${this.resourcePageParam}=${parameters.page}`,
-        `${this.resourcePageSizeParam}=${parameters.pageSize}`
+        `${this.resourcePageParam}=${this.__currentPage}`,
+        `${this.resourcePageSizeParam}=${this.resourcePageSize}`
       ];
 
       // Limit the fields that are request to the JSON API.
@@ -338,8 +329,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
       }
 
       // Sort by ascending or descending.
-      if (parameters.sorters.length > 0) {
-        const sortParameters = parameters.sorters.map(sorter => sorter.direction === CasperMoacSortDirections.ASCENDING ? sorter.path : `-${sorter.path}`);
+      if (this.__activeSorters.length > 0) {
+        const sortParameters = this.__activeSorters.map(sorter => sorter.direction === CasperMoacSortDirections.ASCENDING ? sorter.path : `-${sorter.path}`);
         resourceUrlParams = [...resourceUrlParams, `${this.resourceSortParam}=${sortParameters.join(',')}`];
       }
 
