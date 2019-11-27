@@ -137,7 +137,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
     /**
      * Public method that allows the casper-moac users to re-fetch the items.
      */
-    refreshItems () {
+    refreshItems (activateItemAfterRefresh) {
       // Scroll to the top of the grid to reset the current page being displayed.
       if (this.gridScroller) this.gridScroller.scrollTop = 0;
 
@@ -145,6 +145,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.__selectedItems = [];
       this.__staleDataset = false;
       this.__ignoreScrollEvents = false;
+      this.__activateItemAfterRefresh = activateItemAfterRefresh;
       this.__debounceFetchResourceItems();
     }
 
@@ -207,9 +208,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       if (!socketResponse) return;
 
       // Format the elements returned by the JSON API.
-      if (this.resourceFormatter) {
-        socketResponse.data.forEach(item => this.resourceFormatter.call(this.page || {}, item));
-      }
+      if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter.call(this.page || {}, item));
 
       if (this.__currentPage !== 1) {
         this.__filteredItems = [...this.__filteredItems, ...socketResponse.data];
@@ -222,18 +221,26 @@ export const CasperMoacLazyLoadMixin = superClass => {
         // Reset the totals when requesting the first page.
         this.__resourceTotal = undefined;
         this.__resourceGrandTotal = undefined;
-
         this.__filteredItems = socketResponse.data;
 
-        this.grid._scrollToIndex(0);
-        this.__activateItemAtIndex();
+        if (!this.__activateItemAfterRefresh) {
+          // Activate the first item by default.
+          this.grid._scrollToIndex(0);
+          this.__activateItemAtIndex();
+        } else {
+          // Find the item that we're trying to select and reset the variable.
+          const itemIndex = this.__findItemIndexById(this.__activateItemAfterRefresh, true);
+
+          this.grid._scrollToIndex(itemIndex);
+          this.__activateItemAtIndex(itemIndex);
+          this.__activateItemAfterRefresh = undefined;
+        }
       }
 
       // Check if the totals are different which means something changed in the server's dataset.
       if (!this.__staleDataset && (
         (this.__resourceTotal && this.__resourceTotal !== socketResponse.meta.total) ||
-        (this.__resourceGrandTotal && this.__resourceGrandTotal !== socketResponse.meta['grand-total'])
-      )) {
+        (this.__resourceGrandTotal && this.__resourceGrandTotal !== socketResponse.meta['grand-total']))) {
         this.__staleDataset = true;
       }
 
