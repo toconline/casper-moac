@@ -203,7 +203,12 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * Function that is invoked to fetch items from the remote source which is the JSON API in this case.
      */
     async __fetchResourceItems () {
-      const socketResponse = await this.__fetchRequest(this.buildResourceUrl());
+      // Check if there is already existing filters in the resource name.
+      const url = this.resourceName.includes('?')
+        ? `${this.resourceName}&${this.buildResourceUrl()}`
+        : `${this.resourceName}?${this.buildResourceUrl()}`;
+
+      const socketResponse = await this.__fetchRequest(url);
 
       if (!socketResponse) return;
 
@@ -351,10 +356,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${filterResourceUrlParams}"`];
       }
 
-      // Check if there is already existing filters in the resource name.
-      return this.resourceName.includes('?')
-        ? `${this.resourceName}&${resourceUrlParams.join('&')}`
-        : `${this.resourceName}?${resourceUrlParams.join('&')}`;
+      return resourceUrlParams.join('&');
     }
 
     /**
