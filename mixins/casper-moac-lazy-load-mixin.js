@@ -136,8 +136,10 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
     /**
      * Public method that allows the casper-moac users to re-fetch the items.
+     *
+     * @param {String | Number} activateItemId The item's identifier that will be activated after re-fetching the new items.
      */
-    refreshItems (activateItemAfterRefresh) {
+    refreshItems (activateItemId) {
       // Scroll to the top of the grid to reset the current page being displayed.
       if (this.gridScroller) this.gridScroller.scrollTop = 0;
 
@@ -145,7 +147,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.__selectedItems = [];
       this.__staleDataset = false;
       this.__ignoreScrollEvents = false;
-      this.__activateItemAfterRefresh = activateItemAfterRefresh;
+      this.__activateItemId = activateItemId;
       this.__debounceFetchResourceItems();
     }
 
@@ -228,18 +230,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.__resourceGrandTotal = undefined;
         this.__filteredItems = socketResponse.data;
 
-        if (!this.__activateItemAfterRefresh) {
-          // Activate the first item by default.
-          this.grid._scrollToIndex(0);
-          this.__activateItemAtIndex();
-        } else {
-          // Find the item that we're trying to select and reset the variable.
-          const itemIndex = this.__findItemIndexById(this.__activateItemAfterRefresh, true);
-
-          this.grid._scrollToIndex(itemIndex);
-          this.__activateItemAtIndex(itemIndex);
-          this.__activateItemAfterRefresh = undefined;
-        }
+        this.__activateItem();
       }
 
       // Check if the totals are different which means something changed in the server's dataset.

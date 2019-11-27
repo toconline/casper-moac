@@ -1043,6 +1043,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 
   /**
+   * This method changes the local items and offer the possibility to activate one specific item after that.
+   *
+   * @param {Array} items The list of new items.
+   * @param {String | Number} activateItemId The item's identifier that will be activated after resetting the new items.
+   */
+  setItems (items, activateItemId) {
+    this.__activateItemId = activateItemId;
+    this.items = items;
+  }
+
+  /**
    * Scrolls to a specific item if he's not currently visible.
    *
    * @param {Number | String} itemId The item that should be scrolled to if he's not currently visible.
@@ -1230,7 +1241,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    *
    * @param {Object} event The event's object.
    */
-  async __handleGridKeyDownEvents (event) {
+  __handleGridKeyDownEvents (event) {
     const keyCode = event.code;
 
     if (this.__filteredItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
@@ -1469,7 +1480,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     this.__filteredItems = this.__sortItems(filteredItems);
     this.forceGridRedraw();
-    this.__activateItemAtIndex();
+    this.__activateItem();
     this.__numberOfResults = filteredItems.length === originalItems.length
       ? `${filteredItems.length} ${this.multiSelectionLabel}`
       : `${filteredItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
@@ -1478,10 +1489,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   /**
    * This method activates the item that is present in the specified index.
    */
-  async __activateItemAtIndex (index = 0) {
-    this.__filteredItems && this.__filteredItems.length > index
-      ? this.activeItem = this.__filteredItems[index]
+  __activateItem () {
+    let itemIndex = 0;
+    if (this.__activateItemId) {
+      itemIndex = this.__findItemIndexById(this.__activateItemId, true);
+      this.__activateItemId = undefined;
+    }
+
+    this.__filteredItems && this.__filteredItems.length > itemIndex
+      ? this.activeItem = this.__filteredItems[itemIndex]
       : this.activeItem = null;
+
+    afterNextRender(this, () => this.grid._scrollToIndex(itemIndex));
   }
 
   /**
