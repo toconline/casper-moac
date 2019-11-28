@@ -997,6 +997,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         this.__staleDataset = true;
         this.__filteredItems = this.__filteredItems.filter(item => !itemsToRemove.includes(String(item[this.idExternalProperty])));
+        this.__selectedItems = this.__selectedItems.filter(item => !itemsToRemove.includes(String(item[this.idExternalProperty])));
         this.__filteredItems.length === 0
           ? this.activeItem = null
           : this.activeItem = this.__filteredItems[Math.max(0, firstItemToRemoveIndex - 1)];
