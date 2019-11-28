@@ -1274,6 +1274,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         !this.__selectedItems.find(selectedItem => this.__compareItems(selectedItem, this.__activeItem))
           ? this.$.grid.selectItem(this.__activeItem)
           : this.$.grid.deselectItem(this.__activeItem);
+
+        // The remaining function code only concerns the arrow navigation.
+        return;
       }
     }
 
@@ -1284,9 +1287,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       // This property is used to avoid delaying infinitely activating the same item which is caused when the user
       // maintains the up / down arrows after reaching the first / last result in the table.
       this.__scheduleActiveItem = {...this.__activeItem};
-      this.__debounce('__activeItemDebouncer', () => {
+
+      // Only debounce when the event is repeated, meaning the user keeps the key pressed or if the activeItemDebounce was specifically set.
+      if (event.repeat || this.activeItemDebounce) {
+        this.__debounce('__activeItemDebouncer', () => {
+          this.activeItem = this.__scheduleActiveItem;
+        }, this.activeItemDebounce || 300);
+      } else {
+        this.__cancelDebounce('__activeItemDebouncer');
         this.activeItem = this.__scheduleActiveItem;
-      }, 300, true);
+      }
     }
   }
 
@@ -1800,20 +1810,25 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Function} callback The function that will be invoked afterwards.
    * @param {Number} timeOutMilliseconds Number of milliseconds after the last invoke that will trigger the callback.
    */
-  __debounce (debouncerProperty, callback, timeOutMilliseconds = 250, executeImmediately = false) {
-    let wasExecutedImmediately = false;
-    if (executeImmediately && (!this[debouncerProperty] || (this[debouncerProperty] && !this[debouncerProperty].isActive()))) {
-      wasExecutedImmediately = true;
-      callback();
-    }
-
+  __debounce (debouncerProperty, callback, timeOutMilliseconds = 250) {
     this[debouncerProperty] = Debouncer.debounce(
       this[debouncerProperty],
       timeOut.after(timeOutMilliseconds),
       () => {
-        if (!wasExecutedImmediately) callback();
+        callback();
       }
     );
+  }
+
+  /**
+   * This function is used to cancel active debouncers.
+   *
+   * @param {String} debouncerProperty The casper-moac's property that currently holds the debounce status.
+   */
+  __cancelDebounce (debouncerProperty) {
+    if (this[debouncerProperty] && this[debouncerProperty].isActive()) {
+      this[debouncerProperty].cancel();
+    }
   }
 
   /**
