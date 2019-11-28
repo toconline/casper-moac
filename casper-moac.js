@@ -146,6 +146,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         observer: '__activeItemChanged'
       },
       /**
+       * The active item debouncer timeout to not trigger too many changes.
+       *
+       * @type {Number}
+       */
+      activeItemDebounce: {
+        type: Number
+      },
+      /**
        * The items that are currently selected in the vaadin-grid.
        *
        * @type {Array}
