@@ -939,15 +939,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (itemsToUpdate.constructor.name === 'Object') itemsToUpdate = [itemsToUpdate];
 
     const filteredItems = [...this.__filteredItems];
+    const selectedItems = [...this.__selectedItems];
+
     itemsToUpdate.forEach(itemToUpdate => {
-      filteredItems.forEach((item, itemIndex, filteredItems) => {
+      const updateItemCallback = (item, itemIndex, items) => {
         if (this.__compareItems(itemToUpdate, item, true)) {
-          filteredItems[itemIndex] = itemToUpdate;
+          items[itemIndex] = itemToUpdate;
         }
-      });
+      };
+
+      filteredItems.forEach(updateItemCallback);
+      selectedItems.forEach(updateItemCallback);
     });
 
     this.__filteredItems = filteredItems;
+    this.__selectedItems = selectedItems;
 
     this.forceGridRedraw();
     this.__staleDataset = true;
