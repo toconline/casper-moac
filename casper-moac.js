@@ -952,7 +952,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     itemsToUpdate.forEach(itemToUpdate => {
       const updateItemCallback = (item, itemIndex, items) => {
         if (this.__compareItems(itemToUpdate, item, true)) {
-          items[itemIndex] = itemToUpdate;
+          // Do not simply overwrite the object to avoid losing important internal properties set by this component.
+          Object.keys(itemToUpdate).forEach(itemToUpdateProperty => {
+            items[itemIndex][itemToUpdateProperty] = itemToUpdate[itemToUpdateProperty];
+          });
         }
       };
 
