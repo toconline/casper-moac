@@ -1186,6 +1186,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         }
       }));
 
+      const searchParams = new URLSearchParams();
+      Object.keys(this.filters).forEach(filter => {
+        if (this.filters[filter].value) {
+          searchParams.set(filter, this.filters[filter].value);
+        }
+      });
+
+      history.pushState(null, '', `${window.location.pathname}?${searchParams.toString()}`);
+
       // Force the re-fetch of items if one the filter changes.
       if (this.lazyLoad) {
         if (this.page && this.beforeJsonApiRequest) {
@@ -1410,13 +1419,24 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__hasFilters = !!this.filters && Object.keys(this.filters).length > 0;
     this.__bindFiltersEvents();
 
-    // Transform the filters object into an array to use in a dom-repeat.
-    this.__filters = Object.keys(filters).map(filterKey => ({
-      filterKey: filterKey,
-      filter: this.filters[filterKey]
-    }));
+    const searchParams = new URLSearchParams(window.location.search);
 
-    // Force the re-fetch of items if one the filter changes.
+    // Transform the filters object into an array to use in a dom-repeat.
+    this.__filters = Object.keys(filters).map(filterKey => {
+      const filterSettings = {
+        filterKey: filterKey,
+        filter: this.filters[filterKey]
+      };
+
+      // Override the filter's default value if it's present in the URL.
+      if (searchParams.has(filterKey)) {
+        filterSettings.filter.value = searchParams.get(filterKey);
+      }
+
+      return filterSettings;
+    });
+
+    // Force the re-fetch of items if one of the filter changes.
     if (this.lazyLoad) this.refreshItems();
 
     this.__renderActiveFilters();
