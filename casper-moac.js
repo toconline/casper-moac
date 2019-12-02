@@ -1473,8 +1473,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     }
 
     // This is used to avoid conflicts between arrow and click events.
-    this.__scheduleActiveItem = undefined;
-    this.__activeItem = this.activeItem;
+    this.__scheduleActiveItem = this.__activeItem = {...this.activeItem};
     this.__paintGridRows(true);
   }
 
