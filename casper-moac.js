@@ -1188,12 +1188,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
       const searchParams = new URLSearchParams();
       Object.keys(this.filters).forEach(filter => {
-        if (this.filters[filter].value) {
+        if (!this.filters[filter].doNotIncludeInUrl && this.filters[filter].value) {
           searchParams.set(filter, this.filters[filter].value);
         }
       });
 
-      history.pushState(null, '', `${window.location.pathname}?${searchParams.toString()}`);
+      history.replaceState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
 
       // Force the re-fetch of items if one the filter changes.
       if (this.lazyLoad) {
