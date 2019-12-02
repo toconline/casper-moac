@@ -154,6 +154,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         type: Number
       },
       /**
+       * The items that are currently expanded in the vaadin-grid.
+       *
+       * @type {Array}
+       */
+      expandedItems: {
+        type: Array,
+        notify: true,
+        value: []
+      },
+      /**
        * The items that are currently selected in the vaadin-grid.
        *
        * @type {Array}
@@ -1328,40 +1338,44 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   async __handleGridTreeToggleEvents (event) {
     const parentItem = this.activeItem = this.grid.getEventContext(event).item;
 
-      const treeToggleComponent = event.composedPath().shift();
-      treeToggleComponent.disabled = true;
+    const treeToggleComponent = event.composedPath().shift();
+    treeToggleComponent.disabled = true;
+
+    if (!event.detail.expanded) {
+      this.expandedItems = [...this.expandedItems.filter(expandedItem => !this.__compareItems(expandedItem, parentItem, true))];
+
+      // Remove the row color from the parent.
+      delete parentItem[this.rowBackgroundColorInternalProperty];
 
       // If the toggle is not expanded remove the items that were previously expanded.
-      if (!event.detail.expanded) {
-        delete parentItem[this.rowBackgroundColorInternalProperty];
+      this.__filteredItems = this.__filteredItems.filter(item => String(item[this.parentInternalProperty]) !== String(parentItem[this.idExternalProperty]));
+    } else {
+      this.expandedItems = [...this.expandedItems, parentItem];
+      const parentItemIndex = this.__findItemIndexById(parentItem[this.idInternalProperty]);
 
-        this.__filteredItems = this.__filteredItems.filter(item => String(item[this.parentInternalProperty]) !== String(parentItem[this.idExternalProperty]));
-      } else {
-        const parentItemIndex = this.__findItemIndexById(parentItem[this.idInternalProperty]);
+      // Either query the database or use the local property depending on the current type of grid.
+      let parentItemChildren = !this.lazyLoad
+        ? parentItem[this.childrenProperty]
+        : await this.__fetchChildrenResourceItems(parentItem);
 
-        // Either query the database or use the local property depending on the current type of grid.
-        let parentItemChildren = !this.lazyLoad
-          ? parentItem[this.childrenProperty]
-          : await this.__fetchChildrenResourceItems(parentItem);
+      // Safeguard for an empty response from the server or an empty local property.
+      parentItemChildren = Array.isArray(parentItemChildren) ? parentItemChildren : [];
+      parentItemChildren.forEach(child => {
+        child[this.parentInternalProperty] = parentItem[this.idExternalProperty];
+        child[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-child-item-background-color)';
+      });
 
-        // Safeguard for an empty response from the server or an empty local property.
-        parentItemChildren = Array.isArray(parentItemChildren) ? parentItemChildren : [];
-        parentItemChildren.forEach(child => {
-          child[this.parentInternalProperty] = parentItem[this.idExternalProperty];
-          child[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-child-item-background-color)';
-        });
+      parentItem[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-parent-item-background-color)';
 
-        parentItem[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-parent-item-background-color)';
+      this.__filteredItems = [
+        ...this.__filteredItems.slice(0, parentItemIndex + 1),
+        ...parentItemChildren,
+        ...this.__filteredItems.slice(parentItemIndex + 1)
+      ];
+    }
 
-        this.__filteredItems = [
-          ...this.__filteredItems.slice(0, parentItemIndex + 1),
-          ...parentItemChildren,
-          ...this.__filteredItems.slice(parentItemIndex + 1)
-        ];
-      }
-
-      this.__paintGridRows();
-      treeToggleComponent.disabled = false;
+    this.__paintGridRows();
+    treeToggleComponent.disabled = false;
   }
 
   /**
