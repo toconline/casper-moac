@@ -299,7 +299,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
        *
        * @type {Array}
        */
-      childrenProperty: {
+      childrenExternalProperty: {
         type: String,
         value: 'children'
       },
@@ -1355,7 +1355,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
       // Either query the database or use the local property depending on the current type of grid.
       let parentItemChildren = !this.lazyLoad
-        ? parentItem[this.childrenProperty]
+        ? parentItem[this.childrenExternalProperty]
         : await this.__fetchChildrenResourceItems(parentItem);
 
       // Safeguard for an empty response from the server or an empty local property.
@@ -1472,6 +1472,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       this.epaper.openBlankPage();
     }
 
+    // This is used to avoid conflicts between arrow and click events.
+    this.__scheduleActiveItem = undefined;
     this.__activeItem = this.activeItem;
     this.__paintGridRows(true);
   }
@@ -1727,7 +1729,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               ? cell.style.backgroundColor = 'var(--casper-moac-active-item-background-color)'
               : cell.style.backgroundColor = row._item[this.rowBackgroundColorInternalProperty];
           } else {
-            // If we got here, just remove the current cell background color.
             this.disableRowStripes || row._item[this.idInternalProperty] % 2 === 0
               ? cell.style.backgroundColor = 'white'
               : cell.style.backgroundColor = 'var(--casper-moac-row-stripe-color)';
