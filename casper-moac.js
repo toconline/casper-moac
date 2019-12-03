@@ -1169,7 +1169,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * Bind event listeners to the generic search input.
    */
   __bindSearchInputEvents () {
-    this.$.filterInternalInput.addEventListener('keyup', () => this.__freeFilterChanged());
+    this.$.filterInternalInput.addEventListener('keydown', event => this.__freeFilterChanged(event));
     this.$.filterInternalInput.addEventListener('focus', () => {
       this.$.filterInput.style.border = '1px solid var(--primary-color)';
       this.$.filterInput.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.1)';
@@ -1314,7 +1314,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }
     }
 
-    this.__paintGridRows(true);
+    this.__paintGridRows();
 
     // If the active item changed, debounce the active item change.
     if (!this.__scheduleActiveItem || !this.__compareItems(this.__activeItem, this.__scheduleActiveItem)) {
@@ -1413,7 +1413,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   /**
    * Debounce the items filtering after the search input's value changes.
    */
-  __freeFilterChanged () {
+  __freeFilterChanged (event) {
+    // If the user is in the search input and clicks the ArrowDown key, focus the currently active row and simulate the same click in the grid.
+    if (event.code === 'ArrowDown') {
+      this.__focusActiveRow();
+      this.__handleGridKeyDownEvents(event);
+      return;
+    }
+
     this.__debounce('__freeFilterChangedDebouncer', () => {
       // Do not re-filter the items if the current value matches the last one.
       if (this.$.filterInput.value.trim() === this.__lastFreeFilter) return;
@@ -1478,7 +1485,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     // This is used to avoid conflicts between arrow and click events.
     this.__scheduleActiveItem = this.__activeItem = {...this.activeItem};
-    this.__paintGridRows(true);
+    this.__paintGridRows();
   }
 
   /**
@@ -1715,7 +1722,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * row has a different background color. This is required for scroll as well since the vaadin-grid re-uses
    * its rows and having this into account, the id property is used to avoid highlighting the wrong row.
    */
-  __paintGridRows (focusActiveCell = false) {
+  __paintGridRows () {
     afterNextRender(this, () => {
       // Loop through each grid row and paint the active one.
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
@@ -1747,12 +1754,32 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             }
           }
         });
-
-        if (isRowActive && focusActiveCell && !this.$.grid.shadowRoot.activeElement) {
-          row.firstElementChild.focus();
-        }
       });
     });
+  }
+
+  /**
+   * This method focuses the row that is currently active to enable the ArrowDown / ArrowUp navigation.
+   */
+  __focusActiveRow () {
+    if (!this.activeItem) return;
+
+    const vaadinGridTable = this.$.grid.shadowRoot.querySelector('table');
+    const vaadinGridTableRows = vaadinGridTable.querySelectorAll('tbody tr');
+
+    // This line is necessary since when clicking the ArrowDown, the grid would slightly scroll down.
+    vaadinGridTable.style.overflow = 'hidden';
+
+    const vaadinGridTableActiveRow = Array.from(vaadinGridTableRows).find(row => this.__compareItems(row._item, this.activeItem));
+    if (vaadinGridTableActiveRow) {
+      vaadinGridTableActiveRow.firstElementChild.focus();
+      afterNextRender(this, () => { vaadinGridTable.style.overflow = ''; });
+      return;
+    }
+
+    // This means that the active row is not currently visible.
+    this.__scrollToItemIfNotVisible(this.activeItem);
+    this.__focusActiveRow();
   }
 
   /**
