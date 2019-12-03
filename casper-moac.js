@@ -180,7 +180,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       filters: {
         type: Object,
         notify: true,
-        value: {},
         observer: '__filtersChanged'
       },
       /**
@@ -1414,10 +1413,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * Debounce the items filtering after the search input's value changes.
    */
   __freeFilterChanged (event) {
-    // If the user is in the search input and clicks the ArrowDown key, focus the currently active row and simulate the same click in the grid.
+    // If the user is in the search input and clicks the ArrowDown key, focus the currently active row.
     if (event.code === 'ArrowDown') {
       this.__focusActiveRow();
-      this.__handleGridKeyDownEvents(event);
       return;
     }
 
@@ -1441,7 +1439,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Object} filters The filters that are currently being applied to the dataset.
    */
   __filtersChanged (filters) {
-    this.__hasFilters = !!this.filters && Object.keys(this.filters).length > 0;
+    this.__hasFilters = !!filters && Object.keys(filters).length > 0;
     this.__bindFiltersEvents();
     this.__buildHistoryStateFilters();
 
@@ -1460,9 +1458,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
       return filterSettings;
     });
-
-    // Force the re-fetch of items if one of the filter changes.
-    if (this.lazyLoad) this.refreshItems();
 
     this.__renderActiveFilters();
   }

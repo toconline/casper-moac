@@ -167,8 +167,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
           this.__debounceFetchResourceItems();
         }
       });
-
-      this.__debounceFetchResourceItems();
     }
 
     /**
