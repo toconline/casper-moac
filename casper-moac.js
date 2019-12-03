@@ -1196,14 +1196,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         }
       }));
 
-      const searchParams = new URLSearchParams();
-      Object.keys(this.filters).forEach(filter => {
-        if (!this.filters[filter].doNotIncludeInUrl && this.filters[filter].value) {
-          searchParams.set(filter, this.filters[filter].value);
-        }
+      this.__debounce('__replaceStateWithFiltersDebouncer', () => {
+        const searchParams = new URLSearchParams();
+        this.__historyStateFilters.forEach(historyStateFilter => {
+          if (this.__valueIsNotEmpty(this.filters[historyStateFilter].value)) {
+            searchParams.set(historyStateFilter, this.filters[historyStateFilter].value);
+          }
+        });
+
+        const searchParamsText = searchParams.toString();
+        if (searchParamsText) history.replaceState({}, '', `${window.location.pathname}?${searchParamsText}`);
       });
 
-      history.replaceState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
 
       // Force the re-fetch of items if one the filter changes.
       if (this.lazyLoad) {
@@ -1432,9 +1436,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   __filtersChanged (filters) {
     this.__hasFilters = !!this.filters && Object.keys(this.filters).length > 0;
     this.__bindFiltersEvents();
+    this.__buildHistoryStateFilters();
 
     const searchParams = new URLSearchParams(window.location.search);
-
     // Transform the filters object into an array to use in a dom-repeat.
     this.__filters = Object.keys(filters).map(filterKey => {
       const filterSettings = {
@@ -1930,6 +1934,24 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __selectableItems () {
     return this.__filteredItems.filter(filteredItem => !filteredItem[this.disableSelectionInternalProperty]);
+  }
+
+  /**
+   * This method is used to select and sort the filters that will be present in the current URL.
+   */
+  __buildHistoryStateFilters () {
+    this.__historyStateFilters = Object.keys(this.filters)
+      .filter(filterKey => !this.filters[filterKey].historyState || !this.filters[filterKey].historyState.disabled)
+      .sort((a, b) => {
+        if ((this.filters[a].historyState === undefined || this.filters[a].historyState.priority === undefined) && (this.filters[b].historyState === undefined || this.filters[b].historyState.priority === undefined)) return 0;
+        if (this.filters[a].historyState === undefined || this.filters[a].historyState.priority === undefined) return 1;
+        if (this.filters[b].historyState === undefined || this.filters[b].historyState.priority === undefined) return -1;
+
+        if (this.filters[a].historyState.priority < this.filters[b].historyState.priority) return -1;
+        if (this.filters[a].historyState.priority > this.filters[b].historyState.priority) return 1;
+
+        return 0;
+      });
   }
 }
 
