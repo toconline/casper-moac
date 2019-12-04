@@ -949,14 +949,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     // Cast the object as an array to avoid ternaries when appending the new item(s).
     if (itemsToAdd.constructor.name === 'Object') itemsToAdd = [itemsToAdd];
 
+    const rootItems = itemsToAdd.filter(itemToAdd => !this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty]));
+    const childItems = itemsToAdd.filter(itemToAdd => this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty]));
+
     let filteredItems = this.__filteredItems;
-    filteredItems = this.__addRootItems(itemsToAdd.filter(itemToAdd => !this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty])), afterItemId, filteredItems);
-    filteredItems = this.__addChildItems(itemsToAdd.filter(itemToAdd => this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty])), filteredItems);
+    filteredItems = this.__addRootItems(rootItems, filteredItems, afterItemId);
+    filteredItems = this.__addChildItems(childItems, filteredItems);
     this.__filteredItems = filteredItems;
 
     this.forceGridRedraw();
     this.__staleDataset = true;
-    this.activeItem = itemsToAdd[0];
+
+    if (rootItems.length > 0) this.activeItem = rootItems[0];
 
     afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]));
   }
@@ -1060,6 +1064,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   forceGridRedraw () {
     this.grid.clearCache();
+    this.__paintGridRows();
   }
 
   /**
@@ -1102,7 +1107,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
    * @param {Array} filteredItems The currently filtered items.
    */
-  __addRootItems (itemsToAdd, afterItemId, filteredItems) {
+  __addRootItems (itemsToAdd, filteredItems, afterItemId) {
     if (itemsToAdd.length === 0) return filteredItems;
 
     if (!afterItemId) {
@@ -1142,11 +1147,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         itemToAdd[this.parentInternalProperty] = itemToAddParent;
         itemToAdd[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-child-item-background-color)';
 
-        const itemToAddParentIndex = this.__findItemIndexById(itemToAddParent, true);
+        const itemToAddParentIndex = this.__findItemIndexById(itemToAddParent, true, filteredItems);
 
         filteredItems = [
           ...filteredItems.slice(0, itemToAddParentIndex + 1),
-          itemToAdd,
+          {...itemToAdd},
           ...filteredItems.slice(itemToAddParentIndex + 1)
         ];
       });
@@ -1762,7 +1767,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {String | Number | Array | Object} value
    */
   __valueIsNotEmpty (value) {
-    return ![null, undefined, false, ''].includes(value) || (value && value.constructor.name === 'Array' && value.length > 0);
+    return value && value.constructor.name === 'Array'
+      ? value.length > 0
+      : ![null, undefined, false, ''].includes(value);
   }
 
   /**
@@ -2001,11 +2008,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    *
    * @param {Number | String} itemId The item's identifier that we'll looking for.
    * @param {Boolean} useExternalProperty This flag states which identifier should be used.
+   * @param {Array} filteredItems When this parameter is present use it to search the item instead of the __filteredItems.
    */
-  __findItemIndexById (itemId, useExternalProperty = false) {
+  __findItemIndexById (itemId, useExternalProperty = false, filteredItems) {
     return useExternalProperty
-      ? this.__filteredItems.findIndex(item => String(item[this.idExternalProperty]) === String(itemId))
-      : this.__filteredItems.findIndex(item => String(item[this.idInternalProperty]) === String(itemId));
+      ? (filteredItems || this.__filteredItems).findIndex(item => String(item[this.idExternalProperty]) === String(itemId))
+      : (filteredItems || this.__filteredItems).findIndex(item => String(item[this.idInternalProperty]) === String(itemId));
   }
 
   /**
