@@ -20,8 +20,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
          * @type {String}
          */
         resourceName: {
-          type: String,
-          observer: '__debounceFetchResourceItems'
+          type: String
         },
         /**
          * List of attributes that should be fetch via JSON API.
@@ -189,7 +188,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
           'resourcePageSizeParam',
           'resourceTotalsMetaParam',
         ].filter(property => !this[property]);
-
         // Check if all the required parameters were provided.
         if (missingProperties.length > 0) return;
 

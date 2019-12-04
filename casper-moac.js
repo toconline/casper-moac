@@ -410,6 +410,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: [],
         observer: '__filteredItemsChanged'
       },
+      /**
+       * This object contains the filter keys and values that should not be used to fetch new items since those filters
+       * were already applied beforehand.
+       *
+       * @type {Object}
+       */
+      __skipValueChangedEvents: {
+        type: Object,
+        value: {}
+      }
     };
   }
 
@@ -1187,32 +1197,35 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __bindFiltersEvents () {
     const filterChangedCallback = event => {
+      const filterComponent = event.composedPath().shift();
+
+      // This validation makes sure we're not firing requests for already fetched filters during the initialization process.
+      if (this.__skipValueChangedEvents[filterComponent.dataset.filter] === this.filters[filterComponent.dataset.filter].value) {
+        delete this.__skipValueChangedEvents[filterComponent.dataset.filter];
+        return;
+      }
+
+      // Dispatch a custom event to inform the page using casper-moac that the filters have changed.
       this.dispatchEvent(new CustomEvent('filters-changed', {
         bubbles: true,
         composed: true,
-        detail: {
-          filter: event.composedPath().shift().dataset.filter
-        }
+        detail: { filter: filterComponent.dataset.filter }
       }));
 
-      this.__debounce('__replaceStateWithFiltersDebouncer', () => {
-        const searchParams = new URLSearchParams();
-        this.__historyStateFilters.forEach(historyStateFilter => {
-          if (this.__valueIsNotEmpty(this.filters[historyStateFilter].value)) {
-            searchParams.set(historyStateFilter, this.filters[historyStateFilter].value);
-          }
-        });
-
-        const searchParamsText = searchParams.toString();
-        if (searchParamsText) history.replaceState({}, '', `${window.location.pathname}?${searchParamsText}`);
+      // When one filter changes, reflect those changes in the URL.
+      const searchParams = new URLSearchParams();
+      this.__historyStateFilters.forEach(historyStateFilter => {
+        if (this.__valueIsNotEmpty(this.filters[historyStateFilter].value)) {
+          searchParams.set(historyStateFilter, this.filters[historyStateFilter].value);
+        }
       });
 
+      const searchParamsText = searchParams.toString();
+      if (searchParamsText) history.replaceState({}, '', `${window.location.pathname}?${searchParamsText}`);
 
       // Force the re-fetch of items if one the filter changes.
       if (this.lazyLoad) {
-        if (this.page && this.beforeJsonApiRequest) {
-          this.beforeJsonApiRequest.call(this.page || {});
-        }
+        if (this.beforeJsonApiRequest) this.beforeJsonApiRequest.call(this.page || {});
 
         this.refreshItems();
       }
@@ -1422,13 +1435,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__debounce('__freeFilterChangedDebouncer', () => {
       // Do not re-filter the items if the current value matches the last one.
       if (this.$.filterInput.value.trim() === this.__lastFreeFilter) return;
+      this.__lastFreeFilter = this.$.filterInput.value.trim();
 
       !this.lazyLoad
         ? this.__filterItems()
         : this.__filterLazyLoadItems();
-
-      this.__renderActiveFilters();
-      this.__lastFreeFilter = this.$.filterInput.value.trim();
     });
   }
 
@@ -1456,8 +1467,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         filterSettings.filter.value = searchParams.get(filterKey);
       }
 
+      if (this.__valueIsNotEmpty(filterSettings.filter.value)) {
+        this.__skipValueChangedEvents[filterKey] = filterSettings.filter.value;
+      }
+
       return filterSettings;
     });
+
+    // Since we already have all the values ready, filter the items.
+    !this.lazyLoad
+      ? this.__filterItems()
+      : this.__filterLazyLoadItems();
 
     this.__renderActiveFilters();
   }
