@@ -302,13 +302,20 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: false
       },
       /**
-       * The local property where the items children are.
+       * The external property where the items' children are stored.
        *
-       * @type {Array}
+       * @type {String}
        */
       childrenExternalProperty: {
         type: String,
-        value: 'children'
+      },
+      /**
+       * The external property where the items' parents are stored.
+       *
+       * @type {String}
+       */
+      parentExternalProperty: {
+        type: String
       },
       /**
        * The external identifier property that will be used when painting the active row.
@@ -935,24 +942,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * Adds manually a new item / list of items to the beginning of the existing ones ignoring
    * the currently applied filters.
    *
-   * @param {Object} itemsToAdd The item / list of items to be added to the current dataset.
+   * @param {Object | Array} itemsToAdd The item / list of items to be added to the current dataset.
    * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
    */
   addItem (itemsToAdd, afterItemId) {
     // Cast the object as an array to avoid ternaries when appending the new item(s).
     if (itemsToAdd.constructor.name === 'Object') itemsToAdd = [itemsToAdd];
 
-    if (!afterItemId) {
-      this.__filteredItems = [...itemsToAdd, ...this.__filteredItems];
-    } else {
-      const insertAfterIndex = this.__findItemIndexById(afterItemId, true);
-
-      this.__filteredItems = [
-        ...this.__filteredItems.slice(0, insertAfterIndex + 1),
-        ...itemsToAdd,
-        ...this.__filteredItems.slice(insertAfterIndex + 1)
-      ];
-    }
+    let filteredItems = this.__filteredItems;
+    filteredItems = this.__addRootItems(itemsToAdd.filter(itemToAdd => !itemToAdd[this.parentExternalProperty]), afterItemId, filteredItems);
+    filteredItems = this.__addChildItems(itemsToAdd.filter(itemToAdd => !!itemToAdd[this.parentExternalProperty]), filteredItems);
+    this.__filteredItems = filteredItems;
 
     this.forceGridRedraw();
     this.__staleDataset = true;
@@ -1093,6 +1093,66 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   setItems (items, activateItemId) {
     this.__activateItemId = activateItemId;
     this.items = items;
+  }
+
+  /**
+   * This method appends new items who are at the root level.
+   *
+   * @param {Object | Array} itemsToAdd The item / list of items to be added to the current dataset.
+   * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
+   * @param {Array} filteredItems The currently filtered items.
+   */
+  __addRootItems (itemsToAdd, afterItemId, filteredItems) {
+    if (itemsToAdd.length === 0) return filteredItems;
+
+    if (!afterItemId) {
+      return [...itemsToAdd, ...filteredItems];
+    } else {
+      const insertAfterIndex = this.__findItemIndexById(afterItemId, true);
+
+      return [
+        ...filteredItems.slice(0, insertAfterIndex + 1),
+        ...itemsToAdd,
+        ...filteredItems.slice(insertAfterIndex + 1)
+      ];
+    }
+  }
+
+  /**
+   * This method appends new items who have parents if they are currently expanded.
+   *
+   * @param {Object | Array} itemsToAdd The item / list of items to be added to the current dataset.
+   * @param {Array} filteredItems The currently filtered items.
+   */
+  __addChildItems (itemsToAdd, filteredItems) {
+    const expandedItems = this.expandedItems.map(expandedItem => String(expandedItem[this.idExternalProperty]));
+    if (itemsToAdd.lengh === 0 || expandedItems.length === 0) return filteredItems;
+
+    itemsToAdd.forEach(itemToAdd => {
+      // Convert the parent property to an array.
+      let itemToAddParents = itemToAdd[this.parentExternalProperty];
+      if (itemToAdd[this.parentExternalProperty].constructor.name !== 'Array') {
+        itemToAddParents = [itemToAdd[this.parentExternalProperty]];
+      }
+
+      itemToAddParents.forEach(itemToAddParent => {
+        // Only append the child items if their parents are currently expanded.
+        if (!expandedItems.includes(String(itemToAddParent))) return;
+
+        itemToAdd[this.parentInternalProperty] = itemToAddParent;
+        itemToAdd[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-child-item-background-color)';
+
+        const itemToAddParentIndex = this.__findItemIndexById(itemToAddParent, true);
+
+        filteredItems = [
+          ...filteredItems.slice(0, itemToAddParentIndex + 1),
+          itemToAdd,
+          ...filteredItems.slice(itemToAddParentIndex + 1)
+        ];
+      });
+    });
+
+    return filteredItems;
   }
 
   /**
