@@ -950,8 +950,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (itemsToAdd.constructor.name === 'Object') itemsToAdd = [itemsToAdd];
 
     let filteredItems = this.__filteredItems;
-    filteredItems = this.__addRootItems(itemsToAdd.filter(itemToAdd => !itemToAdd[this.parentExternalProperty]), afterItemId, filteredItems);
-    filteredItems = this.__addChildItems(itemsToAdd.filter(itemToAdd => !!itemToAdd[this.parentExternalProperty]), filteredItems);
+    filteredItems = this.__addRootItems(itemsToAdd.filter(itemToAdd => !this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty])), afterItemId, filteredItems);
+    filteredItems = this.__addChildItems(itemsToAdd.filter(itemToAdd => this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty])), filteredItems);
     this.__filteredItems = filteredItems;
 
     this.forceGridRedraw();
@@ -1762,7 +1762,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {String | Number | Array | Object} value
    */
   __valueIsNotEmpty (value) {
-    return ![null, undefined, false, ''].includes(value);
+    return ![null, undefined, false, ''].includes(value) || (value && value.constructor.name === 'Array' && value.length > 0);
   }
 
   /**
