@@ -191,19 +191,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: 'query'
       },
       /**
-       * The minimum percentual width of the left~side container.
+       * The minimum percentual width of the left-side container.
        *
        * @type {Number}
        */
       leftSideMinimumWidth: Number,
       /**
-       * The maximum percentual width of the left~side container.
+       * The maximum percentual width of the left-side container.
        *
        * @type {Number}
        */
       leftSideMaximumWidth: Number,
       /**
-       * The initial percentual width of the left~side container.
+       * The initial percentual width of the left-side container.
        *
        * @type {Number}
        */
@@ -509,6 +509,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           --casper-icon-fill-color: var(--primary-color);
         }
 
+        .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput ~ casper-icon:hover {
+          cursor: pointer;
+          --casper-icon-fill-color: var(--dark-primary-color);
+        }
+
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters {
           margin: 0;
           width: 100%;
@@ -743,7 +748,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               <div class="generic-filter-container">
                 <!--Generic Filter input-->
                 <input placeholder="[[filterInputPlaceholder]]" id="filterInput" />
-                <casper-icon icon="fa-regular:search"></casper-icon>
+                <casper-icon icon="fa-light:times" on-click="__clearFilterInput"></casper-icon>
 
                 <!--Show/hide the active filters-->
                 <template is="dom-if" if="[[__hasFilters]]">
@@ -1245,6 +1250,31 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 
   /**
+   * This method is called when the user presses the times icon that sits inside the filter input.
+   */
+  __clearFilterInput () {
+    this.$.filterInput.value = '';
+
+    this.__freeFilterChanged();
+    this.__updateFilterInputStyles();
+  }
+
+  /**
+   * This method either applies or removes the border and background color styling to the filter input.
+   *
+   * @param {Boolean} applyStyles When this parameter is sets to true, apply the border and background color.
+   */
+  __updateFilterInputStyles (applyStyles) {
+    if (applyStyles) {
+      this.$.filterInput.style.border = '1px solid var(--primary-color)';
+      this.$.filterInput.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.1)';
+    } else {
+      this.$.filterInput.style.border = '';
+      this.$.filterInput.style.backgroundColor = '';
+    }
+  }
+
+  /**
    * Bind event listeners to the generic search input.
    */
   __bindSearchInputEvents () {
@@ -1252,23 +1282,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (searchParams.has(this.freeFilterUrlParameterName)) {
       afterNextRender(this, () => {
         this.$.filterInput.value = searchParams.get(this.freeFilterUrlParameterName);
-        this.$.filterInput.style.border = '1px solid var(--primary-color)';
-        this.$.filterInput.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.1)';
+        this.__updateFilterInputStyles(true);
       });
     }
 
     this.$.filterInput.addEventListener('keydown', event => this.__freeFilterChanged(event));
-    this.$.filterInput.addEventListener('focus', () => {
-      this.$.filterInput.style.border = '1px solid var(--primary-color)';
-      this.$.filterInput.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.1)';
-    });
-
-    this.$.filterInput.addEventListener('blur', () => {
-      if (!this.$.filterInput.value.trim()) {
-        this.$.filterInput.style.border = '';
-        this.$.filterInput.style.backgroundColor = '';
-      }
-    });
+    this.$.filterInput.addEventListener('focus', () => { this.__updateFilterInputStyles(true); });
+    this.$.filterInput.addEventListener('blur', () => { this.__updateFilterInputStyles(!!this.$.filterInput.value.trim()); });
   }
 
   /**
@@ -1496,7 +1516,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __freeFilterChanged (event) {
     // If the user is in the search input and clicks the ArrowDown key, focus the currently active row.
-    if (event.code === 'ArrowDown') return this.__focusActiveRow();
+    if (event && event.code === 'ArrowDown') return this.__focusActiveRow();
 
     this.__debounce('__freeFilterChangedDebouncer', () => {
       // Do not re-filter the items if the current value matches the last one.
