@@ -2005,12 +2005,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   __updateUrlWithCurrentFilters () {
     const searchParams = new URLSearchParams(window.location.search);
     this.__historyStateFilters.forEach(historyStateFilter => {
+      // Remove the value firstly so that we don't end up with stale data.
+      searchParams.delete(historyStateFilter);
+
       // Only include non-empty filters.
       if (this.__valueIsNotEmpty(this.filters[historyStateFilter].value)) {
         searchParams.set(historyStateFilter, this.filters[historyStateFilter].value);
       }
     });
 
+    searchParams.delete(this.freeFilterUrlParameterName);
     if (this.__lastFreeFilter) {
       searchParams.set(this.freeFilterUrlParameterName, this.__lastFreeFilter);
     }
