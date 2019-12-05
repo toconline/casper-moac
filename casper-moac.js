@@ -1386,7 +1386,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Object} event The event's object.
    */
   __handleGridKeyDownEvents (event) {
-    const keyCode = event.code;
+    const keyCode = event.key || event.code;
 
     if (this.__filteredItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
 
