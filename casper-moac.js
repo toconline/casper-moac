@@ -1638,7 +1638,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__selectedItems = [];
 
     // Use spread operator to avoid messing with the original dataset by sorting.
-    let originalItems = [...(this.items || [])]
+    let originalItems = [...(this.items || [])];
     let filteredItems = [...(this.items || [])];
 
     if (this.$.filterInput.value.trim() && originalItems.length > 0) {
