@@ -486,14 +486,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         /* Filter paper-input */
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInput {
-          height: 35px;
-          display: flex;
+          margin: 0;
           padding: 0;
-          padding-left: 10px;
-          font-size: 13px;
-          border-radius: 3px;
-          align-items: center;
+          height: 35px;
           outline: none;
+          font-size: 13px;
+          padding-left: 10px;
+          border-radius: 3px;
+          flex-shrink: 0;
+          align-items: center;
           box-sizing: border-box;
           border: 1px solid lightgrey;
           transition: border 250ms linear,
@@ -517,6 +518,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters {
           margin: 0;
           width: 100%;
+          outline: none;
+          flex-shrink: 0;
           line-height: 15px;
           font-size: 0.85em;
           font-weight: bold;
