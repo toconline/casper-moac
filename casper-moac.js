@@ -468,6 +468,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         .main-container vaadin-split-layout .left-side-container .header-container {
           display: flex;
           flex-wrap: wrap;
+          min-height: 70px;
           margin-bottom: 10px;
           justify-content: center;
         }
@@ -480,6 +481,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           padding: 0 10px;
           text-align: center;
           display: flex;
+          height: 70px;
           flex-direction: column;
           position: relative;
         }
@@ -493,7 +495,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           font-size: 13px;
           padding-left: 10px;
           border-radius: 3px;
-          flex-shrink: 0;
           align-items: center;
           box-sizing: border-box;
           border: 1px solid lightgrey;
@@ -518,9 +519,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters {
           margin: 0;
           width: 100%;
+          height: 35px;
           outline: none;
-          flex-shrink: 0;
-          line-height: 15px;
+          line-height: 35px;
           font-size: 0.85em;
           font-weight: bold;
           text-transform: unset;
