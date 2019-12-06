@@ -1523,7 +1523,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     // If the user is in the search input and clicks the ArrowDown key, focus the currently active row.
     if (event && event.code === 'ArrowDown') return this.__focusActiveRow();
 
-    console.log(this.$.filterInput.value.trim());
     !!this.$.filterInput.value.trim()
         ? this.$.filterInputIcon.icon = 'fa-regular:times'
         : this.$.filterInputIcon.icon = 'fa-regular:search';
