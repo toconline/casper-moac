@@ -193,6 +193,10 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
         this.__currentPage++;
 
+        if (this.beforeJsonApiRequest) {
+          this.beforeJsonApiRequest.call(this.page || {});
+        }
+
         this.__fetchResourceItems();
       });
     }

@@ -1304,7 +1304,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       const filterComponent = event.composedPath().shift();
 
       // This validation makes sure we're not firing requests for already fetched filters during the initialization process.
-      if (this.__skipValueChangedEvents[filterComponent.dataset.filter] === this.filters[filterComponent.dataset.filter].value) {
+      if (String(this.__skipValueChangedEvents[filterComponent.dataset.filter]) === String(this.filters[filterComponent.dataset.filter].value)) {
         delete this.__skipValueChangedEvents[filterComponent.dataset.filter];
         return;
       }
@@ -1317,11 +1317,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }));
 
       // Force the re-fetch of items if one the filter changes.
-      if (this.lazyLoad) {
-        if (this.beforeJsonApiRequest) this.beforeJsonApiRequest.call(this.page || {});
-
-        this.refreshItems();
-      }
+      if (this.lazyLoad) this.refreshItems();
 
       this.__updateUrlWithCurrentFilters();
       this.__renderActiveFilters();
