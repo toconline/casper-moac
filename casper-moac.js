@@ -747,6 +747,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         .main-container vaadin-split-layout .right-side-container .epaper-container {
           width: 100%;
           height: 100%;
+          overflow: hidden;
         }
       </style>
 
