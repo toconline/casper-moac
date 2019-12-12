@@ -16,10 +16,7 @@ class CasperMoacSortColumn extends GridColumnElement {
        *
        * @type {Number}
        */
-      sortOrder: {
-        type: Number,
-        observer: '__sortOrderChanged',
-      },
+      sortOrder: Number,
       /**
        * This property specifies the column data type so that the component knows how to sort the items.
        *
