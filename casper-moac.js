@@ -381,6 +381,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         type: Array
       },
       /**
+       * The value that is currently in the free filter input which will be used to filter the items.
+       *
+       * @type {String}
+       */
+      freeFilterValue: {
+        type: String,
+        notify: true
+      },
+      /**
        * Flag that is passed to the casper-epaper component which disables the sticky
        * mouseenter / mouseleave animation.
        *
@@ -947,6 +956,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__monkeyPatchVaadinElements();
     this.__stampGridCustomStylesTemplate();
   }
+
   /**
    * Adds manually a new item / list of items to the beginning of the existing ones ignoring
    * the currently applied filters.
@@ -1525,8 +1535,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     this.__debounce('__freeFilterChangedDebouncer', () => {
       // Do not re-filter the items if the current value matches the last one.
-      if (this.$.filterInput.value.trim() === this.__lastFreeFilter) return;
-      this.__lastFreeFilter = this.$.filterInput.value.trim();
+      if (this.$.filterInput.value.trim() === this.freeFilterValue) return;
+      this.freeFilterValue = this.$.filterInput.value.trim();
 
       this.__updateUrlWithCurrentFilters();
       !this.lazyLoad
