@@ -670,12 +670,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           background-color: var(--primary-color);
         }
 
-        .main-container vaadin-split-layout .left-side-container #active-sorters-container > div casper-icon {
-          width: 15px;
-          height: 15px;
-          --casper-icon-fill-color: white;
-        }
-
         /* Vaadin-grid */
         .main-container vaadin-split-layout .left-side-container .grid-no-items {
           top: 0;
@@ -895,10 +889,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             <div id="active-sorters-container">
               <strong>Items ordenados por:</strong>
               <template is="dom-repeat" items="[[__activeSorters]]" as="activeSorter">
-                <div>
-                  [[activeSorter.header]]
-                  <casper-icon icon="[[__getActiveSorterIcon(activeSorter.direction)]]"></casper-icon>
-                </div>
+                <div>[[activeSorter.header]]</div>
               </template>
             </div>
 

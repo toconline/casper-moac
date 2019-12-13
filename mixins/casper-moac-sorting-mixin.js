@@ -9,7 +9,7 @@ export const CasperMoacSortingMixin = superClass => {
      * or sort locally otherwise everytime a sorter changes.
      */
     __bindSorterEvents () {
-      const activeSorters = [];
+      this.__activeSorters = [];
       this.__sorters = [
         ...this.shadowRoot.querySelector('slot[name="grid-before"]').assignedElements().filter(assignedElement => assignedElement.nodeName.toLowerCase() === 'casper-moac-sort-column'),
         ...this.shadowRoot.querySelector('slot[name="grid"]').assignedElements().filter(assignedElement => assignedElement.nodeName.toLowerCase() === 'casper-moac-sort-column'),
@@ -19,26 +19,23 @@ export const CasperMoacSortingMixin = superClass => {
         sorterColumn.addEventListener('direction-changed', event => {
           const sorter = event.target;
 
-          const existingSorterIndex = activeSorters.findIndex(activeSorter => activeSorter === sorter);
+          const existingSorterIndex = this.__activeSorters.findIndex(activeSorter => activeSorter === sorter);
           if (existingSorterIndex === -1) {
             // This means the current sorter does not yet exist.
-            activeSorters.push(sorter);
+            this.__activeSorters = [...this.__activeSorters, sorter];
           } else {
             // This means the sorter already exists so it needs to be removed in case it's not sorting anymore.
             if (!sorter.direction) {
-              activeSorters.splice(existingSorterIndex, 1);
+              this.__activeSorters = [...this.__activeSorters.filter(activeSorter => activeSorter.path !== sorter.path)];
             }
           }
 
           // Loop through all the sorters and display the sorterOrder if necessary.
           this.__sorters.forEach(sorter => {
-            const activeSorterIndex = activeSorters.findIndex(activeSorter => activeSorter === sorter);
+            const activeSorterIndex = this.__activeSorters.findIndex(activeSorter => activeSorter === sorter);
 
-            sorter.sortOrder = activeSorters.length > 1 && activeSorterIndex !== -1 ? activeSorterIndex + 1 : '';
+            sorter.sortOrder = this.__activeSorters.length > 1 && activeSorterIndex !== -1 ? activeSorterIndex + 1 : '';
           });
-
-          this.__activeSorters = [];
-          afterNextRender(this, () => this.__activeSorters = activeSorters);
 
           !this.lazyLoad
             ? this.__filterItems()
@@ -107,17 +104,6 @@ export const CasperMoacSortingMixin = superClass => {
      */
     __isNumeric (value) {
       return !isNaN(parseFloat(value)) && isFinite(value);
-    }
-
-    /**
-     * This method returns the icon that should be used when displaying the currently active sorters.
-     *
-     * @param {String} direction The active sorter current direction.
-     */
-    __getActiveSorterIcon (direction) {
-      return direction === 'desc'
-        ? 'fa-solid:sort-down'
-        : 'fa-solid:sort-up';
     }
   }
 }
