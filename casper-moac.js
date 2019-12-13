@@ -477,9 +477,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         .main-container vaadin-split-layout .left-side-container .header-container {
           display: flex;
           flex-wrap: wrap;
-          min-height: 70px;
-          margin-bottom: 10px;
+          padding-bottom: 10px;
           justify-content: center;
+          border-bottom: 1px solid var(--primary-color);
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container > * {
@@ -617,8 +617,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           grid-column-gap: 10px;
           grid-template-columns: 1fr 1fr;
           padding: 15px;
-          margin-bottom: 15px;
-          border-top: 1px solid var(--primary-color);
           border-bottom: 1px solid var(--primary-color);
         }
 
@@ -646,6 +644,36 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         .main-container vaadin-split-layout .left-side-container .filters-container .filter-container paper-checkbox {
           margin-top: 25px;
+        }
+
+        .main-container vaadin-split-layout .left-side-container #active-sorters-container {
+          padding: 10px 0;
+          display: flex;
+          font-size: 0.85em;
+          align-items: center;
+          min-height: 45px;
+          box-sizing: border-box;
+        }
+
+        .main-container vaadin-split-layout .left-side-container #active-sorters-container strong {
+          margin-right: 10px;
+        }
+
+        .main-container vaadin-split-layout .left-side-container #active-sorters-container > div {
+          height: 25px;
+          display: flex;
+          margin: 0 5px;
+          padding: 0 10px;
+          align-items: center;
+          border-radius: 5px;
+          color: var(--on-primary-color);
+          background-color: var(--primary-color);
+        }
+
+        .main-container vaadin-split-layout .left-side-container #active-sorters-container > div casper-icon {
+          width: 15px;
+          height: 15px;
+          --casper-icon-fill-color: white;
         }
 
         /* Vaadin-grid */
@@ -850,6 +878,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             </div>
 
             <slot name="left"></slot>
+
+            <!--Multi-selection container-->
             <div id="multi-selection-container">
               <div class="grid-multiple-selection">
                 <div class="grid-multiple-selection-label">
@@ -859,6 +889,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                   <slot name="multi-selection"></slot>
                 </div>
               </div>
+            </div>
+
+            <!--Active sorters container-->
+            <div id="active-sorters-container">
+              <strong>Items ordenados por:</strong>
+              <template is="dom-repeat" items="[[__activeSorters]]" as="activeSorter">
+                <div>
+                  [[activeSorter.header]]
+                  <casper-icon icon="[[__getActiveSorterIcon(activeSorter.direction)]]"></casper-icon>
+                </div>
+              </template>
             </div>
 
             <!--Vaadin grid container-->
