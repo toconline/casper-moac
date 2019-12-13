@@ -1543,7 +1543,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       !this.lazyLoad
         ? this.__filterItems()
         : this.__filterLazyLoadItems();
-
     });
   }
 
@@ -1597,7 +1596,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       this.activeItem = previousActiveItem;
     }
 
-    // Clean the epaper when there is no active item and the developer didn't disabled this behavior.
+    // Clean the epaper when there is no active item and the developer didn't disable this behavior.
     if (!this.activeItem && this.epaper && !this.disableResetEpaper) {
       this.epaper.openBlankPage();
     }
