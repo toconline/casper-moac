@@ -97,7 +97,7 @@ class CasperMoacSortColumn extends GridColumnElement {
   /**
    * Method invoked from the vaadin grid itself to stamp the template and bind the dataHost.
    */
-  _prepareHeaderTemplate() {
+  _prepareHeaderTemplate () {
     const headerTemplate = this._prepareTemplatizer(this.shadowRoot.querySelector('template'));
     headerTemplate.templatizer.dataHost = this;
 

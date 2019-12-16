@@ -965,8 +965,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   ready () {
     super.ready();
 
-    this.grid             = this.$.grid;
-    this.gridScroller     = this.$.grid.$.outerscroller;
+    this.grid = this.$.grid;
+    this.gridScroller = this.$.grid.$.outerscroller;
 
     if (this.hasEpaper) {
       // Save the epaper in a notifiable property so it can be used outside.
@@ -1199,7 +1199,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         filteredItems = [
           ...filteredItems.slice(0, itemToAddParentIndex + 1),
-          {...itemToAdd},
+          { ...itemToAdd },
           ...filteredItems.slice(itemToAddParentIndex + 1)
         ];
       });
@@ -1275,7 +1275,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         this.grid.shadowRoot.querySelectorAll('table thead th').forEach(header => {
           const selectAllCheckbox = header.querySelector('slot').assignedElements().shift().firstElementChild;
           if (selectAllCheckbox && selectAllCheckbox.nodeName.toLowerCase() === 'vaadin-checkbox') {
-           // Create a vaadin-checkbox to replace the default one which has bugs.
+            // Create a vaadin-checkbox to replace the default one which has bugs.
             this.__selectAllCheckbox = document.createElement('vaadin-checkbox');
             this.__selectAllCheckbox.addEventListener('checked-changed', event => {
               // Lock the vaadin-checkbox event handler to avoid infinite loops.
@@ -1461,7 +1461,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (!this.__scheduleActiveItem || !this.__compareItems(this.__activeItem, this.__scheduleActiveItem)) {
       // This property is used to avoid delaying infinitely activating the same item which is caused when the user
       // maintains the up / down arrows after reaching the first / last result in the table.
-      this.__scheduleActiveItem = {...this.__activeItem};
+      this.__scheduleActiveItem = { ...this.__activeItem };
 
       // Only debounce when the event is repeated, meaning the user keeps the key pressed or if the activeItemDebounce was specifically set.
       if (event.repeat || this.activeItemDebounce) {
@@ -1559,8 +1559,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (event && event.code === 'ArrowDown') return this.__focusActiveRow();
 
     !!this.$.filterInput.value.trim()
-        ? this.$.filterInputIcon.icon = 'fa-regular:times'
-        : this.$.filterInputIcon.icon = 'fa-regular:search';
+      ? this.$.filterInputIcon.icon = 'fa-regular:times'
+      : this.$.filterInputIcon.icon = 'fa-regular:search';
 
     this.__debounce('__freeFilterChangedDebouncer', () => {
       // Do not re-filter the items if the current value matches the last one.
@@ -1630,7 +1630,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     }
 
     // This is used to avoid conflicts between arrow and click events.
-    this.__scheduleActiveItem = this.__activeItem = {...this.activeItem};
+    this.__scheduleActiveItem = this.__activeItem = { ...this.activeItem };
     this.__paintGridRows();
   }
 
@@ -1878,7 +1878,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         const isRowBackgroundColored = !!row._item[this.rowBackgroundColorInternalProperty];
 
         Array.from(row.children).forEach(cell => {
-          if(row.hasAttribute('blink')) return;
+          if (row.hasAttribute('blink')) return;
 
           // Check if the row has no active animation and is either active or colored.
           if (isRowActive || isRowBackgroundColored) {

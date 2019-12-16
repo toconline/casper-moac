@@ -247,7 +247,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.__ignoreScrollEvents = this.__filteredItems.length === parseInt(socketResponse.meta.total);
 
       // Update the paging information.
-      this.__numberOfResults =  socketResponse.meta.total === socketResponse.meta['grand-total']
+      this.__numberOfResults = socketResponse.meta.total === socketResponse.meta['grand-total']
         ? `${socketResponse.meta.total} ${this.multiSelectionLabel}`
         : `${socketResponse.meta.total} de ${socketResponse.meta['grand-total']} ${this.multiSelectionLabel}`;
     }
@@ -393,10 +393,10 @@ export const CasperMoacLazyLoadMixin = superClass => {
       return this.__filters
         .filter(filterItem =>
           this.__valueIsNotEmpty(filterItem.filter.value)
-            && filterItem.filter.lazyLoad
-            && filterItem.filter.lazyLoad.field
-            && filterItem.filter.lazyLoad.operator
-            && !filterItem.filter.lazyLoad.disabled
+          && filterItem.filter.lazyLoad
+          && filterItem.filter.lazyLoad.field
+          && filterItem.filter.lazyLoad.operator
+          && !filterItem.filter.lazyLoad.disabled
         )
         .map(filterItem => {
           const filter = filterItem.filter;
@@ -429,7 +429,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
             // Custom comparisons.
             case CasperMoacOperators.CUSTOM: return filter.lazyLoad.field.replace(new RegExp(`%{${filterItem.filterKey}}`, 'g'), filter.value);
           }
-      }).join(' AND ');
+        }).join(' AND ');
     }
 
     /**

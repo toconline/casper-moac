@@ -1,4 +1,3 @@
-import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import { CasperMoacSortTypes, CasperMoacSortDirections } from '../casper-moac-constants.js';
 
 export const CasperMoacSortingMixin = superClass => {

@@ -21,22 +21,22 @@ class CasperMoacMenu extends PolymerElement {
         type: Boolean,
         value: false,
         observer: '__disabledChanged'
-       },
-       /**
-        * Icon that will appear when the casper-moac-menu
-        * is closed.
-        * @type {String}
-        */
-       openIcon: {
-         type: String,
-         value: 'fa-light:plus'
-       },
-       /**
-        * Icon that will appear when the casper-moac-menu
-        * is opened.
-        * @type {String}
-        */
-       closeIcon: {
+      },
+      /**
+       * Icon that will appear when the casper-moac-menu
+       * is closed.
+       * @type {String}
+       */
+      openIcon: {
+        type: String,
+        value: 'fa-light:plus'
+      },
+      /**
+       * Icon that will appear when the casper-moac-menu
+       * is opened.
+       * @type {String}
+       */
+      closeIcon: {
         type: String,
         value: 'fa-light:times'
       }
