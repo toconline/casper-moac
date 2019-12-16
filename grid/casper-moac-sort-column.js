@@ -78,7 +78,7 @@ class CasperMoacSortColumn extends GridColumnElement {
           <span id="header-title">[[header]]</span>
 
           <div id="header-sort">
-            <casper-icon icon="[[__getIcon()]]" style="[[__getIconOpacity()]]"></casper-icon>
+            <casper-icon icon="[[__getIcon(direction)]]" style="[[__getIconOpacity(direction)]]"></casper-icon>
 
             <!--Only display the sort order when there is more than one sort-->
             <template is="dom-if" if="[[sortOrder]]">
@@ -115,15 +115,15 @@ class CasperMoacSortColumn extends GridColumnElement {
 
     // Manipulate the icon and opacity.
     this.__headerIcon = this.__headerIcon || event.target.closest('#header-container').querySelector('casper-icon');
-    this.__headerIcon.icon = this.__getIcon();
-    this.__headerIcon.style = this.__getIconOpacity();
+    this.__headerIcon.icon = this.__getIcon(this.direction);
+    this.__headerIcon.style = this.__getIconOpacity(this.direction);
   }
 
   /**
    * This method returns the casper-icon depending on the current direction of the sorter.
    */
-  __getIcon () {
-    switch (this.direction) {
+  __getIcon (direction) {
+    switch (direction) {
       case CasperMoacSortDirections.ASCENDING:
         return 'fa-solid:sort-up';
       case CasperMoacSortDirections.DESCENDING:
@@ -136,8 +136,8 @@ class CasperMoacSortColumn extends GridColumnElement {
   /**
    * This method returns the casper-icon's opacity depending on the current direction of the sorter.
    */
-  __getIconOpacity () {
-    return `opacity: ${!this.direction ? '0.2' : '1'}`;
+  __getIconOpacity (direction) {
+    return `opacity: ${!direction ? '0.2' : '1'}`;
   }
 
   /**

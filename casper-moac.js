@@ -666,6 +666,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           background-color: var(--primary-color);
         }
 
+        .main-container vaadin-split-layout .left-side-container #active-sorters-container > div > casper-icon {
+          width: 15px;
+          height: 15px;
+          cursor: pointer;
+          margin-left: 5px;
+          --casper-icon-fill-color: white;
+        }
+
         /* Vaadin-grid */
         .main-container vaadin-split-layout .left-side-container .grid-no-items {
           left: 0;
@@ -885,7 +893,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             <div id="active-sorters-container">
               <strong>Items ordenados por:</strong>
               <template is="dom-repeat" items="[[__activeSorters]]" as="activeSorter">
-                <div>[[activeSorter.header]]</div>
+                <div>
+                  [[activeSorter.header]]
+                  <casper-icon
+                    icon="fa-light:times"
+                    on-click="__removeActiveSorter"
+                    data-path$="[[activeSorter.path]]">
+                  </casper-icon>
+                </div>
               </template>
             </div>
 
@@ -1419,7 +1434,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   /**
    * Bind event listeners for when the user presses down the Enter or the down / up arrow keys.
    *
-   * @param {Object} event The event's object.
+   * @param {Event} event The event's object.
    */
   __handleGridKeyDownEvents (event) {
     const keyCode = event.key || event.code;
@@ -1474,7 +1489,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   /**
    * This method handles the click on the casper-moac-tree-toggle components and expands / collapses the row.
    *
-   * @param {Object} event The event's object.
+   * @param {Event} event The event's object.
    */
   async __handleGridTreeToggleEvents (event) {
     const parentItem = this.activeItem = this.grid.getEventContext(event).item;
@@ -2149,6 +2164,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     const searchParamsText = searchParams.toString();
     if (searchParamsText) {
       history.replaceState({}, '', `${window.location.pathname}?${searchParamsText}`);
+    }
+  }
+
+  /**
+   * This method gets invoked when the user clicks to remove an active sorter.
+   *
+   * @param {Event} event The event's object.
+   */
+  __removeActiveSorter (event) {
+    for (let sorterIndex = 0; sorterIndex < this.__sorters.length; sorterIndex++) {
+      const currentSorter = this.__sorters[sorterIndex];
+
+      if (currentSorter.path === event.target.dataset.path) {
+        currentSorter.direction = undefined;
+        return;
+      }
     }
   }
 }
