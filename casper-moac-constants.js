@@ -1,10 +1,3 @@
-export const CasperMoacTypes = {
-  GRID: 'GRID',
-  GRID_EPAPER: 'GRID_EPAPER',
-  GRID_SIDEBAR: 'GRID_SIDEBAR',
-  GRID_EPAPER_SIDEBAR: 'GRID_EPAPER_SIDEBAR'
-};
-
 export const CasperMoacFilterTypes = {
   PAPER_INPUT: 'PAPER_INPUT',
   PAPER_CHECKBOX: 'PAPER_CHECKBOX',

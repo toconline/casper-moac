@@ -1,7 +1,7 @@
 import './sidebar/casper-moac-sidebar.js';
 import { CasperMoacSortingMixin } from './mixins/casper-moac-sorting-mixin.js';
 import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
-import { CasperMoacTypes, CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
+import { CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
@@ -39,20 +39,20 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: window.app
       },
       /**
+       * This property when set to true, displays the casper-epaper component.
+       *
+       * @type {Boolean}
+       */
+      hasEpaper: {
+        type: Boolean,
+        value: false
+      },
+      /**
        * The page that is currently using the casper-moac component.
        *
        * @type {Object}
        */
       page: Object,
-      /**
-       * This states what kind of MOAC we're dealing with so that certain items are displayed / hidden.
-       *
-       * @type {String}
-       */
-      moacType: {
-        type: String,
-        value: CasperMoacTypes.GRID_EPAPER
-      },
       /**
        * The list of items to be displayed.
        *
@@ -936,7 +936,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
           <div class="right-side-container" style="[[__rightSideStyling()]]">
             <!--Epaper-->
-            <template is="dom-if" if="[[__displayEpaper]]">
+            <template is="dom-if" if="[[hasEpaper]]">
               <div class="epaper-container">
                 <slot name="right"></slot>
                 <casper-epaper
@@ -955,9 +955,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         </vaadin-split-layout>
 
         <!--Sidebar-->
-        <template is="dom-if" if="[[__displaySidebar]]">
-          <slot name="sidebar"></slot>
-        </template>
+        <slot name="sidebar"></slot>
       </div>
 
       <slot name="context-menu"></slot>
@@ -969,10 +967,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     this.grid             = this.$.grid;
     this.gridScroller     = this.$.grid.$.outerscroller;
-    this.__displayEpaper  = [CasperMoacTypes.GRID_EPAPER_SIDEBAR, CasperMoacTypes.GRID_EPAPER].includes(this.moacType);
-    this.__displaySidebar = [CasperMoacTypes.GRID_EPAPER_SIDEBAR, CasperMoacTypes.GRID_SIDEBAR].includes(this.moacType);
 
-    if (this.__displayEpaper) {
+    if (this.hasEpaper) {
       // Save the epaper in a notifiable property so it can be used outside.
       afterNextRender(this, () => this.epaper = this.shadowRoot.querySelector('casper-epaper'));
     }
@@ -1270,7 +1266,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.grid.addEventListener('keydown', event => this.__handleGridKeyDownEvents(event));
     this.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', event => this.__handleGridTreeToggleEvents(event));
 
-    if (!this.__displayEpaper) {
+    if (!this.hasEpaper) {
       this.$.splitLayout.$.splitter.style.display = 'none';
     }
 
@@ -1983,7 +1979,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * correct percentual width for the left side of the component.
    */
   __leftSideStyling () {
-    const width = [CasperMoacTypes.GRID, CasperMoacTypes.GRID_SIDEBAR].includes(this.moacType) ? 'width: 100%' : `width: ${this.leftSideInitialWidth}%`;
+    const width = !this.hasEpaper ? 'width: 100%' : `width: ${this.leftSideInitialWidth}%`;
     const maximumWidth = this.leftSideMaximumWidth ? `max-width: ${this.leftSideMaximumWidth}%` : null;
     const minimumWidth = this.leftSideMinimumWidth ? `min-width: ${this.leftSideMinimumWidth}%` : null;
 
@@ -1995,7 +1991,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * correct percentual width for the right side of the component.
    */
   __rightSideStyling () {
-    return [CasperMoacTypes.GRID, CasperMoacTypes.GRID_SIDEBAR].includes(this.moacType)
+    return !this.hasEpaper
       ? 'width: 0%;'
       : `width: ${100 - parseInt(this.leftSideInitialWidth)}%;`;
   }
@@ -2005,7 +2001,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * adding the 'filters-container-inline' class or not.
    */
   __filtersContainerClassName () {
-    return [CasperMoacTypes.GRID_EPAPER, CasperMoacTypes.GRID_EPAPER_SIDEBAR].includes(this.moacType)
+    return this.hasEpaper
       ? 'filters-container'
       : 'filters-container filters-container-inline';
   }
