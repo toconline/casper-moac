@@ -645,7 +645,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         .main-container vaadin-split-layout .left-side-container #active-sorters-container {
           padding: 10px 0;
           display: flex;
-          font-size: 0.85em;
+          font-size: 0.75em;
           align-items: center;
           min-height: 45px;
           box-sizing: border-box;
@@ -661,7 +661,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           margin: 0 5px;
           padding: 0 10px;
           align-items: center;
-          border-radius: 5px;
+          border-radius: 15px;
           color: var(--on-primary-color);
           background-color: var(--primary-color);
         }
@@ -890,19 +890,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             </div>
 
             <!--Active sorters container-->
-            <div id="active-sorters-container">
-              <strong>Items ordenados por:</strong>
-              <template is="dom-repeat" items="[[__activeSorters]]" as="activeSorter">
-                <div>
-                  [[activeSorter.header]]
-                  <casper-icon
-                    icon="fa-light:times"
-                    on-click="__removeActiveSorter"
-                    data-path$="[[activeSorter.path]]">
-                  </casper-icon>
-                </div>
-              </template>
-            </div>
+            <template is="dom-if" if="[[__hasActiveSorters]]">
+              <div id="active-sorters-container">
+                <strong>Items ordenados por:</strong>
+                <template is="dom-repeat" items="[[__activeSorters]]" as="activeSorter">
+                  <div>
+                    [[activeSorter.header]]
+                    <casper-icon
+                      icon="fa-light:times"
+                      on-click="__removeActiveSorter"
+                      data-path$="[[activeSorter.path]]">
+                    </casper-icon>
+                  </div>
+                </template>
+              </div>
+            </template>
 
             <!--Vaadin grid container-->
             <div class="grid-container">
