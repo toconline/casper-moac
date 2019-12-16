@@ -22,10 +22,6 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(PolymerElement)) {
 
-  static get is () {
-    return 'casper-moac';
-  }
-
   static get properties () {
     return {
       /**
@@ -2157,4 +2153,4 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 }
 
-customElements.define(CasperMoac.is, CasperMoac);
+customElements.define('casper-moac', CasperMoac);

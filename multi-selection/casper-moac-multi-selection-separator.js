@@ -2,10 +2,6 @@ import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
 class CasperMoacMultiSelectionSeparator extends PolymerElement {
 
-  static get is () {
-    return 'casper-moac-multi-selection-separator';
-  }
-
   static get template () {
     return html`
       <style>
@@ -21,4 +17,4 @@ class CasperMoacMultiSelectionSeparator extends PolymerElement {
   }
 }
 
-customElements.define(CasperMoacMultiSelectionSeparator.is, CasperMoacMultiSelectionSeparator);
+customElements.define('casper-moac-multi-selection-separator', CasperMoacMultiSelectionSeparator);

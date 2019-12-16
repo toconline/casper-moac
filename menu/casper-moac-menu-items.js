@@ -4,10 +4,6 @@ import { IronOverlayBehavior } from '@polymer/iron-overlay-behavior/iron-overlay
 
 class CasperMoacMenuItems extends mixinBehaviors(IronOverlayBehavior, PolymerElement) {
 
-  static get is () {
-    return 'casper-moac-menu-items';
-  }
-
   static get template () {
     return html`
       <style>
@@ -27,4 +23,4 @@ class CasperMoacMenuItems extends mixinBehaviors(IronOverlayBehavior, PolymerEle
   }
 }
 
-customElements.define(CasperMoacMenuItems.is, CasperMoacMenuItems);
+customElements.define('casper-moac-menu-items', CasperMoacMenuItems);

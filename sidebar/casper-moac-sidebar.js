@@ -4,10 +4,6 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 class CasperMoacSidebar extends PolymerElement {
 
-  static get is () {
-    return 'casper-moac-sidebar';
-  }
-
   static get properties () {
     return {
       /**
@@ -141,4 +137,4 @@ class CasperMoacSidebar extends PolymerElement {
   }
 }
 
-customElements.define(CasperMoacSidebar.is, CasperMoacSidebar);
+customElements.define('casper-moac-sidebar', CasperMoacSidebar);

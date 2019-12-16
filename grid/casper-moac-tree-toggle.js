@@ -3,10 +3,6 @@ import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
 class CasperMoacTreeToggle extends PolymerElement {
 
-  static get is () {
-    return 'casper-moac-tree-toggle';
-  }
-
   static get properties () {
     return {
       /**
@@ -111,4 +107,4 @@ class CasperMoacTreeToggle extends PolymerElement {
   }
 }
 
-customElements.define(CasperMoacTreeToggle.is, CasperMoacTreeToggle);
+customElements.define('casper-moac-tree-toggle', CasperMoacTreeToggle);

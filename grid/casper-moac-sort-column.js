@@ -5,10 +5,6 @@ import { CasperMoacSortTypes, CasperMoacSortDirections } from '../casper-moac-co
 
 class CasperMoacSortColumn extends GridColumnElement {
 
-  static get is () {
-    return 'casper-moac-sort-column';
-  }
-
   static get properties () {
     return {
       /**
@@ -159,4 +155,4 @@ class CasperMoacSortColumn extends GridColumnElement {
   }
 }
 
-customElements.define(CasperMoacSortColumn.is, CasperMoacSortColumn);
+customElements.define('casper-moac-sort-column', CasperMoacSortColumn);

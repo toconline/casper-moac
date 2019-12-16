@@ -5,10 +5,6 @@ import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
 class CasperMoacMultiSelectionAction extends PolymerElement {
 
-  static get is () {
-    return 'casper-moac-multi-selection-action';
-  }
-
   static get properties () {
     return {
       /**
@@ -111,4 +107,4 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
   }
 }
 
-customElements.define(CasperMoacMultiSelectionAction.is, CasperMoacMultiSelectionAction);
+customElements.define('casper-moac-multi-selection-action', CasperMoacMultiSelectionAction);

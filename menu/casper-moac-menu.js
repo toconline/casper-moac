@@ -7,10 +7,6 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 class CasperMoacMenu extends PolymerElement {
 
-  static get is () {
-    return 'casper-moac-menu';
-  }
-
   static get properties () {
     return {
       /**
@@ -205,4 +201,4 @@ class CasperMoacMenu extends PolymerElement {
   }
 }
 
-customElements.define(CasperMoacMenu.is, CasperMoacMenu);
+customElements.define('casper-moac-menu', CasperMoacMenu);

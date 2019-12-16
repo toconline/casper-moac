@@ -3,10 +3,6 @@ import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
 export class CasperMoacMenuItem extends PolymerElement {
 
-  static get is () {
-    return 'casper-moac-menu-item';
-  }
-
   static get template () {
     return html`
       <style>
@@ -94,4 +90,4 @@ export class CasperMoacMenuItem extends PolymerElement {
   }
 }
 
-customElements.define(CasperMoacMenuItem.is, CasperMoacMenuItem);
+customElements.define('casper-moac-menu-item', CasperMoacMenuItem);
