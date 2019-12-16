@@ -748,6 +748,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           display: flex;
           position: relative;
           flex-direction: column;
+          margin-top: 10px;
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
