@@ -522,10 +522,10 @@
     "@vaadin/vaadin-development-mode-detector" "^2.0.0"
     "@vaadin/vaadin-usage-statistics" "^2.0.2"
 
-"@vaadin/vaadin-grid@^5.4.6":
-  version "5.4.8"
-  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-grid/-/vaadin-grid-5.4.8.tgz#822490e6c51e7bea85c5d6d94203ec33010997ca"
-  integrity sha512-1N7sNM5WkPk0JjGGBaaGn3GanJpkE6ysUsUephqmBJSMFa3xLq2iGslxKeKUMOjbijSw5085rAvzLnDbjDJUCA==
+"@vaadin/vaadin-grid@^5.5.0":
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-grid/-/vaadin-grid-5.5.0.tgz#3c10055925db6dd2404287c0199893a959f8eaad"
+  integrity sha512-QQ7NdP8ug8xh3WrTQTP+CB1HCPVjr462Zrnk2uCD4G8Wdw9KTzw9avuauwlMm9pv/CrsP19x5hJS+bmqYSJd5A==
   dependencies:
     "@polymer/iron-a11y-announcer" "^3.0.0"
     "@polymer/iron-a11y-keys-behavior" "^3.0.0"
