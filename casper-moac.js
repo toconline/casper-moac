@@ -1274,7 +1274,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   __monkeyPatchVaadinElements () {
     this.gridScroller.addEventListener('scroll', () => {
       this.__paintGridRows();
-
       this.__contextMenu.close();
     });
 

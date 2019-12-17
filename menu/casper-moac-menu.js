@@ -163,24 +163,33 @@ class CasperMoacMenu extends PolymerElement {
   open () {
     document.addEventListener('keydown', this.__boundCloseOnEscapePress);
 
-    if (!this.__circleDimensions) {
+    if (!this.__menuBackgroundDimensions) {
       // Open the menu invisibly to calculate its dimensions.
       this.$.menuItems.style.visibility = 'hidden';
       this.$.menuItems.open();
-
-      afterNextRender(this, () => {
-        const menuItemsDimensions = Math.max(this.$.menuItems.scrollHeight, this.$.menuItems.scrollWidth) * 2;
-        this.__circleDimensions = Math.max(500, menuItemsDimensions);
-
-        this.$.circleBackground.style.width = `${this.__circleDimensions}px`;
-        this.$.circleBackground.style.height = `${this.__circleDimensions}px`;
-        this.$.menuItems.style.visibility = 'visible';
-      });
+      this.__calculateMenuBackgroundDimensions();
     } else {
       this.$.menuItems.open();
-      this.$.circleBackground.style.width = `${this.__circleDimensions}px`;
-      this.$.circleBackground.style.height = `${this.__circleDimensions}px`;
+      this.$.circleBackground.style.width = `${this.__menuBackgroundDimensions}px`;
+      this.$.circleBackground.style.height = `${this.__menuBackgroundDimensions}px`;
     }
+  }
+
+  /**
+   * This method is used to calculate the menu's background size on the first render. It may invoke
+   * itself again if the menu wasn't rendered yet and therefore has no width / height.
+   */
+  __calculateMenuBackgroundDimensions () {
+    // This means the menu wasn't rendered yet.
+    if (this.$.menuItems.scrollHeight === 0 && this.$.menuItems.scrollWidth === 0) {
+      return afterNextRender(this, () => this.__calculateMenuBackgroundDimensions());
+    }
+
+    this.__menuBackgroundDimensions = Math.max(500, Math.max(this.$.menuItems.scrollHeight, this.$.menuItems.scrollWidth) * 2);
+
+    this.$.circleBackground.style.width = `${this.__menuBackgroundDimensions}px`;
+    this.$.circleBackground.style.height = `${this.__menuBackgroundDimensions}px`;
+    this.$.menuItems.style.visibility = 'visible';
   }
 
   /**
