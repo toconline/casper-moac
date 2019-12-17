@@ -1661,9 +1661,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __selectedItemsChanged () {
     this.selectedItems = [...this.__selectedItems];
-    this.__selectedItems && this.__selectedItems.length > 0
-      ? this.$['multi-selection-container'].style.height = `${this.$['multi-selection-container'].firstElementChild.scrollHeight}px`
-      : this.$['multi-selection-container'].style.height = '';
+    !this.__selectedItems || this.__selectedItems.length === 0
+      ? this.$['multi-selection-container'].style.height = ''
+      : this.$['multi-selection-container'].style.height = `${this.$['multi-selection-container'].firstElementChild.scrollHeight}px`;
 
     if (!this.__selectAllCheckbox) return;
 
@@ -1776,7 +1776,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__debounce('__renderActiveFiltersDebouncer', () => {
       this.$.activeFilters.innerHTML = '';
 
-      this.__renderActiveFixedFilters();
+      if (!this.__filters) return;
+
+      this.__filters.forEach(filterItem => {
+        let isFilterCurrentlyOpen = false;
+
+        // Do not hide the "shortcut" when the casper-select is currently open.
+        if (filterItem.filter.type === CasperMoacFilterTypes.CASPER_SELECT) {
+          const selectElement = this.shadowRoot.querySelector(`casper-select[data-filter="${filterItem.filterKey}"]`);
+          isFilterCurrentlyOpen = selectElement && selectElement.opened;
+        }
+
+        if (isFilterCurrentlyOpen || this.__valueIsNotEmpty(filterItem.filter.value)) {
+          this.__renderActiveFilterDOM(filterItem);
+        }
+      });
 
       // Create the no active filters placeholder.
       if (!this.$.activeFilters.innerHTML) {
@@ -1790,51 +1804,23 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 
   /**
-   * This method renders the current fixed filters that are being applied.
+   * This method creates the currently active filters in the DOM and binds the click event listener.
+   *
+   * @param {Object} filterItem The filter's settings.
    */
-  __renderActiveFixedFilters () {
-    if (!this.__filters) return;
+  __renderActiveFilterDOM (filterItem) {
+    const filterContainer = document.createElement('div');
+    filterContainer.className = 'active-filter';
 
-    this.__filters.forEach(filterItem => {
-      // Do not hide the "shortcut" when the casper-select is currently open.
-      let isFilterCurrentlyOpen = false;
-      if (filterItem.filter.type === CasperMoacFilterTypes.CASPER_SELECT) {
-        const selectElement = this.shadowRoot.querySelector(`casper-select[data-filter="${filterItem.filterKey}"]`);
+    const filterLabelElement = document.createTextNode(`${filterItem.filter.label}: `);
+    const filterValueElement = document.createElement('strong');
+    filterValueElement.innerHTML = this.__activeFilterValue(filterItem);
+    filterValueElement.dataset.filter = filterItem.filterKey;
+    filterValueElement.addEventListener('click', event => this.__displayInlineFilters(event));
 
-        isFilterCurrentlyOpen = selectElement && selectElement.opened;
-      }
-
-      if (isFilterCurrentlyOpen || this.__valueIsNotEmpty(filterItem.filter.value)) {
-        this.__renderActiveFilterDOM(
-          filterItem.filter.label,
-          this.__activeFilterValue(filterItem),
-          event => this.__displayInlineFilters(event),
-          filterItem.filterKey
-        );
-      }
-    });
-  }
-
-  /**
-   * This method actually creates the elements in the DOM and binds the click event listener.
-   * @param {String} filterLabel The filter's label.
-   * @param {String} filterValue The filter's current value.
-   * @param {Function} clickEventListener The filter's click event listener.
-   * @param {String} datasetKey For fixed filters, this represents the key that uniquely identifies it.
-   */
-  __renderActiveFilterDOM (filterLabel, filterValue, clickEventListener, datasetKey) {
-    const activeFilter = document.createElement('div');
-    activeFilter.className = 'active-filter';
-
-    const activeFilterLabel = document.createTextNode(`${filterLabel}: `);
-    const activeFilterValue = document.createElement('strong');
-    activeFilterValue.innerHTML = filterValue;
-    activeFilterValue.dataset.filter = datasetKey;
-    activeFilterValue.addEventListener('click', clickEventListener);
-
-    activeFilter.appendChild(activeFilterLabel);
-    activeFilter.appendChild(activeFilterValue);
-    this.$.activeFilters.appendChild(activeFilter);
+    filterContainer.appendChild(filterLabelElement);
+    filterContainer.appendChild(filterValueElement);
+    this.$.activeFilters.appendChild(filterContainer);
   }
 
   /**
