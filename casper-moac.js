@@ -614,6 +614,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           grid-column-gap: 10px;
           grid-template-columns: 1fr 1fr;
           padding: 10px;
+          padding-top: 0;
           margin-bottom: 10px;
           border-bottom: 1px solid var(--primary-color);
         }
@@ -626,11 +627,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         .main-container vaadin-split-layout .left-side-container .filters-container.filters-container-inline .filter-container {
           flex: 1;
           margin: 0 5px;
-        }
-
-        .main-container vaadin-split-layout .left-side-container .filters-container .filter-container span {
-          font-weight: bold;
-          color: var(--primary-color);
         }
 
         .main-container vaadin-split-layout .left-side-container .filters-container .filter-container paper-input,
@@ -827,7 +823,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               <div class$="[[__filtersContainerClassName()]]">
                 <template is="dom-repeat" items="[[__filters]]">
                   <div class="filter-container">
-                    <span>[[item.filter.label]]:</span>
                     <!--Casper-Select filter-->
                     <template is="dom-if" if="[[__isFilterCasperSelect(item.filter.type)]]">
                       <casper-select
