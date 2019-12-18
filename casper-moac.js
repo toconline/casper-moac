@@ -1509,7 +1509,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       delete parentItem[this.rowBackgroundColorInternalProperty];
 
       // If the toggle is not expanded remove the items that were previously expanded.
-      this.__filteredItems = this.__filteredItems.filter(item => String(item[this.parentInternalProperty]) !== String(parentItem[this.idExternalProperty]));
+      this.__filteredItems = this.__removeChildItemsRecursively(this.__filteredItems, parentItem);
     } else {
       this.expandedItems = [...this.expandedItems, parentItem];
       const parentItemIndex = this.__findItemIndexById(parentItem[this.idInternalProperty]);
@@ -1537,6 +1537,31 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     this.__paintGridRows();
     treeToggleComponent.disabled = false;
+  }
+
+  /**
+   * This method hides the children, grandchildren, etc from a specific parent item.
+   *
+   * @param {Array} items The list of items from where the items will be removed.
+   * @param {Object} parentItem The parent item which will be collapsed.
+   */
+  __removeChildItemsRecursively (items, parentItem) {
+    const itemsToRemove = [parentItem];
+
+    while (itemsToRemove.length > 0) {
+      const parentItem = itemsToRemove.shift();
+
+      items = items.filter(item => {
+        if (String(item[this.parentInternalProperty]) === String(parentItem[this.idExternalProperty])) {
+          itemsToRemove.push(item);
+          return false;
+        }
+
+        return true;
+      });
+    }
+
+    return items;
   }
 
   /**
