@@ -342,6 +342,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         value: '__parent'
       },
       /**
+       * This property states if one specific item is expanded or not.
+       *
+       * @type {Boolean}
+       */
+      expandedInternalProperty: {
+        type: Boolean,
+        value: '__expanded'
+      },
+      /**
        * This property disables the possibility of one item to be selected.
        *
        * @type {Boolean}
@@ -1163,6 +1172,61 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 
   /**
+   * This method expands a specific item.
+   *
+   * @param {Object} parentItem The object that will be expanded.
+   */
+  async expandItem (parentItem) {
+    // If the item is already expanded, exit.
+    if (this.expandedItems.some(expandedItem => this.__compareItems(expandedItem, parentItem, true))) return;
+
+    this.expandedItems = [...this.expandedItems, parentItem];
+    const parentItemIndex = this.__findItemIndexById(parentItem[this.idInternalProperty]);
+
+    // Either query the database or use the local property depending on the current type of grid.
+    let parentItemChildren = !this.lazyLoad
+      ? parentItem[this.childrenExternalProperty]
+      : await this.__fetchChildrenResourceItems(parentItem);
+
+    if (!parentItemChildren) return;
+
+    // Safeguard for an empty response from the server or an empty local property.
+    parentItemChildren = Array.isArray(parentItemChildren) ? parentItemChildren : [];
+    parentItemChildren.forEach(child => {
+      child[this.parentInternalProperty] = parentItem[this.idExternalProperty];
+      child[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-child-item-background-color)';
+    });
+
+    parentItem[this.expandedInternalProperty] = true;
+    parentItem[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-parent-item-background-color)';
+
+    this.__filteredItems = [
+      ...this.__filteredItems.slice(0, parentItemIndex),
+      parentItem,
+      ...parentItemChildren,
+      ...this.__filteredItems.slice(parentItemIndex + 1)
+    ];
+  }
+
+  /**
+   * This method collapses a specific item.
+   *
+   * @param {Object} parentItem The object that will be collapsed.
+   */
+  collapseItem (parentItem) {
+    // If the item is already collapsed, exit.
+    if (!this.expandedItems.some(expandedItem => this.__compareItems(expandedItem, parentItem, true))) return;
+
+    this.expandedItems = [...this.expandedItems.filter(expandedItem => !this.__compareItems(parentItem, expandedItem, true))];
+
+    // Remove the row color from the parent and set the internal property to false.
+    parentItem[this.expandedInternalProperty] = false;
+    delete parentItem[this.rowBackgroundColorInternalProperty];
+
+    this.__filteredItems = this.__removeChildItemsRecursively(this.__filteredItems, parentItem);
+  }
+
+  /**
    * This method appends new items who are at the root level.
    *
    * @param {Object | Array} itemsToAdd The item / list of items to be added to the current dataset.
@@ -1443,7 +1507,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   __handleGridKeyDownEvents (event) {
     const keyCode = event.key || event.code;
 
-    if (this.__filteredItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
+    if (this.__filteredItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
 
     // When there are no active items, select the first one.
     if (!this.__activeItem) {
@@ -1458,6 +1522,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
       if (keyCode === 'ArrowDown' && activeItemIndex + 1 < this.__filteredItems.length) {
         this.__activeItem = this.__filteredItems[activeItemIndex + 1];
+      }
+
+      if (keyCode === 'ArrowRight') {
+        this.__focusActiveRow();
+        return this.expandItem(this.activeItem);
+      }
+
+      if (keyCode === 'ArrowLeft') {
+        this.__focusActiveRow();
+        return this.collapseItem(this.activeItem);
       }
 
       if (keyCode === 'Enter' && !this.disableSelection && !this.__activeItem[this.disableSelectionInternalProperty]) {
@@ -1495,46 +1569,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    *
    * @param {Event} event The event's object.
    */
-  async __handleGridTreeToggleEvents (event) {
+  __handleGridTreeToggleEvents (event) {
     const parentItem = this.activeItem = this.grid.getEventContext(event).item;
 
     const treeToggleComponent = event.composedPath().shift();
     treeToggleComponent.disabled = true;
 
-    if (!event.detail.expanded) {
-      this.expandedItems = [...this.expandedItems.filter(expandedItem => !this.__compareItems(expandedItem, parentItem, true))];
+    event.detail.expanded
+      ? this.expandItem(parentItem)
+      : this.collapseItem(parentItem);
 
-      // Remove the row color from the parent.
-      delete parentItem[this.rowBackgroundColorInternalProperty];
-
-      // If the toggle is not expanded remove the items that were previously expanded.
-      this.__filteredItems = this.__removeChildItemsRecursively(this.__filteredItems, parentItem);
-    } else {
-      this.expandedItems = [...this.expandedItems, parentItem];
-      const parentItemIndex = this.__findItemIndexById(parentItem[this.idInternalProperty]);
-
-      // Either query the database or use the local property depending on the current type of grid.
-      let parentItemChildren = !this.lazyLoad
-        ? parentItem[this.childrenExternalProperty]
-        : await this.__fetchChildrenResourceItems(parentItem);
-
-      // Safeguard for an empty response from the server or an empty local property.
-      parentItemChildren = Array.isArray(parentItemChildren) ? parentItemChildren : [];
-      parentItemChildren.forEach(child => {
-        child[this.parentInternalProperty] = parentItem[this.idExternalProperty];
-        child[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-child-item-background-color)';
-      });
-
-      parentItem[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-parent-item-background-color)';
-
-      this.__filteredItems = [
-        ...this.__filteredItems.slice(0, parentItemIndex + 1),
-        ...parentItemChildren,
-        ...this.__filteredItems.slice(parentItemIndex + 1)
-      ];
-    }
-
-    this.__paintGridRows();
     treeToggleComponent.disabled = false;
   }
 
@@ -1546,6 +1590,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __removeChildItemsRecursively (items, parentItem) {
     const itemsToRemove = [parentItem];
+
+    // Replace the parent as well to change its internal properties.
+    items = items.map(item => item[this.idInternalProperty] === parentItem[this.idInternalProperty] ? parentItem : item);
 
     while (itemsToRemove.length > 0) {
       const parentItem = itemsToRemove.shift();
@@ -1898,12 +1945,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __paintGridRows () {
     afterNextRender(this, () => {
-      // Loop through each grid row and paint the active one.
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
-        const isRowActive = this.__activeItem && this.__compareItems(row._item, this.__activeItem);
-        const isRowBackgroundColored = !!row._item[this.rowBackgroundColorInternalProperty];
+        const currentRowItem = this.__filteredItems.find(item => this.__compareItems(row._item, item));
+
+        const isRowActive = this.__activeItem && this.__compareItems(currentRowItem, this.__activeItem);
+        const isRowBackgroundColored = !!currentRowItem[this.rowBackgroundColorInternalProperty];
 
         Array.from(row.children).forEach(cell => {
+          const cellContents = cell.firstElementChild.assignedElements().shift();
+
           if (row.hasAttribute('blink')) return;
 
           // Check if the row has no active animation and is either active or colored.
@@ -1911,18 +1961,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             // The active background color has priority.
             isRowActive
               ? cell.style.backgroundColor = 'var(--casper-moac-active-item-background-color)'
-              : cell.style.backgroundColor = row._item[this.rowBackgroundColorInternalProperty];
+              : cell.style.backgroundColor = currentRowItem[this.rowBackgroundColorInternalProperty];
           } else {
-            this.disableRowStripes || row._item[this.idInternalProperty] % 2 === 0
+            this.disableRowStripes || currentRowItem[this.idInternalProperty] % 2 === 0
               ? cell.style.backgroundColor = 'white'
               : cell.style.backgroundColor = 'var(--casper-moac-row-stripe-color)';
           }
 
           // Remove the vaadin-checkbox element if this items does not support selection.
           if (!this.disableSelection) {
-            const vaadinCheckbox = cell.firstElementChild.assignedElements().shift().querySelector('vaadin-checkbox');
+            const vaadinCheckbox = cellContents.querySelector('vaadin-checkbox');
             if (vaadinCheckbox) {
-              !row._item[this.disableSelectionInternalProperty]
+              !currentRowItem[this.disableSelectionInternalProperty]
                 ? vaadinCheckbox.style.display = ''
                 : vaadinCheckbox.style.display = 'none';
             }

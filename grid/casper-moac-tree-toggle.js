@@ -17,12 +17,6 @@ class CasperMoacTreeToggle extends PolymerElement {
         reflectToAttribute: true
       },
       /**
-       * If the current item does not have any children, the tree toggle will not be drawn.
-       *
-       * @type {Boolean}
-       */
-      hasChildren: Boolean,
-      /**
        * Number of children of the current item.
        *
        * @type {Number}
@@ -77,7 +71,7 @@ class CasperMoacTreeToggle extends PolymerElement {
         }
       </style>
 
-      <template is="dom-if" if="[[hasChildren]]">
+      <template is="dom-if" if="[[__hasChildren(childrenCount)]]">
         <div id="tree-toggle-container">
           <casper-icon icon="fa-solid:caret-right"></casper-icon>
           [[childrenCount]]
@@ -104,6 +98,16 @@ class CasperMoacTreeToggle extends PolymerElement {
         detail: { expanded: this.expanded }
       }));
     });
+  }
+
+  /**
+   * This method returns a boolean stating if the item has children or not which will display / hide
+   * the toggle component.
+   *
+   * @param {Number} childrenCount The number of children.
+   */
+  __hasChildren (childrenCount) {
+    return childrenCount > 0;
   }
 }
 
