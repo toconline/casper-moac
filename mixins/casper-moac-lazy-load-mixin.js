@@ -134,6 +134,33 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     /**
+     * This method will fetch specific items from the JSON API and then add them to the vaadin-grid.
+     *
+     * @param {Array | String | Number} itemsToAdd The list of item identifiers that will be fetched from the JSON API and appended
+     * to the grid using the already existing addItem method.
+     * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
+     */
+    async addItemFromAPI (itemsToAdd, afterItemId) {
+      const socketResponse = await this.__fetchRequest(this.__buildResourceUrlForAddOrUpdate(itemsToAdd));
+
+      if (socketResponse) this.addItem(socketResponse.data, afterItemId);
+    }
+
+    /**
+     * This method will fetch specific items from the JSON API and then replace their old versions that
+     * are currently in the vaadin-grid.
+     *
+     * @param {Array | String | Number} itemsToUpdate The list of item identifiers that will be fetched from the JSON API and updated
+     * in the grid using the already existing updateItem method.
+     * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
+     */
+    async updateItemFromAPI (itemsToUpdate) {
+      const socketResponse = await this.__fetchRequest(this.__buildResourceUrlForAddOrUpdate(itemsToUpdate));
+
+      if (socketResponse) this.updateItem(socketResponse.data)
+    }
+
+    /**
      * Public method that allows the casper-moac users to re-fetch the items.
      *
      * @param {String | Number} activateItemId The item's identifier that will be activated after re-fetching the new items.
@@ -430,6 +457,25 @@ export const CasperMoacLazyLoadMixin = superClass => {
             case CasperMoacOperators.CUSTOM: return filter.lazyLoad.field.replace(new RegExp(`%{${filterItem.filterKey}}`, 'g'), filter.value);
           }
         }).join(' AND ');
+    }
+
+    /**
+     * This method builds the url that will be used when the developer wants to add / update specific items from the JSON API.
+     *
+     * @param {Array | String | Number} itemsToAddOrUpdate The list of item identifiers that will be added / replaced in the vaadin-grid.
+     */
+    __buildResourceUrlForAddOrUpdate (itemsToAddOrUpdate) {
+      if (itemsToAddOrUpdate.constructor.name !== 'Array') {
+        return this.resourceName.includes('?')
+          ? `${this.resourceName}&${this.resourceFilterParam}="${this.idExternalProperty}::TEXT = ${itemsToAddOrUpdate.toString()}::TEXT"`
+          : `${this.resourceName}?${this.resourceFilterParam}="${this.idExternalProperty}::TEXT = ${itemsToAddOrUpdate.toString()}::TEXT"`;
+      } else {
+        itemsToAddOrUpdate = itemsToAddOrUpdate.map(itemToUpdate => `${itemToUpdate}::TEXT`);
+
+        return this.resourceName.includes('?')
+          ? `${this.resourceName}&${this.resourceFilterParam}="${this.idExternalProperty}::TEXT IN (${itemsToAddOrUpdate.join(',')})"`
+          : `${this.resourceName}?${this.resourceFilterParam}="${this.idExternalProperty}::TEXT IN (${itemsToAddOrUpdate.join(',')})"`;
+      }
     }
 
     /**

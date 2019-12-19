@@ -1029,15 +1029,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Object | Array} itemsToUpdate The item / list of items that will be updated.
    */
   updateItem (itemsToUpdate) {
-    // Cast the object as an array to avoid ternaries when appending the new item(s).
-    if (itemsToUpdate.constructor.name === 'Object') itemsToUpdate = [itemsToUpdate];
+    // Cast the object as an array to avoid ternaries when updating the item(s).
+    if (itemsToUpdate.constructor.name !== 'Array') itemsToUpdate = [itemsToUpdate];
 
+    let activeItemIndex;
     const filteredItems = [...this.__filteredItems];
     const selectedItems = [...this.__selectedItems];
 
     itemsToUpdate.forEach(itemToUpdate => {
       const updateItemCallback = (item, itemIndex, items) => {
         if (this.__compareItems(itemToUpdate, item, true)) {
+          // Save the index of the item we're going to activate.
+          activeItemIndex = activeItemIndex !== undefined ? activeItemIndex : itemIndex;
+
           // Do not simply overwrite the object to avoid losing important internal properties set by this component.
           Object.keys(itemToUpdate).forEach(itemToUpdateProperty => {
             items[itemIndex][itemToUpdateProperty] = itemToUpdate[itemToUpdateProperty];
@@ -1054,7 +1058,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
     this.forceGridRedraw();
     this.__staleDataset = true;
-    this.activeItem = itemsToUpdate[0];
+    this.activeItem = this.__filteredItems[activeItemIndex];
 
     afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]));
   }
