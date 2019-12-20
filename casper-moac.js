@@ -1206,6 +1206,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     // Safeguard for an empty response from the server or an empty local property.
     parentItemChildren = Array.isArray(parentItemChildren) ? parentItemChildren : [];
     parentItemChildren.forEach(child => {
+      child[this.expandedInternalProperty] = false;
       child[this.parentInternalProperty] = parentItem[this.idExternalProperty];
       child[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-child-item-background-color)';
     });
