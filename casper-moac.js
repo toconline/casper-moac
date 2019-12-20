@@ -1180,6 +1180,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     // If the item is already expanded, exit.
     if (this.expandedItems.some(expandedItem => this.__compareItems(expandedItem, parentItem, true))) return;
 
+    // If the item can't be expanded, exit.
+    this.__toggleColumns = this.__toggleColumns || [
+      ...this.shadowRoot.querySelector('slot[name="grid-before"]').assignedElements().filter(element => element.nodeName.toLowerCase() === 'casper-moac-tree-toggle-column'),
+      ...this.shadowRoot.querySelector('slot[name="grid"]').assignedElements().filter(element => element.nodeName.toLowerCase() === 'casper-moac-tree-toggle-column'),
+    ];
+
+    if (!this.__toggleColumns.some(toggleColumn => {
+      return parentItem[toggleColumn.path]
+        && parentItem[toggleColumn.path].constructor.name === 'Array'
+        && parentItem[toggleColumn.path].length > 0;
+    })) return;
+
+
     this.expandedItems = [...this.expandedItems, parentItem];
     const parentItemIndex = this.__findItemIndexById(parentItem[this.idInternalProperty]);
 
