@@ -883,18 +883,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
             <slot name="left"></slot>
 
-            <!--Multi-selection container-->
-            <div id="multi-selection-container">
-              <div class="grid-multiple-selection">
-                <div class="grid-multiple-selection-label">
-                  Seleção múltipla:&nbsp;<strong>[[__selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
-                </div>
-                <div class="grid-multiple-selection-icons">
-                  <slot name="multi-selection"></slot>
-                </div>
-              </div>
-            </div>
-
             <!--Active sorters container-->
             <template is="dom-if" if="[[__hasActiveSorters]]">
               <div id="active-sorters-container">
@@ -911,6 +899,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                 </template>
               </div>
             </template>
+
+            <!--Multi-selection container-->
+            <div id="multi-selection-container">
+              <div class="grid-multiple-selection">
+                <div class="grid-multiple-selection-label">
+                  Seleção múltipla:&nbsp;<strong>[[__selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
+                </div>
+                <div class="grid-multiple-selection-icons">
+                  <slot name="multi-selection"></slot>
+                </div>
+              </div>
+            </div>
 
             <!--Vaadin grid container-->
             <div class="grid-container">

@@ -36,7 +36,7 @@ export const CasperMoacSortingMixin = superClass => {
             sorter.sortOrder = this.__activeSorters.length > 1 && activeSorterIndex !== -1 ? activeSorterIndex + 1 : '';
           });
 
-          this.__hasActiveSorters = false;
+          this.__hasActiveSorters = this.__activeSorters.length > 0;
           !this.lazyLoad
             ? this.__filterItems()
             : this.__filterLazyLoadItems();
