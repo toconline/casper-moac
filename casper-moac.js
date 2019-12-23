@@ -1899,7 +1899,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     const filterContainer = document.createElement('div');
     filterContainer.className = 'active-filter';
 
-    const filterLabelElement = document.createTextNode(`${filterItem.filter.label}: `);
+    const filterLabelElement = document.createTextNode(`${filterItem.filter.inputOptions.label}: `);
     const filterValueElement = document.createElement('strong');
     filterValueElement.innerHTML = this.__activeFilterValue(filterItem);
     filterValueElement.dataset.filter = filterItem.filterKey;
