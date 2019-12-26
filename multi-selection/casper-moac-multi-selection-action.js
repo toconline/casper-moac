@@ -75,15 +75,15 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
         }
 
         #button[disabled] casper-icon {
-          --casper-icon-fill-color: var(--disabled-text-color);
+          color: var(--disabled-text-color);
         }
 
         #button:not([disabled]) casper-icon {
-          --casper-icon-fill-color: var(--on-primary-color);
+          color: var(--on-primary-color);
         }
 
         #button:hover casper-icon {
-          --casper-icon-fill-color: var(--primary-color);
+          color: var(--primary-color);
         }
       </style>
 

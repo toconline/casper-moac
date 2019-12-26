@@ -65,7 +65,7 @@ class CasperMoacSortColumn extends GridColumnElement {
           #header-container #header-sort casper-icon {
             width: 15px;
             height: 15px;
-            --casper-icon-fill-color: white;
+            color: white;
           }
 
           #header-container #header-sort #header-sort-order {

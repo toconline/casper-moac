@@ -75,7 +75,7 @@ class CasperMoacSidebarItem extends PolymerElement {
         }
 
         .sidebar-item-header casper-icon {
-          --casper-icon-fill-color: #3C3C3C;
+          color: #3C3C3C;
           margin-right: 15px;
           transition: transform 200ms linear;
         }
@@ -85,7 +85,7 @@ class CasperMoacSidebarItem extends PolymerElement {
         }
 
         .sidebar-item-header:hover casper-icon {
-          --casper-icon-fill-color: #3E3E3E;
+          color: #3E3E3E;
         }
 
         .sidebar-item-header .sidebar-item-header-title {

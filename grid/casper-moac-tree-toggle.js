@@ -48,7 +48,7 @@ class CasperMoacTreeToggle extends PolymerElement {
         :host #tree-toggle-container:hover {
           cursor: pointer;
           color: var(--primary-color);
-          --casper-icon-fill-color: var(--primary-color);
+          color: var(--primary-color);
         }
 
         :host([expanded]) #tree-toggle-container {
@@ -57,13 +57,13 @@ class CasperMoacTreeToggle extends PolymerElement {
 
         :host #tree-toggle-container:hover casper-icon,
         :host([expanded]) #tree-toggle-container casper-icon {
-          --casper-icon-fill-color: var(--primary-color);
+          color: var(--primary-color);
         }
 
         :host #tree-toggle-container casper-icon {
           width: 15px;
           height: 15px;
-          --casper-icon-fill-color: darkgrey;
+          color: darkgrey;
         }
 
         :host([expanded]) #tree-toggle-container casper-icon {

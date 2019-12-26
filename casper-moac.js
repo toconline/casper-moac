@@ -523,12 +523,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           width: 15px;
           height: 15px;
           position: absolute;
-          --casper-icon-fill-color: var(--primary-color);
+          color: var(--primary-color);
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #filterInputIcon:hover {
           cursor: pointer;
-          --casper-icon-fill-color: var(--dark-primary-color);
+          color: var(--dark-primary-color);
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters {
@@ -553,7 +553,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           height: 15px;
           margin-left: 5px;
           transition: transform 200ms linear;
-          --casper-icon-fill-color: var(--primary-color);
+          color: var(--primary-color);
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters casper-icon[rotate] {
@@ -588,7 +588,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           margin-right: 5px;
           box-sizing: border-box;
           background-color: var(--primary-color);
-          --casper-icon-fill-color: white;
+          color: white;
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header .header-title casper-icon:hover {
@@ -678,7 +678,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           height: 15px;
           cursor: pointer;
           margin-left: 5px;
-          --casper-icon-fill-color: white;
+          color: white;
         }
 
         /* Vaadin-grid */
@@ -703,7 +703,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           width: 100px;
           height: 100px;
           margin-bottom: 25px;
-          --casper-icon-fill-color: var(--status-gray);
+          color: var(--status-gray);
         }
 
         .main-container vaadin-split-layout .left-side-container #spinner {
@@ -768,13 +768,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           height: 20px;
           border-radius: 50%;
           display: var(--display-actions-on-hover);
-          --casper-icon-fill-color: var(--primary-color);
+          color: var(--primary-color);
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid .context-menu-icon:hover {
           cursor: pointer;
           background-color: var(--primary-color);
-          --casper-icon-fill-color: white;
+          color: white;
         }
 
         .main-container vaadin-split-layout .right-side-container .epaper-container {
