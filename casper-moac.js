@@ -1962,13 +1962,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
         const currentRowItem = this.__filteredItems.find(item => this.__compareItems(row._item, item));
 
+        if (!currentRowItem || row.hasAttribute('blink')) return;
+
         const isRowActive = this.__activeItem && this.__compareItems(currentRowItem, this.__activeItem);
         const isRowBackgroundColored = !!currentRowItem[this.rowBackgroundColorInternalProperty];
 
         Array.from(row.children).forEach(cell => {
           const cellContents = cell.firstElementChild.assignedElements().shift();
-
-          if (row.hasAttribute('blink')) return;
 
           // Check if the row has no active animation and is either active or colored.
           if (isRowActive || isRowBackgroundColored) {
@@ -2241,9 +2241,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     }
 
     const searchParamsText = searchParams.toString();
-    if (searchParamsText) {
-      history.replaceState({}, '', `${window.location.pathname}?${searchParamsText}`);
-    }
+    !searchParamsText
+      ? history.replaceState({}, '', window.location.pathname)
+      : history.replaceState({}, '', `${window.location.pathname}?${searchParamsText}`);
   }
 
   /**
