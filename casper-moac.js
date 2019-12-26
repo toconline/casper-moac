@@ -395,6 +395,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         notify: true
       },
       /**
+       * The atatchment that is being currently displayed in the epaper component.
+       *
+       * @type {Object}
+       */
+      epaperCurrentAttachment: {
+        type: Object,
+        notify: true
+      },
+      /**
        * Flag that is passed to the casper-epaper component which disables the sticky
        * mouseenter / mouseleave animation.
        *
@@ -961,6 +970,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                 <casper-epaper
                   app="[[app]]"
                   zoom="[[epaperZoom]]"
+                  current-attachment="{{epaperCurrentAttachment}}"
                   sticky-maximum-height="[[epaperStickyMaximumHeight]]"
                   disable-sticky-animation="[[epaperDisableStickyAnimation]]">
                   <slot name="casper-epaper-tabs" slot="casper-epaper-tabs"></slot>
