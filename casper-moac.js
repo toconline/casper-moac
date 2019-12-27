@@ -750,6 +750,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         .main-container vaadin-split-layout .left-side-container #multi-selection-container .grid-multiple-selection .grid-multiple-selection-label {
           font-size: 0.75em;
+          margin-right: 10px;
           color: var(--primary-color);
         }
 

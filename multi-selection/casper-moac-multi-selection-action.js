@@ -44,8 +44,7 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
         :host {
           height: 25px;
           margin-top: 10px;
-          margin-left: 2px;
-          margin-right: 2px;
+          margin-right: 5px;
         }
 
         :host([disabled]) {
@@ -60,6 +59,7 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
         }
 
         #button {
+          margin: 0;
           height: 25px;
           font-size: 10px;
           font-weight: bold;
