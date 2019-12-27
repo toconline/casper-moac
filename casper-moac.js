@@ -895,7 +895,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             <!--Active sorters container-->
             <template is="dom-if" if="[[__hasActiveSorters]]">
               <div id="active-sorters-container">
-                <strong>Items ordenados por:</strong>
+                <strong>Itens ordenados por:</strong>
                 <template is="dom-repeat" items="[[__activeSorters]]" as="activeSorter">
                   <div>
                     [[activeSorter.header]]
