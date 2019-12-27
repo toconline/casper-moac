@@ -739,9 +739,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         .main-container vaadin-split-layout .left-side-container #multi-selection-container .grid-multiple-selection {
           display: flex;
           overflow: hidden;
-          border-radius: 5px;
           padding: 10px;
           align-items: center;
+          border-top-left-radius: 5px;
+          border-top-right-radius: 5px;
           background-color: #1A39601A;
           justify-content: space-between;
           transition: height 100ms linear;
@@ -749,6 +750,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         .main-container vaadin-split-layout .left-side-container #multi-selection-container .grid-multiple-selection .grid-multiple-selection-label {
           font-size: 0.75em;
+          margin-right: 10px;
           color: var(--primary-color);
         }
 
@@ -769,7 +771,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
           overflow: hidden;
           user-select: none;
-          border-radius: 5px;
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid .context-menu-icon {
@@ -1026,12 +1027,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     // Cast the object as an array to avoid ternaries when appending the new item(s).
     if (itemsToAdd.constructor.name === 'Object') itemsToAdd = [itemsToAdd];
 
+    // Format the items we're adding.
+    if (this.lazyLoad && this.resourceFormatter) {
+      itemsToAdd.forEach(item => this.resourceFormatter.call(this.page || {}, item));
+    }
+
     const rootItems = itemsToAdd.filter(itemToAdd => !this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty]));
     const childItems = itemsToAdd.filter(itemToAdd => this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty]));
 
     let filteredItems = this.__filteredItems;
     filteredItems = this.__addRootItems(rootItems, filteredItems, afterItemId);
     filteredItems = this.__addChildItems(childItems, filteredItems);
+
     this.__filteredItems = filteredItems;
 
     this.forceGridRedraw();
@@ -1065,6 +1072,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           Object.keys(itemToUpdate).forEach(itemToUpdateProperty => {
             items[itemIndex][itemToUpdateProperty] = itemToUpdate[itemToUpdateProperty];
           });
+
+          // Format the items we're updating.
+          if (this.lazyLoad && this.resourceFormatter) {
+            this.resourceFormatter.call(this.page || {}, items[itemIndex]);
+          }
         }
       };
 
@@ -1758,9 +1770,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __selectedItemsChanged () {
     this.selectedItems = [...this.__selectedItems];
-    !this.__selectedItems || this.__selectedItems.length === 0
-      ? this.$['multi-selection-container'].style.height = ''
-      : this.$['multi-selection-container'].style.height = `${this.$['multi-selection-container'].firstElementChild.scrollHeight}px`;
+
+    if (!this.__selectedItems || this.__selectedItems.length === 0) {
+      this.$.grid.style.borderTopLeftRadius = '5px';
+      this.$.grid.style.borderTopRightRadius = '5px';
+      this.$['multi-selection-container'].style.height = ''
+    } else {
+      this.$.grid.style.borderTopLeftRadius = '';
+      this.$.grid.style.borderTopRightRadius = '';
+      this.$['multi-selection-container'].style.height = `${this.$['multi-selection-container'].firstElementChild.scrollHeight}px`;
+    }
 
     if (!this.__selectAllCheckbox) return;
 
