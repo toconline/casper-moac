@@ -1026,12 +1026,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     // Cast the object as an array to avoid ternaries when appending the new item(s).
     if (itemsToAdd.constructor.name === 'Object') itemsToAdd = [itemsToAdd];
 
+    // Format the items we're adding.
+    if (this.lazyLoad && this.resourceFormatter) {
+      itemsToAdd.forEach(item => this.resourceFormatter.call(this.page || {}, item));
+    }
+
     const rootItems = itemsToAdd.filter(itemToAdd => !this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty]));
     const childItems = itemsToAdd.filter(itemToAdd => this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty]));
 
     let filteredItems = this.__filteredItems;
     filteredItems = this.__addRootItems(rootItems, filteredItems, afterItemId);
     filteredItems = this.__addChildItems(childItems, filteredItems);
+
     this.__filteredItems = filteredItems;
 
     this.forceGridRedraw();
@@ -1065,6 +1071,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           Object.keys(itemToUpdate).forEach(itemToUpdateProperty => {
             items[itemIndex][itemToUpdateProperty] = itemToUpdate[itemToUpdateProperty];
           });
+
+          // Format the items we're updating.
+          if (this.lazyLoad && this.resourceFormatter) {
+            this.resourceFormatter.call(this.page || {}, items[itemIndex]);
+          }
         }
       };
 
