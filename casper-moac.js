@@ -739,9 +739,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         .main-container vaadin-split-layout .left-side-container #multi-selection-container .grid-multiple-selection {
           display: flex;
           overflow: hidden;
-          border-radius: 5px;
           padding: 10px;
           align-items: center;
+          border-top-left-radius: 5px;
+          border-top-right-radius: 5px;
           background-color: #1A39601A;
           justify-content: space-between;
           transition: height 100ms linear;
@@ -769,7 +770,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
           overflow: hidden;
           user-select: none;
-          border-radius: 5px;
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid .context-menu-icon {
@@ -1769,9 +1769,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __selectedItemsChanged () {
     this.selectedItems = [...this.__selectedItems];
-    !this.__selectedItems || this.__selectedItems.length === 0
-      ? this.$['multi-selection-container'].style.height = ''
-      : this.$['multi-selection-container'].style.height = `${this.$['multi-selection-container'].firstElementChild.scrollHeight}px`;
+
+    if (!this.__selectedItems || this.__selectedItems.length === 0) {
+      this.$.grid.style.borderTopLeftRadius = '5px';
+      this.$.grid.style.borderTopRightRadius = '5px';
+      this.$['multi-selection-container'].style.height = ''
+    } else {
+      this.$.grid.style.borderTopLeftRadius = '';
+      this.$.grid.style.borderTopRightRadius = '';
+      this.$['multi-selection-container'].style.height = `${this.$['multi-selection-container'].firstElementChild.scrollHeight}px`;
+    }
 
     if (!this.__selectAllCheckbox) return;
 
