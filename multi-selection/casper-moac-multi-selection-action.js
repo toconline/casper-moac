@@ -48,6 +48,10 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
           font-size: 12px;
           margin: 10px 2px 0;
         }
+
+        casper-icon-button[has-text] {
+          padding: 5px 10px;
+        }
       </style>
 
       <casper-icon-button icon="[[icon]]" disabled="[[disabled]]" reverse="[[reverse]]">
