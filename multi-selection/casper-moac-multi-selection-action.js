@@ -34,6 +34,14 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
       reverse: {
         type: Boolean,
         value: false
+      },
+      /**
+       * The casper-icon-button's text.
+       *
+       * @type {String}
+       */
+      text: {
+        type: String
       }
     };
   }
@@ -54,9 +62,7 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
         }
       </style>
 
-      <casper-icon-button icon="[[icon]]" disabled="[[disabled]]" reverse="[[reverse]]">
-        <slot></slot>
-      </casper-icon-button>
+      <casper-icon-button icon="[[icon]]" disabled="[[disabled]]" reverse="[[reverse]]" text="[[text]]"></casper-icon-button>
     `;
   }
 }
