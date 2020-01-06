@@ -134,6 +134,16 @@ export const CasperMoacLazyLoadMixin = superClass => {
     }
 
     /**
+     * Fetches the items from the JSON API and returns them.
+     *
+     * @param {Array | String | Number} itemsToFetch The list of item identifiers that will be fetched from the JSON API.
+     * @param {Array | String} filters The filters that will be applied when fetching the items.
+     */
+    async fetchItemFromAPI (itemsToFetch, filters) {
+      return await this.__fetchRequest(this.__buildResourceUrlForAddOrUpdate(itemsToFetch, filters));
+    }
+
+    /**
      * This method will fetch specific items from the JSON API and then add them to the vaadin-grid.
      *
      * @param {Array | String | Number} itemsToAdd The list of item identifiers that will be fetched from the JSON API and appended
@@ -141,7 +151,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
      */
     async addItemFromAPI (itemsToAdd, afterItemId) {
-      const socketResponse = await this.__fetchRequest(this.__buildResourceUrlForAddOrUpdate(itemsToAdd));
+      const socketResponse = await this.fetchItemFromAPI(itemsToAdd);
 
       if (socketResponse) {
         this.addItem(socketResponse.data, afterItemId);
@@ -158,10 +168,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
      *
      * @param {Array | String | Number} itemsToUpdate The list of item identifiers that will be fetched from the JSON API and updated
      * in the grid using the already existing updateItem method.
-     * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
      */
     async updateItemFromAPI (itemsToUpdate) {
-      const socketResponse = await this.__fetchRequest(this.__buildResourceUrlForAddOrUpdate(itemsToUpdate));
+      const socketResponse = await this.fetchItemFromAPI(itemsToUpdate);
 
       if (socketResponse) {
         this.updateItem(socketResponse.data);
@@ -474,20 +483,22 @@ export const CasperMoacLazyLoadMixin = superClass => {
     /**
      * This method builds the url that will be used when the developer wants to add / update specific items from the JSON API.
      *
-     * @param {Array | String | Number} itemsToAddOrUpdate The list of item identifiers that will be added / replaced in the vaadin-grid.
+     * @param {Array | String | Number} items The list of item identifiers that will be added / replaced in the vaadin-grid.
      */
-    __buildResourceUrlForAddOrUpdate (itemsToAddOrUpdate) {
-      if (itemsToAddOrUpdate.constructor.name !== 'Array') {
-        return this.resourceName.includes('?')
-          ? `${this.resourceName}&${this.resourceFilterParam}="${this.idExternalProperty}::TEXT = ${itemsToAddOrUpdate.toString()}::TEXT"`
-          : `${this.resourceName}?${this.resourceFilterParam}="${this.idExternalProperty}::TEXT = ${itemsToAddOrUpdate.toString()}::TEXT"`;
-      } else {
-        itemsToAddOrUpdate = itemsToAddOrUpdate.map(itemToUpdate => `${itemToUpdate}::TEXT`);
+    __buildResourceUrlForAddOrUpdate (items, filters = []) {
+      if (filters.constructor.name !== 'Array') filters = [filters];
 
-        return this.resourceName.includes('?')
-          ? `${this.resourceName}&${this.resourceFilterParam}="${this.idExternalProperty}::TEXT IN (${itemsToAddOrUpdate.join(',')})"`
-          : `${this.resourceName}?${this.resourceFilterParam}="${this.idExternalProperty}::TEXT IN (${itemsToAddOrUpdate.join(',')})"`;
-      }
+      const resourceFilterParameter = items.constructor.name !== 'Array'
+        ? `${this.resourceFilterParam}="${this.idExternalProperty}::TEXT = '${items}'::TEXT"`
+        : `${this.resourceFilterParam}="${this.idExternalProperty}::TEXT IN (${items.map(item => `'${item}'::TEXT`).join(',')})"`;
+
+      let resourceUrl = this.resourceName.includes('?')
+        ? `${this.resourceName}&${resourceFilterParameter}`
+        : `${this.resourceName}?${resourceFilterParameter}`;
+
+      if (filters.length > 0) resourceUrl = `${resourceUrl}&${filters.join('&')}`;
+
+      return resourceUrl;
     }
 
     /**
