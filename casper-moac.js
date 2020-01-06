@@ -2234,6 +2234,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 
   /**
+   *
+   * @param {Object} item The item which internal / external idenifier will be used for comparison.
+   * @param {String | Number} itemIds The items identifiers that we'll be used for comparison.
+   * @param {Boolean} useExternalProperty This flag states which identifier should be used - internal ou external.
+   */
+  __compareItemWithIds (item, itemIds, useExternalProperty = false) {
+    return useExternalProperty
+      ? itemIds.map(itemId => String(itemId)).includes(String(item[this.idExternalProperty]))
+      : itemIds.map(itemId => String(itemId)).includes(String(item[this.idInternalProperty]));
+  }
+
+  /**
    * This method returns all the items that can be selected since one can disable the selection per item.
    */
   __selectableItems () {

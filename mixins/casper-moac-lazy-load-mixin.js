@@ -143,7 +143,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
     async addItemFromAPI (itemsToAdd, afterItemId) {
       const socketResponse = await this.__fetchRequest(this.__buildResourceUrlForAddOrUpdate(itemsToAdd));
 
-      if (socketResponse) this.addItem(socketResponse.data, afterItemId);
+      if (socketResponse) {
+        this.addItem(socketResponse.data, afterItemId);
+
+        return itemsToAdd.constructor.name === 'Array'
+          ? this.__filteredItems.filter(item => this.__compareItemWithIds(item, itemsToAdd, true))
+          : this.__filteredItems.find(item => this.__compareItemWithId(item, itemsToAdd, true));
+      }
     }
 
     /**
@@ -157,7 +163,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
     async updateItemFromAPI (itemsToUpdate) {
       const socketResponse = await this.__fetchRequest(this.__buildResourceUrlForAddOrUpdate(itemsToUpdate));
 
-      if (socketResponse) this.updateItem(socketResponse.data)
+      if (socketResponse) {
+        this.updateItem(socketResponse.data);
+
+        return itemsToUpdate.constructor.name === 'Array'
+          ? this.__filteredItems.filter(item => this.__compareItemWithIds(item, itemsToUpdate, true))
+          : this.__filteredItems.find(item => this.__compareItemWithId(item, itemsToUpdate, true));
+      }
     }
 
     /**
