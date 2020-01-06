@@ -1014,6 +1014,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__bindContextMenuEvents();
     this.__monkeyPatchVaadinElements();
     this.__stampGridCustomStylesTemplate();
+
+    // Observe the multi selection container layout changes and resize if needed.
+    if (typeof window.ResizeObserver === 'function') {
+      const multiSelectionElement = this.shadowRoot.querySelector('.grid-multiple-selection');
+      const multiSelectionElementObserver = new ResizeObserver(() => {
+        this.__debounce('__multiSelectionResizeDebouncer', () => this.$['multi-selection-container'].style.height = `${multiSelectionElement.scrollHeight}px`);
+      });
+      multiSelectionElementObserver.observe(multiSelectionElement);
+    }
   }
 
   /**
