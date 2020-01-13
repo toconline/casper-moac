@@ -351,8 +351,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
      */
     async __fetchRequest (url) {
       try {
-        this.loading = true
-        const socketResponse = await this.app.socket.jget(url, this.resourceTimeoutMs);
+        this.loading = true;
+        const socketResponse = await this.app.broker.get(url, this.resourceTimeoutMs);
         this.loading = false;
 
         return socketResponse;
