@@ -149,12 +149,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * @param {Array | String | Number} itemsToAdd The list of item identifiers that will be fetched from the JSON API and appended
      * to the grid using the already existing addItem method.
      * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
+     * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
      */
-    async addItemFromAPI (itemsToAdd, afterItemId) {
+    async addItemFromAPI (itemsToAdd, afterItemId, staleDataset = true) {
       const socketResponse = await this.fetchItemFromAPI(itemsToAdd);
 
       if (socketResponse) {
-        this.addItem(socketResponse.data, afterItemId);
+        this.addItem(socketResponse.data, afterItemId, staleDataset);
 
         return itemsToAdd.constructor.name === 'Array'
           ? this.__filteredItems.filter(item => this.__compareItemWithIds(item, itemsToAdd, true))
@@ -168,12 +169,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
      *
      * @param {Array | String | Number} itemsToUpdate The list of item identifiers that will be fetched from the JSON API and updated
      * in the grid using the already existing updateItem method.
+     * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
      */
-    async updateItemFromAPI (itemsToUpdate) {
+    async updateItemFromAPI (itemsToUpdate, staleDataset = true) {
       const socketResponse = await this.fetchItemFromAPI(itemsToUpdate);
 
       if (socketResponse) {
-        this.updateItem(socketResponse.data);
+        this.updateItem(socketResponse.data, staleDataset);
 
         return itemsToUpdate.constructor.name === 'Array'
           ? this.__filteredItems.filter(item => this.__compareItemWithIds(item, itemsToUpdate, true))

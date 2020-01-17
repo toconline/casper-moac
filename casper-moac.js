@@ -1033,8 +1033,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    *
    * @param {Object | Array} itemsToAdd The item / list of items to be added to the current dataset.
    * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
+   * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
    */
-  addItem (itemsToAdd, afterItemId) {
+  addItem (itemsToAdd, afterItemId, staleDataset = true) {
     // Cast the object as an array to avoid ternaries when appending the new item(s).
     if (itemsToAdd.constructor.name === 'Object') itemsToAdd = [itemsToAdd];
 
@@ -1053,7 +1054,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__filteredItems = filteredItems;
 
     this.forceGridRedraw();
-    this.__staleDataset = true;
+    this.__staleDataset = staleDataset;
 
     if (rootItems.length > 0) this.activeItem = rootItems[0];
 
@@ -1064,8 +1065,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * Updates manually the item / list of items provided by its id propery.
    *
    * @param {Object | Array} itemsToUpdate The item / list of items that will be updated.
+   * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
    */
-  updateItem (itemsToUpdate) {
+  updateItem (itemsToUpdate, staleDataset = true) {
     // Cast the object as an array to avoid ternaries when updating the item(s).
     if (itemsToUpdate.constructor.name !== 'Array') itemsToUpdate = [itemsToUpdate];
 
@@ -1099,7 +1101,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__selectedItems = selectedItems;
 
     this.forceGridRedraw();
-    this.__staleDataset = true;
+    this.__staleDataset = staleDataset;
     this.activeItem = this.__filteredItems[activeItemIndex];
 
     afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]));
@@ -1110,7 +1112,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    *
    * @param {String | Number | Array} itemsToRemove The identifier to find the item that will be removed.
    */
-  removeItem (itemsToRemove) {
+  removeItem (itemsToRemove, staleDataset = true) {
     // Convert the parameter to an array of strings so it's easier afterwards.
     itemsToRemove.constructor.name !== 'Array'
       ? itemsToRemove = [String(itemsToRemove)]
@@ -1138,7 +1140,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           [...blinkingRow.children].forEach(cell => { cell.style.backgroundColor = ''; });
         });
 
-        this.__staleDataset = true;
+        this.__staleDataset = staleDataset;
         this.__filteredItems = this.__filteredItems.filter(item => !itemsToRemove.includes(String(item[this.idExternalProperty])));
         this.__selectedItems = this.__selectedItems.filter(item => !itemsToRemove.includes(String(item[this.idExternalProperty])));
         this.__filteredItems.length === 0
