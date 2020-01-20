@@ -175,7 +175,23 @@ export const CasperMoacLazyLoadMixin = superClass => {
       const socketResponse = await this.fetchItemFromAPI(itemsToUpdate);
 
       if (socketResponse) {
-        this.updateItem(socketResponse.data, staleDataset);
+        if (socketResponse.data.constructor.name === 'Array') {
+          const itemToActivate = itemsToUpdate.constructor.name === 'Array'
+            ? String(itemsToUpdate[0])
+            : String(itemsToUpdate);
+
+          // Sort the server's response since it could return more records than the ones requested which causes "random" items to be activated.
+          const sortedServerResponse = socketResponse.data.sort((previousItem, nextItem) => {
+            if (String(nextItem[this.idExternalProperty]) === itemToActivate) return 1;
+            if (String(previousItem[this.idExternalProperty]) === itemToActivate) return -1;
+
+            return 0;
+          })
+
+          this.updateItem(sortedServerResponse, staleDataset);
+        } else {
+          this.updateItem(socketResponse.data, staleDataset);
+        }
 
         return itemsToUpdate.constructor.name === 'Array'
           ? this.__filteredItems.filter(item => this.__compareItemWithIds(item, itemsToUpdate, true))
