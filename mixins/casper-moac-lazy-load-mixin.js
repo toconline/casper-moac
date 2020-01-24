@@ -186,7 +186,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
             if (String(previousItem[this.idExternalProperty]) === itemToActivate) return -1;
 
             return 0;
-          })
+          });
 
           this.updateItem(sortedServerResponse, staleDataset);
         } else {
