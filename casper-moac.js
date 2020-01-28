@@ -850,8 +850,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                     <template is="dom-if" if="[[__isFilterCasperSelect(item.filter.type)]]">
                       <casper-select
                         data-filter$="[[item.filterKey]]"
-                        list-width="20vw"
                         list-height="50vh"
+                        fixed-container-width
                         value="{{item.filter.value}}"
                         items="[[item.filter.inputOptions.items]]"
                         label="[[item.filter.inputOptions.label]]"
