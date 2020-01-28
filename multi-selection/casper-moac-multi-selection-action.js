@@ -49,6 +49,10 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
   static get template () {
     return html`
       <style>
+        :host([disabled]) {
+          pointer-events: none;
+        }
+
         casper-icon-button {
           width: 25px;
           height: 25px;
