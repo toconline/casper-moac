@@ -637,14 +637,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           border-bottom: 1px solid var(--primary-color);
         }
 
-        .main-container vaadin-split-layout .left-side-container .filters-container.filters-container-inline {
+        .main-container vaadin-split-layout .left-side-container .filters-container.filters-container--inline {
           display: flex;
           padding: 10px;
         }
 
-        .main-container vaadin-split-layout .left-side-container .filters-container.filters-container-inline .filter-container {
+        .main-container vaadin-split-layout .left-side-container .filters-container.filters-container--inline .filter-container {
           flex: 1;
           margin: 0 5px;
+        }
+
+        .main-container vaadin-split-layout .left-side-container .filters-container:not(.filters-container--inline) .filter-container.filter-container--full-width {
+          grid-column: span 2;
         }
 
         .main-container vaadin-split-layout .left-side-container .filters-container .filter-container paper-input,
@@ -841,7 +845,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
             <div hidden$="[[!__displayAllFilters]]">
               <div class$="[[__filtersContainerClassName()]]">
                 <template is="dom-repeat" items="[[__filters]]">
-                  <div class="filter-container">
+                  <div class$="[[__filterContainerClassName(item.filter.fullWidth)]]">
                     <!--Casper-Select filter-->
                     <template is="dom-if" if="[[__isFilterCasperSelect(item.filter.type)]]">
                       <casper-select
@@ -2133,12 +2137,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
   /**
    * Depending on the current MOAC type, the active filters will be displayed differently by either
-   * adding the 'filters-container-inline' class or not.
+   * adding the 'filters-container--inline' class or not.
    */
   __filtersContainerClassName () {
     return this.hasEpaper
       ? 'filters-container'
-      : 'filters-container filters-container-inline';
+      : 'filters-container filters-container--inline';
+  }
+
+  /**
+   * This method allows filters to span over two columns instead of the default one.
+   */
+  __filterContainerClassName (fullWidth = false) {
+    return !fullWidth
+      ? 'filter-container'
+      : 'filter-container filter-container--full-width';
   }
 
   /**
