@@ -51,6 +51,7 @@ class CasperMoacMenu extends PolymerElement {
           width: 55px;
           height: 55px;
           padding: 10px;
+          border: 1px solid var(--primary-color);
         }
 
         #menuTrigger[data-menu-opened] {
@@ -68,8 +69,8 @@ class CasperMoacMenu extends PolymerElement {
       <casper-icon-button
         id="menuTrigger"
         disabled="[[disabled]]"
-        icon="[[__menuIcon(__opened, openIcon, closeIcon)]]"
-        data-menu-opened$="[[__opened]]">
+        data-menu-opened$="[[__opened]]"
+        icon="[[__menuIcon(__opened, openIcon, closeIcon)]]">
       </casper-icon-button>
 
       <casper-moac-menu-items
@@ -91,7 +92,12 @@ class CasperMoacMenu extends PolymerElement {
       this.__boundCloseOnEscapePress = this.__closeOnEscapePress.bind(this);
 
       this.$.menuTrigger.addEventListener('click', () => { this.toggle(); });
-      this.$.menuTrigger.addEventListener('mouseover', () => { this.open(); });
+      this.$.menuTrigger.addEventListener('mouseover', () => {
+        setTimeout(() => {
+          // Do not open the casper-moac-menu automatically on hover.
+          if (this.$.menuTrigger.matches(':hover')) this.open();
+        }, 150);
+      });
 
       this.$.menuItems.positionTarget = this.$.menuTrigger;
       this.$.menuItems.verticalOffset = this.$.menuTrigger.offsetHeight + 10;
