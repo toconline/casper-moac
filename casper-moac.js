@@ -1414,17 +1414,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       this.$.splitLayout.$.splitter.style.display = 'none';
     }
 
-    this.$.splitLayout.addEventListener('iron-resize', () => {
-      this.__throttle('__splitterResizeThrottle', () => {
-        const headerContainer = this.shadowRoot.querySelector('.header-container');
+    this.$.splitLayout.addEventListener('splitter-dragend', () => {
+      const headerContainer = this.shadowRoot.querySelector('.header-container');
 
-        afterNextRender(this, () => {
-          headerContainer.offsetWidth < 600
-            ? headerContainer.classList.add('header-container--responsive')
-            : headerContainer.classList.remove('header-container--responsive');
-        })
-      }, 500);
+      afterNextRender(this, () => {
+        headerContainer.offsetWidth < 600
+          ? headerContainer.classList.add('header-container--responsive')
+          : headerContainer.classList.remove('header-container--responsive');
+      })
     });
+
+    // Fire the initial event to make sure the header container is aligned correctly from the get-go.
+    this.$.splitLayout.dispatchEvent(new CustomEvent('splitter-dragend'));
 
     if (!this.disableSelection) {
       afterNextRender(this, () => {
@@ -2224,21 +2225,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (this[debouncerProperty] && this[debouncerProperty].isActive()) {
       this[debouncerProperty].cancel();
     }
-  }
-
-  /**
-   * This function is used to throttle the execution of a function.
-   *
-   * @param {String} throttleProperty The casper-moac's property that will tell if the function can be called or not.
-   * @param {Function} callback The function that will be invoked.
-   * @param {Number} throttleMilliseconds The periodicity in which a function can be called.
-   */
-  __throttle (throttleProperty, callback, throttleMilliseconds = 250) {
-    if (this[throttleProperty]) return;
-
-    callback();
-    this[throttleProperty] = true;
-    setTimeout(() => { this[throttleProperty] = undefined }, throttleMilliseconds)
   }
 
   /**
