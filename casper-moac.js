@@ -497,16 +497,25 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           border-bottom: 1px solid var(--primary-color);
         }
 
+        .main-container vaadin-split-layout .left-side-container .header-container.header-container--responsive {
+          flex-direction: column;
+        }
+
         .main-container vaadin-split-layout .left-side-container .header-container > * {
           flex: 1;
         }
 
+        .main-container vaadin-split-layout .left-side-container .header-container .header-left-side-container {
+          display: flex;
+        }
+
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container {
+          display: flex;
+          flex-grow: 1;
+          flex-direction: column;
+          height: 70px;
           padding: 0 10px;
           text-align: center;
-          display: flex;
-          height: 70px;
-          flex-direction: column;
           position: relative;
         }
 
@@ -804,20 +813,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         <vaadin-split-layout id="splitLayout">
           <div class="left-side-container" style="[[__leftSideStyling()]]">
             <div class="header-container">
-              <!--Casper-moac-menu-->
-              <slot name="menu"></slot>
-              <div class="generic-filter-container">
-                <!--Generic Filter input-->
-                <input placeholder="[[filterInputPlaceholder]]" id="filterInput" />
-                <casper-icon id="filterInputIcon" on-click="__clearFilterInput"></casper-icon>
+              <div class="header-left-side-container">
+                <!--Casper-moac-menu-->
+                <slot name="menu"></slot>
+                <div class="generic-filter-container">
+                  <!--Generic Filter input-->
+                  <input placeholder="[[filterInputPlaceholder]]" id="filterInput" />
+                  <casper-icon id="filterInputIcon" on-click="__clearFilterInput"></casper-icon>
 
-                <!--Show/hide the active filters-->
-                <template is="dom-if" if="[[__hasFilters]]">
-                  <paper-button id="displayAllFilters" on-click="__toggleDisplayAllFilters">
-                    <span>Ver todos os filtros</span>
-                    <casper-icon icon="fa-regular:angle-down"></casper-icon>
-                  </paper-button>
-                </template>
+                  <!--Show/hide the active filters-->
+                  <template is="dom-if" if="[[__hasFilters]]">
+                    <paper-button id="displayAllFilters" on-click="__toggleDisplayAllFilters">
+                      <span>Ver todos os filtros</span>
+                      <casper-icon icon="fa-regular:angle-down"></casper-icon>
+                    </paper-button>
+                  </template>
+                </div>
               </div>
 
               <!--Active filters-->
@@ -1402,6 +1413,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (!this.hasEpaper) {
       this.$.splitLayout.$.splitter.style.display = 'none';
     }
+
+    this.$.splitLayout.addEventListener('iron-resize', () => {
+      this.__throttle('__splitterResizeThrottle', () => {
+        const headerContainer = this.shadowRoot.querySelector('.header-container');
+
+        afterNextRender(this, () => {
+          headerContainer.offsetWidth < 600
+            ? headerContainer.classList.add('header-container--responsive')
+            : headerContainer.classList.remove('header-container--responsive');
+        })
+      }, 500);
+    });
 
     if (!this.disableSelection) {
       afterNextRender(this, () => {
@@ -2180,12 +2203,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    *
    * @param {String} debouncerProperty The casper-moac's property that will hold the current debounce status.
    * @param {Function} callback The function that will be invoked afterwards.
-   * @param {Number} timeOutMilliseconds Number of milliseconds after the last invoke that will trigger the callback.
+   * @param {Number} debounceMilliseconds Number of milliseconds after the last invoke that will trigger the callback.
    */
-  __debounce (debouncerProperty, callback, timeOutMilliseconds = 250) {
+  __debounce (debouncerProperty, callback, debounceMilliseconds = 250) {
     this[debouncerProperty] = Debouncer.debounce(
       this[debouncerProperty],
-      timeOut.after(timeOutMilliseconds),
+      timeOut.after(debounceMilliseconds),
       () => {
         callback();
       }
@@ -2201,6 +2224,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (this[debouncerProperty] && this[debouncerProperty].isActive()) {
       this[debouncerProperty].cancel();
     }
+  }
+
+  /**
+   * This function is used to throttle the execution of a function.
+   *
+   * @param {String} throttleProperty The casper-moac's property that will tell if the function can be called or not.
+   * @param {Function} callback The function that will be invoked.
+   * @param {Number} throttleMilliseconds The periodicity in which a function can be called.
+   */
+  __throttle (throttleProperty, callback, throttleMilliseconds = 250) {
+    if (this[throttleProperty]) return;
+
+    callback();
+    this[throttleProperty] = true;
+    setTimeout(() => { this[throttleProperty] = undefined }, throttleMilliseconds)
   }
 
   /**
