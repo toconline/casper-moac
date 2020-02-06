@@ -507,6 +507,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         .main-container vaadin-split-layout .left-side-container .header-container .header-left-side-container {
           display: flex;
+          user-select: none;
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container {

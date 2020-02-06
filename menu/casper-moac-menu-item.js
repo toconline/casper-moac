@@ -16,7 +16,10 @@ export class CasperMoacMenuItem extends PolymerElement {
           font-size: 15px;
           user-select: none;
           align-items: center;
-          padding: 8px 25px 8px 15px;
+          width: fit-content;
+          padding-top: 8px;
+          padding-bottom: 8px;
+          padding-left: 12.5px;
         }
 
         #container ::slotted(a) {
@@ -27,8 +30,8 @@ export class CasperMoacMenuItem extends PolymerElement {
 
         :host([disabled]) #container,
         :host([disabled]) #container ::slotted(a) {
-          color: var(--disabled-text-color);
           pointer-events: none;
+          color: var(--disabled-text-color);
         }
 
         #container:hover,
@@ -37,6 +40,11 @@ export class CasperMoacMenuItem extends PolymerElement {
           cursor: pointer;
           text-decoration: none;
           transition: background-color 100ms linear;
+        }
+
+        #container:hover casper-icon-button {
+          background-color: white;
+          color: var(--primary-color);
         }
 
         #container casper-icon-button {

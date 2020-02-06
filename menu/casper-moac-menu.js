@@ -10,7 +10,19 @@ class CasperMoacMenu extends PolymerElement {
   static get properties () {
     return {
       /**
+       * Flag that states if the menu is opened or not.
+       *
+       * @type {Boolean}
+       */
+      opened: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+        observer: '__openedChanged'
+      },
+      /**
        * Flag that states if the menu is currently disabled or not.
+       *
        * @type {Boolean}
        */
       disabled: {
@@ -19,8 +31,8 @@ class CasperMoacMenu extends PolymerElement {
         observer: '__disabledChanged'
       },
       /**
-       * Icon that will appear when the casper-moac-menu
-       * is closed.
+       * Icon that will appear when the casper-moac-menu is closed.
+       *
        * @type {String}
        */
       openIcon: {
@@ -28,8 +40,8 @@ class CasperMoacMenu extends PolymerElement {
         value: 'fa-light:plus'
       },
       /**
-       * Icon that will appear when the casper-moac-menu
-       * is opened.
+       * Icon that will appear when the casper-moac-menu is opened.
+       *
        * @type {String}
        */
       closeIcon: {
@@ -42,107 +54,114 @@ class CasperMoacMenu extends PolymerElement {
   static get template () {
     return html`
       <style>
-        :host  {
-          z-index: 1;
-        }
-
-        #menuTrigger {
-          z-index: 2;
+        :host #menu-trigger {
+          z-index: 3;
           width: 55px;
           height: 55px;
           padding: 10px;
+          cursor: pointer;
+          border: 1px solid transparent;
+        }
+
+        :host #menu-trigger:hover {
           border: 1px solid var(--primary-color);
         }
 
-        #menuTrigger[data-menu-opened] {
+        :host([opened]) #menu-trigger {
           box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.25);
         }
 
-        #circleBackground {
-          opacity: 0.95;
+        :host #menu-items {
+          opacity: 0;
+          display: flex;
+          position: absolute;
+          visibility: hidden;
+          flex-direction: column;
+          transition: opacity 200ms linear;
+        }
+
+        :host([opened]) #menu-items {
+          z-index: 3;
+          opacity: 1;
+          visibility: visible;
+        }
+
+        :host #circle-background {
+          z-index: 2;
+          opacity: 0;
           position: absolute;
           border-radius: 50%;
           transform: translate(-35%, -35%);
           background-color: var(--casper-moac-menu-background-color);
+          transition: width 200ms linear,
+                      height 200ms linear,
+                      opacity 200ms linear;
+        }
+
+        :host([opened]) #circle-background {
+          opacity: 0.95;
+        }
+
+        ::slotted(casper-moac-menu-item:first-of-type) {
+          padding-top: 8px;
         }
       </style>
       <casper-icon-button
-        id="menuTrigger"
+        id="menu-trigger"
         disabled="[[disabled]]"
-        data-menu-opened$="[[__opened]]"
         icon="[[__menuIcon(__opened, openIcon, closeIcon)]]">
       </casper-icon-button>
 
-      <casper-moac-menu-items
-        id="menuItems"
-        opened="{{__opened}}"
-        vertical-align="top"
-        horizontal-align="left">
+      <div id="circle-background"></div>
+      <div id="menu-items">
         <slot></slot>
-      </casper-moac-menu-items>
-      <div id="circleBackground"></div>
+      </div>
     `;
   }
 
   ready () {
     super.ready();
 
+    this.__bindMouseEnterAndLeave();
+    this.__boundCloseOnEscapePress = this.__closeOnEscapePress.bind(this);
+
+    this.$['menu-items'].addEventListener('click', () => this.close());
+    this.$['circle-background'].addEventListener('click', () => this.close());
+    this.$['menu-trigger'].addEventListener('click', () => { this.opened = !this.opened; });
+
     afterNextRender(this, () => {
-      this.__bindMouseEnterAndLeave();
-      this.__boundCloseOnEscapePress = this.__closeOnEscapePress.bind(this);
-
-      this.$.menuTrigger.addEventListener('click', () => { this.toggle(); });
-      this.$.menuTrigger.addEventListener('mouseover', () => {
-        setTimeout(() => {
-          // Do not open the casper-moac-menu automatically on hover.
-          if (this.$.menuTrigger.matches(':hover')) this.open();
-        }, 150);
-      });
-
-      this.$.menuItems.positionTarget = this.$.menuTrigger;
-      this.$.menuItems.verticalOffset = this.$.menuTrigger.offsetHeight + 10;
-      this.$.menuItems.horizontalOffset = this.$.menuTrigger.offsetWidth / 2 - 30;
-      this.$.menuItems.addEventListener('iron-overlay-canceled', event => {
-        // Prevent the default action which would close the overlay and then the below listener would re-open it.
-        if (event.detail.path.includes(this.$.menuTrigger) || event.detail.path.includes(this.$.circleBackground)) {
-          event.preventDefault();
-        }
-      });
-
-      // Close the menu if there was a click on the circle background.
-      this.$.circleBackground.addEventListener('click', () => this.close());
+      this.__menuBackgroundDimensions = Math.max(500, Math.max(this.$['menu-items'].scrollHeight, this.$['menu-items'].scrollWidth) * 2);
     });
   }
 
   /**
-   * Bind the mouseenter / mouseleave events that will change the opacity
-   * when the user is hovering in / out the casper-moac-menu.
+   * Bind the mouseenter / mouseleave events that will change the opacity when the user is hovering in / out the casper-moac-menu.
    */
   __bindMouseEnterAndLeave () {
-    this.shadowRoot.host.addEventListener('mouseleave', () => {
-      if (this.$.menuItems.opened) {
-        // Start a fading out transition by reducing the opacity.
-        const fadingOutDuration = 250;
-        this.shadowRoot.host.style.transition = `opacity ${fadingOutDuration}ms linear`;
-        this.shadowRoot.host.style.opacity = 0;
-
-        this.__fadeOutTimeout = setTimeout(() => {
-          this.close();
-          this.shadowRoot.host.style.transition = '';
-          this.shadowRoot.host.style.opacity = 1;
-        }, fadingOutDuration);
-      }
+    this.shadowRoot.host.addEventListener('mouseenter', () => {
+      clearTimeout(this.__closeDelayTimeout);
+      this.$['menu-items'].style.opacity = '';
+      this.$['circle-background'].style.opacity = '';
     });
 
-    this.shadowRoot.host.addEventListener('mouseenter', () => {
-      this.shadowRoot.host.style.transition = '';
-      this.shadowRoot.host.style.opacity = 1;
-      clearTimeout(this.__fadeOutTimeout);
+    this.shadowRoot.host.addEventListener('mouseleave', () => {
+      if (this.opened) {
+        // Start a fading out transition by reducing the opacity.
+        this.$['menu-items'].style.opacity = 0;
+        this.$['circle-background'].style.opacity = 0;
+
+        this.__closeDelayTimeout = setTimeout(() => {
+          this.close();
+          this.$['menu-items'].style.opacity = '';
+          this.$['circle-background'].style.opacity = '';
+        }, 200);
+      }
     });
   }
 
   /**
    * Method that changes the menu's icon when it opens / closes.
+   *
    * @param {Boolean} opened Boolean that states if the menu is open or not.
    */
   __menuIcon (opened) {
@@ -163,56 +182,47 @@ class CasperMoacMenu extends PolymerElement {
     if (event.code === 'Escape') this.close();
   }
 
-  /**
-   * Public method to open the menu.
-   */
-  open () {
-    document.addEventListener('keydown', this.__boundCloseOnEscapePress);
+  __openedChanged (opened) {
+    // If the user presses the menu trigger too fast the background dimensions might not exist yet.
+    if (!this.__menuBackgroundDimensions) return afterNextRender(this, () => this.__openedChanged(opened));
 
-    if (!this.__menuBackgroundDimensions) {
-      // Open the menu invisibly to calculate its dimensions.
-      this.$.menuItems.style.visibility = 'hidden';
-      this.$.menuItems.open();
-      this.__calculateMenuBackgroundDimensions();
+    if (!opened) {
+      this.$['menu-trigger'].icon = this.openIcon;
+      this.$['circle-background'].style.width = 0;
+      this.$['circle-background'].style.height = 0;
+
+      document.removeEventListener('keydown', this.__boundCloseOnEscapePress);
     } else {
-      this.$.menuItems.open();
-      this.$.circleBackground.style.width = `${this.__menuBackgroundDimensions}px`;
-      this.$.circleBackground.style.height = `${this.__menuBackgroundDimensions}px`;
+      this.$['menu-trigger'].icon = this.closeIcon;
+      this.$['circle-background'].style.width = `${this.__menuBackgroundDimensions}px`;
+      this.$['circle-background'].style.height = `${this.__menuBackgroundDimensions}px`;
+
+
+      document.addEventListener('keydown', this.__boundCloseOnEscapePress);
     }
   }
 
   /**
-   * This method is used to calculate the menu's background size on the first render. It may invoke
-   * itself again if the menu wasn't rendered yet and therefore has no width / height.
+   * Public method to open the menu.
    */
-  __calculateMenuBackgroundDimensions () {
-    // This means the menu wasn't rendered yet.
-    if (this.$.menuItems.scrollHeight === 0 && this.$.menuItems.scrollWidth === 0) {
-      return afterNextRender(this, () => this.__calculateMenuBackgroundDimensions());
-    }
-
-    this.__menuBackgroundDimensions = Math.max(500, Math.max(this.$.menuItems.scrollHeight, this.$.menuItems.scrollWidth) * 2);
-
-    this.$.circleBackground.style.width = `${this.__menuBackgroundDimensions}px`;
-    this.$.circleBackground.style.height = `${this.__menuBackgroundDimensions}px`;
-    this.$.menuItems.style.visibility = 'visible';
+  open () {
+    this.opened = true;
   }
 
   /**
    * Public method to close the menu.
    */
   close () {
-    this.$.menuItems.close();
-    this.$.circleBackground.style.width = 0;
-    this.$.circleBackground.style.height = 0;
-    document.removeEventListener('keydown', this.__boundCloseOnEscapePress);
+    this.opened = false;
   }
 
   /**
    * Public method that opens / closes the menu depending on its current state.
    */
   toggle () {
-    this.__opened ? this.close() : this.open();
+    this.opened
+      ? this.close()
+      : this.open();
   }
 }
 
