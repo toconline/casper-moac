@@ -1,5 +1,4 @@
 import './casper-moac-menu-item';
-import './casper-moac-menu-items';
 import '@casper2020/casper-icons/casper-icon.js';
 import '@casper2020/casper-icons/casper-icon-button.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
