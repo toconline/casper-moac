@@ -59,11 +59,6 @@ class CasperMoacMenu extends PolymerElement {
           height: 55px;
           padding: 10px;
           cursor: pointer;
-          border: 1px solid transparent;
-        }
-
-        :host #menu-trigger:hover {
-          border: 1px solid var(--primary-color);
         }
 
         :host([opened]) #menu-trigger {

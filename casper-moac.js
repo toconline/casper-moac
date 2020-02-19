@@ -1,4 +1,5 @@
-import './sidebar/casper-moac-sidebar.js';
+import './components/casper-moac-pill.js';
+import './components/casper-moac-active-filter.js';
 import { CasperMoacSortingMixin } from './mixins/casper-moac-sorting-mixin.js';
 import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
 import { CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
@@ -8,7 +9,6 @@ import '@vaadin/vaadin-grid/vaadin-grid.js';
 import '@vaadin/vaadin-grid/vaadin-grid-column.js';
 import '@vaadin/vaadin-grid/vaadin-grid-selection-column.js';
 import '@casper2020/casper-icons/casper-icon.js';
-import '@casper2020/casper-icons/casper-icons.js';
 import '@casper2020/casper-epaper/casper-epaper.js';
 import '@casper2020/casper-select/casper-select.js';
 import '@casper2020/casper-date-picker/casper-date-picker.js';
@@ -624,17 +624,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
           color: #A5A5A5;
         }
 
-        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .active-filters-list .active-filter strong {
-          cursor: pointer;
-          margin-right: 5px;
-          color: var(--primary-color);
-          transition: color 100ms linear;
-        }
-
-        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .active-filters-list .active-filter strong:hover {
-          color: var(--dark-primary-color);
-        }
-
         /* Active filters */
         .main-container vaadin-split-layout .left-side-container .filters-container {
           display: grid;
@@ -683,25 +672,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
         .main-container vaadin-split-layout .left-side-container #active-sorters-container strong {
           margin-right: 10px;
-        }
-
-        .main-container vaadin-split-layout .left-side-container #active-sorters-container > div {
-          height: 25px;
-          display: flex;
-          margin: 0 5px;
-          padding: 0 10px;
-          align-items: center;
-          border-radius: 15px;
-          color: var(--on-primary-color);
-          background-color: var(--primary-color);
-        }
-
-        .main-container vaadin-split-layout .left-side-container #active-sorters-container > div > casper-icon {
-          width: 15px;
-          height: 15px;
-          cursor: pointer;
-          margin-left: 5px;
-          color: white;
         }
 
         /* Vaadin-grid */
@@ -913,14 +883,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               <div id="active-sorters-container">
                 <strong>Itens ordenados por:</strong>
                 <template is="dom-repeat" items="[[__activeSorters]]" as="activeSorter">
-                  <div>
+                  <casper-moac-pill id="[[activeSorter.path]]" on-click-callback="[[__removeActiveSorter]]">
                     [[activeSorter.header]]
-                    <casper-icon
-                      icon="fa-light:times"
-                      on-click="__removeActiveSorter"
-                      data-path$="[[activeSorter.path]]">
-                    </casper-icon>
-                  </div>
+                  </casper-moac-pill>
                 </template>
               </div>
             </template>
@@ -991,8 +956,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                   disable-sticky-animation="[[epaperDisableStickyAnimation]]">
                   <slot name="casper-epaper-tabs" slot="casper-epaper-tabs"></slot>
                   <slot name="casper-epaper-actions" slot="casper-epaper-actions"></slot>
-                  <slot name="casper-epaper-context-menu" slot="casper-epaper-context-menu"></slot>
                   <slot name="casper-epaper-line-menu" slot="casper-epaper-line-menu"></slot>
+                  <slot name="casper-epaper-context-menu" slot="casper-epaper-context-menu"></slot>
                 </casper-epaper>
               </div>
             </template>
@@ -1039,6 +1004,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         }
       });
       multiSelectionElementObserver.observe(multiSelectionElement);
+    }
+
+    // This method gets invoked when the user clicks to remove an active sorter.
+    this.__removeActiveSorter = path => {
+      for (let sorterIndex = 0; sorterIndex < this.__sorters.length; sorterIndex++) {
+        const currentSorter = this.__sorters[sorterIndex];
+
+        if (currentSorter.path === path) {
+          currentSorter.direction = undefined;
+          return;
+        }
+      }
     }
   }
 
@@ -1818,7 +1795,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (!this.__selectedItems || this.__selectedItems.length === 0) {
       this.$.grid.style.borderTopLeftRadius = '5px';
       this.$.grid.style.borderTopRightRadius = '5px';
-      this.$['multi-selection-container'].style.height = ''
+      this.$['multi-selection-container'].style.height = '';
     } else {
       this.$.grid.style.borderTopLeftRadius = '';
       this.$.grid.style.borderTopRightRadius = '';
@@ -1901,29 +1878,24 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    *
    * @param {Event} event The event's object.
    */
-  __displayInlineFilters (event) {
-    const filterKey = event.target.dataset.filter
+  __displayInlineFilters (filterKey) {
     const filter = this.filters[filterKey];
+    const filterComponent = this.__getFilterComponent(filterKey);
 
     switch (filter.type) {
       case CasperMoacFilterTypes.CASPER_SELECT:
-        const selectElement = this.shadowRoot.querySelector(`casper-select[data-filter="${filterKey}"]`);
-
-        selectElement.opened
-          ? selectElement.closeDropdown()
-          : selectElement.openDropdown(this.$.activeFilters);
-        break;
-      case CasperMoacFilterTypes.PAPER_INPUT:
-        this.__displayAllFilters = true;
-        this.shadowRoot.querySelector(`paper-input[data-filter="${filterKey}"]`).focus();
+        filterComponent.opened
+          ? filterComponent.closeDropdown()
+          : filterComponent.openDropdown(this.$.activeFilters);
         break;
       case CasperMoacFilterTypes.CASPER_DATE_PICKER:
         this.__displayAllFilters = true;
-        this.shadowRoot.querySelector(`casper-date-picker[data-filter="${filterKey}"]`).open();
+        filterComponent.open();
         break;
+      case CasperMoacFilterTypes.PAPER_INPUT:
       case CasperMoacFilterTypes.PAPER_CHECKBOX:
         this.__displayAllFilters = true;
-        this.shadowRoot.querySelector(`paper-checkbox[data-filter="${filterKey}"]`).focus();
+        filterComponent.focus();
         break;
     }
   }
@@ -1969,18 +1941,41 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Object} filterItem The filter's settings.
    */
   __renderActiveFilterDOM (filterItem) {
-    const filterContainer = document.createElement('div');
-    filterContainer.className = 'active-filter';
+    const activeFilter = document.createElement('casper-moac-active-filter');
+    activeFilter.key = filterItem.filterKey;
+    activeFilter.label = filterItem.filter.inputOptions.label;
+    activeFilter.value = this.__activeFilterValue(filterItem);
+    activeFilter.onClickCallback = filterKey => this.__displayInlineFilters(filterKey);
+    activeFilter.onRemoveCallback = filterKey => this.__removeActiveFilter(filterKey);
 
-    const filterLabelElement = document.createTextNode(`${filterItem.filter.inputOptions.label}: `);
-    const filterValueElement = document.createElement('strong');
-    filterValueElement.innerHTML = this.__activeFilterValue(filterItem);
-    filterValueElement.dataset.filter = filterItem.filterKey;
-    filterValueElement.addEventListener('click', event => this.__displayInlineFilters(event));
+    this.$.activeFilters.appendChild(activeFilter);
+  }
 
-    filterContainer.appendChild(filterLabelElement);
-    filterContainer.appendChild(filterValueElement);
-    this.$.activeFilters.appendChild(filterContainer);
+  /**
+   * This method removes an active filter by changing the value of the the casper-select, paper-input, etc associated with it.
+   *
+   * @param {String} key The filter's unique identifier.
+   */
+  __removeActiveFilter (key) {
+    const filterComponent = this.__getFilterComponent(key);
+
+    filterComponent.nodeName.toLowerCase() !== 'paper-checkbox'
+      ? filterComponent.value = ''
+      : filterComponent.checked = false;
+  }
+
+  /**
+   * This method returns the DOM object that represents the casper-select, paper-input, etc, for a specific filter.
+   *
+   * @param {String} key The filter's unique identifier.
+   */
+  __getFilterComponent (key) {
+    switch (this.filters[key].type) {
+      case CasperMoacFilterTypes.PAPER_INPUT: return this.shadowRoot.querySelector(`paper-input[data-filter="${key}"]`);
+      case CasperMoacFilterTypes.CASPER_SELECT: return this.shadowRoot.querySelector(`casper-select[data-filter="${key}"]`);
+      case CasperMoacFilterTypes.PAPER_CHECKBOX: return this.shadowRoot.querySelector(`paper-checkbox[data-filter="${key}"]`);
+      case CasperMoacFilterTypes.CASPER_DATE_PICKER: return this.shadowRoot.querySelector(`casper-date-picker[data-filter="${key}"]`);
+    }
   }
 
   /**
@@ -2338,22 +2333,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     !searchParamsText
       ? history.replaceState({}, '', window.location.pathname)
       : history.replaceState({}, '', `${window.location.pathname}?${searchParamsText}`);
-  }
-
-  /**
-   * This method gets invoked when the user clicks to remove an active sorter.
-   *
-   * @param {Event} event The event's object.
-   */
-  __removeActiveSorter (event) {
-    for (let sorterIndex = 0; sorterIndex < this.__sorters.length; sorterIndex++) {
-      const currentSorter = this.__sorters[sorterIndex];
-
-      if (currentSorter.path === event.target.dataset.path) {
-        currentSorter.direction = undefined;
-        return;
-      }
-    }
   }
 }
 

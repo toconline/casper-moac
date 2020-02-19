@@ -370,7 +370,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
     async __fetchRequest (url) {
       try {
         this.loading = true;
-        const socketResponse = await this.app.broker.get(url, this.resourceTimeoutMs);
+        const socketResponse = await this.app.broker.get(url, this.resourceTimeoutMs, true);
         this.loading = false;
 
         return socketResponse;
@@ -407,7 +407,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.resourceDefaultFilters,
         this.__buildResourceUrlFreeFilters(),
         this.__buildResourceUrlFixedFilters(),
-      ].filter(filterUrlParam => !!filterUrlParam).join(' AND ');
+      ].filter(filterUrlParam => !!filterUrlParam)
+        .map(filterUrlParam => encodeURIComponent(filterUrlParam))
+        .join(' AND ');
 
       if (filterResourceUrlParams) {
         resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${filterResourceUrlParams}"`];
@@ -429,20 +431,22 @@ export const CasperMoacLazyLoadMixin = superClass => {
         && this.resourceFilterAttributes
         && this.resourceFilterAttributes.length > 0) {
 
+        const filterValue = this.$.filterInput.value.toString().trim();
+
         freeFilters = this.resourceFilterAttributes.map(filterAttribute => {
           if (filterAttribute.constructor.name === 'Object') {
             switch (filterAttribute.operator) {
-              case CasperMoacOperators.CONTAINS: return `${filterAttribute.field}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}%'`;
-              case CasperMoacOperators.ENDS_WITH: return `${filterAttribute.field}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}'`;
-              case CasperMoacOperators.STARTS_WITH: return `${filterAttribute.field}::TEXT ILIKE '${this.__sanitizeValue(this.$.filterInput.value)}%'`;
-              case CasperMoacOperators.EXACT_MATCH: return `${filterAttribute.field}::TEXT ILIKE '${this.__sanitizeValue(this.$.filterInput.value)}'`;
+              case CasperMoacOperators.CONTAINS: return `${filterAttribute.field}::TEXT ILIKE '%${filterValue}%'`;
+              case CasperMoacOperators.ENDS_WITH: return `${filterAttribute.field}::TEXT ILIKE '%${filterValue}'`;
+              case CasperMoacOperators.STARTS_WITH: return `${filterAttribute.field}::TEXT ILIKE '${filterValue}%'`;
+              case CasperMoacOperators.EXACT_MATCH: return `${filterAttribute.field}::TEXT ILIKE '${filterValue}'`;
             }
           }
 
-          // Encapsulate the free filters in parenthesis to not mess with the AND clause.
-          return `${filterAttribute}::TEXT ILIKE '%${this.__sanitizeValue(this.$.filterInput.value)}%'`;
+          return `${filterAttribute}::TEXT ILIKE '%${filterValue}%'`;
         });
 
+        // Encapsulate the free filters in parenthesis to not mess with the AND clause.
         freeFilters = `(${freeFilters.join(' OR ')})`;
       }
 
@@ -466,6 +470,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         )
         .map(filterItem => {
           const filter = filterItem.filter;
+          const filterValue = filter.value.toString().trim();
 
           switch (filter.lazyLoad.operator) {
             // Array comparisons.
@@ -482,11 +487,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
                 ? `${filter.lazyLoad.field} IN (${escapedFilterValue})`
                 : `${filter.lazyLoad.field} NOT IN (${escapedFilterValue})`;
             // String comparisons.
-            case CasperMoacOperators.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this.__sanitizeValue(filter.value)}'`;
-            case CasperMoacOperators.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${this.__sanitizeValue(filter.value)}%'`;
-            case CasperMoacOperators.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this.__sanitizeValue(filter.value)}'`;
-            case CasperMoacOperators.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${this.__sanitizeValue(filter.value)}%'`;
-            case CasperMoacOperators.DOES_NOT_CONTAIN: return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${this.__sanitizeValue(filter.value)}%'`;
+            case CasperMoacOperators.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${filterValue}% '`;
+            case CasperMoacOperators.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${filterValue}'`;
+            case CasperMoacOperators.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${filterValue}'`;
+            case CasperMoacOperators.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${filterValue}% '`;
+            case CasperMoacOperators.DOES_NOT_CONTAIN: return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${filterValue}% '`;
             // Numeric comparisons.
             case CasperMoacOperators.LESS_THAN: return `${filter.lazyLoad.field} < ${filter.value}`;
             case CasperMoacOperators.GREATER_THAN: return `${filter.lazyLoad.field} > ${filter.value}`;
@@ -517,18 +522,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
       if (filters.length > 0) resourceUrl = `${resourceUrl}&${filters.join('&')}`;
 
       return resourceUrl;
-    }
-
-    /**
-     * Method used to escape special characters that might break the ILIKE clause or the JSONAPI url parsing.
-     * @param {String} value
-     */
-    __sanitizeValue (value) {
-      return value
-        .toString()
-        .trim()
-        .replace(/[%\\]/g, '\\$&')
-        .replace(/[&]/g, '_');
     }
   }
 }
