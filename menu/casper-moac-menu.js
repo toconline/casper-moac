@@ -101,6 +101,7 @@ class CasperMoacMenu extends PolymerElement {
         }
       </style>
       <casper-icon-button
+        with-border
         id="menu-trigger"
         disabled="[[disabled]]"
         icon="[[__menuIcon(__opened, openIcon, closeIcon)]]">

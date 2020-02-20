@@ -20,6 +20,15 @@ class CasperMoacPill extends PolymerElement {
        */
       onClickCallback: {
         type: Function
+      },
+      /**
+       * Flag that inverts the color scheme of the component.
+       *
+       * @type {Boolean}
+       */
+      reverse: {
+        type: Boolean,
+        reflectToAttribute: true
       }
     };
   }
@@ -38,14 +47,22 @@ class CasperMoacPill extends PolymerElement {
           box-sizing: border-box;
           color: var(--on-primary-color);
           background-color: var(--primary-color);
-          transition: color 200ms,
-                      background-color 200ms;
+          border: 1px solid var(--primary-color);
+        }
+
+        :host([reverse]) {
+          color: var(--primary-color);
+          background-color: var(--on-primary-color);
         }
 
         :host(:hover) {
           color: var(--primary-color);
-          border: 1px solid var(--primary-color);
           background-color: var(--on-primary-color);
+        }
+
+        :host([reverse]:hover) {
+          color: var(--on-primary-color);
+          background-color: var(--primary-color);
         }
 
         :host casper-icon {
@@ -56,8 +73,16 @@ class CasperMoacPill extends PolymerElement {
           color: var(--on-primary-color);
         }
 
+        :host([reverse]) casper-icon {
+          color: var(--primary-color);
+        }
+
         :host(:hover) casper-icon {
           color: var(--primary-color);
+        }
+
+        :host([reverse]:hover) casper-icon {
+          color: var(--on-primary-color);
         }
       </style>
 

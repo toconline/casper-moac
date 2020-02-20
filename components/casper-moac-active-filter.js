@@ -29,6 +29,15 @@ class CasperMoacActiveFilter extends PolymerElement {
         type: String
       },
       /**
+       * Flag that states if the filter can be removed or not.
+       *
+       * @type {Boolean}
+       */
+      required: {
+        type: Boolean,
+        value: false
+      },
+      /**
        * The function that will be invoked when the user clicks on the active filter's value.
        *
        * @type {Function}
@@ -81,9 +90,17 @@ class CasperMoacActiveFilter extends PolymerElement {
       </style>
       [[label]]:
       <div id="value" on-click="__onValueClick">[[value]]</div>
-      <div id="icon-container">
-        <casper-icon-button icon="fa-light:times" on-click="__onRemoveIconClick"></casper-icon-button>
-      </div>
+
+      <template is="dom-if" if="[[!required]]">
+        <div id="icon-container">
+          <casper-icon-button
+            reverse
+            with-border
+            icon="fa-light:times"
+            on-click="__onRemoveIconClick">
+          </casper-icon-button>
+        </div>
+      </template>
     `;
   }
 

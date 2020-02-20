@@ -1,9 +1,10 @@
+import './sidebar/casper-moac-sidebar.js';
+import './sidebar/casper-moac-sidebar-item.js';
 import './components/casper-moac-pill.js';
 import './components/casper-moac-active-filter.js';
 import { CasperMoacSortingMixin } from './mixins/casper-moac-sorting-mixin.js';
 import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
 import { CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
-
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
 import '@vaadin/vaadin-grid/vaadin-grid-column.js';
@@ -883,7 +884,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               <div id="active-sorters-container">
                 <strong>Itens ordenados por:</strong>
                 <template is="dom-repeat" items="[[__activeSorters]]" as="activeSorter">
-                  <casper-moac-pill id="[[activeSorter.path]]" on-click-callback="[[__removeActiveSorter]]">
+                  <casper-moac-pill reverse id="[[activeSorter.path]]" on-click-callback="[[__removeActiveSorter]]">
                     [[activeSorter.header]]
                   </casper-moac-pill>
                 </template>
@@ -1943,6 +1944,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   __renderActiveFilterDOM (filterItem) {
     const activeFilter = document.createElement('casper-moac-active-filter');
     activeFilter.key = filterItem.filterKey;
+    activeFilter.required = filterItem.filter.required;
     activeFilter.label = filterItem.filter.inputOptions.label;
     activeFilter.value = this.__activeFilterValue(filterItem);
     activeFilter.onClickCallback = filterKey => this.__displayInlineFilters(filterKey);
