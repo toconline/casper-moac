@@ -1740,7 +1740,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
 
       // Override the filter's default value if it's present in the URL.
       if (searchParams.has(filterKey)) {
-        filterSettings.filter.value = searchParams.get(filterKey);
+        filterSettings.filter.value = this.__getValueFromPrettyParameter(filterSettings.filter, searchParams.get(filterKey));
       }
 
       if (this.__valueIsNotEmpty(filterSettings.filter.value)) {
@@ -2300,12 +2300,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__historyStateFilters = Object.keys(this.filters)
       .filter(filterKey => !this.filters[filterKey].historyState || !this.filters[filterKey].historyState.disabled)
       .sort((a, b) => {
-        if ((this.filters[a].historyState === undefined || this.filters[a].historyState.priority === undefined) && (this.filters[b].historyState === undefined || this.filters[b].historyState.priority === undefined)) return 0;
-        if (this.filters[a].historyState === undefined || this.filters[a].historyState.priority === undefined) return 1;
-        if (this.filters[b].historyState === undefined || this.filters[b].historyState.priority === undefined) return -1;
+        const nextHistoryState = this.filters[b].historyState;
+        const previousHistoryState = this.filters[a].historyState;
 
-        if (this.filters[a].historyState.priority < this.filters[b].historyState.priority) return -1;
-        if (this.filters[a].historyState.priority > this.filters[b].historyState.priority) return 1;
+        if ((nextHistoryState === undefined || nextHistoryState.priority === undefined) &&
+          (previousHistoryState === undefined || previousHistoryState.priority === undefined)) return 0;
+
+        if (nextHistoryState === undefined || nextHistoryState.priority === undefined) return -1;
+        if (previousHistoryState === undefined || previousHistoryState.priority === undefined) return 1;
+
+        if (previousHistoryState.priority < nextHistoryState.priority) return -1;
+        if (previousHistoryState.priority > nextHistoryState.priority) return 1;
 
         return 0;
       });
@@ -2317,12 +2322,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   __updateUrlWithCurrentFilters () {
     const searchParams = new URLSearchParams(window.location.search);
     this.__historyStateFilters.forEach(historyStateFilter => {
+      const filter = this.filters[historyStateFilter];
+
       // Remove the value firstly so that we don't end up with stale data.
       searchParams.delete(historyStateFilter);
 
       // Only include non-empty filters.
-      if (this.__valueIsNotEmpty(this.filters[historyStateFilter].value)) {
-        searchParams.set(historyStateFilter, this.filters[historyStateFilter].value);
+      if (this.__valueIsNotEmpty(filter.value)) {
+        searchParams.set(historyStateFilter, this.__getPrettyParameterForValue(filter));
       }
     });
 
@@ -2335,6 +2342,42 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     !searchParamsText
       ? history.replaceState({}, '', window.location.pathname)
       : history.replaceState({}, '', `${window.location.pathname}?${searchParamsText}`);
+  }
+
+  /**
+   * Tries to map the pretty URL search parameter with an actual value provided by the developer.
+   *
+   * @param {Object} historyState The current's filter history state settings.
+   * @param {String} parameter The value that is in the URL for the current filter.
+   */
+  __getValueFromPrettyParameter ({ historyState }, parameter) {
+    if (historyState && historyState.prettyParameters) {
+      // Find the key which value matches with the parameter present in the URL.
+      const filterValue = Object.keys(historyState.prettyParameters).find(prettyParameter => {
+        return historyState.prettyParameters[prettyParameter] === parameter;
+      });
+
+      if (filterValue) return filterValue;
+    }
+
+    return parameter;
+  }
+
+  /**
+   * Tries to obtain a pretty URL search parameter for a given value.
+   *
+   * @param {Object} historyState The current filter's history state settings.
+   * @param {String} value The current filter's value.
+   */
+  __getPrettyParameterForValue ({ historyState, value }) {
+    if (historyState
+      && !historyState.disabled
+      && historyState.prettyParameters
+      && historyState.prettyParameters.hasOwnProperty(value)) {
+      return historyState.prettyParameters[value];
+    } else {
+      return value;
+    }
   }
 }
 
