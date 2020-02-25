@@ -1,10 +1,3 @@
-import './sidebar/casper-moac-sidebar.js';
-import './sidebar/casper-moac-sidebar-item.js';
-import './components/casper-moac-pill.js';
-import './components/casper-moac-active-filter.js';
-import { CasperMoacSortingMixin } from './mixins/casper-moac-sorting-mixin.js';
-import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
-import { CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@vaadin/vaadin-grid/vaadin-grid.js';
 import '@vaadin/vaadin-grid/vaadin-grid-column.js';
@@ -20,6 +13,14 @@ import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { templatize } from '@polymer/polymer/lib/utils/templatize.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
+
+import './sidebar/casper-moac-sidebar.js';
+import './sidebar/casper-moac-sidebar-item.js';
+import './components/casper-moac-pill.js';
+import './components/casper-moac-active-filter.js';
+import { CasperMoacSortingMixin } from './mixins/casper-moac-sorting-mixin.js';
+import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
+import { CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 
 export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(PolymerElement)) {
 
