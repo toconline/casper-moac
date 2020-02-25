@@ -1216,6 +1216,28 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 
   /**
+   * Changes the filters values without automatically firing a request by setting the internal property '__valueChangeLock'.
+   *
+   * @param {Object} filterValues The object which contains the new values for each filter.
+   */
+  setFiltersValue (filterValues) {
+    this.__valueChangeLock = true;
+
+    for (let [filterName, filterValue] of Object.entries(filterValues)) {
+      const filterComponent = this.__getFilterComponent(filterName);
+
+      this.filters[filterName].type !== CasperMoacFilterTypes.PAPER_CHECKBOX
+        ? filterComponent.value = filterValue
+        : filterComponent.checked = filterValue;
+    }
+
+    this.__valueChangeLock = false;
+
+    this.__updateUrlWithCurrentFilters();
+    this.__renderActiveFilters();
+  }
+
+  /**
    * This method expands a specific item.
    *
    * @param {Object} parentItem The object that will be expanded.
@@ -1491,6 +1513,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    */
   __bindFiltersEvents () {
     const filterChangedCallback = event => {
+      if (this.__valueChangeLock) return;
+
       const filterComponent = event.composedPath().shift();
 
       // This validation makes sure we're not firing requests for already fetched filters during the initialization process.
