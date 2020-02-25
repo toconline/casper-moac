@@ -1200,6 +1200,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   }
 
   /**
+   * Changes the list of items of a provided casper-select based filter.
+   *
+   * @param {String} filter The filter's identifier.
+   * @param {Array} items The new list of items.
+   */
+  setFilterItems (filter, items) {
+    if (this.filters[filter].type !== CasperMoacFilterTypes.CASPER_SELECT) return;
+
+    const filterSelectComponent = this.shadowRoot.querySelector(`casper-select[data-filter="${filter}"]`);
+    if (filterSelectComponent) {
+      filterSelectComponent.items = items;
+    }
+  }
+
+  /**
    * This method expands a specific item.
    *
    * @param {Object} parentItem The object that will be expanded.
@@ -2010,15 +2025,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       case CasperMoacFilterTypes.CASPER_SELECT:
         const casperSelect = this.shadowRoot.querySelector(`casper-select[data-filter="${filterItem.filterKey}"]`);
 
-        if (!casperSelect || !casperSelect.items || casperSelect.items.length === 0) return '(Filtro Vazio)';
+        if (!casperSelect || !casperSelect.items || casperSelect.items.length === 0) return;
 
-        const filterValues = !filterItem.filter.inputOptions.multiSelection
-          ? [filterItem.filter.value.toString()]
-          : filterItem.filter.value.split(casperSelect.multiSelectionValueSeparator);
-
-        return casperSelect.items
-          .filter(item => filterValues.includes(item[casperSelect.keyColumn].toString()))
-          .map(item => item[casperSelect.itemColumn]).join(', ');
+        return !filterItem.filter.inputOptions.multiSelection
+          ? casperSelect.selectedItems[casperSelect.itemColumn]
+          : casperSelect.selectedItems.map(selectedItem => selectedItem[casperSelect.itemColumn]).join(', ');
     }
   }
 
