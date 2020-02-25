@@ -118,6 +118,15 @@ export const CasperMoacLazyLoadMixin = superClass => {
           type: String,
         },
         /**
+         * Query that will be used when the developer specifies a custom query for each one of the possible filter values.
+         *
+         * @type {String}
+         */
+        resourceCustomQueryKey: {
+          type: String,
+          value: 'customQuery'
+        },
+        /**
          * This property states the current page.
          *
          * @type {Number}
@@ -126,6 +135,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
           type: Number,
           value: 0
         },
+        /**
+         * Internal property to cache children elements in order to avoid spamming the server.
+         *
+         * @type {Object}
+         */
         __resourceChildrenCache: {
           type: Object,
           value: {}
@@ -487,7 +501,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
                 ? `${filter.lazyLoad.field} IN (${escapedFilterValue})`
                 : `${filter.lazyLoad.field} NOT IN (${escapedFilterValue})`;
             // String comparisons.
-            case CasperMoacOperators.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${filterValue}% '`;
+            case CasperMoacOperators.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${filterValue}%'`;
             case CasperMoacOperators.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${filterValue}'`;
             case CasperMoacOperators.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${filterValue}'`;
             case CasperMoacOperators.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${filterValue}% '`;
@@ -499,6 +513,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
             case CasperMoacOperators.GREATER_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} >= ${filter.value}`;
             // Custom comparisons.
             case CasperMoacOperators.CUSTOM: return filter.lazyLoad.field.replace(new RegExp(`%{${filterItem.filterKey}}`, 'g'), filter.value);
+            case CasperMoacOperators.CUSTOM_PER_VALUE:
+              // The custom comparison per value only applies to single selection casper-select components.
+              if (filter.type !== CasperMoacFilterTypes.CASPER_SELECT || filter.inputOptions.multiSelection) return;
+
+              const casperSelect = this.__getFilterComponent(filterItem.filterKey);
+
+              return casperSelect.selectedItems[this.resourceCustomQueryKey].replace(new RegExp(`%{${filterItem.filterKey}}`, 'g'), filter.value);
           }
         }).join(' AND ');
     }
