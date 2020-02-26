@@ -301,7 +301,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.__filteredItems = [...this.__filteredItems, ...socketResponse.data];
 
         // Since there are new items, set the select all checkbox to indeterminate if it's currently checked.
-        if (this.__selectAllCheckbox.checked && !this.__selectAllCheckbox.indeterminate) {
+        if (!this.disableSelection && this.__selectAllCheckbox.checked && !this.__selectAllCheckbox.indeterminate) {
           this.__selectAllCheckbox.indeterminate = true;
         }
       } else {
