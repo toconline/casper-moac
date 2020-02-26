@@ -172,8 +172,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.addItem(socketResponse.data, afterItemId, staleDataset);
 
         return itemsToAdd.constructor.name === 'Array'
-          ? this.__filteredItems.filter(item => this.__compareItemWithIds(item, itemsToAdd, true))
-          : this.__filteredItems.find(item => this.__compareItemWithId(item, itemsToAdd, true));
+          ? this.displayedItems.filter(item => this.__compareItemWithIds(item, itemsToAdd, true))
+          : this.displayedItems.find(item => this.__compareItemWithId(item, itemsToAdd, true));
       }
     }
 
@@ -208,8 +208,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
         }
 
         return itemsToUpdate.constructor.name === 'Array'
-          ? this.__filteredItems.filter(item => this.__compareItemWithIds(item, itemsToUpdate, true))
-          : this.__filteredItems.find(item => this.__compareItemWithId(item, itemsToUpdate, true));
+          ? this.displayedItems.filter(item => this.__compareItemWithIds(item, itemsToUpdate, true))
+          : this.displayedItems.find(item => this.__compareItemWithId(item, itemsToUpdate, true));
       }
     }
 
@@ -298,7 +298,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter.call(this.page || {}, item));
 
       if (this.__currentPage !== 1) {
-        this.__filteredItems = [...this.__filteredItems, ...socketResponse.data];
+        this.displayedItems = [...this.displayedItems, ...socketResponse.data];
 
         // Since there are new items, set the select all checkbox to indeterminate if it's currently checked.
         if (!this.disableSelection && this.__selectAllCheckbox.checked && !this.__selectAllCheckbox.indeterminate) {
@@ -308,7 +308,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         // Reset the totals when requesting the first page.
         this.__resourceTotal = undefined;
         this.__resourceGrandTotal = undefined;
-        this.__filteredItems = socketResponse.data;
+        this.displayedItems = socketResponse.data;
 
         this.__activateItem();
       }
@@ -324,7 +324,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.__resourceGrandTotal = socketResponse.meta['grand-total'];
 
       // Disable the scroll event listeners when there are no more items.
-      this.__ignoreScrollEvents = this.__filteredItems.length === parseInt(socketResponse.meta.total);
+      this.__ignoreScrollEvents = this.displayedItems.length === parseInt(socketResponse.meta.total);
 
       // Update the paging information.
       this.__numberOfResults = socketResponse.meta.total === socketResponse.meta['grand-total']

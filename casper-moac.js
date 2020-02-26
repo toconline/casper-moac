@@ -67,7 +67,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
        */
       displayedItems: {
         type: Array,
-        notify: true
+        value: [],
+        notify: true,
+        observer: '__displayedItemsChanged'
       },
       /**
        * List of attributes that should be used to filter.
@@ -439,16 +441,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         type: Boolean,
         value: false,
         observer: '__displayAllFiltersChanged'
-      },
-      /**
-       * The items that are currently displayed in the vaadin-grid.
-       *
-       * @type {Array}
-       */
-      __filteredItems: {
-        type: Array,
-        value: [],
-        observer: '__filteredItemsChanged'
       },
       /**
        * This object contains the filter keys and values that should not be used to fetch new items since those filters
@@ -909,7 +901,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               <vaadin-grid
                 id="grid"
                 class="moac"
-                items="[[__filteredItems]]"
+                items="[[displayedItems]]"
                 active-item="{{activeItem}}"
                 selected-items="{{__selectedItems}}"
                 item-id-path="[[idInternalProperty]]">
@@ -933,7 +925,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
               </vaadin-grid>
 
               <!--No items placeholder-->
-              <template is="dom-if" if="[[__hasNoItems(__filteredItems, loading)]]">
+              <template is="dom-if" if="[[__hasNoItems(displayedItems, loading)]]">
                 <div class="grid-no-items">
                   <casper-icon icon="[[noItemsIcon]]"></casper-icon>
                   [[noItemsText]]
@@ -1041,11 +1033,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     const rootItems = itemsToAdd.filter(itemToAdd => !this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty]));
     const childItems = itemsToAdd.filter(itemToAdd => this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty]));
 
-    let filteredItems = this.__filteredItems;
+    let filteredItems = this.displayedItems;
     filteredItems = this.__addRootItems(rootItems, filteredItems, afterItemId);
     filteredItems = this.__addChildItems(childItems, filteredItems);
 
-    this.__filteredItems = filteredItems;
+    this.displayedItems = filteredItems;
 
     this.forceGridRedraw();
     this.__staleDataset = staleDataset;
@@ -1066,7 +1058,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     if (itemsToUpdate.constructor.name !== 'Array') itemsToUpdate = [itemsToUpdate];
 
     let activeItemIndex;
-    const filteredItems = [...this.__filteredItems];
+    const filteredItems = [...this.displayedItems];
     const selectedItems = [...this.__selectedItems];
 
     itemsToUpdate.forEach(itemToUpdate => {
@@ -1091,12 +1083,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       selectedItems.forEach(updateItemCallback);
     });
 
-    this.__filteredItems = filteredItems;
+    this.displayedItems = filteredItems;
     this.__selectedItems = selectedItems;
 
     this.forceGridRedraw();
     this.__staleDataset = staleDataset;
-    this.activeItem = this.__filteredItems[activeItemIndex];
+    this.activeItem = this.displayedItems[activeItemIndex];
 
     afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]));
   }
@@ -1135,11 +1127,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
         });
 
         this.__staleDataset = staleDataset;
-        this.__filteredItems = this.__filteredItems.filter(item => !itemsToRemove.includes(String(item[this.idExternalProperty])));
+        this.displayedItems = this.displayedItems.filter(item => !itemsToRemove.includes(String(item[this.idExternalProperty])));
         this.__selectedItems = this.__selectedItems.filter(item => !itemsToRemove.includes(String(item[this.idExternalProperty])));
-        this.__filteredItems.length === 0
+        this.displayedItems.length === 0
           ? this.activeItem = null
-          : this.activeItem = this.__filteredItems[Math.max(0, firstItemToRemoveIndex - 1)];
+          : this.activeItem = this.displayedItems[Math.max(0, firstItemToRemoveIndex - 1)];
       }, 1000);
     });
   }
@@ -1280,11 +1272,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     parentItem[this.expandedInternalProperty] = true;
     parentItem[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-parent-item-background-color)';
 
-    this.__filteredItems = [
-      ...this.__filteredItems.slice(0, parentItemIndex),
+    this.displayedItems = [
+      ...this.displayedItems.slice(0, parentItemIndex),
       parentItem,
       ...parentItemChildren,
-      ...this.__filteredItems.slice(parentItemIndex + 1)
+      ...this.displayedItems.slice(parentItemIndex + 1)
     ];
   }
 
@@ -1303,7 +1295,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     parentItem[this.expandedInternalProperty] = false;
     delete parentItem[this.rowBackgroundColorInternalProperty];
 
-    this.__filteredItems = this.__removeChildItemsRecursively(this.__filteredItems, parentItem);
+    this.displayedItems = this.__removeChildItemsRecursively(this.displayedItems, parentItem);
   }
 
   /**
@@ -1605,21 +1597,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   __handleGridKeyDownEvents (event) {
     const keyCode = event.key || event.code;
 
-    if (this.__filteredItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
+    if (this.displayedItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
 
     // When there are no active items, select the first one.
     if (!this.__activeItem) {
-      this.__activeItem = this.__filteredItems[0];
+      this.__activeItem = this.displayedItems[0];
     } else {
       // Find the index of the current active item.
       const activeItemIndex = this.__findItemIndexById(this.__activeItem[this.idInternalProperty]);
 
       if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
-        this.__activeItem = this.__filteredItems[activeItemIndex - 1];
+        this.__activeItem = this.displayedItems[activeItemIndex - 1];
       }
 
-      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < this.__filteredItems.length) {
-        this.__activeItem = this.__filteredItems[activeItemIndex + 1];
+      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < this.displayedItems.length) {
+        this.__activeItem = this.displayedItems[activeItemIndex + 1];
       }
 
       if (keyCode === 'ArrowRight') {
@@ -1805,7 +1797,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Object} previousActiveItem The previous vaadin-grid activeItem.
    */
   __activeItemChanged (newActiveItem, previousActiveItem) {
-    if (!newActiveItem && previousActiveItem && this.forceActiveItem && this.__filteredItems && this.__filteredItems.length > 0) {
+    if (!newActiveItem && previousActiveItem && this.forceActiveItem && this.displayedItems && this.displayedItems.length > 0) {
       this.activeItem = previousActiveItem;
     }
 
@@ -1889,7 +1881,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       }
     }
 
-    this.__filteredItems = this.__sortItems(filteredItems);
+    this.displayedItems = this.__sortItems(filteredItems);
     this.forceGridRedraw();
     this.__activateItem();
     this.__numberOfResults = filteredItems.length === originalItems.length
@@ -1908,8 +1900,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       this.__activateItemId = undefined;
     }
 
-    this.__filteredItems && this.__filteredItems.length > itemIndex
-      ? this.activeItem = this.__filteredItems[itemIndex]
+    this.displayedItems && this.displayedItems.length > itemIndex
+      ? this.activeItem = this.displayedItems[itemIndex]
       : this.activeItem = null;
   }
 
@@ -2066,7 +2058,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   __paintGridRows () {
     afterNextRender(this, () => {
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
-        const currentRowItem = this.__filteredItems.find(item => this.__compareItems(row._item, item));
+        const currentRowItem = this.displayedItems.find(item => this.__compareItems(row._item, item));
 
         if (!currentRowItem || row.hasAttribute('blink')) return;
 
@@ -2263,10 +2255,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
   /**
    * This observer gets called when the internal property filteredItems changes.
    */
-  __filteredItemsChanged () {
-    this.displayedItems = this.__filteredItems;
-
-    this.__filteredItems.forEach((item, itemIndex) => {
+  __displayedItemsChanged () {
+    this.displayedItems.forEach((item, itemIndex) => {
       item[this.idInternalProperty] = itemIndex;
     });
   }
@@ -2276,12 +2266,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    *
    * @param {Number | String} itemId The item's identifier that we'll looking for.
    * @param {Boolean} useExternalProperty This flag states which identifier should be used.
-   * @param {Array} filteredItems When this parameter is present use it to search the item instead of the __filteredItems.
+   * @param {Array} filteredItems When this parameter is present use it to search the item instead of the displayedItems.
    */
   __findItemIndexById (itemId, useExternalProperty = false, filteredItems) {
     return useExternalProperty
-      ? (filteredItems || this.__filteredItems).findIndex(item => String(item[this.idExternalProperty]) === String(itemId))
-      : (filteredItems || this.__filteredItems).findIndex(item => String(item[this.idInternalProperty]) === String(itemId));
+      ? (filteredItems || this.displayedItems).findIndex(item => String(item[this.idExternalProperty]) === String(itemId))
+      : (filteredItems || this.displayedItems).findIndex(item => String(item[this.idInternalProperty]) === String(itemId));
   }
 
   /**
@@ -2326,7 +2316,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * This method returns all the items that can be selected since one can disable the selection per item.
    */
   __selectableItems () {
-    return this.__filteredItems.filter(filteredItem => !filteredItem[this.disableSelectionInternalProperty]);
+    return this.displayedItems.filter(filteredItem => !filteredItem[this.disableSelectionInternalProperty]);
   }
 
   /**
