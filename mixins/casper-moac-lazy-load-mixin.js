@@ -226,7 +226,12 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.__selectedItems = [];
       this.__staleDataset = false;
       this.__ignoreScrollEvents = false;
-      this.__activateItemId = activateItemId;
+
+      // When this method is invoked by clicking the refresh button, it passes the mouse event as a parameter.
+      if (activateItemId && activateItemId.constructor.name !== 'MouseEvent') {
+        this.__activateItemId = activateItemId;
+      }
+
       this.__debounceFetchResourceItems();
     }
 
