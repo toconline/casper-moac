@@ -1773,9 +1773,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       };
 
       // Override the filter's default value if it's present in the URL.
-      const parameterName = this.__getParameterNameForFilter(filterKey);
+      const parameterName = this.__getUrlKeyForFilter(filterKey);
       if (searchParams.has(parameterName)) {
-        filterSettings.filter.value = this.__getValueFromPrettyParameter(filterSettings.filter, searchParams.get(parameterName));
+        filterSettings.filter.value = this.__getValueFromPrettyUrl(filterSettings.filter, searchParams.get(parameterName));
       }
 
       if (this.__valueIsNotEmpty(filterSettings.filter.value)) {
@@ -2353,14 +2353,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__historyStateFilters.forEach(historyStateFilter => {
       const filter = this.filters[historyStateFilter];
 
-      const parameterName = this.__getParameterNameForFilter(historyStateFilter);
+      const parameterName = this.__getUrlKeyForFilter(historyStateFilter);
 
       // Remove the value firstly so that we don't end up with stale data.
       searchParams.delete(parameterName);
 
       // Only include non-empty filters.
       if (this.__valueIsNotEmpty(filter.value)) {
-        searchParams.set(parameterName, this.__getPrettyParameterForValue(filter));
+        searchParams.set(parameterName, this.__getPrettyValueForUrl(filter));
       }
     });
 
@@ -2379,19 +2379,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * Tries to map the pretty URL search parameter with an actual value provided by the developer.
    *
    * @param {Object} historyState The current's filter history state settings.
-   * @param {String} parameter The value that is in the URL for the current filter.
+   * @param {String} prettyValueInUrl The value that is in the URL for the current filter.
    */
-  __getValueFromPrettyParameter ({ historyState }, parameter) {
-    if (historyState && historyState.prettyParameters) {
+  __getValueFromPrettyUrl ({ historyState }, prettyValueInUrl) {
+    if (historyState && historyState.prettyValues) {
       // Find the key which value matches with the parameter present in the URL.
-      const filterValue = Object.keys(historyState.prettyParameters).find(prettyParameter => {
-        return historyState.prettyParameters[prettyParameter] === parameter;
+      const filterValue = Object.keys(historyState.prettyValues).find(prettyValue => {
+        return historyState.prettyValues[prettyValue] === prettyValueInUrl;
       });
 
       if (filterValue) return filterValue;
     }
 
-    return parameter;
+    return prettyValueInUrl;
   }
 
   /**
@@ -2400,12 +2400,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {Object} historyState The current filter's history state settings.
    * @param {String} value The current filter's value.
    */
-  __getPrettyParameterForValue ({ historyState, value }) {
+  __getPrettyValueForUrl ({ historyState, value }) {
     if (historyState
       && !historyState.disabled
-      && historyState.prettyParameters
-      && historyState.prettyParameters.hasOwnProperty(value)) {
-      return historyState.prettyParameters[value];
+      && historyState.prettyValues
+      && historyState.prettyValues.hasOwnProperty(value)) {
+      return historyState.prettyValues[value];
     } else {
       return value;
     }
@@ -2416,12 +2416,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    *
    * @param {String} filterKey The filter identifier.
    */
-  __getParameterNameForFilter (filterKey) {
+  __getUrlKeyForFilter (filterKey) {
     let parameterName = filterKey;
 
     const historyState = this.filters[filterKey].historyState;
-    if (historyState && historyState.parameterName) {
-      parameterName = historyState.parameterName;
+    if (historyState && historyState.key) {
+      parameterName = historyState.key;
     }
 
     return parameterName;
