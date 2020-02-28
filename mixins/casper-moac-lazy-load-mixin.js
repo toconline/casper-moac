@@ -517,14 +517,14 @@ export const CasperMoacLazyLoadMixin = superClass => {
             case CasperMoacOperators.LESS_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} <= ${filter.value}`;
             case CasperMoacOperators.GREATER_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} >= ${filter.value}`;
             // Custom comparisons.
-            case CasperMoacOperators.CUSTOM: return filter.lazyLoad.field.replace(new RegExp(`%{${filterItem.filterKey}}`, 'g'), filter.value);
-            case CasperMoacOperators.CUSTOM_PER_VALUE:
+            case CasperMoacOperators.CUSTOM:
               // The custom comparison per value only applies to single selection casper-select components.
               if (filter.type !== CasperMoacFilterTypes.CASPER_SELECT || filter.inputOptions.multiSelection) return;
 
               const casperSelect = this.__getFilterComponent(filterItem.filterKey);
+              const customQuery = casperSelect.selectedItems[this.resourceCustomQueryKey] || filter.lazyLoad.field;
 
-              return casperSelect.selectedItems[this.resourceCustomQueryKey].replace(new RegExp(`%{${filterItem.filterKey}}`, 'g'), filter.value);
+              return customQuery.replace(new RegExp(`%{${filterItem.filterKey}}`, 'g'), filter.value);
           }
         }).join(' AND ');
     }

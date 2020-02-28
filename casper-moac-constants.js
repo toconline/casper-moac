@@ -21,8 +21,7 @@ export const CasperMoacOperators = {
   LESS_THAN_OR_EQUAL_TO: 'LESS_THAN_OR_EQUAL_TO',
   GREATER_THAN_OR_EQUAL_TO: 'GREATER_THAN_OR_EQUAL_TO',
   // Custom comparisons.
-  CUSTOM: 'CUSTOM',
-  CUSTOM_PER_VALUE: 'CUSTOM_PER_VALUE'
+  CUSTOM: 'CUSTOM'
 };
 
 export const CasperMoacSortTypes = {
