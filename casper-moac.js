@@ -1198,12 +1198,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    * @param {String} filter The filter's identifier.
    * @param {Array} items The new list of items.
    */
-  setFilterItems (filter, items) {
-    if (this.filters[filter].type !== CasperMoacFilterTypes.CASPER_SELECT) return;
+  setFiltersItems (filtersItems) {
+    for (let [filterName, filterItems] of Object.entries(filtersItems)) {
+      if (this.filters[filterName].type !== CasperMoacFilterTypes.CASPER_SELECT) return;
 
-    const filterSelectComponent = this.shadowRoot.querySelector(`casper-select[data-filter="${filter}"]`);
-    if (filterSelectComponent) {
-      filterSelectComponent.items = items;
+      const filterSelectComponent = this.shadowRoot.querySelector(`casper-select[data-filter="${filterName}"]`);
+      if (filterSelectComponent) {
+        filterSelectComponent.items = filterItems;
+      }
     }
   }
 
@@ -1212,10 +1214,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
    *
    * @param {Object} filterValues The object which contains the new values for each filter.
    */
-  setFiltersValue (filterValues) {
+  setFiltersValue (filtersValue) {
     this.__valueChangeLock = true;
 
-    for (let [filterName, filterValue] of Object.entries(filterValues)) {
+    for (let [filterName, filterValue] of Object.entries(filtersValue)) {
       const filterComponent = this.__getFilterComponent(filterName);
 
       this.filters[filterName].type !== CasperMoacFilterTypes.PAPER_CHECKBOX
@@ -1771,8 +1773,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
       };
 
       // Override the filter's default value if it's present in the URL.
-      if (searchParams.has(filterKey)) {
-        filterSettings.filter.value = this.__getValueFromPrettyParameter(filterSettings.filter, searchParams.get(filterKey));
+      const parameterName = this.__getParameterNameForFilter(filterKey);
+      if (searchParams.has(parameterName)) {
+        filterSettings.filter.value = this.__getValueFromPrettyParameter(filterSettings.filter, searchParams.get(parameterName));
       }
 
       if (this.__valueIsNotEmpty(filterSettings.filter.value)) {
@@ -2350,12 +2353,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     this.__historyStateFilters.forEach(historyStateFilter => {
       const filter = this.filters[historyStateFilter];
 
+      const parameterName = this.__getParameterNameForFilter(historyStateFilter);
+
       // Remove the value firstly so that we don't end up with stale data.
-      searchParams.delete(historyStateFilter);
+      searchParams.delete(parameterName);
 
       // Only include non-empty filters.
       if (this.__valueIsNotEmpty(filter.value)) {
-        searchParams.set(historyStateFilter, this.__getPrettyParameterForValue(filter));
+        searchParams.set(parameterName, this.__getPrettyParameterForValue(filter));
       }
     });
 
@@ -2404,6 +2409,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
     } else {
       return value;
     }
+  }
+
+  /**
+   * Returns the parameter name that will be present in the URL for a specific filter.
+   *
+   * @param {String} filterKey The filter identifier.
+   */
+  __getParameterNameForFilter (filterKey) {
+    let parameterName = filterKey;
+
+    const historyState = this.filters[filterKey].historyState;
+    if (historyState && historyState.parameterName) {
+      parameterName = historyState.parameterName;
+    }
+
+    return parameterName;
   }
 }
 
