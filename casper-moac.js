@@ -803,7 +803,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(CasperMoacSortingMixin(P
                       <casper-icon
                         on-click="refreshItems"
                         icon="fa-regular:sync"
-                        tooltip="Os dados poderão estar desactualizados. Clique aqui para recarreegar a grelha">
+                        tooltip="Os dados poderão estar desactualizados. Clique aqui para recarregar a grelha">
                       </casper-icon>
                     </template>
                     <strong>Filtros ativos:</strong>

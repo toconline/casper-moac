@@ -450,7 +450,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         && this.resourceFilterAttributes
         && this.resourceFilterAttributes.length > 0) {
 
-        const filterValue = this.$.filterInput.value.toString().trim();
+        const filterValue = this.$.filterInput.value.toString().trim().replace("'", "''");
 
         freeFilters = this.resourceFilterAttributes.map(filterAttribute => {
           if (filterAttribute.constructor.name === 'Object') {
@@ -489,7 +489,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         )
         .map(filterItem => {
           const filter = filterItem.filter;
-          const filterValue = filter.value.toString().trim();
+          const filterValue = filter.value.toString().trim().replace("'", "''");
 
           switch (filter.lazyLoad.operator) {
             // Array comparisons.
