@@ -3,6 +3,7 @@ export const CasperMoacFilterTypes = {
   PAPER_CHECKBOX: 'PAPER_CHECKBOX',
   CASPER_SELECT: 'CASPER_SELECT',
   CASPER_DATE_PICKER: 'CASPER_DATE_PICKER',
+  COMPONENTLESS_FILTER: 'COMPONENTLESS_FILTER'
 };
 
 export const CasperMoacOperators = {
