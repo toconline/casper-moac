@@ -453,7 +453,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
        *
        * @type {Object}
        */
-      __skipValueChangedEvents: {
+      __ignoreFiltersValues: {
         type: Object,
         value: {}
       }
@@ -828,7 +828,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
             <div hidden$="[[!__displayAllFilters]]">
               <div class$="[[__filtersContainerClassName()]]">
-                <template is="dom-repeat" items="[[__filters]]">
+                <template is="dom-repeat" items="[[__filters]]" restamp>
                   <div class$="[[__filterContainerClassName(item.filter)]]">
                     <!--Casper-Select filter-->
                     <template is="dom-if" if="[[__isFilterCasperSelect(item.filter.type)]]">
@@ -1097,7 +1097,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
     this.forceGridRedraw();
     this.__staleDataset = staleDataset;
-    this.activeItem = this.displayedItems[activeItemIndex];
 
     afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]));
   }

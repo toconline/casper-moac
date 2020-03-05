@@ -6,10 +6,38 @@ export const CasperMoacFiltersMixin = superClass => {
   return class extends superClass {
 
     /**
+     * Adds a new filter to the list of existing ones.
+     *
+     * @param {String} filterKey The filter's identifier.
+     * @param {Object} filter The filter's settings.
+     */
+    addFilter (filterKey, filter) {
+      this.filters[filterKey] = filter;
+
+      // This "hack" is used to avoid problems when re-rendering the filters.
+      this.__filters = [];
+      this.__ignoreFiltersValues = {};
+      afterNextRender(this, () => { this.__filtersChanged(this.filters); });
+    }
+
+    /**
+     * Removes an existing filter and re-renders the component.
+     *
+     * @param {String} filterKey The filter's identifier.
+     */
+    removeFilter (filterKey) {
+      delete this.filters[filterKey];
+
+      // This "hack" is used to avoid problems when re-rendering the filters.
+      this.__filters = [];
+      this.__ignoreFiltersValues = {};
+      afterNextRender(this, () => { this.__filtersChanged(this.filters); });
+    }
+
+    /**
      * Changes the list of items of a provided casper-select based filter.
      *
-     * @param {String} filter The filter's identifier.
-     * @param {Array} items The new list of items.
+     * @param {Object} filtersItems An object containing the new items for the specified filters.
      */
     setFiltersItems (filtersItems) {
       for (const [filterKey, filterItems] of Object.entries(filtersItems)) {
@@ -31,7 +59,7 @@ export const CasperMoacFiltersMixin = superClass => {
       for (const [filterName, filterValue] of Object.entries(filtersValue)) {
         const filterComponent = this.__getFilterComponent(filterName);
 
-        this.__skipValueChangedEvents[filterName] = filterValue;
+        this.__ignoreFiltersValues[filterName] = filterValue;
 
         this.filters[filterName].type !== CasperMoacFilterTypes.PAPER_CHECKBOX
           ? filterComponent.value = filterValue
@@ -53,6 +81,8 @@ export const CasperMoacFiltersMixin = superClass => {
     __filtersChanged (filters) {
       this.__hasFilters = !!filters && Object.keys(filters).length > 0;
 
+      this.__buildHistoryStateFilters();
+
       const searchParams = new URLSearchParams(window.location.search);
       // Transform the filters object into an array to use in a dom-repeat.
       this.__filters = Object.keys(filters).map(filterKey => {
@@ -68,7 +98,7 @@ export const CasperMoacFiltersMixin = superClass => {
         }
 
         if (this.__valueIsNotEmpty(filterSettings.filter.value)) {
-          this.__skipValueChangedEvents[filterKey] = filterSettings.filter.value;
+          this.__ignoreFiltersValues[filterKey] = filterSettings.filter.value;
         }
 
         return filterSettings;
@@ -82,7 +112,6 @@ export const CasperMoacFiltersMixin = superClass => {
       afterNextRender(this, () => {
         this.__bindFiltersEvents();
         this.__renderActiveFilters();
-        this.__buildHistoryStateFilters();
       });
     }
 
@@ -91,21 +120,22 @@ export const CasperMoacFiltersMixin = superClass => {
      */
     __bindFiltersEvents () {
       const filterChangedCallback = event => {
-        const filterComponent = event.composedPath().shift();
+        const { dataset, value } = event.composedPath().shift();
 
         // This validation makes sure we're not firing requests for already fetched filters during the initialization process.
-        if (Object.keys(this.__skipValueChangedEvents).includes(filterComponent.dataset.filter)) {
-          const valueDidNotChange = String(this.__skipValueChangedEvents[filterComponent.dataset.filter]) === String(filterComponent.value);
-          if (valueDidNotChange) return;
+        if (Object.keys(this.__ignoreFiltersValues).includes(dataset.filter)) {
+          const filterDidNotChange = String(this.__ignoreFiltersValues[dataset.filter]) === String(value);
+          if (filterDidNotChange) return;
 
-          delete this.__skipValueChangedEvents[filterComponent.dataset.filter];
+          delete this.__ignoreFiltersValues[dataset.filter];
         }
 
+        console.log('Disparei um event');
         // Dispatch a custom event to inform the page using casper-moac that the filters have changed.
         this.dispatchEvent(new CustomEvent('filters-changed', {
           bubbles: true,
           composed: true,
-          detail: { filter: filterComponent.dataset.filter }
+          detail: { filter: dataset.filter }
         }));
 
         // Force the re-fetch of items if one the filter changes.
@@ -181,7 +211,8 @@ export const CasperMoacFiltersMixin = superClass => {
     /**
      * This method creates the currently active filters in the DOM and binds the click event listener.
      *
-     * @param {Object} filterItem The filter's settings.
+     * @param {Object} filterKey The filter's identifier.
+     * @param {Object} filter The filter's settings.
      */
     __renderActiveFilterDOM (filterKey, filter) {
       const activeFilter = document.createElement('casper-moac-active-filter');
@@ -199,7 +230,8 @@ export const CasperMoacFiltersMixin = superClass => {
      * Given a specific filter, this method is responsible for returning the human-readable version
      * of its current value.
      *
-     * @param {Object} filterItem
+     * @param {Object} filterKey The filter's identifier.
+     * @param {Object} filter The filter's settings.
      */
     __activeFilterValue (filterKey, filter) {
       if (!this.__valueIsNotEmpty(filter.value)) return '(Filtro Vazio)';
@@ -228,10 +260,10 @@ export const CasperMoacFiltersMixin = superClass => {
     /**
      * This method removes an active filter by changing the value of the the casper-select, paper-input, etc associated with it.
      *
-     * @param {String} key The filter's unique identifier.
+     * @param {String} filterKey The filter's unique identifier.
      */
-    __removeActiveFilter (key) {
-      const filterComponent = this.__getFilterComponent(key);
+    __removeActiveFilter (filterKey) {
+      const filterComponent = this.__getFilterComponent(filterKey);
 
       filterComponent.nodeName.toLowerCase() !== 'paper-checkbox'
         ? filterComponent.value = ''
@@ -268,6 +300,8 @@ export const CasperMoacFiltersMixin = superClass => {
 
     /**
      * Debounce the items filtering after the search input's value changes.
+     *
+     * @param {Object} event The event's object.
      */
     __freeFilterChanged (event) {
       // If the user is in the search input and clicks the ArrowDown key, focus the currently active row.
