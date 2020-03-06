@@ -389,15 +389,17 @@ export const CasperMoacLazyLoadMixin = superClass => {
     async __fetchRequest (url) {
       try {
         this.loading = true;
+        this.app.broker.abortPendingRequest();
         const socketResponse = await this.app.broker.get(url, this.resourceTimeoutMs, true);
         this.loading = false;
 
         return socketResponse;
       } catch (error) {
-        console.error(error);
-
         this.loading = false;
-        this.app.openToast({ text: 'Ocorreu um erro ao obter os dados.', backgroundColor: 'red' });
+
+        if (error.name !== 'AbortError') {
+          this.app.openToast({ text: 'Ocorreu um erro ao obter os dados.', backgroundColor: 'red' });
+        }
       }
     }
 
