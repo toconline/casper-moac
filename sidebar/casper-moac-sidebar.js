@@ -60,7 +60,7 @@ class CasperMoacSidebar extends PolymerElement {
 
       <div id="sidebar-items-container" opened$="[[opened]]">
         <casper-moac-sidebar-item
-          disable-expansion-collapse
+          disable-toggle
           icon="[[__getIcon(opened)]]"
           title="[[__getTitle(opened)]]">
         </casper-moac-sidebar-item>
@@ -92,9 +92,9 @@ class CasperMoacSidebar extends PolymerElement {
       });
     });
 
-    this.shadowRoot.querySelector('casper-moac-sidebar-item').addEventListener('click', () => {
-      this.opened = !this.opened;
-    });
+    this.shadowRoot
+      .querySelector('casper-moac-sidebar-item')
+      .addEventListener('click', () => { this.opened = !this.opened; });
   }
 
   /**
@@ -104,7 +104,9 @@ class CasperMoacSidebar extends PolymerElement {
    * @param {Boolean} opened The current opened state of the sidebar.
    */
   __getIcon (opened) {
-    return opened ? 'fa-regular:angle-right' : 'fa-regular:angle-left';
+    return opened
+      ? 'fa-regular:angle-right'
+      : 'fa-regular:angle-left';
   }
 
   /**
@@ -123,14 +125,17 @@ class CasperMoacSidebar extends PolymerElement {
   __openedChanged () {
     afterNextRender(this, () => {
       if (this.opened) {
-        this.__openedSidebarItems.forEach(sidebarItem => sidebarItem.opened = true);
+        this.__openedSidebarItems.forEach(sidebarItem => { sidebarItem.opened = true; });
+        this.shadowRoot.querySelector('slot').assignedElements().forEach(sidebarItem => { sidebarItem.sidebarOpened = true; });
       } else {
         this.__openedSidebarItems = [];
         this.shadowRoot.querySelector('slot').assignedElements().forEach(sidebarItem => {
           if (sidebarItem.opened) {
             this.__openedSidebarItems.push(sidebarItem);
           }
+
           sidebarItem.opened = false;
+          sidebarItem.sidebarOpened = false;
         });
       }
     });

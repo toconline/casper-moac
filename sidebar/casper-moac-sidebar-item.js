@@ -8,6 +8,13 @@ class CasperMoacSidebarItem extends PolymerElement {
   static get properties () {
     return {
       /**
+       * Flag that states if the sidebar is currently opened. If it is, the title will be displayed.
+       */
+      sidebarOpened: {
+        type: Boolean,
+        observer: '__sidebarOpenedChanged'
+      },
+      /**
        * The icon that will be used on the sidebar item's header.
        *
        * @type {String}
@@ -23,7 +30,12 @@ class CasperMoacSidebarItem extends PolymerElement {
       title: {
         type: String
       },
-      disableExpansionCollapse: {
+      /**
+       * Flag that states if the user can use the component's public methods to toggle the component's state.
+       *
+       * @type {Boolean}
+       */
+      disableToggle: {
         type: Boolean,
         value: false
       },
@@ -94,42 +106,63 @@ class CasperMoacSidebarItem extends PolymerElement {
           align-items: center;
         }
 
-        .sidebar-item-body {
-          height: auto;
+        .sidebar-item-header .sidebar-item-header-title.sidebar-item-header-title--collapsed span {
+          display: none;
+        }
+
+        .sidebar-item-outer-body {
           max-height: 0;
           overflow: hidden;
           background-color: white;
           transition: max-height 150ms ease-in;
         }
 
-        .sidebar-item-body .sidebar-item-content {
+        .sidebar-item-outer-body .sidebar-item-inner-body {
+          height: fit-content;
+        }
+
+        .sidebar-item-outer-body .sidebar-item-inner-body .sidebar-item-content {
           padding: 15px;
         }
       </style>
       <div class="sidebar-item-header" id="header">
         <paper-ripple></paper-ripple>
-        <div class="sidebar-item-header-title">
+        <div class="sidebar-item-header-title" id="title">
           <casper-icon icon="[[icon]]"></casper-icon>
-          [[title]]
+          <span>[[title]]</span>
         </div>
 
-        <template is="dom-if" if="[[!disableExpansionCollapse]]">
+        <template is="dom-if" if="[[!disableToggle]]">
           <casper-icon icon="fa-regular:angle-down" id="header-dropdown-icon"></casper-icon>
         </template>
       </div>
-      <div class="sidebar-item-body" id="body">
-        <div class="sidebar-item-content">
-          <slot></slot>
+      <div class="sidebar-item-outer-body" id="outerBody">
+        <div class="sidebar-item-inner-body" id="innerBody">
+          <div class="sidebar-item-content">
+            <slot></slot>
+          </div>
         </div>
       </div>
     `;
+  }
+
+  ready () {
+    super.ready();
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (!this.opened) return;
+
+      this.$.outerBody.style.maxHeight = `${this.$.innerBody.clientHeight}px`;
+    });
+
+    resizeObserver.observe(this.$.innerBody);
   }
 
   /**
    * Toggle the current opened state of the sidebar item.
    */
   toggle () {
-    if (this.disableExpansionCollapse) return;
+    if (this.disableToggle) return;
 
     this.opened = !this.opened;
   }
@@ -138,7 +171,7 @@ class CasperMoacSidebarItem extends PolymerElement {
    * Open the sidebar item.
    */
   open () {
-    if (this.disableExpansionCollapse) return;
+    if (this.disableToggle) return;
 
     this.opened = true;
   }
@@ -147,9 +180,15 @@ class CasperMoacSidebarItem extends PolymerElement {
    * Close the sidebar item.
    */
   close () {
-    if (this.disableExpansionCollapse) return;
+    if (this.disableToggle) return;
 
     this.opened = false;
+  }
+
+  __sidebarOpenedChanged (sidebarOpened) {
+    sidebarOpened
+      ? this.$.title.classList.remove('sidebar-item-header-title--collapsed')
+      : this.$.title.classList.add('sidebar-item-header-title--collapsed');
   }
 
   /**
@@ -158,15 +197,15 @@ class CasperMoacSidebarItem extends PolymerElement {
    * @param {Boolean} opened The current opened state of the sidebar item.
    */
   __openedChanged (opened) {
-    if (this.disableExpansionCollapse) return;
-
     afterNextRender(this, () => {
+      const dropdownIcon = this.shadowRoot.querySelector('#header-dropdown-icon');
+
       if (opened) {
-        this.$.body.style.maxHeight = `${this.$.body.scrollHeight}px`;
-        this.shadowRoot.querySelector('#header-dropdown-icon').setAttribute('rotate', true);
+        this.$.outerBody.style.maxHeight = `${this.$.innerBody.scrollHeight}px`;
+        if (dropdownIcon) dropdownIcon.setAttribute('rotate', true);
       } else {
-        this.$.body.style.maxHeight = 0;
-        this.shadowRoot.querySelector('#header-dropdown-icon').removeAttribute('rotate');
+        this.$.outerBody.style.maxHeight = 0;
+        if (dropdownIcon) dropdownIcon.removeAttribute('rotate');
       }
     });
   }
