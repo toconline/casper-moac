@@ -174,7 +174,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
        */
       selectedItems: {
         type: Array,
-        notify: true
+        notify: true,
+        value: [],
+        observer: '__selectedItemsChanged'
       },
       /**
        * The array of filters that are available to filter the results presents on the page.
@@ -462,7 +464,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
   static get observers () {
     return [
-      '__selectedItemsChanged(__selectedItems.splices)'
+      '__gridSelectedItemsChanged(__selectedItems.splices)'
     ];
   }
 
@@ -897,7 +899,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
             <div id="multi-selection-container">
               <div class="grid-multiple-selection">
                 <div class="grid-multiple-selection-label">
-                  Seleção múltipla:&nbsp;<strong>[[__selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
+                  Seleção múltipla:&nbsp;<strong>[[selectedItems.length]]&nbsp;[[multiSelectionLabel]]</strong>
                 </div>
                 <div class="grid-multiple-selection-icons">
                   <slot name="multi-selection"></slot>
@@ -1642,13 +1644,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.__filterItems();
   }
 
+
   /**
    * Observer that fires when the vaadin-grid selected items change.
    */
-  __selectedItemsChanged () {
+  __gridSelectedItemsChanged () {
     this.selectedItems = [...this.__selectedItems];
+  }
 
-    if (!this.__selectedItems || this.__selectedItems.length === 0) {
+  /**
+   * Observer that fires when the selectedItems property changes.
+   */
+  __selectedItemsChanged () {
+    if (!this.selectedItems || this.selectedItems.length === 0) {
       this.$.grid.style.borderTopLeftRadius = '5px';
       this.$.grid.style.borderTopRightRadius = '5px';
       this.$['multi-selection-container'].style.height = '';
@@ -1664,8 +1672,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
     // Lock the vaadin-checkbox event handler to avoid infinite loops.
     this.__selectAllCheckboxLock = true;
-    this.__selectAllCheckbox.checked = this.__selectedItems.length > 0 && selectableItems.length === this.__selectedItems.length;
-    this.__selectAllCheckbox.indeterminate = this.__selectedItems.length > 0 && selectableItems.length !== this.__selectedItems.length;
+    this.__selectAllCheckbox.checked = this.selectedItems.length > 0 && selectableItems.length === this.selectedItems.length;
+    this.__selectAllCheckbox.indeterminate = this.selectedItems.length > 0 && selectableItems.length !== this.selectedItems.length;
     this.__selectAllCheckboxLock = false;
   }
 
