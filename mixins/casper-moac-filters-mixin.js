@@ -26,6 +26,14 @@ export const CasperMoacFiltersMixin = superClass => {
      * @param {String} filterKey The filter's identifier.
      */
     removeFilter (filterKey) {
+      // Delete the current URL key if it exists.
+      const urlSearchParams = new URLSearchParams(window.location.search);
+      const urlParameterName = this.__getUrlKeyForFilter(filterKey);
+      if (urlSearchParams.has(urlParameterName)) {
+        urlSearchParams.delete(urlParameterName);
+        window.history.replaceState({}, '', `${window.location.origin}${window.location.pathname}?${urlSearchParams.toString()}`);
+      }
+
       delete this.filters[filterKey];
 
       // This "hack" is used to avoid problems when re-rendering the filters.
