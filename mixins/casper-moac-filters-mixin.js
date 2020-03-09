@@ -112,6 +112,7 @@ export const CasperMoacFiltersMixin = superClass => {
       afterNextRender(this, () => {
         this.__bindFiltersEvents();
         this.__renderActiveFilters();
+        this.__updateUrlWithCurrentFilters();
       });
     }
 
