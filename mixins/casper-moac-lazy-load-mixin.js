@@ -166,7 +166,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
      * @param {Boolean} hideSpinner If this flag is set to true, the request that will be fired from this method call won't display the spinner.
      */
-    async addItemFromAPI (itemsToAdd, afterItemId, staleDataset = true, hideSpinner = true) {
+    async addItemFromAPI (itemsToAdd, afterItemId, staleDataset = true, hideSpinner = false) {
       this.__hideSpinnerOnNextRequest = hideSpinner;
 
       const socketResponse = await this.fetchItemFromAPI(itemsToAdd);
@@ -189,7 +189,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
      * @param {Boolean} hideSpinner If this flag is set to true, the request that will be fired from this method call won't display the spinner.
      */
-    async updateItemFromAPI (itemsToUpdate, staleDataset = true, hideSpinner = true) {
+    async updateItemFromAPI (itemsToUpdate, staleDataset = true, hideSpinner = false) {
       this.__hideSpinnerOnNextRequest = hideSpinner;
 
       const socketResponse = await this.fetchItemFromAPI(itemsToUpdate);
