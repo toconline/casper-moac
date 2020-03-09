@@ -1945,8 +1945,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * This method is invoked when the _filteredItem property changes and either hides or displays the
    * vaadin-grid no items placeholder.
    *
-   * @param {Array} displayedItems
-   * @param {Boolean} loading
+   * @param {Array} displayedItems The currently displayed items.
+   * @param {Boolean} loading Flag that states if the grid is currently loading.
    */
   __hasNoItems (displayedItems, loading) {
     return !loading && displayedItems && displayedItems.length === 0;
