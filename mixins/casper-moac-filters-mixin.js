@@ -183,6 +183,9 @@ export const CasperMoacFiltersMixin = superClass => {
       if (!this.filters) return;
 
       Object.entries(this.filters).forEach(([filterKey, filter]) => {
+        // If the filter is not visible, do not render him in the list of active filters.
+        if (Object.keys(this.filters[filterKey]).includes('visible') && this.filters[filterKey].visible === false) return;
+
         let isFilterCurrentlyOpen = false;
 
         // Do not hide the "shortcut" when the casper-select is currently open.

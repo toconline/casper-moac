@@ -164,8 +164,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * to the grid using the already existing addItem method.
      * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
      * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
+     * @param {Boolean} hideSpinner If this flag is set to true, the request that will be fired from this method call won't display the spinner.
      */
-    async addItemFromAPI (itemsToAdd, afterItemId, staleDataset = true) {
+    async addItemFromAPI (itemsToAdd, afterItemId, staleDataset = true, hideSpinner = true) {
+      this.__hideSpinnerOnNextRequest = hideSpinner;
+
       const socketResponse = await this.fetchItemFromAPI(itemsToAdd);
 
       if (socketResponse) {
@@ -184,8 +187,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * @param {Array | String | Number} itemsToUpdate The list of item identifiers that will be fetched from the JSON API and updated
      * in the grid using the already existing updateItem method.
      * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
+     * @param {Boolean} hideSpinner If this flag is set to true, the request that will be fired from this method call won't display the spinner.
      */
-    async updateItemFromAPI (itemsToUpdate, staleDataset = true) {
+    async updateItemFromAPI (itemsToUpdate, staleDataset = true, hideSpinner = true) {
+      this.__hideSpinnerOnNextRequest = hideSpinner;
+
       const socketResponse = await this.fetchItemFromAPI(itemsToUpdate);
 
       if (socketResponse) {
@@ -388,7 +394,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
      */
     async __fetchRequest (url) {
       try {
-        this.loading = true;
+        if (!this.__hideSpinnerOnNextRequest) this.loading = true;
+        this.__hideSpinnerOnNextRequest = false;
+
         this.app.broker.abortPendingRequest();
         const socketResponse = await this.app.broker.get(url, this.resourceTimeoutMs, true);
         this.loading = false;
