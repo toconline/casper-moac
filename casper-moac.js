@@ -1682,10 +1682,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     if (this.__selectedItemsChangedInternally) return;
 
     // Fetch the internal representation of the items since they contain the field that the vaadin-grid uses as an identifier.
-    const internalSelectedItems = this.selectedItems.map(selectedItem => {
+    this.$.grid.selectedItems = this.selectedItems.map(selectedItem => {
       return this.displayedItems[this.__findItemIndexById(selectedItem[this.idExternalProperty], true)];
     });
-    this.$.grid.selectedItems = internalSelectedItems;
   }
 
   /**
