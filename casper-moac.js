@@ -1649,7 +1649,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * Observer that fires when the vaadin-grid selected items change.
    */
   __gridSelectedItemsChanged () {
+    this.__selectedItemsChangedInternally = true;
     this.selectedItems = [...this.__selectedItems];
+    this.__selectedItemsChangedInternally = false;
   }
 
   /**
@@ -1675,6 +1677,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.__selectAllCheckbox.checked = this.selectedItems.length > 0 && selectableItems.length === this.selectedItems.length;
     this.__selectAllCheckbox.indeterminate = this.selectedItems.length > 0 && selectableItems.length !== this.selectedItems.length;
     this.__selectAllCheckboxLock = false;
+
+    // Check if this method was invoked by the vaadin-grid or from the page using this component.
+    if (this.__selectedItemsChangedInternally) return;
+
+    // Fetch the internal representation of the items since they contain the field that the vaadin-grid uses as an identifier.
+    const internalSelectedItems = this.selectedItems.map(selectedItem => {
+      return this.displayedItems[this.__findItemIndexById(selectedItem[this.idExternalProperty], true)];
+    });
+    this.$.grid.selectedItems = internalSelectedItems;
   }
 
   /**
