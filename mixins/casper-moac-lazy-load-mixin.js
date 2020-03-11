@@ -493,9 +493,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
         .filter(filterItem =>
           this.__valueIsNotEmpty(filterItem.filter.value)
           && filterItem.filter.lazyLoad
-          && filterItem.filter.lazyLoad.field
           && filterItem.filter.lazyLoad.operator
           && !filterItem.filter.lazyLoad.disabled
+          && (filterItem.filter.lazyLoad.field || filterItem.filter.lazyLoad.operator === CasperMoacOperators.CUSTOM)
         )
         .map(filterItem => {
           const filter = filterItem.filter;
