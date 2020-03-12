@@ -309,7 +309,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter.call(this.page || {}, item));
 
       if (this.__currentPage !== 1) {
-        this.displayedItems = [...this.displayedItems, ...socketResponse.data];
+        this.displayedItems = this.__addInternalIdentifierToItems([...this.displayedItems, ...socketResponse.data]);
 
         // Since there are new items, set the select all checkbox to indeterminate if it's currently checked.
         if (!this.disableSelection && this.__selectAllCheckbox.checked && !this.__selectAllCheckbox.indeterminate) {
@@ -319,7 +319,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         // Reset the totals when requesting the first page.
         this.__resourceTotal = undefined;
         this.__resourceGrandTotal = undefined;
-        this.displayedItems = socketResponse.data;
+        this.displayedItems = this.__addInternalIdentifierToItems(socketResponse.data);
 
         this.__activateItem();
       }

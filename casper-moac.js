@@ -73,8 +73,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       displayedItems: {
         type: Array,
         value: [],
-        notify: true,
-        observer: '__displayedItemsChanged'
+        notify: true
       },
       /**
        * List of attributes that should be used to filter.
@@ -1048,7 +1047,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     displayedItems = this.__addRootItems(rootItems, displayedItems, afterItemId);
     displayedItems = this.__addChildItems(childItems, displayedItems);
 
-    this.displayedItems = displayedItems;
+    this.displayedItems = this.__addInternalIdentifierToItems(displayedItems);
 
     this.forceGridRedraw();
     this.__staleDataset = staleDataset;
@@ -1245,12 +1244,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     parentItem[this.expandedInternalProperty] = true;
     parentItem[this.rowBackgroundColorInternalProperty] = 'var(--casper-moac-parent-item-background-color)';
 
-    this.displayedItems = [
+    this.displayedItems = this.__addInternalIdentifierToItems([
       ...this.displayedItems.slice(0, parentItemIndex),
       parentItem,
       ...parentItemChildren,
       ...this.displayedItems.slice(parentItemIndex + 1)
-    ];
+    ]);
   }
 
   /**
@@ -2009,11 +2008,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 
   /**
-   * This observer gets called when the internal property displayedItems changes.
+   * This method sets the internal identifer key required for some actions like painting the active row for instance.
+   *
+   * @param {Array} newItems The list of items that will be patched with the identifier.
    */
-  __displayedItemsChanged () {
-    this.displayedItems.forEach((item, itemIndex) => {
-      item[this.idInternalProperty] = itemIndex;
+  __addInternalIdentifierToItems (newItems) {
+    return newItems.map((newItem, newItemIndex) => {
+      newItem[this.idInternalProperty] = newItemIndex;
+      return newItem;
     });
   }
 
