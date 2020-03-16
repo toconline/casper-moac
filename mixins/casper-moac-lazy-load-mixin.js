@@ -110,6 +110,14 @@ export const CasperMoacLazyLoadMixin = superClass => {
           type: String
         },
         /**
+         * Filters that should be always applied to the JSON API resource regardless of the current filters in the square bracket notation.
+         *
+         * @type {Object}
+         */
+        resourceExternalFilters: {
+          type: String
+        },
+        /**
          * Query that will be used to fetch the expanded / children items.
          *
          * @type {String}
@@ -424,6 +432,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
       // Limit the fields that are request to the JSON API.
       if (this.resourceListAttributes && this.resourceListAttributes.length > 0) {
         resourceUrlParams = [...resourceUrlParams, `fields[${this.resourceName}]=${this.resourceListAttributes.join(',')}`];
+      }
+
+      // Apply the external filters that should be applied in the square bracket notation.
+      if (this.resourceExternalFilters) {
+        Object.entries(this.resourceExternalFilters).forEach(([key, value]) => {
+          resourceUrlParams.push(`filter[${key}]=${value}`);
+        });
       }
 
       // Sort by ascending or descending.
