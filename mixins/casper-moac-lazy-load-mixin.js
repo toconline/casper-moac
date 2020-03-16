@@ -102,19 +102,19 @@ export const CasperMoacLazyLoadMixin = superClass => {
           value: 10000
         },
         /**
-         * Filters that should be always applied to the JSON API resource regardless of the current filters.
-         *
-         * @type {String}
-         */
-        resourceDefaultFilters: {
-          type: String
-        },
-        /**
          * Filters that should be always applied to the JSON API resource regardless of the current filters in the square bracket notation.
          *
          * @type {Object}
          */
         resourceExternalFilters: {
+          type: String
+        },
+        /**
+         * Filters that should be always applied to the JSON API resource regardless of the current filters in the raw SQL notation.
+         *
+         * @type {String}
+         */
+        resourceExternalSqlFilters: {
           type: String
         },
         /**
@@ -451,7 +451,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       }
 
       const filterResourceUrlParams = [
-        this.resourceDefaultFilters,
+        this.resourceExternalSqlFilters,
         this.__buildResourceUrlFreeFilters(),
         this.__buildResourceUrlFixedFilters(),
       ].filter(filterUrlParam => !!filterUrlParam)
