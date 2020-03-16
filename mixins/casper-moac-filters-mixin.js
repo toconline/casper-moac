@@ -139,7 +139,6 @@ export const CasperMoacFiltersMixin = superClass => {
           delete this.__ignoreFiltersValues[dataset.filter];
         }
 
-        console.log('Disparei um event');
         // Dispatch a custom event to inform the page using casper-moac that the filters have changed.
         this.dispatchEvent(new CustomEvent('filters-changed', {
           bubbles: true,

@@ -410,12 +410,15 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.loading = false;
 
         return socketResponse;
-      } catch (error) {
+      } catch (exception) {
         this.loading = false;
+        let errorMessage = 'Ocorreu um erro a carregar os dados.';
 
-        if (error.name !== 'AbortError') {
-          this.app.openToast({ text: 'Ocorreu um erro ao obter os dados.', backgroundColor: 'red' });
+        if (exception.errors && exception.errors.constructor === Array && exception.errors.length >= 1) {
+          errorMessage = exception.errors[0].detail;
         }
+
+        this.app.openToast({ text: errorMessage, backgroundColor: 'red' });
       }
     }
 
