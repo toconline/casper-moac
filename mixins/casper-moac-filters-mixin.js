@@ -104,7 +104,7 @@ export const CasperMoacFiltersMixin = superClass => {
         };
 
         // Override the filter's default value if it's present in the URL.
-        if (!filterSettings.filter.historyState || filterSettings.filter.historyState.disabled !== true) {
+        if (this.__historyStateFilters.includes(filterKey)) {
           const parameterName = this.__getUrlKeyForFilter(filterKey);
           if (searchParams.has(parameterName)) {
             filterSettings.filter.value = this.__getValueFromPrettyUrl(filterSettings.filter, searchParams.get(parameterName));
