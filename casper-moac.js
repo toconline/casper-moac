@@ -1641,7 +1641,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   __itemsChanged () {
     // Check if the new items are an array or otherwise, exit early.
-    if (!this.items || this.items.constructor !== Array) return;
+    if (!this.items || this.items.constructor !== Array) {
+      return console.warn('The items property should be an array and instead the component received this -', this.items);
+    }
 
     // Check if the items have the required internal property before advancing.
     if (this.items.length > 0 && this.items[0][this.idInternalProperty] === undefined) {
