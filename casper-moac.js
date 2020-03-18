@@ -1640,6 +1640,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * the new items on the vaadin-grid.
    */
   __itemsChanged () {
+    // Check if the new items are an array or otherwise, exit early.
+    if (!this.items || this.items.constructor !== Array) return;
+
     // Check if the items have the required internal property before advancing.
     if (this.items.length > 0 && this.items[0][this.idInternalProperty] === undefined) {
       this.items = this.__addInternalIdentifierToItems(this.items);
