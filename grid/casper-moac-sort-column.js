@@ -30,7 +30,8 @@ class CasperMoacSortColumn extends GridColumnElement {
        */
       direction: {
         type: String,
-        notify: true
+        notify: true,
+        value: null
       }
     }
   }
@@ -106,7 +107,7 @@ class CasperMoacSortColumn extends GridColumnElement {
    * @param {Object} event The event's object.
    */
   __toggleDirection (event) {
-    const directions = [undefined, CasperMoacSortDirections.ASCENDING, CasperMoacSortDirections.DESCENDING];
+    const directions = [null, CasperMoacSortDirections.ASCENDING, CasperMoacSortDirections.DESCENDING];
     const currentDirection = directions.findIndex(direction => direction === this.direction);
 
     this.direction = currentDirection + 1 < directions.length

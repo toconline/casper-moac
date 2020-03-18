@@ -19,7 +19,7 @@ export const CasperMoacSortingMixin = superClass => {
           const sorter = event.target;
 
           const existingSorterIndex = this.__activeSorters.findIndex(activeSorter => activeSorter === sorter);
-          if (existingSorterIndex === -1) {
+          if (existingSorterIndex === -1 && !!sorter.direction) {
             // This means the current sorter does not yet exist.
             this.__activeSorters = [...this.__activeSorters, sorter];
           } else {
