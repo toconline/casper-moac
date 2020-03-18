@@ -49,11 +49,15 @@ export const CasperMoacFiltersMixin = superClass => {
      */
     setFiltersItems (filtersItems) {
       for (const [filterKey, filterItems] of Object.entries(filtersItems)) {
-        if (this.filters[filterKey].type !== CasperMoacFilterTypes.CASPER_SELECT) return;
+        if (![CasperMoacFilterTypes.CASPER_SELECT, CasperMoacFilterTypes.COMPONENTLESS_FILTER].includes(this.filters[filterKey].type)) return;
 
         const filterSelectComponent = this.__getFilterComponent(filterKey);
         if (filterSelectComponent) {
           filterSelectComponent.items = filterItems;
+
+          // Also change the list of items in the filters property.
+          this.filters[filterKey].inputOptions = this.filters[filterKey].inputOptions || {};
+          this.filters[filterKey].inputOptions.items = filterItems;
         }
       }
     }
@@ -233,8 +237,11 @@ export const CasperMoacFiltersMixin = superClass => {
       activeFilter.required = filter.required;
       activeFilter.label = filter.inputOptions.label;
       activeFilter.value = this.__activeFilterValue(filterKey, filter);
-      activeFilter.onClickCallback = filterKey => this.__displayInlineFilters(filterKey);
       activeFilter.onRemoveCallback = filterKey => this.__removeActiveFilter(filterKey);
+
+      if (filter.type !== CasperMoacFilterTypes.COMPONENTLESS_FILTER) {
+        activeFilter.onClickCallback = filterKey => this.__displayInlineFilters(filterKey);
+      }
 
       this.$.activeFilters.appendChild(activeFilter);
     }
@@ -252,11 +259,11 @@ export const CasperMoacFiltersMixin = superClass => {
       switch (filter.type) {
         case CasperMoacFilterTypes.PAPER_INPUT:
         case CasperMoacFilterTypes.CASPER_DATE_PICKER:
-        case CasperMoacFilterTypes.COMPONENTLESS_FILTER:
           return filter.value;
         case CasperMoacFilterTypes.PAPER_CHECKBOX:
           return filter.inputOptions.label;
         case CasperMoacFilterTypes.CASPER_SELECT:
+        case CasperMoacFilterTypes.COMPONENTLESS_FILTER:
           const casperSelect = this.__getFilterComponent(filterKey);
 
           // This means the casper-select is not in the DOM yet or does not have the selected items.

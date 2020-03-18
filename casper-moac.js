@@ -832,7 +832,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                 <template is="dom-repeat" items="[[__filters]]" restamp>
                   <div class$="[[__filterContainerClassName(item.filter)]]">
                     <!--Casper-Select filter-->
-                    <template is="dom-if" if="[[__isFilterCasperSelect(item.filter.type)]]">
+                    <template is="dom-if" if="[[__isFilterCasperSelectOrComponentless(item.filter.type)]]">
                       <casper-select
                         data-filter$="[[item.filterKey]]"
                         list-height="50vh"
@@ -850,7 +850,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                     </template>
 
                     <!--Paper-Input or componentless filter-->
-                    <template is="dom-if" if="[[__isFilterPaperInputOrComponentless(item.filter.type)]]">
+                    <template is="dom-if" if="[[__isFilterPaperInput(item.filter.type)]]">
                       <paper-input
                         data-filter$="[[item.filterKey]]"
                         value="{{item.filter.value}}"
@@ -1352,10 +1352,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     }
   }
 
-  __isFilterCasperSelect (itemType) { return itemType === CasperMoacFilterTypes.CASPER_SELECT; }
+  __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
   __isFilterPaperCheckbox (itemType) { return itemType === CasperMoacFilterTypes.PAPER_CHECKBOX; }
   __isFilterCasperDatePicker (itemType) { return itemType === CasperMoacFilterTypes.CASPER_DATE_PICKER; }
-  __isFilterPaperInputOrComponentless (itemType) { return [CasperMoacFilterTypes.PAPER_INPUT, CasperMoacFilterTypes.COMPONENTLESS_FILTER].includes(itemType); }
+  __isFilterCasperSelectOrComponentless (itemType) { return [CasperMoacFilterTypes.CASPER_SELECT, CasperMoacFilterTypes.COMPONENTLESS_FILTER].includes(itemType); }
 
   /**
    * This method checks if the named slot "grid-custom-styles" has a template assigned to it. If it has,
@@ -1792,11 +1792,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   __getFilterComponent (key) {
     switch (this.filters[key].type) {
       case CasperMoacFilterTypes.PAPER_INPUT:
-      case CasperMoacFilterTypes.COMPONENTLESS_FILTER:
         return this.shadowRoot.querySelector(`paper-input[data-filter="${key}"]`);
-      case CasperMoacFilterTypes.CASPER_SELECT: return this.shadowRoot.querySelector(`casper-select[data-filter="${key}"]`);
-      case CasperMoacFilterTypes.PAPER_CHECKBOX: return this.shadowRoot.querySelector(`paper-checkbox[data-filter="${key}"]`);
-      case CasperMoacFilterTypes.CASPER_DATE_PICKER: return this.shadowRoot.querySelector(`casper-date-picker[data-filter="${key}"]`);
+      case CasperMoacFilterTypes.CASPER_SELECT:
+      case CasperMoacFilterTypes.COMPONENTLESS_FILTER:
+        return this.shadowRoot.querySelector(`casper-select[data-filter="${key}"]`);
+      case CasperMoacFilterTypes.PAPER_CHECKBOX:
+        return this.shadowRoot.querySelector(`paper-checkbox[data-filter="${key}"]`);
+      case CasperMoacFilterTypes.CASPER_DATE_PICKER:
+        return this.shadowRoot.querySelector(`casper-date-picker[data-filter="${key}"]`);
     }
   }
 

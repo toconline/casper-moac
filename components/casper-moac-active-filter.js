@@ -108,14 +108,18 @@ class CasperMoacActiveFilter extends PolymerElement {
    * This method is invoked when the user clicks on the active filter's value.
    */
   __onValueClick () {
-    this.onClickCallback(this.key);
+    if (this.onClickCallback) {
+      this.onClickCallback(this.key);
+    }
   }
 
   /**
    * This method is invoked when the user tries to remove the current active filter.
    */
   __onRemoveIconClick () {
-    this.onRemoveCallback(this.key);
+    if (this.onRemoveCallback) {
+      this.onRemoveCallback(this.key);
+    }
   }
 }
 
