@@ -1902,9 +1902,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
   /**
    * This method toggles the visibility of all the filters when the user presses the button below the search input.
+   *
+   * @param {Object} event The event's object.
    */
-  __toggleDisplayAllFilters () {
+  __toggleDisplayAllFilters (event) {
+    const paperButton = this.__eventPathContainsNode(event, 'paper-button');
+
     this.__displayAllFilters = !this.__displayAllFilters;
+    !this.__displayAllFilters
+      ? paperButton.style.backgroundColor = ''
+      : paperButton.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.2)';
   }
 
   /**
