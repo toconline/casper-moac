@@ -22,12 +22,14 @@ import { CasperMoacSortingMixin } from './mixins/casper-moac-sorting-mixin.js';
 import { CasperMoacFiltersMixin } from './mixins/casper-moac-filters-mixin.js';
 import { CasperMoacHistoryMixin } from './mixins/casper-moac-history-mixin.js';
 import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
+import { CasperMoacLocalStorageMixin } from './mixins/casper-moac-local-storage-mixin.js';
 import { CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 
 export class CasperMoac extends CasperMoacLazyLoadMixin(
   CasperMoacFiltersMixin(
     CasperMoacSortingMixin(
-      CasperMoacHistoryMixin(PolymerElement)))) {
+      CasperMoacLocalStorageMixin(
+        CasperMoacHistoryMixin(PolymerElement))))) {
 
   static get properties () {
     return {
@@ -393,7 +395,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
        * @type {Array}
        */
       filterComponents: {
-        type: Array
+        type: Array,
+        value: []
       },
       /**
        * The value that is currently in the free filter input which will be used to filter the items.
@@ -447,6 +450,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         type: Boolean,
         value: false,
         observer: '__displayAllFiltersChanged'
+      },
+      /**
+       * This object contains initial filter values so that the user can reset to them if he wants.
+       *
+       * @type {Object}
+       */
+      __initialFiltersValues: {
+        type: Object,
+        value: {}
       },
       /**
        * This object contains the filter keys and values that should not be used to fetch new items since those filters
@@ -809,13 +821,24 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
               <div class="active-filters">
                 <div class="header">
                   <div class="header-title">
-                    <template is="dom-if" if="[[__staleDataset]]">
+                  <!--Stale dataset icon-->
+                  <template is="dom-if" if="[[__staleDataset]]">
                       <casper-icon
                         on-click="refreshItems"
                         icon="fa-regular:sync"
                         tooltip="Os dados poderão estar desactualizados. Clique aqui para recarregar a grelha">
                       </casper-icon>
                     </template>
+
+                    <!--Reset filters icon-->
+                    <template is="dom-if" if="[[__displayResetFiltersIcon]]">
+                      <casper-icon
+                        icon="fa-solid:user"
+                        on-click="__resetFilters"
+                        tooltip="Clique aqui para reiniciar os filtros">
+                      </casper-icon>
+                    </template>
+
                     <strong>Filtros ativos:</strong>
                   </div>
 

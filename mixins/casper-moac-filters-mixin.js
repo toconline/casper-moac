@@ -17,6 +17,7 @@ export const CasperMoacFiltersMixin = superClass => {
       // This "hack" is used to avoid problems when re-rendering the filters.
       this.__filters = [];
       this.__ignoreFiltersValues = {};
+      this.__initialFiltersValues = {};
       afterNextRender(this, () => { this.__filtersChanged(this.filters); });
     }
 
@@ -39,6 +40,7 @@ export const CasperMoacFiltersMixin = superClass => {
       // This "hack" is used to avoid problems when re-rendering the filters.
       this.__filters = [];
       this.__ignoreFiltersValues = {};
+      this.__initialFiltersValues = {};
       afterNextRender(this, () => { this.__filtersChanged(this.filters); });
     }
 
@@ -80,6 +82,7 @@ export const CasperMoacFiltersMixin = superClass => {
 
       afterNextRender(this, () => {
         this.__renderActiveFilters();
+        this.__saveFiltersIntoLocalStorage();
         this.__updateUrlWithCurrentFilters();
       });
     }
@@ -94,14 +97,20 @@ export const CasperMoacFiltersMixin = superClass => {
       this.__hasFilters = !!filters && Object.keys(filters).length > 0;
 
       this.__buildHistoryStateFilters();
-
       const searchParams = new URLSearchParams(window.location.search);
+      const localStorageFilters = this.__retrieveFiltersFromLocalStorage();
+
       // Transform the filters object into an array to use in a dom-repeat.
       this.__filters = Object.keys(filters).map(filterKey => {
         const filterSettings = {
           filterKey: filterKey,
           filter: this.filters[filterKey]
         };
+
+        // Override the filter's default value if it's present in the local storage.
+        if (localStorageFilters.hasOwnProperty(filterKey)) {
+          filterSettings.filter.value = localStorageFilters[filterKey];
+        }
 
         // Override the filter's default value if it's present in the URL.
         if (this.__historyStateFilters.includes(filterKey)) {
@@ -113,6 +122,7 @@ export const CasperMoacFiltersMixin = superClass => {
 
         if (this.__valueIsNotEmpty(filterSettings.filter.value)) {
           this.__ignoreFiltersValues[filterKey] = filterSettings.filter.value;
+          this.__initialFiltersValues[filterKey] = filterSettings.filter.value;
         }
 
         return filterSettings;
@@ -139,24 +149,24 @@ export const CasperMoacFiltersMixin = superClass => {
 
         // This validation makes sure we're not firing requests for already fetched filters during the initialization process.
         if (Object.keys(this.__ignoreFiltersValues).includes(dataset.filter)) {
-          const filterDidNotChange = String(this.__ignoreFiltersValues[dataset.filter]) === String(value);
+          const valueToIgnore = this.__ignoreFiltersValues[dataset.filter];
+
+          // Test
+          const filterDidNotChange = String(valueToIgnore) === String(value) || (!this.__valueIsNotEmpty(valueToIgnore) && !this.__valueIsNotEmpty(value));
           if (filterDidNotChange) return;
 
           delete this.__ignoreFiltersValues[dataset.filter];
         }
 
-        // Dispatch a custom event to inform the page using casper-moac that the filters have changed.
-        this.dispatchEvent(new CustomEvent('filters-changed', {
-          bubbles: true,
-          composed: true,
-          detail: { filter: dataset.filter }
-        }));
+        this.__displayResetFiltersIcon = true;
 
         // Force the re-fetch of items if one the filter changes.
         if (this.lazyLoad) this.refreshItems();
 
         this.__renderActiveFilters();
         this.__updateUrlWithCurrentFilters();
+        this.__saveFiltersIntoLocalStorage();
+        this.__dispatchFilterChangedEvent(dataset.filter);
       };
 
       afterNextRender(this, () => {
@@ -341,6 +351,40 @@ export const CasperMoacFiltersMixin = superClass => {
           ? this.__filterItems()
           : this.__filterLazyLoadItems();
       });
+    }
+
+    /**
+     * Dispatches a custom event that'll alert the page that the filters have changed.
+     *
+     * @param {String | Array} filter The filter(s) that changed.
+     */
+    __dispatchFilterChangedEvent (filter) {
+      // Dispatches the custom event to inform the page using casper-moac that the filters have changed.
+      this.dispatchEvent(new CustomEvent('filters-changed', {
+        bubbles: true,
+        composed: true,
+        detail: { filter: filter }
+      }));
+    }
+
+    /**
+     * Resets the filters to the initial values.
+     */
+    __resetFilters () {
+      this.__displayResetFiltersIcon = false;
+
+      const resetFiltersValues = {};
+
+      Object.keys(this.filters).forEach(filterKey => {
+        !this.__initialFiltersValues.hasOwnProperty(filterKey)
+          ? resetFiltersValues[filterKey] = ''
+          : resetFiltersValues[filterKey] = this.__initialFiltersValues[filterKey];
+      });
+
+      this.setFiltersValue(resetFiltersValues);
+      this.lazyLoad
+        ? this.refreshItems()
+        : this.__dispatchFilterChangedEvent(Object.keys(resetFiltersValues));
     }
   }
 };
