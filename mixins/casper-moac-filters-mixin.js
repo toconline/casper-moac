@@ -107,24 +107,30 @@ export const CasperMoacFiltersMixin = superClass => {
           filter: this.filters[filterKey]
         };
 
+        let filterValue = filterSettings.filter.value;
+
+        if (this.__valueIsNotEmpty(filterValue)) {
+          this.__initialFiltersValues[filterKey] = filterValue;
+        }
+
         // Override the filter's default value if it's present in the local storage.
         if (localStorageFilters.hasOwnProperty(filterKey)) {
-          filterSettings.filter.value = localStorageFilters[filterKey];
+          filterValue = localStorageFilters[filterKey];
         }
 
         // Override the filter's default value if it's present in the URL.
         if (this.__historyStateFilters.includes(filterKey)) {
           const parameterName = this.__getUrlKeyForFilter(filterKey);
           if (searchParams.has(parameterName)) {
-            filterSettings.filter.value = this.__getValueFromPrettyUrl(filterSettings.filter, searchParams.get(parameterName));
+            filterValue = this.__getValueFromPrettyUrl(filterSettings.filter, searchParams.get(parameterName));
           }
         }
 
-        if (this.__valueIsNotEmpty(filterSettings.filter.value)) {
-          this.__ignoreFiltersValues[filterKey] = filterSettings.filter.value;
-          this.__initialFiltersValues[filterKey] = filterSettings.filter.value;
+        if (this.__valueIsNotEmpty(filterValue)) {
+          this.__ignoreFiltersValues[filterKey] = filterValue;
         }
 
+        filterSettings.filter.value = filterValue;
         return filterSettings;
       });
 
