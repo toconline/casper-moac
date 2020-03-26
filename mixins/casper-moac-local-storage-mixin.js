@@ -10,7 +10,6 @@ export const CasperMoacLocalStorageMixin = superClass => {
          */
         localStorageKey: {
           type: String,
-          value: 'teste'
         }
       }
     }
