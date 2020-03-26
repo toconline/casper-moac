@@ -109,9 +109,8 @@ export const CasperMoacFiltersMixin = superClass => {
 
         let filterValue = filterSettings.filter.value;
 
-        if (this.__valueIsNotEmpty(filterValue)) {
-          this.__initialFiltersValues[filterKey] = filterValue;
-        }
+        // Save the initial value provided by the developer.
+        this.__initialFiltersValues[filterKey] = filterSettings.filter.value;
 
         // Override the filter's default value if it's present in the local storage.
         if (localStorageFilters.hasOwnProperty(filterKey)) {
@@ -128,6 +127,10 @@ export const CasperMoacFiltersMixin = superClass => {
 
         if (this.__valueIsNotEmpty(filterValue)) {
           this.__ignoreFiltersValues[filterKey] = filterValue;
+        }
+
+        if (String(filterValue) !== String(this.__initialFiltersValues[filterKey]) && (filterValue || this.__initialFiltersValues[filterKey])) {
+          this.__displayResetFiltersIcon = true;
         }
 
         filterSettings.filter.value = filterValue;
