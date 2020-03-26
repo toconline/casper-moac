@@ -833,7 +833,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                     <!--Reset filters icon-->
                     <template is="dom-if" if="[[__displayResetFiltersIcon]]">
                       <casper-icon
-                        icon="fa-solid:user"
+                        icon="fa-solid:filter"
                         on-click="__resetFilters"
                         tooltip="Clique aqui para reiniciar os filtros">
                       </casper-icon>
