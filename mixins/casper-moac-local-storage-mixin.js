@@ -18,6 +18,8 @@ export const CasperMoacLocalStorageMixin = superClass => {
      * Retrieves the filters information that was previously save in the local storage.
      */
     __retrieveFiltersFromLocalStorage () {
+      if (!this.localStorageKey) return {};
+
       const localStorageFilters = window.localStorage.getItem(this.localStorageKey);
 
       return JSON.parse(localStorageFilters) || {};
@@ -27,6 +29,8 @@ export const CasperMoacLocalStorageMixin = superClass => {
      * Saves the current filters information into the local storage.
      */
     __saveFiltersIntoLocalStorage () {
+      if (!this.localStorageKey) return;
+
       const localStorageFilters = {};
 
       Object.entries(this.filters).forEach(([filterKey, filter]) => {
