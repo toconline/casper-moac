@@ -385,7 +385,7 @@ export const CasperMoacFiltersMixin = superClass => {
       Object.keys(this.filters).forEach(filterKey => {
         !this.__initialFiltersValues.hasOwnProperty(filterKey)
           ? resetFiltersValues[filterKey] = ''
-          : resetFiltersValues[filterKey] = this.__initialFiltersValues[filterKey];
+          : resetFiltersValues[filterKey] = this.__initialFiltersValues[filterKey] || '';
       });
 
       this.setFiltersValue(resetFiltersValues);
