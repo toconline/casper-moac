@@ -17,7 +17,6 @@ export const CasperMoacFiltersMixin = superClass => {
       // This "hack" is used to avoid problems when re-rendering the filters.
       this.__filters = [];
       this.__ignoreFiltersValues = {};
-      this.__initialFiltersValues = {};
       afterNextRender(this, () => { this.__filtersChanged(this.filters); });
     }
 
@@ -40,7 +39,6 @@ export const CasperMoacFiltersMixin = superClass => {
       // This "hack" is used to avoid problems when re-rendering the filters.
       this.__filters = [];
       this.__ignoreFiltersValues = {};
-      this.__initialFiltersValues = {};
       afterNextRender(this, () => { this.__filtersChanged(this.filters); });
     }
 
@@ -154,13 +152,13 @@ export const CasperMoacFiltersMixin = superClass => {
      */
     __bindFiltersEvents () {
       const filterChangedCallback = event => {
-        const { dataset, value } = event.composedPath().shift();
+        let { dataset, value } = event.composedPath().shift();
+        if (event.type === 'checked-changed') value = event.detail.value;
 
         // This validation makes sure we're not firing requests for already fetched filters during the initialization process.
         if (Object.keys(this.__ignoreFiltersValues).includes(dataset.filter)) {
           const valueToIgnore = this.__ignoreFiltersValues[dataset.filter];
 
-          // Test
           const filterDidNotChange = String(valueToIgnore) === String(value) || (!this.__valueIsNotEmpty(valueToIgnore) && !this.__valueIsNotEmpty(value));
           if (filterDidNotChange) return;
 
