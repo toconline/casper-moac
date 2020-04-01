@@ -469,6 +469,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       __ignoreFiltersValues: {
         type: Object,
         value: {}
+      },
+      /**
+       * Flag that states if the pill which resets the filters, is visible or not.
+       *
+       * @type {Boolean}
+       */
+      __displayResetFiltersPill: {
+        type: Boolean,
+        value: false
       }
     };
   }
@@ -625,6 +634,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header .header-title casper-icon:hover {
           cursor: pointer;
           background-color: var(--dark-primary-color);
+        }
+
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header .header-title casper-moac-pill {
+          margin: 0;
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container .active-filters .active-filters-list {
@@ -830,16 +843,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                       </casper-icon>
                     </template>
 
-                    <!--Reset filters icon-->
-                    <template is="dom-if" if="[[__displayResetFiltersIcon]]">
-                      <casper-icon
-                        icon="fa-solid:filter"
-                        on-click="__resetFilters"
-                        tooltip="Clique aqui para reiniciar os filtros">
-                      </casper-icon>
+                    <!--Reset filters Pill-->
+                    <template is="dom-if" if="[[__displayResetFiltersPill]]">
+                      <casper-moac-pill reverse on-click="__resetFilters">Repor filtros</casper-moac-pill>
                     </template>
 
-                    <strong>Filtros ativos:</strong>
+                    <template is="dom-if" if="[[!__displayResetFiltersPill]]">
+                      <strong>Filtros ativos:</strong>
+                    </template>
                   </div>
 
                   <template is="dom-if" if="[[!hideNumberResults]]">

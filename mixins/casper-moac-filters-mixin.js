@@ -128,7 +128,7 @@ export const CasperMoacFiltersMixin = superClass => {
         }
 
         if (String(filterValue) !== String(this.__initialFiltersValues[filterKey]) && (filterValue || this.__initialFiltersValues[filterKey])) {
-          this.__displayResetFiltersIcon = true;
+          this.__displayResetFiltersPill = true;
         }
 
         filterSettings.filter.value = filterValue;
@@ -165,7 +165,7 @@ export const CasperMoacFiltersMixin = superClass => {
           delete this.__ignoreFiltersValues[dataset.filter];
         }
 
-        this.__displayResetFiltersIcon = true;
+        this.__displayResetFiltersPill = true;
 
         // Force the re-fetch of items if one the filter changes.
         if (this.lazyLoad) this.refreshItems();
@@ -378,7 +378,7 @@ export const CasperMoacFiltersMixin = superClass => {
      * Resets the filters to the initial values.
      */
     __resetFilters () {
-      this.__displayResetFiltersIcon = false;
+      this.__displayResetFiltersPill = false;
 
       const resetFiltersValues = {};
 
