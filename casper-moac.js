@@ -607,6 +607,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           flex-direction: column;
         }
 
+        .main-container vaadin-split-layout .left-side-container .header-container.header-container--responsive .active-filters {
+          margin-top: 10px;
+        }
+
         .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header {
           display: flex;
           line-height: 20px;
