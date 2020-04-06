@@ -1683,12 +1683,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       return console.warn('The items property should be an array and instead the component received this -', this.items);
     }
 
-    // Check if the items have the required internal property before advancing.
-    if (this.items.length > 0 && this.items[0][this.idInternalProperty] === undefined) {
-      this.items = this.__addInternalIdentifierToItems(this.items);
-      return;
-    }
-
     this.__filterItems();
   }
 
@@ -1770,7 +1764,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       }
     }
 
-    this.displayedItems = this.__sortItems(displayedItems);
+    this.displayedItems = this.__addInternalIdentifierToItems(this.__sortItems(displayedItems));
     this.forceGridRedraw();
     this.__activateItem();
     this.__numberOfResults = displayedItems.length === originalItems.length
