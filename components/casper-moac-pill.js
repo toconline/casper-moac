@@ -94,7 +94,9 @@ class CasperMoacPill extends PolymerElement {
   ready () {
     super.ready();
 
-    this.addEventListener('click', () => this.onClickCallback(this.id));
+    this.addEventListener('click', () => {
+      if (this.onClickCallback) this.onClickCallback(this.id);
+    });
   }
 }
 

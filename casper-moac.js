@@ -849,7 +849,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
                     <!--Reset filters Pill-->
                     <template is="dom-if" if="[[__displayResetFiltersPill]]">
-                      <casper-moac-pill reverse on-click-callback="__resetFilters">Repor filtros</casper-moac-pill>
+                      <casper-moac-pill reverse on-click="__resetFilters">Repor filtros</casper-moac-pill>
                     </template>
 
                     <template is="dom-if" if="[[!__displayResetFiltersPill]]">

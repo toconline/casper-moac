@@ -66,12 +66,13 @@ export const CasperMoacFiltersMixin = superClass => {
      * Changes the filters values without automatically firing a request by setting the internal property '__valueChangeLock'.
      *
      * @param {Object} filterValues The object which contains the new values for each filter.
+     * @param {Boolean} displayResetPill This flag states if the reset filters pill should be displayed.
      */
-    setFiltersValue (filtersValue) {
+    setFiltersValue (filtersValue, displayResetFiltersPill = true) {
       for (const [filterName, filterValue] of Object.entries(filtersValue)) {
         const filterComponent = this.__getFilterComponent(filterName);
 
-        this.__displayResetFiltersPill = true;
+        this.__displayResetFiltersPill = displayResetFiltersPill;
         this.__ignoreFiltersValues[filterName] = filterValue;
 
         this.filters[filterName].type !== CasperMoacFilterTypes.PAPER_CHECKBOX
@@ -391,7 +392,7 @@ export const CasperMoacFiltersMixin = superClass => {
           : resetFiltersValues[filterKey] = this.__initialFiltersValues[filterKey] || '';
       });
 
-      this.setFiltersValue(resetFiltersValues);
+      this.setFiltersValue(resetFiltersValues, false);
       this.lazyLoad
         ? this.refreshItems()
         : this.__dispatchFilterChangedEvent(Object.keys(resetFiltersValues));
