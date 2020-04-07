@@ -32,14 +32,24 @@ export const CasperMoacLocalStorageMixin = superClass => {
       if (!this.localStorageKey) return;
 
       const localStorageFilters = {};
+      this.__localStorageFilters.forEach(filterKey => {
+        const filterValue = this.filters[filterKey].value;
 
-      Object.entries(this.filters).forEach(([filterKey, filter]) => {
-        if (this.__valueIsNotEmpty(filter.value)) {
-          localStorageFilters[filterKey] = filter.value;
+        if (this.__valueIsNotEmpty(filterValue)) {
+          localStorageFilters[filterKey] = filterValue;
         }
       });
 
       window.localStorage.setItem(this.localStorageKey, JSON.stringify(localStorageFilters));
+    }
+
+    /**
+     * This method is used to select the filters that will be used when reading and writing into the local storage.
+     */
+    __buildLocalStorageFilters () {
+      this.__localStorageFilters = Object.keys(this.filters).filter(filterKey => {
+        return !this.filters[filterKey].localStorage || !this.filters[filterKey].localStorage.disabled;
+      });
     }
   }
 };

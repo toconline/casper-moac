@@ -95,6 +95,8 @@ export const CasperMoacFiltersMixin = superClass => {
       this.__hasFilters = !!filters && Object.keys(filters).length > 0;
 
       this.__buildHistoryStateFilters();
+      this.__buildLocalStorageFilters();
+
       const searchParams = new URLSearchParams(window.location.search);
       const localStorageFilters = this.__retrieveFiltersFromLocalStorage();
 
@@ -111,7 +113,7 @@ export const CasperMoacFiltersMixin = superClass => {
         this.__initialFiltersValues[filterKey] = filterSettings.filter.value;
 
         // Override the filter's default value if it's present in the local storage.
-        if (localStorageFilters.hasOwnProperty(filterKey)) {
+        if (this.__localStorageFilters.includes(filterKey) && localStorageFilters.hasOwnProperty(filterKey)) {
           filterValue = localStorageFilters[filterKey];
         }
 
