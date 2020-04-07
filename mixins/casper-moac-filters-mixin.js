@@ -67,8 +67,9 @@ export const CasperMoacFiltersMixin = superClass => {
      *
      * @param {Object} filterValues The object which contains the new values for each filter.
      * @param {Boolean} displayResetPill This flag states if the reset filters pill should be displayed.
+     * @param {Boolean} overrideInitialValues This flag states if the initial values should be overwritten with the new ones.
      */
-    setFiltersValue (filtersValue, displayResetFiltersPill = true) {
+    setFiltersValue (filtersValue, displayResetFiltersPill = true, overrideInitialValues = false) {
       for (const [filterName, filterValue] of Object.entries(filtersValue)) {
         const filterComponent = this.__getFilterComponent(filterName);
 
@@ -78,7 +79,10 @@ export const CasperMoacFiltersMixin = superClass => {
         this.filters[filterName].type !== CasperMoacFilterTypes.PAPER_CHECKBOX
           ? filterComponent.value = filterValue
           : filterComponent.checked = filterValue;
+
+        if (overrideInitialValues) this.__initialFiltersValues[filterName] = filterValue;
       }
+
 
       afterNextRender(this, () => {
         this.__renderActiveFilters();
@@ -384,18 +388,18 @@ export const CasperMoacFiltersMixin = superClass => {
     __resetFilters () {
       this.__displayResetFiltersPill = false;
 
-      const resetFiltersValues = {};
+      const resetFiltersValue = {};
 
       Object.keys(this.filters).forEach(filterKey => {
         !this.__initialFiltersValues.hasOwnProperty(filterKey)
-          ? resetFiltersValues[filterKey] = ''
-          : resetFiltersValues[filterKey] = this.__initialFiltersValues[filterKey] || '';
+          ? resetFiltersValue[filterKey] = ''
+          : resetFiltersValue[filterKey] = this.__initialFiltersValues[filterKey] || '';
       });
 
-      this.setFiltersValue(resetFiltersValues, false);
+      this.setFiltersValue(resetFiltersValue, false);
       this.lazyLoad
         ? this.refreshItems()
-        : this.__dispatchFilterChangedEvent(Object.keys(resetFiltersValues));
+        : this.__dispatchFilterChangedEvent(Object.keys(resetFiltersValue));
     }
   }
 };
