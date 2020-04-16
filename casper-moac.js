@@ -74,7 +74,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
        */
       displayedItems: {
         type: Array,
-        value: [],
+        value: () => [],
         notify: true
       },
       /**
@@ -166,7 +166,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       expandedItems: {
         type: Array,
         notify: true,
-        value: []
+        value: () => []
       },
       /**
        * The items that are currently selected in the vaadin-grid.
@@ -176,7 +176,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       selectedItems: {
         type: Array,
         notify: true,
-        value: [],
+        value: () => [],
         observer: '__selectedItemsChanged'
       },
       /**
@@ -396,7 +396,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
        */
       filterComponents: {
         type: Array,
-        value: []
+        value: () => []
       },
       /**
        * The value that is currently in the free filter input which will be used to filter the items.
@@ -458,7 +458,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
        */
       __initialFiltersValues: {
         type: Object,
-        value: {}
+        value: () => ({})
       },
       /**
        * This object contains the filter keys and values that should not be used to fetch new items since those filters
@@ -468,7 +468,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
        */
       __ignoreFiltersValues: {
         type: Object,
-        value: {}
+        value: () => ({})
       },
       /**
        * Flag that states if the pill which resets the filters, is visible or not.
