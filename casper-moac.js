@@ -656,30 +656,20 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         /* Active filters */
         .main-container vaadin-split-layout .left-side-container .filters-container {
           display: grid;
-          grid-row-gap: 10px;
-          grid-column-gap: 10px;
-          grid-template-columns: 1fr 1fr;
           padding: 10px;
           padding-top: 0;
+          grid-row-gap: 10px;
+          grid-column-gap: 10px;
           margin-bottom: 10px;
           border-bottom: 1px solid var(--primary-color);
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         }
 
         .main-container vaadin-split-layout .left-side-container .filters-container .filter-container-invisible {
           display: none;
         }
 
-        .main-container vaadin-split-layout .left-side-container .filters-container.filters-container--inline {
-          display: flex;
-          padding: 10px;
-        }
-
-        .main-container vaadin-split-layout .left-side-container .filters-container.filters-container--inline .filter-container {
-          flex: 1;
-          margin: 0 5px;
-        }
-
-        .main-container vaadin-split-layout .left-side-container .filters-container:not(.filters-container--inline) .filter-container.filter-container--full-width {
+        .main-container vaadin-split-layout .left-side-container .filters-container .filter-container.filter-container--full-width {
           grid-column: span 2;
         }
 
@@ -866,7 +856,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
             </div>
 
             <div hidden$="[[!__displayAllFilters]]">
-              <div class$="[[__filtersContainerClassName()]]">
+              <div class="filters-container">
                 <template is="dom-repeat" items="[[__filters]]" restamp>
                   <div class$="[[__filterContainerClassName(item.filter)]]">
                     <!--Casper-Select filter-->
@@ -1987,16 +1977,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     return !this.hasEpaper
       ? 'width: 0%;'
       : `width: ${100 - parseInt(this.leftSideInitialWidth)}%;`;
-  }
-
-  /**
-   * Depending on the current MOAC type, the active filters will be displayed differently by either
-   * adding the 'filters-container--inline' class or not.
-   */
-  __filtersContainerClassName () {
-    return this.hasEpaper
-      ? 'filters-container'
-      : 'filters-container filters-container--inline';
   }
 
   /**
