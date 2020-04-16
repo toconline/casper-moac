@@ -1105,16 +1105,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     // Cast the object as an array to avoid ternaries when updating the item(s).
     if (itemsToUpdate.constructor.name !== 'Array') itemsToUpdate = [itemsToUpdate];
 
-    let activeItemIndex;
     const displayedItems = [...this.displayedItems];
     const selectedItems = [...this.__selectedItems];
 
     itemsToUpdate.forEach(itemToUpdate => {
       const updateItemCallback = (item, itemIndex, items) => {
         if (this.__compareItems(itemToUpdate, item, true)) {
-          // Save the index of the item we're going to activate.
-          activeItemIndex = activeItemIndex !== undefined ? activeItemIndex : itemIndex;
-
           // Do not simply overwrite the object to avoid losing important internal properties set by this component.
           Object.keys(itemToUpdate).forEach(itemToUpdateProperty => {
             items[itemIndex][itemToUpdateProperty] = itemToUpdate[itemToUpdateProperty];
@@ -1127,8 +1123,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         }
       };
 
-      displayedItems.forEach(updateItemCallback);
       selectedItems.forEach(updateItemCallback);
+      displayedItems.forEach(updateItemCallback);
+
+      // Make sure we notify that the active item changed.
+      if (this.__compareItems(itemToUpdate, this.activeItem, true)) {
+        this.activeItem = { ...this.activeItem };
+      }
     });
 
     this.displayedItems = displayedItems;
