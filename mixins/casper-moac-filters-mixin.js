@@ -275,18 +275,19 @@ export const CasperMoacFiltersMixin = superClass => {
      * Given a specific filter, this method is responsible for returning the human-readable version
      * of its current value.
      *
-     * @param {Object} filterKey The filter's identifier.
+     * @param {String} filterKey The filter's identifier.
      * @param {Object} filter The filter's settings.
      */
     __activeFilterValue (filterKey, filter) {
       if (!this.__valueIsNotEmpty(filter.value)) return '(Filtro Vazio)';
 
       switch (filter.type) {
-        case CasperMoacFilterTypes.PAPER_INPUT:
+        case CasperMoacFilterTypes.PAPER_INPUT: return filter.value;
+        case CasperMoacFilterTypes.PAPER_CHECKBOX: return filter.inputOptions.label;
         case CasperMoacFilterTypes.CASPER_DATE_PICKER:
-          return filter.value;
-        case CasperMoacFilterTypes.PAPER_CHECKBOX:
-          return filter.inputOptions.label;
+          const casperDatePicker = this.__getFilterComponent(filterKey);
+
+          return casperDatePicker ? casperDatePicker.formattedValue : '';
         case CasperMoacFilterTypes.CASPER_SELECT:
         case CasperMoacFilterTypes.COMPONENTLESS_FILTER:
           const casperSelect = this.__getFilterComponent(filterKey);
