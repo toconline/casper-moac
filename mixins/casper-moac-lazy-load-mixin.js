@@ -415,7 +415,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
         let errorMessage = 'Ocorreu um erro a carregar os dados.';
 
         if (exception.errors && exception.errors.constructor === Array && exception.errors.length >= 1) {
-          errorMessage = exception.errors[0].detail;
+          if ( exception.errors[0].code ===  'FORBIDDEN_BY_GATEKEEPER') {
+            errorMessage = 'Não tem permissão para executar esta operação';
+          } else {
+            errorMessage = exception.errors[0].detail;
+          }
         }
 
         this.app.openToast({ text: errorMessage, backgroundColor: 'red' });
