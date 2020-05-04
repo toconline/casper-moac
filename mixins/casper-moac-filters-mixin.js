@@ -74,7 +74,7 @@ export const CasperMoacFiltersMixin = superClass => {
         const filterComponent = this.__getFilterComponent(filterName);
 
         this.__ignoreFiltersValues[filterName] = filterValue;
-        if (displayResetFiltersPill) this.__displayResetFiltersPill = displayResetFiltersPill;
+        if (displayResetFiltersPill) this.__displayResetFiltersPill = true;
 
         this.filters[filterName].type !== CasperMoacFilterTypes.PAPER_CHECKBOX
           ? filterComponent.value = filterValue
