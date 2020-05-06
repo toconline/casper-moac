@@ -1,4 +1,4 @@
-import '@casper2020/casper-icons/casper-icon.js';
+import '@cloudware-casper/casper-icons/casper-icon.js';
 import { html } from '@polymer/polymer/polymer-element.js';
 import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js';
 import { CasperMoacSortTypes, CasperMoacSortDirections } from '../casper-moac-constants';
