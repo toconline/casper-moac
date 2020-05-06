@@ -775,22 +775,35 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           flex-direction: column;
         }
 
-        .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
-          overflow: hidden;
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu {
+          right: 15px;
+          height: 35px;
+          display: none;
+          padding: 0 5px;
+          border-radius: 10px;
+          position: absolute;
+          align-items: center;
+          background-image: linear-gradient(to right, rgba(255,255,255, 0), #F3F3F3 10%);
         }
 
-        .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid .context-menu-icon {
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu casper-icon,
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-action"]::slotted(casper-icon) {
           width: 20px;
           height: 20px;
+          margin: 0 5px;
           border-radius: 50%;
-          display: var(--display-actions-on-hover);
           color: var(--primary-color);
         }
 
-        .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid .context-menu-icon:hover {
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu casper-icon:hover,
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-action"]::slotted(casper-icon:hover) { {
+          color: white;
           cursor: pointer;
           background-color: var(--primary-color);
-          color: white;
+        }
+
+        .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
+          overflow: hidden;
         }
 
         .main-container vaadin-split-layout .right-side-container .epaper-container {
@@ -951,16 +964,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                 </template>
 
                 <slot name="grid"></slot>
-
-                <!--Context Menu-->
-                <vaadin-grid-column flex-grow="0" width="40px" text-align="center">
-                  <template is="dom-if" if="[[__displayContextMenu]]">
-                    <template>
-                      <casper-icon class="context-menu-icon" on-click="__openContextMenu" icon="fa-regular:angle-down"></casper-icon>
-                    </template>
-                  </template>
-                </vaadin-grid-column>
               </vaadin-grid>
+
+              <!--Context Menu-->
+              <template is="dom-if" if="[[__displayContextMenu]]">
+                <div id="floating-context-menu">
+                  <slot name="floating-context-menu-action"></slot>
+                  <casper-icon on-click="__openContextMenu" icon="fa-regular:angle-down"></casper-icon>
+                </div>
+              </template>
 
               <!--No items placeholder-->
               <template is="dom-if" if="[[__hasNoItems(displayedItems, loading)]]">
@@ -1516,18 +1528,42 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.__contextMenu.verticalAlign = 'auto';
     this.__contextMenu.horizontalAlign = 'auto';
 
-    // Hide the context menu when one of its items is clicked.
-    this.__contextMenu.addEventListener('click', event => {
-      if (this.__eventPathContainsNode(event, 'casper-menu-item')) {
-        this.__contextMenu.positionTarget.removeAttribute('style');
+    const gridBody = this.$.grid.shadowRoot.querySelector('tbody');
+    const gridHeaderHeight = this.$.grid.shadowRoot.querySelector('thead');
+    const gridContainer = this.shadowRoot.querySelector('.grid-container');
+
+    const hideFloatingContextMenu = () => {
+      this.__floatingContextMenu = this.__floatingContextMenu || this.shadowRoot.querySelector('#floating-context-menu');
+      this.__floatingContextMenu.style.display = 'none';
+    };
+
+    // Hide the floating context menu as soon as the user leaves the grid if the context menu is not open.
+    gridContainer.addEventListener('mouseleave', () => {
+      if (!this.__contextMenu.opened) {
+        hideFloatingContextMenu();
       }
     });
 
+    // Display the floating context menu in a specific row.
+    gridBody.addEventListener('mouseover', event => {
+      const targetRow = event.composedPath().find(element => element.nodeName && element.nodeName.toLowerCase() === 'tr');
+      const targetRowRect = targetRow.getBoundingClientRect();
+      const gridContainerRect = gridContainer.getBoundingClientRect();
+
+      // Hide the floating context menu since it would overlap the header.
+      if (targetRowRect.top - gridContainerRect.top < gridHeaderHeight.getBoundingClientRect().height) {
+        return hideFloatingContextMenu();
+      }
+
+      this.__floatingContextMenu = this.__floatingContextMenu || this.shadowRoot.querySelector('#floating-context-menu');
+      this.__floatingContextMenu.style.display = 'flex';
+      this.__floatingContextMenu.style.top = `${targetRowRect.top - gridContainerRect.top}px`;
+    });
+
+    // Hide the floating context menu as soon as the other context menu closes.
     this.__contextMenu.addEventListener('opened-changed', event => {
       if (!event.detail.value) {
-        this.shadowRoot.querySelectorAll('.context-menu-icon').forEach(contextMenuIcon => {
-          contextMenuIcon.removeAttribute('style');
-        });
+        hideFloatingContextMenu();
       }
     });
   }
