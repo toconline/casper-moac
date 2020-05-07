@@ -1903,7 +1903,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           }
 
           // Remove the vaadin-checkbox element if this items does not support selection.
-          if (!this.disableSelection) {
+          if (!this.disableSelection && cellContents) {
             const vaadinCheckbox = cellContents.querySelector('vaadin-checkbox');
             if (vaadinCheckbox) {
               !currentRowItem[this.disableSelectionInternalProperty]
