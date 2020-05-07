@@ -2,10 +2,10 @@ import '@vaadin/vaadin-grid/vaadin-grid.js';
 import '@vaadin/vaadin-grid/vaadin-grid-column.js';
 import '@vaadin/vaadin-grid/vaadin-grid-selection-column.js';
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
-import '@casper2020/casper-icons/casper-icon.js';
-import '@casper2020/casper-epaper/casper-epaper.js';
-import '@casper2020/casper-select/casper-select.js';
-import '@casper2020/casper-date-picker/casper-date-picker.js';
+import '@cloudware-casper/casper-icons/casper-icon.js';
+import '@cloudware-casper/casper-epaper/casper-epaper.js';
+import '@cloudware-casper/casper-select/casper-select.js';
+import '@cloudware-casper/casper-date-picker/casper-date-picker.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
@@ -776,30 +776,29 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu {
-          right: 15px;
           height: 35px;
           display: none;
-          padding: 0 5px;
-          border-radius: 10px;
+          padding: 0 10px 0 20px;
           position: absolute;
           align-items: center;
-          background-image: linear-gradient(to right, rgba(255,255,255, 0), #F3F3F3 10%);
+          background-image: linear-gradient(to right, transparent, #F3F3F3 25%);
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu casper-icon,
-        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-action"]::slotted(casper-icon) {
-          width: 20px;
-          height: 20px;
-          margin: 0 5px;
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-actions"]::slotted(casper-icon) {
+          width: 28px;
+          height: 28px;
+          padding: 4px;
           border-radius: 50%;
+          box-sizing: border-box;
           color: var(--primary-color);
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu casper-icon:hover,
-        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-action"]::slotted(casper-icon:hover) { {
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-actions"]::slotted(casper-icon:hover) { {
           color: white;
           cursor: pointer;
-          background-color: var(--primary-color);
+          background-color: var(--dark-primary-color);
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
@@ -967,12 +966,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
               </vaadin-grid>
 
               <!--Context Menu-->
-              <template is="dom-if" if="[[__displayContextMenu]]">
-                <div id="floating-context-menu">
-                  <slot name="floating-context-menu-action"></slot>
-                  <casper-icon on-click="__openContextMenu" icon="fa-regular:angle-down"></casper-icon>
-                </div>
-              </template>
+              <div id="floating-context-menu">
+                <slot name="floating-context-menu-actions"></slot>
+                <casper-icon on-click="__openContextMenu" icon="fa-regular:angle-down"></casper-icon>
+              </div>
 
               <!--No items placeholder-->
               <template is="dom-if" if="[[__hasNoItems(displayedItems, loading)]]">
@@ -1527,14 +1524,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.__contextMenu.dynamicAlign = true;
     this.__contextMenu.verticalAlign = 'auto';
     this.__contextMenu.horizontalAlign = 'auto';
+    this.__floatingContextMenu = this.shadowRoot.querySelector('#floating-context-menu');
 
     const gridBody = this.$.grid.shadowRoot.querySelector('tbody');
+    const gridScroller = this.$.grid.shadowRoot.querySelector('vaadin-grid-outer-scroller');
     const gridHeaderHeight = this.$.grid.shadowRoot.querySelector('thead');
     const gridContainer = this.shadowRoot.querySelector('.grid-container');
 
     const hideFloatingContextMenu = () => {
-      this.__floatingContextMenu = this.__floatingContextMenu || this.shadowRoot.querySelector('#floating-context-menu');
-      this.__floatingContextMenu.style.display = 'none';
+      // this.__floatingContextMenu.style.display = 'none';
     };
 
     // Hide the floating context menu as soon as the user leaves the grid if the context menu is not open.
@@ -1555,9 +1553,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         return hideFloatingContextMenu();
       }
 
-      this.__floatingContextMenu = this.__floatingContextMenu || this.shadowRoot.querySelector('#floating-context-menu');
       this.__floatingContextMenu.style.display = 'flex';
       this.__floatingContextMenu.style.top = `${targetRowRect.top - gridContainerRect.top}px`;
+      this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
     });
 
     // Hide the floating context menu as soon as the other context menu closes.
