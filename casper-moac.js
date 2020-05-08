@@ -778,17 +778,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu {
           height: 35px;
           display: none;
+          padding: 0 10px;
           position: absolute;
           align-items: center;
-          padding: 0 10px 0 20px;
-          background-image: linear-gradient(to right, transparent, var(--casper-moac-row-stripe-color) 15%);
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu casper-icon,
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-actions"]::slotted(casper-icon) {
-          width: 28px;
-          height: 28px;
-          padding: 4px;
+          width: 25px;
+          height: 25px;
+          padding: 5px;
           border-radius: 50%;
           box-sizing: border-box;
           color: var(--primary-color);
@@ -1552,16 +1551,21 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
       // Check if the row is totally visible.
       if (this.__isRowIntoView(row)) {
-        this.__floatingContextMenu.style.display = 'flex';
         this.__floatingContextMenu.style.top = `${rowBoundingRect.top - gridBoundingRect.top}px`;
         this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
+        this.__floatingContextMenu.style.backgroundColor = window.getComputedStyle(row.firstElementChild).backgroundColor;
+        this.__floatingContextMenu.style.display = 'flex';
       } else {
         hideFloatingContextMenu();
       }
     });
 
+    // When the user clicks anywhere in the floating context menu, activate that row and change its background color.
+    this.__floatingContextMenu.addEventListener('click', () => {
+      this.activeItem = this.__hoveringItem;
+    });
+
     // Hide the floating context menu as soon as the other context menu closes.
-    this.__floatingContextMenu.addEventListener('click', () => { this.activeItem = this.__hoveringItem });
     this.__contextMenu.addEventListener('opened-changed', event => {
       if (!event.detail.value) {
         hideFloatingContextMenu();
