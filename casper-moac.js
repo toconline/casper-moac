@@ -662,7 +662,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           grid-column-gap: 10px;
           margin-bottom: 10px;
           border-bottom: 1px solid var(--primary-color);
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         }
 
         .main-container vaadin-split-layout .left-side-container .filters-container .filter-container-invisible {
@@ -1124,9 +1124,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       selectedItems.forEach(updateItemCallback);
       displayedItems.forEach(updateItemCallback);
 
-      // Make sure we notify that the active item changed.
+      // Make sure we keep the active item with the most up-to-date information.
       if (this.__compareItems(itemToUpdate, this.activeItem, true)) {
-        this.activeItem = { ...this.activeItem };
+        Object.keys(itemToUpdate).forEach(itemToUpdateProperty => {
+          this.activeItem[itemToUpdateProperty] = itemToUpdate[itemToUpdateProperty];
+        });
+
+        this.dispatchEvent(new CustomEvent('active-item-updated'));
       }
     });
 
