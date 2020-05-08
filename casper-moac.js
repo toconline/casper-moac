@@ -778,10 +778,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu {
           height: 35px;
           display: none;
-          padding: 0 10px 0 20px;
           position: absolute;
           align-items: center;
-          background-image: linear-gradient(to right, transparent, #F3F3F3 25%);
+          padding: 0 10px 0 20px;
+          background-image: linear-gradient(to right, transparent, var(--casper-moac-row-stripe-color) 15%);
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu casper-icon,
@@ -1184,21 +1184,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 
   /**
-   * This function is used to see if a physical row is totally into view or not.
-   *
-   * @param {Element} row The row's element object.
-   * @param {Number} offset The offset in pixels to apply to the calculations.
-   */
-  isRowIntoView (row, offset = 0) {
-    const rowBoundingClientRect = row.getBoundingClientRect();
-    const gridBoundingClientRect = this.grid.getBoundingClientRect();
-    const gridHeaderHeight = this.grid.shadowRoot.querySelector('thead').getBoundingClientRect().height;
-
-    return parseInt(rowBoundingClientRect.top) >= parseInt(gridBoundingClientRect.top + gridHeaderHeight - offset)
-      && parseInt(rowBoundingClientRect.bottom) <= parseInt(gridBoundingClientRect.bottom + offset);
-  }
-
-  /**
    * This method forces the vaadin-grid to redraw all its rows.
    */
   forceGridRedraw () {
@@ -1527,15 +1512,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.__floatingContextMenu = this.shadowRoot.querySelector('#floating-context-menu');
 
     const gridBody = this.$.grid.shadowRoot.querySelector('tbody');
-    const gridScroller = this.$.grid.shadowRoot.querySelector('vaadin-grid-outer-scroller');
-    const gridHeaderHeight = this.$.grid.shadowRoot.querySelector('thead');
+    const gridHeader = this.$.grid.shadowRoot.querySelector('thead');
     const gridContainer = this.shadowRoot.querySelector('.grid-container');
+    const gridScroller = this.$.grid.shadowRoot.querySelector('vaadin-grid-outer-scroller');
 
     const hideFloatingContextMenu = () => {
-      // this.__floatingContextMenu.style.display = 'none';
+      this.__floatingContextMenu.style.display = 'none';
     };
 
     // Hide the floating context menu as soon as the user leaves the grid if the context menu is not open.
+    gridScroller.addEventListener('scroll', () => { hideFloatingContextMenu(); });
     gridContainer.addEventListener('mouseleave', () => {
       if (!this.__contextMenu.opened) {
         hideFloatingContextMenu();
@@ -1544,21 +1530,26 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
     // Display the floating context menu in a specific row.
     gridBody.addEventListener('mouseover', event => {
-      const targetRow = event.composedPath().find(element => element.nodeName && element.nodeName.toLowerCase() === 'tr');
-      const targetRowRect = targetRow.getBoundingClientRect();
-      const gridContainerRect = gridContainer.getBoundingClientRect();
+      const row = event.composedPath().find(element => element.nodeName && element.nodeName.toLowerCase() === 'tr');
+      const rowBoundingRect = row.getBoundingClientRect();
+      const gridBoundingRect = gridContainer.getBoundingClientRect();
 
-      // Hide the floating context menu since it would overlap the header.
-      if (targetRowRect.top - gridContainerRect.top < gridHeaderHeight.getBoundingClientRect().height) {
-        return hideFloatingContextMenu();
+      // Store the item we're currently hovering.
+      this.__hoveringItem = row._item;
+
+      // Check if the row is totally visible.
+      if (parseInt(rowBoundingRect.bottom) <= parseInt(gridBoundingRect.bottom) &&
+        parseInt(rowBoundingRect.top) >= parseInt(gridBoundingRect.top + gridHeader.getBoundingClientRect().height)) {
+        this.__floatingContextMenu.style.display = 'flex';
+        this.__floatingContextMenu.style.top = `${rowBoundingRect.top - gridBoundingRect.top}px`;
+        this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
+      } else {
+        hideFloatingContextMenu();
       }
-
-      this.__floatingContextMenu.style.display = 'flex';
-      this.__floatingContextMenu.style.top = `${targetRowRect.top - gridContainerRect.top}px`;
-      this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
     });
 
     // Hide the floating context menu as soon as the other context menu closes.
+    this.__floatingContextMenu.addEventListener('click', () => { this.activeItem = this.__hoveringItem });
     this.__contextMenu.addEventListener('opened-changed', event => {
       if (!event.detail.value) {
         hideFloatingContextMenu();
@@ -1978,8 +1969,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * @param {Event} event
    */
   __openContextMenu (event) {
-    const contextMenuItem = this.$.grid.getEventContext(event).item;
-
     this.__contextMenu.positionTarget = event.target;
     this.__contextMenu.close();
 
@@ -1987,7 +1976,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       this.__contextMenu.positionTarget.style.display = 'block';
       this.__contextMenu.refit();
       this.__contextMenu.open();
-      this.activeItem = contextMenuItem;
     });
   }
 
