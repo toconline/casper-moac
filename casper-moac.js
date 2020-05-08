@@ -1365,7 +1365,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       if (this.__compareItemWithId(rows[rowIndex]._item, itemId, useExternalProperty)) {
         // Scroll to the item if it's not into view taking into account the grid's internal items.
-        isRowIntoView = this.isRowIntoView(rows[rowIndex]);
+        isRowIntoView = this.__isRowIntoView(rows[rowIndex]);
         break;
       }
     }
@@ -1373,6 +1373,20 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     if (!isRowIntoView) {
       this.grid.scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
     }
+  }
+
+  /**
+   * This method checks if a specific row is totally visible or not.
+   *
+   * @param {Element} row The row we're trying to figure out if it's in view or not.
+   */
+  __isRowIntoView (row) {
+    const rowBoundingRect = row.getBoundingClientRect();
+    const gridBoundingRect = this.shadowRoot.querySelector('.grid-container').getBoundingClientRect();
+    const gridHeaderBoundingRect = this.$.grid.shadowRoot.querySelector('thead').getBoundingClientRect();
+
+    return parseInt(rowBoundingRect.bottom) <= parseInt(gridBoundingRect.bottom) &&
+      parseInt(rowBoundingRect.top) >= parseInt(gridBoundingRect.top + gridHeaderBoundingRect.height);
   }
 
   __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
@@ -1512,7 +1526,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.__floatingContextMenu = this.shadowRoot.querySelector('#floating-context-menu');
 
     const gridBody = this.$.grid.shadowRoot.querySelector('tbody');
-    const gridHeader = this.$.grid.shadowRoot.querySelector('thead');
     const gridContainer = this.shadowRoot.querySelector('.grid-container');
     const gridScroller = this.$.grid.shadowRoot.querySelector('vaadin-grid-outer-scroller');
 
@@ -1538,8 +1551,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       this.__hoveringItem = row._item;
 
       // Check if the row is totally visible.
-      if (parseInt(rowBoundingRect.bottom) <= parseInt(gridBoundingRect.bottom) &&
-        parseInt(rowBoundingRect.top) >= parseInt(gridBoundingRect.top + gridHeader.getBoundingClientRect().height)) {
+      if (this.__isRowIntoView(row)) {
         this.__floatingContextMenu.style.display = 'flex';
         this.__floatingContextMenu.style.top = `${rowBoundingRect.top - gridBoundingRect.top}px`;
         this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
