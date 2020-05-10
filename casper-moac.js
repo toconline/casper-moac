@@ -1368,7 +1368,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       if (this.__compareItemWithId(rows[rowIndex]._item, itemId, useExternalProperty)) {
         // Scroll to the item if it's not into view taking into account the grid's internal items.
-        isRowIntoView = this.__isRowIntoView(rows[rowIndex]);
+        isRowIntoView = this.__isRowTotallyInView(rows[rowIndex]);
         break;
       }
     }
@@ -1383,7 +1383,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    *
    * @param {Element} row The row we're trying to figure out if it's in view or not.
    */
-  __isRowIntoView (row) {
+  __isRowTotallyInView (row) {
     const rowBoundingRect = row.getBoundingClientRect();
     const gridBoundingRect = this.shadowRoot.querySelector('.grid-container').getBoundingClientRect();
     const gridHeaderBoundingRect = this.$.grid.shadowRoot.querySelector('thead').getBoundingClientRect();
@@ -1532,16 +1532,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     const gridContainer = this.shadowRoot.querySelector('.grid-container');
     const gridScroller = this.$.grid.shadowRoot.querySelector('vaadin-grid-outer-scroller');
 
-    const hideFloatingContextMenu = () => {
-      this.__floatingContextMenu.style.display = 'none';
-    };
+    const hideFloatingContextMenu = () => { this.__floatingContextMenu.style.display = 'none'; };
 
-    // Hide the floating context menu as soon as the user leaves the grid if the context menu is not open.
+    // Hide the floating context menu as soon as the user leaves the grid if the context menu is not open or when the user scrolls the grid.
     gridScroller.addEventListener('scroll', () => { hideFloatingContextMenu(); });
     gridContainer.addEventListener('mouseleave', () => {
-      if (!this.__contextMenu.opened) {
-        hideFloatingContextMenu();
-      }
+      if (!this.__contextMenu.opened) hideFloatingContextMenu();
     });
 
     // Display the floating context menu in a specific row.
@@ -1550,14 +1546,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       const rowBoundingRect = row.getBoundingClientRect();
       const gridBoundingRect = gridContainer.getBoundingClientRect();
 
-      // Store the item we're currently hovering.
-      this.__hoveringItem = row._item;
+      // Store the row and item we're currently hovering.
+      this.__hoveringRow = row;
+      this.__hoveringRowItem = row._item;
 
       // Check if the row is totally visible.
-      if (this.__isRowIntoView(row)) {
+      if (this.__isRowTotallyInView(row)) {
         this.__floatingContextMenu.style.top = `${rowBoundingRect.top - gridBoundingRect.top}px`;
-        this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
         this.__floatingContextMenu.style.backgroundColor = window.getComputedStyle(row.firstElementChild).backgroundColor;
+        this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
         this.__floatingContextMenu.style.display = 'flex';
       } else {
         hideFloatingContextMenu();
@@ -1566,14 +1563,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
     // When the user clicks anywhere in the floating context menu, activate that row and change its background color.
     this.__floatingContextMenu.addEventListener('click', () => {
-      this.activeItem = this.__hoveringItem;
+      this.activeItem = this.__hoveringRowItem;
     });
 
     // Hide the floating context menu as soon as the other context menu closes.
     this.__contextMenu.addEventListener('opened-changed', event => {
-      if (!event.detail.value) {
-        hideFloatingContextMenu();
-      }
+      if (!event.detail.value) hideFloatingContextMenu();
     });
   }
 
@@ -1901,12 +1896,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         Array.from(row.children).forEach(cell => {
           const cellContents = cell.firstElementChild.assignedElements().shift();
 
-          // Check if the row has no active animation and is either active or colored.
-          if (isRowActive || isRowBackgroundColored) {
-            // The active background color has priority.
-            isRowActive
-              ? cell.style.backgroundColor = 'var(--casper-moac-active-item-background-color)'
-              : cell.style.backgroundColor = currentRowItem[this.rowBackgroundColorInternalProperty];
+          if (isRowActive) {
+            // This means the row is currently active.
+            cell.style.backgroundColor = 'var(--casper-moac-active-item-background-color)';
+
+            // Change the floating context menu background color depending on if we're hovering the currently active row.
+            this.__floatingContextMenu.style.backgroundColor = this.__hoveringRow === row
+              ? 'var(--casper-moac-active-item-background-color)'
+              : window.getComputedStyle(this.__hoveringRow.firstElementChild).backgroundColor;
+
+          } else if (isRowBackgroundColored) {
+            // This means the row has a specific color.
+            cell.style.backgroundColor = currentRowItem[this.rowBackgroundColorInternalProperty];
           } else {
             this.disableRowStripes || currentRowItem[this.idInternalProperty] % 2 === 0
               ? cell.style.backgroundColor = 'white'
