@@ -1896,15 +1896,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         Array.from(row.children).forEach(cell => {
           const cellContents = cell.firstElementChild.assignedElements().shift();
 
-          if (isRowActive) {
-            // This means the row is currently active.
-            cell.style.backgroundColor = 'var(--casper-moac-active-item-background-color)';
-
-            // Change the floating context menu background color depending on if we're hovering the currently active row.
+          // Change the floating context menu background color depending on if we're hovering the currently active row.
+          if (this.__hoveringRow) {
             this.__floatingContextMenu.style.backgroundColor = this.__hoveringRow === row
               ? 'var(--casper-moac-active-item-background-color)'
               : window.getComputedStyle(this.__hoveringRow.firstElementChild).backgroundColor;
+          }
 
+          if (isRowActive) {
+            // This means the row is currently active.
+            cell.style.backgroundColor = 'var(--casper-moac-active-item-background-color)';
           } else if (isRowBackgroundColored) {
             // This means the row has a specific color.
             cell.style.backgroundColor = currentRowItem[this.rowBackgroundColorInternalProperty];
