@@ -1,5 +1,31 @@
+import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
+
 export const CasperMoacContextMenuMixin = superClass => {
   return class extends superClass {
+
+    static get properties () {
+      return {
+        /**
+         * The row currently being hovered.
+         *
+         * @type {Object}
+         */
+        hoveringRow: {
+          type: Object,
+          notify: true
+        },
+        /**
+         * The row's item currently being hovered.
+         *
+         * @type {Object}
+         */
+        hoveringRowItem: {
+          type: Object,
+          notify: true
+        },
+      };
+    }
+
     /**
      * Bind event listeners to the context menu component if there is any.
      */
@@ -35,15 +61,15 @@ export const CasperMoacContextMenuMixin = superClass => {
         const gridBoundingRect = gridContainer.getBoundingClientRect();
 
         // Store the row and item we're currently hovering.
-        this.__hoveringRow = row;
-        this.__hoveringRowItem = row._item;
+        this.hoveringRow = row;
+        this.hoveringRowItem = row._item;
 
         // Check if the row is totally visible.
         if (this.__isRowTotallyInView(row)) {
           this.__floatingContextMenu.style.display = 'flex';
           this.__floatingContextMenu.style.top = `${rowBoundingRect.top - gridBoundingRect.top}px`;
           this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
-          this.__paintFloatingMenuAccordingToRow(row);
+          this.__paintFloatingMenuAccordingToRow();
         } else {
           hideFloatingContextMenu();
         }
@@ -51,7 +77,7 @@ export const CasperMoacContextMenuMixin = superClass => {
 
       // When the user clicks anywhere in the floating context menu, activate that row and change its background color.
       this.__floatingContextMenu.addEventListener('click', () => {
-        this.activeItem = this.__hoveringRowItem;
+        this.activeItem = this.hoveringRowItem;
       });
 
       // Hide the floating context menu as soon as the other context menu closes.
@@ -62,17 +88,13 @@ export const CasperMoacContextMenuMixin = superClass => {
 
     /**
      * Change the floating menu icons background color according to the current row they're floating on.
-     *
-     * @param {Object} row The DOM node that represents the row currently being hovered.
      */
-    __paintFloatingMenuAccordingToRow (row) {
-      if (!row) return;
+    __paintFloatingMenuAccordingToRow () {
+      if (!this.hoveringRow) return;
 
-      const rowBackgroundColor = this.__compareItems(this.__activeItem, row._item)
-        ? 'var(--light-primary-color)'
-        : this.__getDefaultRowBackgroundColor(row._item);
-
-      this.__floatingContextMenu.style.backgroundColor = rowBackgroundColor;
+      afterNextRender(this, () => {
+        this.__floatingContextMenu.style.backgroundColor = window.getComputedStyle(this.hoveringRow).backgroundColor;
+      });
     }
   }
 };

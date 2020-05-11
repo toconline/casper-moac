@@ -1831,7 +1831,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   __paintGridRows () {
     afterNextRender(this, () => {
       // Change the floating context menu background color depending on if we're hovering the currently active row.
-      this.__paintFloatingMenuAccordingToRow(this.__hoveringRow);
+      this.__paintFloatingMenuAccordingToRow();
 
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
         const currentRowItem = this.displayedItems.find(item => this.__compareItems(row._item, item));
