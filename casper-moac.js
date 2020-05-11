@@ -782,7 +782,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           display: none;
           position: absolute;
           align-items: center;
-          border-bottom-top-radius: 30px;
+          border-top-left-radius: 30px;
           border-bottom-left-radius: 30px;
         }
 
