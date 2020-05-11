@@ -69,7 +69,7 @@ export const CasperMoacContextMenuMixin = superClass => {
       if (!row) return;
 
       const rowBackgroundColor = this.__compareItems(this.__activeItem, row._item)
-        ? 'var(--casper-moac-active-item-background-color)'
+        ? 'var(--light-primary-color)'
         : this.__getDefaultRowBackgroundColor(row._item);
 
       this.__floatingContextMenu.style.backgroundColor = rowBackgroundColor;

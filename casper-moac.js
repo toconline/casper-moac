@@ -780,6 +780,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu {
           height: 35px;
           display: none;
+          padding-left: 5px;
           position: absolute;
           align-items: center;
           border-top-left-radius: 30px;
@@ -1845,7 +1846,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
           if (isRowActive) {
             // This means the row is currently active.
-            cell.style.backgroundColor = 'var(--casper-moac-active-item-background-color)';
+            cell.style.backgroundColor = 'var(--light-primary-color)';
           } else if (isRowBackgroundColored) {
             // This means the row has a specific color.
             cell.style.backgroundColor = currentRowItem[this.rowBackgroundColorInternalProperty];
