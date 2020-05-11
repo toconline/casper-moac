@@ -778,9 +778,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu {
-          height: 35px;
+          height: 34px;
           display: none;
-          padding-left: 5px;
+          padding: 0 5px;
           position: absolute;
           align-items: center;
           border-top-left-radius: 30px;
