@@ -22,14 +22,16 @@ import { CasperMoacSortingMixin } from './mixins/casper-moac-sorting-mixin.js';
 import { CasperMoacFiltersMixin } from './mixins/casper-moac-filters-mixin.js';
 import { CasperMoacHistoryMixin } from './mixins/casper-moac-history-mixin.js';
 import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
+import { CasperMoacContextMenuMixin } from './mixins/casper-moac-context-menu-mixin.js';
 import { CasperMoacLocalStorageMixin } from './mixins/casper-moac-local-storage-mixin.js';
 import { CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 
 export class CasperMoac extends CasperMoacLazyLoadMixin(
   CasperMoacFiltersMixin(
     CasperMoacSortingMixin(
-      CasperMoacLocalStorageMixin(
-        CasperMoacHistoryMixin(PolymerElement))))) {
+      CasperMoacContextMenuMixin(
+        CasperMoacLocalStorageMixin(
+          CasperMoacHistoryMixin(PolymerElement)))))) {
 
   static get properties () {
     return {
@@ -791,13 +793,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           border-radius: 50%;
           box-sizing: border-box;
           color: var(--primary-color);
+          margin: 0 -1px; /* To guarantee that no text is visible between the icons */
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu casper-icon:hover,
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-actions"]::slotted(casper-icon:hover) {
+          z-index: 1;
           color: white;
           cursor: pointer;
-          background-color: var(--dark-primary-color);
+          background-color: var(--dark-primary-color) !important;
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
@@ -1513,66 +1517,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 
   /**
-   * Bind event listeners to the context menu component if there is any.
-   */
-  __bindContextMenuEvents () {
-    // Check if there is a casper-context-menu.
-    this.__contextMenu = Array.from(this.children).find(child => child.getAttribute('slot') === 'context-menu');
-    this.__displayContextMenu = !!this.__contextMenu;
-
-    if (!this.__contextMenu) return;
-
-    this.__contextMenu.noOverlap = true;
-    this.__contextMenu.dynamicAlign = true;
-    this.__contextMenu.verticalAlign = 'auto';
-    this.__contextMenu.horizontalAlign = 'auto';
-    this.__floatingContextMenu = this.shadowRoot.querySelector('#floating-context-menu');
-
-    const gridBody = this.$.grid.shadowRoot.querySelector('tbody');
-    const gridContainer = this.shadowRoot.querySelector('.grid-container');
-    const gridScroller = this.$.grid.shadowRoot.querySelector('vaadin-grid-outer-scroller');
-
-    const hideFloatingContextMenu = () => { this.__floatingContextMenu.style.display = 'none'; };
-
-    // Hide the floating context menu as soon as the user leaves the grid if the context menu is not open or when the user scrolls the grid.
-    gridScroller.addEventListener('scroll', () => { hideFloatingContextMenu(); });
-    gridContainer.addEventListener('mouseleave', () => {
-      if (!this.__contextMenu.opened) hideFloatingContextMenu();
-    });
-
-    // Display the floating context menu in a specific row.
-    gridBody.addEventListener('mouseover', event => {
-      const row = event.composedPath().find(element => element.nodeName && element.nodeName.toLowerCase() === 'tr');
-      const rowBoundingRect = row.getBoundingClientRect();
-      const gridBoundingRect = gridContainer.getBoundingClientRect();
-
-      // Store the row and item we're currently hovering.
-      this.__hoveringRow = row;
-      this.__hoveringRowItem = row._item;
-
-      // Check if the row is totally visible.
-      if (this.__isRowTotallyInView(row)) {
-        this.__floatingContextMenu.style.top = `${rowBoundingRect.top - gridBoundingRect.top}px`;
-        this.__floatingContextMenu.style.backgroundColor = window.getComputedStyle(row.firstElementChild).backgroundColor;
-        this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
-        this.__floatingContextMenu.style.display = 'flex';
-      } else {
-        hideFloatingContextMenu();
-      }
-    });
-
-    // When the user clicks anywhere in the floating context menu, activate that row and change its background color.
-    this.__floatingContextMenu.addEventListener('click', () => {
-      this.activeItem = this.__hoveringRowItem;
-    });
-
-    // Hide the floating context menu as soon as the other context menu closes.
-    this.__contextMenu.addEventListener('opened-changed', event => {
-      if (!event.detail.value) hideFloatingContextMenu();
-    });
-  }
-
-  /**
    * Bind event listeners for when the user presses down the Enter or the down / up arrow keys.
    *
    * @param {Event} event The event's object.
@@ -1885,6 +1829,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   __paintGridRows () {
     afterNextRender(this, () => {
+      // Change the floating context menu background color depending on if we're hovering the currently active row.
+      this.__paintFloatingMenuIconsAccordingToRow(this.__hoveringRow);
+
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
         const currentRowItem = this.displayedItems.find(item => this.__compareItems(row._item, item));
 
@@ -1896,13 +1843,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         Array.from(row.children).forEach(cell => {
           const cellContents = cell.firstElementChild.assignedElements().shift();
 
-          // Change the floating context menu background color depending on if we're hovering the currently active row.
-          if (this.__hoveringRow) {
-            this.__floatingContextMenu.style.backgroundColor = this.__hoveringRow === row
-              ? 'var(--casper-moac-active-item-background-color)'
-              : window.getComputedStyle(this.__hoveringRow.firstElementChild).backgroundColor;
-          }
-
           if (isRowActive) {
             // This means the row is currently active.
             cell.style.backgroundColor = 'var(--casper-moac-active-item-background-color)';
@@ -1910,9 +1850,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
             // This means the row has a specific color.
             cell.style.backgroundColor = currentRowItem[this.rowBackgroundColorInternalProperty];
           } else {
-            this.disableRowStripes || currentRowItem[this.idInternalProperty] % 2 === 0
-              ? cell.style.backgroundColor = 'white'
-              : cell.style.backgroundColor = 'var(--casper-moac-row-stripe-color)';
+            cell.style.backgroundColor = this.__getDefaultRowBackgroundColor(currentRowItem);
           }
 
           // Remove the vaadin-checkbox element if this items does not support selection.
@@ -1927,6 +1865,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         });
       });
     });
+  }
+
+  /**
+   * This method returns the row background color taking into account if the grid should be striped and the internal identifier being odd or even.
+   *
+   * @param {Object} item The current item whose row background color we want to know.
+   */
+  __getDefaultRowBackgroundColor (item) {
+    return this.disableRowStripes || item[this.idInternalProperty] % 2 === 0 ? 'white' : 'var(--casper-moac-row-stripe-color)';
   }
 
   /**
@@ -2126,7 +2073,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
   /**
    *
-   * @param {Object} item The item which internal / external idenifier will be used for comparison.
+   * @param {Object} item The item which internal / external identifier will be used for comparison.
    * @param {String | Number} itemId The item's identifier that we'll be used for comparison.
    * @param {Boolean} useExternalProperty This flag states which identifier should be used - internal ou external.
    */
@@ -2138,7 +2085,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
   /**
    *
-   * @param {Object} item The item which internal / external idenifier will be used for comparison.
+   * @param {Object} item The item which internal / external identifier will be used for comparison.
    * @param {String | Number} itemIds The items identifiers that we'll be used for comparison.
    * @param {Boolean} useExternalProperty This flag states which identifier should be used - internal ou external.
    */
