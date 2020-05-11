@@ -780,9 +780,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu {
           height: 35px;
           display: none;
-          padding: 0 10px;
           position: absolute;
           align-items: center;
+          border-bottom-top-radius: 30px;
+          border-bottom-left-radius: 30px;
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu casper-icon,
@@ -793,7 +794,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           border-radius: 50%;
           box-sizing: border-box;
           color: var(--primary-color);
-          margin: 0 -1px; /* To guarantee that no text is visible between the icons */
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu casper-icon:hover,
@@ -1830,7 +1830,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   __paintGridRows () {
     afterNextRender(this, () => {
       // Change the floating context menu background color depending on if we're hovering the currently active row.
-      this.__paintFloatingMenuIconsAccordingToRow(this.__hoveringRow);
+      this.__paintFloatingMenuAccordingToRow(this.__hoveringRow);
 
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
         const currentRowItem = this.displayedItems.find(item => this.__compareItems(row._item, item));

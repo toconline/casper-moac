@@ -15,10 +15,6 @@ export const CasperMoacContextMenuMixin = superClass => {
       this.__contextMenu.verticalAlign = 'auto';
       this.__contextMenu.horizontalAlign = 'auto';
       this.__floatingContextMenu = this.shadowRoot.querySelector('#floating-context-menu');
-      this.__floatingContextMenuIcons = [
-        this.shadowRoot.querySelector('#floating-context-menu casper-icon'),
-        ...this.shadowRoot.querySelector('slot[name="floating-context-menu-actions"]').assignedElements(),
-      ];
 
       const gridBody = this.$.grid.shadowRoot.querySelector('tbody');
       const gridContainer = this.shadowRoot.querySelector('.grid-container');
@@ -47,7 +43,7 @@ export const CasperMoacContextMenuMixin = superClass => {
           this.__floatingContextMenu.style.display = 'flex';
           this.__floatingContextMenu.style.top = `${rowBoundingRect.top - gridBoundingRect.top}px`;
           this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
-          this.__paintFloatingMenuIconsAccordingToRow(row);
+          this.__paintFloatingMenuAccordingToRow(row);
         } else {
           hideFloatingContextMenu();
         }
@@ -69,14 +65,14 @@ export const CasperMoacContextMenuMixin = superClass => {
      *
      * @param {Object} row The DOM node that represents the row currently being hovered.
      */
-    __paintFloatingMenuIconsAccordingToRow (row) {
+    __paintFloatingMenuAccordingToRow (row) {
       if (!row) return;
 
       const rowBackgroundColor = this.__compareItems(this.__activeItem, row._item)
         ? 'var(--casper-moac-active-item-background-color)'
         : this.__getDefaultRowBackgroundColor(row._item);
 
-      this.__floatingContextMenuIcons.forEach(icon => icon.style.backgroundColor = rowBackgroundColor);
+      this.__floatingContextMenu.style.backgroundColor = rowBackgroundColor;
     }
   }
 };
