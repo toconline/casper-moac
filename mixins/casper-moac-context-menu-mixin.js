@@ -46,12 +46,12 @@ export const CasperMoacContextMenuMixin = superClass => {
       const gridContainer = this.shadowRoot.querySelector('.grid-container');
       const gridScroller = this.$.grid.shadowRoot.querySelector('vaadin-grid-outer-scroller');
 
-      const hideFloatingContextMenu = () => { this.__floatingContextMenu.style.display = 'none'; };
-
       // Hide the floating context menu as soon as the user leaves the grid if the context menu is not open or when the user scrolls the grid.
-      gridScroller.addEventListener('scroll', () => { hideFloatingContextMenu(); });
+      gridScroller.addEventListener('scroll', () => { this.__hideFloatingContextMenu(); });
       gridContainer.addEventListener('mouseleave', () => {
-        if (!this.__contextMenu.opened) hideFloatingContextMenu();
+        if (!this.__contextMenu.opened) {
+          this.__hideFloatingContextMenu();
+        }
       });
 
       // Display the floating context menu in a specific row.
@@ -69,9 +69,9 @@ export const CasperMoacContextMenuMixin = superClass => {
           this.__floatingContextMenu.style.display = 'flex';
           this.__floatingContextMenu.style.top = `${rowBoundingRect.top - gridBoundingRect.top}px`;
           this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
-          this.__paintFloatingMenuAccordingToRow();
+          this.__paintFloatingContextMenu();
         } else {
-          hideFloatingContextMenu();
+          this.__hideFloatingContextMenu();
         }
       });
 
@@ -82,19 +82,26 @@ export const CasperMoacContextMenuMixin = superClass => {
 
       // Hide the floating context menu as soon as the other context menu closes.
       this.__contextMenu.addEventListener('opened-changed', event => {
-        if (!event.detail.value) hideFloatingContextMenu();
+        if (!event.detail.value) {
+          this.__hideFloatingContextMenu();
+        }
       });
     }
 
     /**
-     * Change the floating menu icons background color according to the current row they're floating on.
+     * This method closes the floating context menu.
      */
-    __paintFloatingMenuAccordingToRow () {
-      if (!this.hoveringRow) return;
+    __hideFloatingContextMenu () {
+      this.__floatingContextMenu.style.display = 'none';
+    }
 
-      afterNextRender(this, () => {
-        this.__floatingContextMenu.style.backgroundColor = window.getComputedStyle(this.hoveringRow).backgroundColor;
-      });
+    /**
+     * Changes the background color of the floating context menu according to the row he's hovering over.
+     */
+    __paintFloatingContextMenu () {
+      if (!this.hoveringRowItem || !this.__contextMenu) return;
+
+      this.__floatingContextMenu.style.backgroundColor = this.__getRowBackgroundColor(this.hoveringRowItem);
     }
   }
 };

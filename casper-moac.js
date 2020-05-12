@@ -798,11 +798,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu casper-icon:hover,
-        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-actions"]::slotted(casper-icon:hover) {
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-actions"]::slotted(casper-icon:not([no-hover-animation]):hover) {
           z-index: 1;
           color: white;
           cursor: pointer;
-          background-color: var(--dark-primary-color) !important;
+          background-color: var(--primary-color);
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
@@ -1830,29 +1830,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   __paintGridRows () {
     afterNextRender(this, () => {
-      // Change the floating context menu background color depending on if we're hovering the currently active row.
-      this.__paintFloatingMenuAccordingToRow();
+      this.__paintFloatingContextMenu();
 
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
         const currentRowItem = this.displayedItems.find(item => this.__compareItems(row._item, item));
 
         if (!currentRowItem || row.hasAttribute('blink')) return;
 
-        const isRowActive = this.__activeItem && this.__compareItems(currentRowItem, this.__activeItem);
-        const isRowBackgroundColored = !!currentRowItem[this.rowBackgroundColorInternalProperty];
-
+        const rowBackgroundColor = this.__getRowBackgroundColor(currentRowItem);
         Array.from(row.children).forEach(cell => {
-          const cellContents = cell.firstElementChild.assignedElements().shift();
+          cell.style.backgroundImage = 'none';
+          cell.style.backgroundColor = rowBackgroundColor;
 
-          if (isRowActive) {
-            // This means the row is currently active.
-            cell.style.backgroundColor = 'var(--light-primary-color)';
-          } else if (isRowBackgroundColored) {
-            // This means the row has a specific color.
-            cell.style.backgroundColor = currentRowItem[this.rowBackgroundColorInternalProperty];
-          } else {
-            cell.style.backgroundColor = this.__getDefaultRowBackgroundColor(currentRowItem);
-          }
+          const cellContents = cell.firstElementChild.assignedElements().shift();
 
           // Remove the vaadin-checkbox element if this items does not support selection.
           if (!this.disableSelection && cellContents) {
@@ -1869,11 +1859,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 
   /**
-   * This method returns the row background color taking into account if the grid should be striped and the internal identifier being odd or even.
+   * This method returns the row background color taking into account the item associated with it.
    *
    * @param {Object} item The current item whose row background color we want to know.
    */
-  __getDefaultRowBackgroundColor (item) {
+  __getRowBackgroundColor (item) {
+    // This means the row is currently active.
+    if (this.__activeItem && this.__compareItems(item, this.__activeItem)) {
+      return 'var(--light-primary-color)';
+    }
+
+    // This means the row has a specific color.
+    if (!!item[this.rowBackgroundColorInternalProperty]) {
+      return item[this.rowBackgroundColorInternalProperty];
+    }
+
+    // The fallback scenario is to apply white or the striped colors.
     return this.disableRowStripes || item[this.idInternalProperty] % 2 === 0 ? 'white' : 'var(--casper-moac-row-stripe-color)';
   }
 
