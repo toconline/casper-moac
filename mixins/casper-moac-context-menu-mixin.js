@@ -82,13 +82,6 @@ export const CasperMoacContextMenuMixin = superClass => {
       this.__floatingContextMenu.addEventListener('click', () => {
         this.activeItem = this.hoveringRowItem;
       });
-
-      // Hide the floating context menu as soon as the other context menu closes.
-      this.__contextMenu.addEventListener('opened-changed', event => {
-        if (!event.detail.value) {
-          this.__hideFloatingContextMenu();
-        }
-      });
     }
 
     /**
