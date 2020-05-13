@@ -86,8 +86,8 @@ export const CasperMoacFiltersMixin = superClass => {
 
       afterNextRender(this, () => {
         this.__renderActiveFilters();
-        this.__saveFiltersIntoLocalStorage();
         this.__updateUrlWithCurrentFilters();
+        this.__updateLocalStorageWithCurrentFilters();
       });
     }
 
@@ -180,7 +180,7 @@ export const CasperMoacFiltersMixin = superClass => {
 
         this.__renderActiveFilters();
         this.__updateUrlWithCurrentFilters();
-        this.__saveFiltersIntoLocalStorage();
+        this.__updateLocalStorageWithCurrentFilters();
         this.__dispatchFilterChangedEvent(dataset.filter);
       };
 

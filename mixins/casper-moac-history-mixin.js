@@ -27,6 +27,8 @@ export const CasperMoacHistoryMixin = superClass => {
      * This method is used to update the current URL with the filters that are being applied at the moment.
      */
     __updateUrlWithCurrentFilters () {
+      if (!this.__historyStateFilters) return;
+
       const searchParams = new URLSearchParams(window.location.search);
 
       this.__historyStateFilters.forEach(historyStateFilter => {
