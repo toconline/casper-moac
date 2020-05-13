@@ -1959,13 +1959,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   __openContextMenu (event) {
     this.__contextMenu.positionTarget = event.target;
-    this.__contextMenu.close();
-
-    afterNextRender(this, () => {
-      this.__contextMenu.positionTarget.style.display = 'block';
-      this.__contextMenu.refit();
-      this.__contextMenu.open();
-    });
+    this.__contextMenu.positionTarget.style.display = 'block';
+    this.__contextMenu.refit();
+    this.__contextMenu.open();
   }
 
   /**
