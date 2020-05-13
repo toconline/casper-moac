@@ -480,6 +480,24 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       __displayResetFiltersPill: {
         type: Boolean,
         value: false
+      },
+      /**
+       * Array that contains the filters which will be mapped and read from the URL.
+       *
+       * @type {Array}
+       */
+      __historyStateFilters: {
+        type: Array,
+        value: []
+      },
+      /**
+       * Array that contains the filters which will be mapped and read from the local storage.
+       *
+       * @type {Array}
+       */
+      __localStorageFilters: {
+        type: Array,
+        value: []
       }
     };
   }
