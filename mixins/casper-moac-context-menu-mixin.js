@@ -73,6 +73,11 @@ export const CasperMoacContextMenuMixin = superClass => {
           this.__floatingContextMenu.style.top = `${rowBoundingRect.top - gridBoundingRect.top}px`;
           this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
           this.__paintFloatingContextMenu();
+
+          // This is used so the users don't get confused when the context menu is open in one line and the floating context menu on another line.
+          if (this.__contextMenu.opened) {
+            this.__contextMenu.close();
+          }
         } else {
           this.__hideFloatingContextMenu();
         }
