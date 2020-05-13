@@ -88,6 +88,8 @@ export const CasperMoacContextMenuMixin = superClass => {
      * This method closes the floating context menu.
      */
     __hideFloatingContextMenu () {
+      this.hoveringRow = null;
+      this.hoveringRowItem = null;
       this.__floatingContextMenu.style.display = 'none';
     }
 
