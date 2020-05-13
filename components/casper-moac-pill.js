@@ -44,6 +44,7 @@ class CasperMoacPill extends PolymerElement {
           padding: 0 10px;
           cursor: pointer;
           border-radius: 15px;
+          white-space: nowrap;
           box-sizing: border-box;
           color: var(--on-primary-color);
           background-color: var(--primary-color);
