@@ -58,7 +58,7 @@ export const CasperMoacContextMenuMixin = superClass => {
       gridBody.addEventListener('mouseover', event => {
         const row = event.composedPath().find(element => element.nodeName && element.nodeName.toLowerCase() === 'tr');
 
-        if (!row) return this.__hideFloatingContextMenu();
+        if (!row || row === this.hoveringRow) return;
 
         const rowBoundingRect = row.getBoundingClientRect();
         const gridBoundingRect = gridContainer.getBoundingClientRect();
