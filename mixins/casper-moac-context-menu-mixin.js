@@ -48,13 +48,15 @@ export const CasperMoacContextMenuMixin = superClass => {
 
       // Hide the floating context menu as soon as the user leaves the grid if the context menu is not open or when the user scrolls the grid.
       gridScroller.addEventListener('scroll', () => { this.__hideFloatingContextMenu(); });
-      gridBody.addEventListener('mouseleave', () => {
-        if (!this.__contextMenu.opened) {
+
+      // Close the floating context menu when the user leaves the table body unless he is hovering the floating menu itself.
+      gridBody.addEventListener('mouseleave', event => {
+        if (event.relatedTarget !== this.__floatingContextMenu && !this.__contextMenu.opened) {
           this.__hideFloatingContextMenu();
         }
       });
 
-      // Display the floating context menu in a specific row.
+      // Display the floating context menu when the user hovers on a row.
       gridBody.addEventListener('mouseover', event => {
         const row = event.composedPath().find(element => element.nodeName && element.nodeName.toLowerCase() === 'tr');
 
@@ -87,6 +89,13 @@ export const CasperMoacContextMenuMixin = superClass => {
       this.__floatingContextMenu.addEventListener('click', () => {
         this.activeItem = this.hoveringRowItem;
       });
+
+      // Close the floating context menu when the other menu closes and user is not currently hovering the table.
+      this.__contextMenu.addEventListener('opened-changed', event => {
+        if (!event.detail.value && !gridBody.matches(':hover')) {
+          this.__hideFloatingContextMenu();
+        }
+      })
     }
 
     /**
