@@ -205,7 +205,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
        *
        * @type {Number}
        */
-      leftSideMinimumWidth: Number,
+      leftSideMinimumWidth: {
+        type: Number,
+        value: 25
+      },
       /**
        * The maximum percentual width of the left-side container.
        *

@@ -48,7 +48,7 @@ export const CasperMoacContextMenuMixin = superClass => {
 
       // Hide the floating context menu as soon as the user leaves the grid if the context menu is not open or when the user scrolls the grid.
       gridScroller.addEventListener('scroll', () => { this.__hideFloatingContextMenu(); });
-      gridContainer.addEventListener('mouseleave', () => {
+      gridBody.addEventListener('mouseleave', () => {
         if (!this.__contextMenu.opened) {
           this.__hideFloatingContextMenu();
         }
