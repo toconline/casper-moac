@@ -6,93 +6,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
     static get properties () {
       return {
         /**
-         * Number of results that will be displayed per page.
-         *
-         * @type {Number}
-         */
-        resourcePageSize: {
-          type: Number,
-          value: 100
-        },
-        /**
-         * The JSON API resource name that will be used to build the URL.
-         *
-         * @type {String}
-         */
-        resourceName: {
-          type: String
-        },
-        /**
-         * List of attributes that should be fetch via JSON API.
-         *
-         * @type {Array}
-         */
-        resourceListAttributes: {
-          type: Array
-        },
-        /**
-         * Function used to format the items that are returned from the JSON API.
-         *
-         * @type {Function}
-         */
-        resourceFormatter: {
-          type: Function
-        },
-        /**
-         * URL parameter that will contain the number of results per page.
-         *
-         * @type {String}
-         */
-        resourcePageSizeParam: {
-          type: String,
-          value: 'page[size]'
-        },
-        /**
-         * URL parameter that will contain the current page.
-         *
-         * @type {String}
-         */
-        resourcePageParam: {
-          type: String,
-          value: 'page[number]'
-        },
-        /**
-         * URL parameter to obtain the total number of results for the current query.
-         *
-         * @type {String}
-         */
-        resourceTotalsMetaParam: {
-          type: String,
-          value: 'totals=1'
-        },
-        /**
-         * URL parameter to sort the results by a specific attribute.
-         *
-         * @type {String}
-        */
-        resourceSortParam: {
-          type: String,
-          value: 'sort'
-        },
-        /**
-         * URL parameter to filter the results by matching a substring with a specific attribute.
-         *
-         * @type {String}
-         */
-        resourceFilterParam: {
-          type: String,
-          value: 'filter'
-        },
-        /**
-         * The JSON API resource timeout value in milliseconds.
-         *
-         * @type {Number}
-         */
-        resourceTimeoutMs: {
-          type: Number,
-          value: 5000
-        },
-        /**
          * Number of milliseconds, during which, we should not re-fetch children items and use their locally cached version.
          *
          * @type {Number}
@@ -100,6 +13,15 @@ export const CasperMoacLazyLoadMixin = superClass => {
         resourceChildrenCacheDuration: {
           type: Number,
           value: 10000
+        },
+        /**
+         * Query that will be used when the developer specifies a custom query for each one of the possible filter values.
+         *
+         * @type {String}
+         */
+        resourceCustomQueryKey: {
+          type: String,
+          value: 'customQuery'
         },
         /**
          * Filters that should be always applied to the JSON API resource regardless of the current filters in the square bracket notation.
@@ -126,13 +48,91 @@ export const CasperMoacLazyLoadMixin = superClass => {
           type: String,
         },
         /**
-         * Query that will be used when the developer specifies a custom query for each one of the possible filter values.
+         * URL parameter to filter the results by matching a substring with a specific attribute.
          *
          * @type {String}
          */
-        resourceCustomQueryKey: {
+        resourceFilterParam: {
           type: String,
-          value: 'customQuery'
+          value: 'filter'
+        },
+        /**
+         * Function used to format the items that are returned from the JSON API.
+         *
+         * @type {Function}
+         */
+        resourceFormatter: {
+          type: Function
+        },
+        /**
+         * List of attributes that should be fetch via JSON API.
+         *
+         * @type {Array}
+         */
+        resourceListAttributes: {
+          type: Array
+        },
+        /**
+         * The JSON API resource name that will be used to build the URL.
+         *
+         * @type {String}
+         */
+        resourceName: {
+          type: String
+        },
+        /**
+         * URL parameter that will contain the current page.
+         *
+         * @type {String}
+         */
+        resourcePageParam: {
+          type: String,
+          value: 'page[number]'
+        },
+        /**
+         * Number of results that will be displayed per page.
+         *
+         * @type {Number}
+         */
+        resourcePageSize: {
+          type: Number,
+          value: 100
+        },
+        /**
+         * URL parameter that will contain the number of results per page.
+         *
+         * @type {String}
+         */
+        resourcePageSizeParam: {
+          type: String,
+          value: 'page[size]'
+        },
+        /**
+         * URL parameter to sort the results by a specific attribute.
+         *
+         * @type {String}
+        */
+        resourceSortParam: {
+          type: String,
+          value: 'sort'
+        },
+        /**
+         * The JSON API resource timeout value in milliseconds.
+         *
+         * @type {Number}
+         */
+        resourceTimeoutMs: {
+          type: Number,
+          value: 5000
+        },
+        /**
+         * URL parameter to obtain the total number of results for the current query.
+         *
+         * @type {String}
+         */
+        resourceTotalsMetaParam: {
+          type: String,
+          value: 'totals=1'
         },
         /**
          * This property states the current page.

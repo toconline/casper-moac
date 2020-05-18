@@ -34,113 +34,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   static get properties () {
     return {
       /**
-       * Since the page load process will change there might be sometimes where this property is not
-       * defined so we initialize it this way to enure that nothing breaks.
-       *
-       * @type {Object}
-       */
-      app: {
-        type: Object,
-        value: window.app
-      },
-      /**
-       * This property when set to true, displays the casper-epaper component.
-       *
-       * @type {Boolean}
-       */
-      hasEpaper: {
-        type: Boolean,
-        value: false
-      },
-      /**
-       * The page that is currently using the casper-moac component.
-       *
-       * @type {Object}
-       */
-      page: Object,
-      /**
-       * The list of items to be displayed.
-       *
-       * @type {Array}
-       */
-      items: {
-        type: Array,
-        observer: '__itemsChanged'
-      },
-      /**
-       * The items that are being currently displayed with all the applied filters.
-       *
-       * @type {Array}
-       */
-      displayedItems: {
-        type: Array,
-        value: () => [],
-        notify: true
-      },
-      /**
-       * List of attributes that should be used to filter.
-       *
-       * @type {Array}
-       */
-      resourceFilterAttributes: Array,
-      /**
-       * The placeholder used in the input where the user can filter the results.
-       *
-       * @type {String}
-       */
-      filterInputPlaceholder: {
-        type: String,
-        value: 'Filtrar resultados'
-      },
-      /**
-       * Label that will be used on the header when multiple items are selected in
-       * the vaadin-grid.
-       *
-       * @type {String}
-       */
-      multiSelectionLabel: {
-        type: String,
-        value: 'resultado(s)'
-      },
-      /**
-       * Flag used to activate the casper-moac's lazy load mode.
-       *
-       * @type {Boolean}
-       */
-      lazyLoad: {
-        type: Boolean,
-        value: false
-      },
-      /**
-       * A reference to the epaper object so that the page using casper-moac can
-       * use its methods.
-       *
-       * @type {Object}
-       */
-      epaper: {
-        type: Object,
-        notify: true
-      },
-      /**
-       * A reference to the vaadin-grid so that the page using casper-moac can
-       * use its methods.
-       *
-       * @type {Object}
-       */
-      grid: {
-        type: Object,
-        notify: true
-      },
-      /**
-       * A reference to the vaadin-grid's scroller so that developers can attach event listeners to it.
-       *
-       * @type {Object}
-       */
-      gridScroller: {
-        type: Object,
-        notify: true
-      },
-      /**
        * The item that is currently active in the vaadin-grid.
        *
        * @type {Object}
@@ -159,120 +52,23 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         type: Number
       },
       /**
-       * The items that are currently expanded in the vaadin-grid.
+       * Since the page load process will change there might be sometimes where this property is not
+       * defined so we initialize it this way to enure that nothing breaks.
        *
-       * @type {Array}
+       * @type {Object}
        */
-      expandedItems: {
-        type: Array,
-        notify: true,
-        value: () => []
-      },
-      /**
-       * The items that are currently selected in the vaadin-grid.
-       *
-       * @type {Array}
-       */
-      selectedItems: {
-        type: Array,
-        notify: true,
-        value: () => [],
-        observer: '__selectedItemsChanged'
-      },
-      /**
-       * The array of filters that are available to filter the results presents on the page.
-       *
-       * @type {Array}
-       */
-      filters: {
+      app: {
         type: Object,
-        notify: true,
-        observer: '__filtersChanged'
+        value: window.app
       },
       /**
-       * The name of the GET parameter that will hold the free filter's value.
+       * The filters's local property where this component will save if his event listeners were already attached or not.
        *
        * @type {String}
        */
-      freeFilterUrlParameterName: {
+      attachedEventListenersInternalProperty: {
         type: String,
-        value: 'query'
-      },
-      /**
-       * The minimum percentual width of the left-side container.
-       *
-       * @type {Number}
-       */
-      leftSideMinimumWidth: Number,
-      /**
-       * The maximum percentual width of the left-side container.
-       *
-       * @type {Number}
-       */
-      leftSideMaximumWidth: Number,
-      /**
-       * The initial percentual width of the left-side container.
-       *
-       * @type {Number}
-       */
-      leftSideInitialWidth: {
-        type: Number,
-        value: 40
-      },
-      /**
-       * Whether to display or not the number of results on the top-right corner of the filters.
-       *
-       * @type {Boolean}
-       */
-      hideNumberResults: {
-        type: Boolean,
-        value: false
-      },
-      /**
-       * Icon that will be used when the vaadin-grid has no items to display.
-       *
-       * @type {String}
-       */
-      noItemsIcon: {
-        type: String,
-        value: 'fa-light:clipboard'
-      },
-      /**
-       * Text that will be used when the vaadin-grid has no items to display.
-       *
-       * @type {String}
-       */
-      noItemsText: {
-        type: String,
-        value: 'Não existem quaisquer resultados para mostrar.'
-      },
-      /**
-       * Boolean that when set to true, forces one item to be active all the time.
-       *
-       * @type {Boolean}
-       */
-      forceActiveItem: {
-        type: Boolean,
-        value: false
-      },
-      /**
-       * Boolean that toggles the paper-spinner when the grid is loading items. This was required since the vaadin-grid one
-       * is readoOnly.
-       *
-       * @type {Boolean}
-       */
-      loading: {
-        type: Boolean,
-        value: false
-      },
-      /**
-       * Boolean that when set to true freezes the selection column inserted automatically by the casper-moac component.
-       *
-       * @type {Boolean}
-       */
-      freezeSelectionColumn: {
-        type: Boolean,
-        value: false
+        value: '__attachedEventListeners'
       },
       /**
        * The function that is going to be called before the JSON API request.
@@ -283,13 +79,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         type: Function,
       },
       /**
-       * Boolean that states if the vaadin-grid should have the selection column or not.
+       * The external property where the items' children are stored.
        *
-       * @type {Boolean}
+       * @type {String}
        */
-      disableSelection: {
-        type: Boolean,
-        value: false,
+      childrenExternalProperty: {
+        type: String,
       },
       /**
        * Boolean that states if we should or shouldn't display the epaper's blank page when there is no active item.
@@ -310,57 +105,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         value: false
       },
       /**
-       * The external property where the items' children are stored.
-       *
-       * @type {String}
-       */
-      childrenExternalProperty: {
-        type: String,
-      },
-      /**
-       * The external property where the items' parents are stored.
-       *
-       * @type {String}
-       */
-      parentExternalProperty: {
-        type: String
-      },
-      /**
-       * The external identifier property that will be used when painting the active row.
-       *
-       * @type {String}
-       */
-      idExternalProperty: {
-        type: String,
-        value: 'id'
-      },
-      /**
-       * The internal identifier property that will be used when painting the active row.
-       *
-       * @type {String}
-       */
-      idInternalProperty: {
-        type: String,
-        value: '__identifier'
-      },
-      /**
-       * The children's local property where this component will save their parent identifier
-       * to easily remove them later.
-       *
-       * @type {String}
-       */
-      parentInternalProperty: {
-        type: String,
-        value: '__parent'
-      },
-      /**
-       * This property states if one specific item is expanded or not.
+       * Boolean that states if the vaadin-grid should have the selection column or not.
        *
        * @type {Boolean}
        */
-      expandedInternalProperty: {
+      disableSelection: {
         type: Boolean,
-        value: '__expanded'
+        value: false,
       },
       /**
        * This property disables the possibility of one item to be selected.
@@ -372,39 +123,23 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         value: '__disableSelection'
       },
       /**
-       * The filters's local property where this component will save if his event listeners were already attached or not.
-       *
-       * @type {String}
-       */
-      attachedEventListenersInternalProperty: {
-        type: String,
-        value: '__attachedEventListeners'
-      },
-      /**
-       * Internal property that an item can define which changes its row background color.
-       *
-       * @type {String}
-       */
-      rowBackgroundColorInternalProperty: {
-        type: String,
-        value: '__rowBackgroundColor'
-      },
-      /**
-       * Array that contains the filter components since the developer might want to access them.
+       * The items that are being currently displayed with all the applied filters.
        *
        * @type {Array}
        */
-      filterComponents: {
+      displayedItems: {
         type: Array,
-        value: () => []
+        value: () => [],
+        notify: true
       },
       /**
-       * The value that is currently in the free filter input which will be used to filter the items.
+       * A reference to the epaper object so that the page using casper-moac can
+       * use its methods.
        *
-       * @type {String}
+       * @type {Object}
        */
-      freeFilterValue: {
-        type: String,
+      epaper: {
+        type: Object,
         notify: true
       },
       /**
@@ -442,6 +177,271 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         type: Number,
       },
       /**
+       * This property states if one specific item is expanded or not.
+       *
+       * @type {Boolean}
+       */
+      expandedInternalProperty: {
+        type: Boolean,
+        value: '__expanded'
+      },
+      /**
+       * The items that are currently expanded in the vaadin-grid.
+       *
+       * @type {Array}
+       */
+      expandedItems: {
+        type: Array,
+        notify: true,
+        value: () => []
+      },
+      /**
+       * Array that contains the filter components since the developer might want to access them.
+       *
+       * @type {Array}
+       */
+      filterComponents: {
+        type: Array,
+        value: () => []
+      },
+      /**
+       * The placeholder used in the input where the user can filter the results.
+       *
+       * @type {String}
+       */
+      filterInputPlaceholder: {
+        type: String,
+        value: 'Filtrar resultados'
+      },
+      /**
+       * The array of filters that are available to filter the results presents on the page.
+       *
+       * @type {Array}
+       */
+      filters: {
+        type: Object,
+        notify: true,
+        observer: '__filtersChanged'
+      },
+      /**
+       * Boolean that when set to true, forces one item to be active all the time.
+       *
+       * @type {Boolean}
+       */
+      forceActiveItem: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * The name of the GET parameter that will hold the free filter's value.
+       *
+       * @type {String}
+       */
+      freeFilterUrlParameterName: {
+        type: String,
+        value: 'query'
+      },
+      /**
+       * The value that is currently in the free filter input which will be used to filter the items.
+       *
+       * @type {String}
+       */
+      freeFilterValue: {
+        type: String,
+        notify: true
+      },
+      /**
+       * Boolean that when set to true freezes the selection column inserted automatically by the casper-moac component.
+       *
+       * @type {Boolean}
+       */
+      freezeSelectionColumn: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * A reference to the vaadin-grid so that the page using casper-moac can
+       * use its methods.
+       *
+       * @type {Object}
+       */
+      grid: {
+        type: Object,
+        notify: true
+      },
+      /**
+       * A reference to the vaadin-grid's scroller so that developers can attach event listeners to it.
+       *
+       * @type {Object}
+       */
+      gridScroller: {
+        type: Object,
+        notify: true
+      },
+      /**
+       * This property when set to true, displays the casper-epaper component.
+       *
+       * @type {Boolean}
+       */
+      hasEpaper: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Whether to display or not the number of results on the top-right corner of the filters.
+       *
+       * @type {Boolean}
+       */
+      hideNumberResults: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * The external identifier property that will be used when painting the active row.
+       *
+       * @type {String}
+       */
+      idExternalProperty: {
+        type: String,
+        value: 'id'
+      },
+      /**
+       * The internal identifier property that will be used when painting the active row.
+       *
+       * @type {String}
+       */
+      idInternalProperty: {
+        type: String,
+        value: '__identifier'
+      },
+      /**
+       * The list of items to be displayed.
+       *
+       * @type {Array}
+       */
+      items: {
+        type: Array,
+        observer: '__itemsChanged'
+      },
+      /**
+       * Flag used to activate the casper-moac's lazy load mode.
+       *
+       * @type {Boolean}
+       */
+      lazyLoad: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * The initial percentual width of the left-side container.
+       *
+       * @type {Number}
+       */
+      leftSideInitialWidth: {
+        type: Number,
+        value: 40
+      },
+      /**
+       * The maximum percentual width of the left-side container.
+       *
+       * @type {Number}
+       */
+      leftSideMaximumWidth: Number,
+      /**
+       * The minimum percentual width of the left-side container.
+       *
+       * @type {Number}
+       */
+      leftSideMinimumWidth: Number,
+      /**
+       * Boolean that toggles the paper-spinner when the grid is loading items. This was required since the vaadin-grid one
+       * is readoOnly.
+       *
+       * @type {Boolean}
+       */
+      loading: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Label that will be used on the header when multiple items are selected in
+       * the vaadin-grid.
+       *
+       * @type {String}
+       */
+      multiSelectionLabel: {
+        type: String,
+        value: 'resultado(s)'
+      },
+      /**
+       * Icon that will be used when the vaadin-grid has no items to display.
+       *
+       * @type {String}
+       */
+      noItemsIcon: {
+        type: String,
+        value: 'fa-light:clipboard'
+      },
+      /**
+       * Text that will be used when the vaadin-grid has no items to display.
+       *
+       * @type {String}
+       */
+      noItemsText: {
+        type: String,
+        value: 'Não existem quaisquer resultados para mostrar.'
+      },
+      /**
+       * The page that is currently using the casper-moac component.
+       *
+       * @type {Object}
+       */
+      page: Object,
+      /**
+       * The external property where the items' parents are stored.
+       *
+       * @type {String}
+       */
+      parentExternalProperty: {
+        type: String
+      },
+      /**
+       * The children's local property where this component will save their parent identifier
+       * to easily remove them later.
+       *
+       * @type {String}
+       */
+      parentInternalProperty: {
+        type: String,
+        value: '__parent'
+      },
+      /**
+       * List of attributes that should be used to filter.
+       *
+       * @type {Array}
+       */
+      resourceFilterAttributes: Array,
+      /**
+       * Internal property that an item can define which changes its row background color.
+       *
+       * @type {String}
+       */
+      rowBackgroundColorInternalProperty: {
+        type: String,
+        value: '__rowBackgroundColor'
+      },
+      /**
+       * The items that are currently selected in the vaadin-grid.
+       *
+       * @type {Array}
+       */
+      selectedItems: {
+        type: Array,
+        notify: true,
+        value: () => [],
+        observer: '__selectedItemsChanged'
+      },
+      /**
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
        *
        * @type {Boolean}
@@ -452,13 +452,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         observer: '__displayAllFiltersChanged'
       },
       /**
-       * This object contains initial filter values so that the user can reset to them if he wants.
+       * Flag that states if the pill which resets the filters, is visible or not.
        *
-       * @type {Object}
+       * @type {Boolean}
        */
-      __initialFiltersValues: {
-        type: Object,
-        value: () => ({})
+      __displayResetFiltersPill: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Array that contains the filters which will be mapped and read from the URL.
+       *
+       * @type {Array}
+       */
+      __historyStateFilters: {
+        type: Array,
+        value: []
       },
       /**
        * This object contains the filter keys and values that should not be used to fetch new items since those filters
@@ -471,13 +480,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         value: () => ({})
       },
       /**
-       * Flag that states if the pill which resets the filters, is visible or not.
+       * This object contains initial filter values so that the user can reset to them if he wants.
        *
-       * @type {Boolean}
+       * @type {Object}
        */
-      __displayResetFiltersPill: {
-        type: Boolean,
-        value: false
+      __initialFiltersValues: {
+        type: Object,
+        value: () => ({})
+      },
+      /**
+       * Array that contains the filters which will be mapped and read from the local storage.
+       *
+       * @type {Array}
+       */
+      __localStorageFilters: {
+        type: Array,
+        value: []
       }
     };
   }
