@@ -189,24 +189,30 @@ export const CasperMoacFiltersMixin = superClass => {
           paper-input[data-filter],
           paper-checkbox[data-filter],
           casper-select[data-filter],
+          casper-date-range[data-filter],
           casper-date-picker[data-filter]
         `));
 
-        this.filterComponents.forEach(filter => {
-          if (filter[this.attachedEventListenersInternalProperty]) return;
+        this.filterComponents.forEach(filterComponent => {
+          if (filterComponent[this.attachedEventListenersInternalProperty]) return;
 
-          filter.nodeName.toLowerCase() !== 'paper-checkbox'
-            ? filter.addEventListener('value-changed', filterChangedCallback)
-            : filter.addEventListener('checked-changed', filterChangedCallback);
+          let eventName;
+          switch (filterComponent.nodeName.toLowerCase()) {
+            case 'paper-checkbox': eventName = 'checked-changed'; break;
+            case 'casper-date-range': eventName = 'formatted-value-changed'; break;
+            default: eventName = 'value-changed';
+          }
+
+          filterComponent.addEventListener(eventName, filterChangedCallback);
 
           // This is used to clean possible empty filters due to the casper-select dropdown being open at the time.
-          if (filter.nodeName.toLowerCase() === 'casper-select') {
-            filter.addEventListener('opened-changed', event => {
+          if (filterComponent.nodeName.toLowerCase() === 'casper-select') {
+            filterComponent.addEventListener('opened-changed', event => {
               if (!event.target.opened) this.__renderActiveFilters();
             });
           }
 
-          filter[this.attachedEventListenersInternalProperty] = true;
+          filterComponent[this.attachedEventListenersInternalProperty] = true;
         });
       });
     }
@@ -284,6 +290,10 @@ export const CasperMoacFiltersMixin = superClass => {
       switch (filter.type) {
         case CasperMoacFilterTypes.PAPER_INPUT: return filter.value;
         case CasperMoacFilterTypes.PAPER_CHECKBOX: return filter.inputOptions.label;
+        case CasperMoacFilterTypes.CASPER_DATE_RANGE:
+          const casperDateRange = this.__getFilterComponent(filterKey);
+
+          return [casperDateRange.formattedValue.start, casperDateRange.formattedValue.end].filter(date => !!date).join(' a ');
         case CasperMoacFilterTypes.CASPER_DATE_PICKER:
           const casperDatePicker = this.__getFilterComponent(filterKey);
 

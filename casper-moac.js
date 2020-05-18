@@ -5,6 +5,7 @@ import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@cloudware-casper/casper-icons/casper-icon.js';
 import '@cloudware-casper/casper-epaper/casper-epaper.js';
 import '@cloudware-casper/casper-select/casper-select.js';
+import '@cloudware-casper/casper-date-range/casper-date-range.js';
 import '@cloudware-casper/casper-date-picker/casper-date-picker.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
@@ -687,7 +688,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           display: none;
         }
 
-        .main-container vaadin-split-layout .left-side-container .filters-container .filter-container.filter-container--full-width {
+        .main-container vaadin-split-layout .left-side-container .filters-container .filter-container.filter-container--double-width {
           grid-column: span 2;
         }
 
@@ -902,6 +903,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                         value="{{item.filter.value}}"
                         label="[[item.filter.inputOptions.label]]">
                       </paper-input>
+                    </template>
+
+                    <!--Casper-Date-Range filter-->
+                    <template is="dom-if" if="[[__isFilterCasperDateRange(item.filter.type)]]">
+                      <casper-date-range
+                        data-filter$="[[item.filterKey]]"
+                        value="{{item.filter.value}}"
+                        input-placeholder="[[item.filter.inputOptions.label]]">
+                      </casper-date-range>
                     </template>
 
                     <!--Casper-Date-Picker filter-->
@@ -1405,6 +1415,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
   __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
   __isFilterPaperCheckbox (itemType) { return itemType === CasperMoacFilterTypes.PAPER_CHECKBOX; }
+  __isFilterCasperDateRange (itemType) { return itemType === CasperMoacFilterTypes.CASPER_DATE_RANGE; }
   __isFilterCasperDatePicker (itemType) { return itemType === CasperMoacFilterTypes.CASPER_DATE_PICKER; }
   __isFilterCasperSelectOrComponentless (itemType) { return [CasperMoacFilterTypes.CASPER_SELECT, CasperMoacFilterTypes.COMPONENTLESS_FILTER].includes(itemType); }
 
@@ -1843,6 +1854,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         return this.shadowRoot.querySelector(`casper-select[data-filter="${key}"]`);
       case CasperMoacFilterTypes.PAPER_CHECKBOX:
         return this.shadowRoot.querySelector(`paper-checkbox[data-filter="${key}"]`);
+      case CasperMoacFilterTypes.CASPER_DATE_RANGE:
+        return this.shadowRoot.querySelector(`casper-date-range[data-filter="${key}"]`);
       case CasperMoacFilterTypes.CASPER_DATE_PICKER:
         return this.shadowRoot.querySelector(`casper-date-picker[data-filter="${key}"]`);
     }
@@ -2009,9 +2022,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   __filterContainerClassName (filter) {
     if (filter.type === CasperMoacFilterTypes.COMPONENTLESS_FILTER) return 'filter-container-invisible';
 
-    return !filter.fullWidth
+    return filter.type !== CasperMoacFilterTypes.CASPER_DATE_RANGE
       ? 'filter-container'
-      : 'filter-container filter-container--full-width';
+      : 'filter-container filter-container--double-width';
   }
 
   /**

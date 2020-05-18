@@ -550,6 +550,15 @@ export const CasperMoacLazyLoadMixin = superClass => {
             case CasperMoacOperators.GREATER_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} >= ${filter.value}`;
             // Custom comparisons.
             case CasperMoacOperators.CUSTOM:
+              if (filter.type === CasperMoacFilterTypes.CASPER_DATE_RANGE) {
+                const dateRangeFilter = [];
+
+                if (filter.value.end) dateRangeFilter.push(filter.lazyLoad.fieldEnd.replace(/%{rangeEnd}/g, filter.value.end));
+                if (filter.value.start) dateRangeFilter.push(filter.lazyLoad.fieldStart.replace(/%{rangeStart}/g, filter.value.start));
+
+                return dateRangeFilter.join(' AND ');
+              }
+
               let customQuery = filter.lazyLoad.field;
 
               // Only allow custom queries per value in single-selection casper-select based filters.
