@@ -104,6 +104,7 @@ export const CasperMoacContextMenuMixin = superClass => {
         this.__contextMenu.opened ||
         event.relatedTarget === app.tooltip ||
         event.relatedTarget === this.__floatingContextMenu ||
+        event.relatedTarget.parentElement === this.__floatingContextMenu ||
         (event.relatedTarget.assignedSlot && event.relatedTarget.assignedSlot.name === 'floating-context-menu-actions')
       )) return;
 
