@@ -100,7 +100,7 @@ export const CasperMoacContextMenuMixin = superClass => {
      * @param {Object} event The event's object.
      */
     __hideFloatingContextMenu (event) {
-      if (event && (
+      if (event && event.relatedTarget && (
         this.__contextMenu.opened ||
         event.relatedTarget === app.tooltip ||
         event.relatedTarget === this.__floatingContextMenu ||
