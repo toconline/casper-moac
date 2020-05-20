@@ -799,7 +799,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu {
-          height: 34px;
+          height: 30px;
           display: none;
           padding: 0 5px;
           position: absolute;
@@ -1546,7 +1546,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   __handleGridKeyDownEvents (event) {
     const keyCode = event.key || event.code;
 
-    if (this.displayedItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
+    if (this.displayedItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
 
     // When there are no active items, select the first one.
     if (!this.__activeItem) {
@@ -1561,16 +1561,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
       if (keyCode === 'ArrowDown' && activeItemIndex + 1 < this.displayedItems.length) {
         this.__activeItem = this.displayedItems[activeItemIndex + 1];
-      }
-
-      if (keyCode === 'ArrowRight') {
-        this.__focusActiveRow();
-        return this.expandItem(this.activeItem);
-      }
-
-      if (keyCode === 'ArrowLeft') {
-        this.__focusActiveRow();
-        return this.collapseItem(this.activeItem);
       }
 
       if (keyCode === 'Enter' && !this.disableSelection && !this.__activeItem[this.disableSelectionInternalProperty]) {
@@ -1908,13 +1898,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     const vaadinGridTable = this.$.grid.shadowRoot.querySelector('table');
     const vaadinGridTableRows = vaadinGridTable.querySelectorAll('tbody tr');
 
-    // This line is necessary since when clicking the ArrowDown, the grid would slightly scroll down.
-    vaadinGridTable.style.overflow = 'hidden';
-
     const vaadinGridTableActiveRow = Array.from(vaadinGridTableRows).find(row => this.__compareItems(row._item, this.activeItem));
     if (vaadinGridTableActiveRow) {
       vaadinGridTableActiveRow.firstElementChild.focus();
-      afterNextRender(this, () => { vaadinGridTable.style.overflow = ''; });
       return;
     }
 

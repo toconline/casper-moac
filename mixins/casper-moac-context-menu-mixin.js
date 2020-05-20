@@ -68,7 +68,7 @@ export const CasperMoacContextMenuMixin = superClass => {
         // Check if the row is totally visible.
         if (this.__isRowTotallyInView(row)) {
           this.__floatingContextMenu.style.display = 'flex';
-          this.__floatingContextMenu.style.top = `${rowBoundingRect.top - gridBoundingRect.top}px`;
+          this.__floatingContextMenu.style.top = `${rowBoundingRect.top - gridBoundingRect.top + 2}px`;
           this.__floatingContextMenu.style.right = gridScroller.clientHeight === gridScroller.scrollHeight ? 0 : `${gridScroller.offsetWidth - gridScroller.clientWidth}px`;
           this.__paintFloatingContextMenu();
 
