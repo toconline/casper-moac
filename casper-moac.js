@@ -1216,7 +1216,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * This method forces the vaadin-grid to redraw all its rows.
    */
   forceGridRedraw () {
-    this.grid.clearCache();
+    this.$.grid.clearCache();
     this.__paintGridRows();
   }
 
@@ -1388,7 +1388,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * @param {Number | String} itemId The item that should be scrolled to if he's not currently visible.
    */
   __scrollToItemIfNotVisible (itemId, useExternalProperty = false) {
-    const rows = this.grid.shadowRoot.querySelectorAll('table tbody tr');
+    const rows = this.$.grid.shadowRoot.querySelectorAll('table tbody tr');
 
     let isRowIntoView = false;
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
@@ -1400,7 +1400,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     }
 
     if (!isRowIntoView) {
-      this.grid.scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
+      this.$.grid.scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
     }
   }
 
@@ -1454,7 +1454,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     });
 
     document.addEventListener('keydown', event => this.__handleGridKeyDownEvents(event));
-    this.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', event => this.__handleGridTreeToggleEvents(event));
+    this.$.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', event => this.__handleGridTreeToggleEvents(event));
 
     if (!this.hasEpaper) {
       this.$.splitLayout.$.splitter.style.display = 'none';
@@ -1475,7 +1475,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
     if (!this.disableSelection) {
       afterNextRender(this, () => {
-        this.grid.shadowRoot.querySelectorAll('table thead th').forEach(header => {
+        this.$.grid.shadowRoot.querySelectorAll('table thead th').forEach(header => {
           const selectAllCheckbox = header.querySelector('slot').assignedElements().shift().firstElementChild;
           if (selectAllCheckbox && selectAllCheckbox.nodeName.toLowerCase() === 'vaadin-checkbox') {
             // Create a vaadin-checkbox to replace the default one which has bugs.
@@ -1593,7 +1593,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * @param {Event} event The event's object.
    */
   __handleGridTreeToggleEvents (event) {
-    const parentItem = this.activeItem = this.grid.getEventContext(event).item;
+    const parentItem = this.activeItem = this.$.grid.getEventContext(event).item;
 
     const treeToggleComponent = event.composedPath().shift();
     treeToggleComponent.disabled = true;
@@ -1889,19 +1889,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   __focusActiveRow () {
     if (!this.__activeItem) return;
 
-    const rows = this.grid.shadowRoot.querySelectorAll('tbody tr');
-    const activeRow = Array.from(rows).find(row => this.__compareItems(row._item, this.__activeItem));
+    // Make sure the active row is currently in view.
+    this.__scrollToItemIfNotVisible(this.__activeItem[this.idInternalProperty]);
 
-    if (activeRow) {
-      return afterNextRender(this, () => {
-        const focusedRow = Array.from(activeRow.children).find(cell => parseInt(cell.getAttribute('tabindex')) === 0) || activeRow.firstElementChild;
-        focusedRow.focus();
-      });
-    }
+    afterNextRender(this, () => {
+      const rows = this.$.grid.shadowRoot.querySelectorAll('table tbody tr');
+      const activeRow = Array.from(rows).find(row => this.__compareItems(row._item, this.__activeItem));
 
-    // This means that the active row is not currently visible.
-    this.__scrollToItemIfNotVisible(this.activeItem);
-    this.__focusActiveRow();
+      // Find the previous focused cell inside the row or by default, focus the first one.
+      const focusedRow = Array.from(activeRow.children).find(cell => parseInt(cell.getAttribute('tabindex')) === 0) || activeRow.firstElementChild;
+
+      focusedRow.focus();
+    });
   }
 
   /**
