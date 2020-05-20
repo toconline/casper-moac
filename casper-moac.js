@@ -1566,7 +1566,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   __handleGridKeyDownEvents (event) {
     const keyCode = event.key || event.code;
 
-    if (this.displayedItems.length === 0 || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
+    // Ignore the event if there are no items, the user is typing in the filter input or it's not an arrow key event.
+    if (this.displayedItems.length === 0 ||
+      this.shadowRoot.activeElement === this.$.filterInput ||
+      !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
 
     // When there are no active items, select the first one.
     if (!this.__activeItem) {
