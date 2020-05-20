@@ -350,9 +350,6 @@ export const CasperMoacFiltersMixin = superClass => {
      * @param {Object} event The event's object.
      */
     __freeFilterChanged (event) {
-      // If the user is in the search input and clicks the ArrowDown key, focus the currently active row.
-      if (event && event.code === 'ArrowDown') return this.__focusActiveRow();
-
       !!this.$.filterInput.value.trim()
         ? this.$.filterInputIcon.icon = 'fa-regular:times'
         : this.$.filterInputIcon.icon = 'fa-regular:search';

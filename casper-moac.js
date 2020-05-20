@@ -1323,6 +1323,26 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 
   /**
+   * This method focuses the row that is currently active to enable the ArrowDown / ArrowUp navigation.
+   */
+  focusActiveCell () {
+    if (!this.__activeItem) return;
+
+    // Make sure the active row is currently in view.
+    this.__scrollToItemIfNotVisible(this.__activeItem[this.idInternalProperty]);
+
+    afterNextRender(this, () => {
+      const rows = this.$.grid.shadowRoot.querySelectorAll('table tbody tr');
+      const activeRow = Array.from(rows).find(row => this.__compareItems(row._item, this.__activeItem));
+
+      // Find the previous focused cell inside the row or by default, focus the first one.
+      const focusedRow = Array.from(activeRow.children).find(cell => parseInt(cell.getAttribute('tabindex')) === 0) || activeRow.firstElementChild;
+
+      focusedRow.focus();
+    });
+  }
+
+  /**
    * This method appends new items who are at the root level.
    *
    * @param {Object | Array} itemsToAdd The item / list of items to be added to the current dataset.
@@ -1453,7 +1473,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       }
     });
 
-    document.addEventListener('keydown', event => this.__handleGridKeyDownEvents(event));
+    this.shadowRoot.addEventListener('keydown', event => this.__handleGridKeyDownEvents(event));
     this.$.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', event => this.__handleGridTreeToggleEvents(event));
 
     if (!this.hasEpaper) {
@@ -1567,7 +1587,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.__paintGridRows();
 
     // Only focus the row if the grid is not currently active, otherwise do nothing in order not to mess with the grid's default behavior.
-    if (this.shadowRoot.activeElement !== this.grid) this.__focusActiveRow();
+    if (this.shadowRoot.activeElement !== this.grid) this.focusActiveCell();
 
     // If the active item changed, debounce the active item change.
     if (!this.__scheduleActiveItem || !this.__compareItems(this.__activeItem, this.__scheduleActiveItem)) {
@@ -1881,26 +1901,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
     // The fallback scenario is to apply white or the striped colors.
     return this.disableRowStripes || item[this.idInternalProperty] % 2 === 0 ? 'white' : 'var(--casper-moac-row-stripe-color)';
-  }
-
-  /**
-   * This method focuses the row that is currently active to enable the ArrowDown / ArrowUp navigation.
-   */
-  __focusActiveRow () {
-    if (!this.__activeItem) return;
-
-    // Make sure the active row is currently in view.
-    this.__scrollToItemIfNotVisible(this.__activeItem[this.idInternalProperty]);
-
-    afterNextRender(this, () => {
-      const rows = this.$.grid.shadowRoot.querySelectorAll('table tbody tr');
-      const activeRow = Array.from(rows).find(row => this.__compareItems(row._item, this.__activeItem));
-
-      // Find the previous focused cell inside the row or by default, focus the first one.
-      const focusedRow = Array.from(activeRow.children).find(cell => parseInt(cell.getAttribute('tabindex')) === 0) || activeRow.firstElementChild;
-
-      focusedRow.focus();
-    });
   }
 
   /**
