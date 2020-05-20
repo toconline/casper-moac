@@ -1453,7 +1453,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       }
     });
 
-    this.grid.addEventListener('keydown', event => this.__handleGridKeyDownEvents(event));
+    document.addEventListener('keydown', event => this.__handleGridKeyDownEvents(event));
     this.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', event => this.__handleGridTreeToggleEvents(event));
 
     if (!this.hasEpaper) {
@@ -1546,12 +1546,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   __handleGridKeyDownEvents (event) {
     const keyCode = event.key || event.code;
 
-    if (this.displayedItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown'].includes(keyCode)) return;
+    if (this.displayedItems.length === 0 || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
 
     // When there are no active items, select the first one.
     if (!this.__activeItem) {
       this.__activeItem = this.displayedItems[0];
-    } else {
+    } else if (this.shadowRoot.activeElement === this.grid) {
       // Find the index of the current active item.
       const activeItemIndex = this.__findItemIndexById(this.__activeItem[this.idInternalProperty]);
 
@@ -1562,18 +1562,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       if (keyCode === 'ArrowDown' && activeItemIndex + 1 < this.displayedItems.length) {
         this.__activeItem = this.displayedItems[activeItemIndex + 1];
       }
-
-      if (keyCode === 'Enter' && !this.disableSelection && !this.__activeItem[this.disableSelectionInternalProperty]) {
-        !this.__selectedItems.find(selectedItem => this.__compareItems(selectedItem, this.__activeItem))
-          ? this.$.grid.selectItem(this.__activeItem)
-          : this.$.grid.deselectItem(this.__activeItem);
-
-        // The remaining function code only concerns the arrow navigation.
-        return;
-      }
     }
 
     this.__paintGridRows();
+
+    // Only focus the row if the grid is not currently active, otherwise do nothing in order not to mess with the grid's default behavior.
+    if (this.shadowRoot.activeElement !== this.grid) this.__focusActiveRow();
 
     // If the active item changed, debounce the active item change.
     if (!this.__scheduleActiveItem || !this.__compareItems(this.__activeItem, this.__scheduleActiveItem)) {
@@ -1893,15 +1887,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * This method focuses the row that is currently active to enable the ArrowDown / ArrowUp navigation.
    */
   __focusActiveRow () {
-    if (!this.activeItem) return;
+    if (!this.__activeItem) return;
 
-    const vaadinGridTable = this.$.grid.shadowRoot.querySelector('table');
-    const vaadinGridTableRows = vaadinGridTable.querySelectorAll('tbody tr');
+    const rows = this.grid.shadowRoot.querySelectorAll('tbody tr');
+    const activeRow = Array.from(rows).find(row => this.__compareItems(row._item, this.__activeItem));
 
-    const vaadinGridTableActiveRow = Array.from(vaadinGridTableRows).find(row => this.__compareItems(row._item, this.activeItem));
-    if (vaadinGridTableActiveRow) {
-      vaadinGridTableActiveRow.firstElementChild.focus();
-      return;
+    if (activeRow) {
+      return afterNextRender(this, () => {
+        const focusedRow = Array.from(activeRow.children).find(cell => parseInt(cell.getAttribute('tabindex')) === 0) || activeRow.firstElementChild;
+        focusedRow.focus();
+      });
     }
 
     // This means that the active row is not currently visible.
