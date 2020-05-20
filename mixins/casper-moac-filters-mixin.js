@@ -63,7 +63,7 @@ export const CasperMoacFiltersMixin = superClass => {
     }
 
     /**
-     * Changes the filters values without automatically firing a request by setting the internal property '__valueChangeLock'.
+     * Changes the filters values without automatically firing a request by setting the internal property '__ignoreFiltersValues'.
      *
      * @param {Object} filterValues The object which contains the new values for each filter.
      * @param {Boolean} displayResetPill This flag states if the reset filters pill should be displayed.
@@ -89,6 +89,21 @@ export const CasperMoacFiltersMixin = superClass => {
         this.__updateUrlWithCurrentFilters();
         this.__updateLocalStorageWithCurrentFilters();
       });
+    }
+
+    updateFiltersAccordingToURL () {
+      const newFiltersValues = {};
+      const searchParams = new URLSearchParams(window.location.search);
+
+      Object.keys(this.filters).forEach(filterKey => {
+        const parameterName = this.__getUrlKeyForFilter(filterKey);
+
+        newFiltersValues[filterKey] = !searchParams.has(parameterName)
+          ? ''
+          : this.__getValueFromPrettyUrl(this.filters[filterKey], searchParams.get(parameterName));
+      });
+
+      this.setFiltersValue(newFiltersValues);
     }
 
     /**
