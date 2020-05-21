@@ -18,6 +18,7 @@ import './sidebar/casper-moac-sidebar.js';
 import './sidebar/casper-moac-sidebar-item.js';
 import './components/casper-moac-pill.js';
 import './components/casper-moac-active-filter.js';
+import { CasperMoacGridMixin } from './mixins/casper-moac-grid-mixin.js';
 import { CasperMoacSortingMixin } from './mixins/casper-moac-sorting-mixin.js';
 import { CasperMoacFiltersMixin } from './mixins/casper-moac-filters-mixin.js';
 import { CasperMoacHistoryMixin } from './mixins/casper-moac-history-mixin.js';
@@ -27,11 +28,12 @@ import { CasperMoacLocalStorageMixin } from './mixins/casper-moac-local-storage-
 import { CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 
 export class CasperMoac extends CasperMoacLazyLoadMixin(
-  CasperMoacFiltersMixin(
-    CasperMoacSortingMixin(
-      CasperMoacContextMenuMixin(
-        CasperMoacLocalStorageMixin(
-          CasperMoacHistoryMixin(PolymerElement)))))) {
+  CasperMoacGridMixin(
+    CasperMoacFiltersMixin(
+      CasperMoacSortingMixin(
+        CasperMoacContextMenuMixin(
+          CasperMoacLocalStorageMixin(
+            CasperMoacHistoryMixin(PolymerElement))))))) {
 
   static get properties () {
     return {
@@ -1047,9 +1049,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
     this.__bindSorterEvents();
+    this.__bindVaadinGridEvents();
     this.__bindSearchInputEvents();
     this.__bindContextMenuEvents();
-    this.__monkeyPatchVaadinElements();
+    this.__bindVaadinSplitLayoutEvents();
     this.__stampGridCustomStylesTemplate();
 
     // Observe the multi selection container layout changes and resize if needed.
@@ -1060,6 +1063,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           this.__debounce('__multiSelectionResizeDebouncer', () => this.$['multi-selection-container'].style.height = `${multiSelectionElement.scrollHeight}px`);
         }
       });
+
       multiSelectionElementObserver.observe(multiSelectionElement);
     }
 
@@ -1216,15 +1220,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   restampSelectTemplate (filters) {
     if (!filters) return;
 
-    let selectElements;
+    let selectElements = [];
     if (filters.constructor.name === 'String') {
       // Select a single casper-select element.
       selectElements = [this.shadowRoot.querySelector(`casper-select[data-filter="${filters}"]`)];
     } else if (filters.constructor.name === 'Array') {
       // Build a selector that contains all the casper-selects.
-      const selectorQuery = filters.map(filter => `casper-select[data-filter="${filter}"]`);
-
-      selectElements = this.shadowRoot.querySelectorAll(selectorQuery.join(','));
+      selectElements = this.shadowRoot.querySelectorAll(filters.map(filter => `casper-select[data-filter="${filter}"]`).join(','));
     }
 
     selectElements.forEach(selectElement => {
@@ -1310,25 +1312,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     delete parentItem[this.rowBackgroundColorInternalProperty];
 
     this.displayedItems = this.__removeChildItemsRecursively(this.displayedItems, parentItem);
-  }
-
-  /**
-   * This method focuses the row that is currently active to enable the ArrowDown / ArrowUp navigation.
-   */
-  focusActiveCell () {
-    if (!this.__activeItem) return;
-
-    // Make sure the active row is currently in view.
-    this.__scrollToItemIfNotVisible(this.__activeItem[this.idInternalProperty]);
-
-    afterNextRender(this, () => {
-      const activeRow = this.__getAllTableRows().find(row => this.__compareItems(row._item, this.__activeItem));
-
-      // Find the previous focused cell inside the row or by default, focus the first one.
-      const focusedRow = Array.from(activeRow.children).find(cell => parseInt(cell.getAttribute('tabindex')) === 0) || activeRow.firstElementChild;
-
-      focusedRow.focus();
-    });
   }
 
   /**
@@ -1440,63 +1423,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 
   /**
-   * As the name suggests, this method applies some monkey-patches to the vaadin elements. Firstly
-   * it adds a scroll event listener to paint the active row due to the grid's constant re-usage of rows.
-   * It also hides the vaadin-split-layout handler if there is no epaper and replaces the existing
-   * vaadin-checkbox header since its current implementation is faulty.
-   */
-  __monkeyPatchVaadinElements () {
-    this.gridScroller.addEventListener('scroll', () => {
-      this.__paintGridRows();
-
-      if (this.__contextMenu && this.__contextMenu.opened) {
-        this.__contextMenu.close();
-      }
-    });
-
-    this.shadowRoot.addEventListener('keydown', event => this.__handleGridKeyDownEvents(event));
-    this.$.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', event => this.__handleGridTreeToggleEvents(event));
-
-    if (!this.hasEpaper) {
-      this.$.splitLayout.$.splitter.style.display = 'none';
-    }
-
-    this.$.splitLayout.addEventListener('splitter-dragend', () => {
-      const headerContainer = this.shadowRoot.querySelector('.header-container');
-
-      afterNextRender(this, () => {
-        headerContainer.offsetWidth < 600
-          ? headerContainer.classList.add('header-container--responsive')
-          : headerContainer.classList.remove('header-container--responsive');
-      })
-    });
-
-    // Fire the initial event to make sure the header container is aligned correctly from the get-go.
-    this.$.splitLayout.dispatchEvent(new CustomEvent('splitter-dragend'));
-
-    if (!this.disableSelection) {
-      afterNextRender(this, () => {
-        this.$.grid.shadowRoot.querySelectorAll('table thead th').forEach(header => {
-          const selectAllCheckbox = header.querySelector('slot').assignedElements().shift().firstElementChild;
-          if (selectAllCheckbox && selectAllCheckbox.nodeName.toLowerCase() === 'vaadin-checkbox') {
-            // Create a vaadin-checkbox to replace the default one which has bugs.
-            this.__selectAllCheckbox = document.createElement('vaadin-checkbox');
-            this.__selectAllCheckbox.addEventListener('checked-changed', event => {
-              // Lock the vaadin-checkbox event handler to avoid infinite loops.
-              if (this.__selectAllCheckboxLock) return;
-
-              this.__selectedItems = !event.detail.value ? [] : [...this.__selectableItems()];
-            });
-
-            selectAllCheckbox.parentElement.appendChild(this.__selectAllCheckbox);
-            selectAllCheckbox.remove();
-          }
-        });
-      });
-    }
-  }
-
-  /**
    * This method is called when the user presses the times icon that sits inside the filter input.
    */
   __clearFilterInput () {
@@ -1540,73 +1466,23 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 
   /**
-   * Bind event listeners for when the user presses down the Enter or the down / up arrow keys.
-   *
-   * @param {Event} event The event's object.
+   * Adds the necessary event listeners to the split layout component.
    */
-  __handleGridKeyDownEvents (event) {
-    const keyCode = event.key || event.code;
+  __bindVaadinSplitLayoutEvents () {
+    if (!this.hasEpaper) this.$.splitLayout.$.splitter.style.display = 'none';
 
-    // Ignore the event if there are no items, the user is typing in the filter input or it's not an arrow key event.
-    if (this.displayedItems.length === 0 ||
-      this.shadowRoot.activeElement === this.$.filterInput ||
-      !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
+    this.$.splitLayout.addEventListener('splitter-dragend', () => {
+      const headerContainer = this.shadowRoot.querySelector('.header-container');
 
-    // When there are no active items, select the first one.
-    if (!this.__activeItem) {
-      this.__activeItem = this.displayedItems[0];
-    } else if (this.shadowRoot.activeElement === this.grid) {
-      // Find the index of the current active item.
-      const activeItemIndex = this.__findItemIndexById(this.__activeItem[this.idInternalProperty]);
+      afterNextRender(this, () => {
+        headerContainer.offsetWidth < 600
+          ? headerContainer.classList.add('header-container--responsive')
+          : headerContainer.classList.remove('header-container--responsive');
+      })
+    });
 
-      if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
-        this.__activeItem = this.displayedItems[activeItemIndex - 1];
-      }
-
-      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < this.displayedItems.length) {
-        this.__activeItem = this.displayedItems[activeItemIndex + 1];
-      }
-    }
-
-    this.__paintGridRows();
-
-    // Only focus the row if the grid is not currently active, otherwise do nothing in order not to mess with the grid's default behavior.
-    if (this.shadowRoot.activeElement !== this.grid) this.focusActiveCell();
-
-    // If the active item changed, debounce the active item change.
-    if (!this.__scheduleActiveItem || !this.__compareItems(this.__activeItem, this.__scheduleActiveItem)) {
-      // This property is used to avoid delaying infinitely activating the same item which is caused when the user
-      // maintains the up / down arrows after reaching the first / last result in the table.
-      this.__scheduleActiveItem = { ...this.__activeItem };
-
-      // Only debounce when the event is repeated, meaning the user keeps the key pressed or if the activeItemDebounce was specifically set.
-      if (event.repeat || this.activeItemDebounce) {
-        this.__debounce('__activeItemDebouncer', () => {
-          this.activeItem = this.__scheduleActiveItem;
-        }, this.activeItemDebounce || 300);
-      } else {
-        this.__cancelDebounce('__activeItemDebouncer');
-        this.activeItem = this.__scheduleActiveItem;
-      }
-    }
-  }
-
-  /**
-   * This method handles the click on the casper-moac-tree-toggle components and expands / collapses the row.
-   *
-   * @param {Event} event The event's object.
-   */
-  __handleGridTreeToggleEvents (event) {
-    const parentItem = this.activeItem = this.$.grid.getEventContext(event).item;
-
-    const treeToggleComponent = event.composedPath().shift();
-    treeToggleComponent.disabled = true;
-
-    event.detail.expanded
-      ? this.expandItem(parentItem)
-      : this.collapseItem(parentItem);
-
-    treeToggleComponent.disabled = false;
+    // Fire the initial event to make sure the header container is aligned correctly from the get-go.
+    this.$.splitLayout.dispatchEvent(new CustomEvent('splitter-dragend'));
   }
 
   /**
@@ -2083,10 +1959,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   __selectableItems () {
     return this.displayedItems.filter(displayedItem => !displayedItem[this.disableSelectionInternalProperty]);
-  }
-
-  __getAllTableRows () {
-    return Array.from(this.$.grid.shadowRoot.querySelectorAll('table tbody tr'));
   }
 }
 
