@@ -252,15 +252,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         value: 'Não existem quaisquer resultados para mostrar.'
       },
       /**
-       * Boolean that when set to true, forces one item to be active all the time.
-       *
-       * @type {Boolean}
-       */
-      forceActiveItem: {
-        type: Boolean,
-        value: false
-      },
-      /**
        * Boolean that toggles the paper-spinner when the grid is loading items. This was required since the vaadin-grid one
        * is readoOnly.
        *
@@ -1180,12 +1171,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       ? itemsToRemove = [String(itemsToRemove)]
       : itemsToRemove = itemsToRemove.map(itemToRemove => String(itemToRemove));
 
-    const firstItemToRemoveIndex = Math.min(...itemsToRemove.map(itemToRemove => this.__findItemIndexById(itemToRemove, true)));
-    this.__scrollToItemIfNotVisible(firstItemToRemoveIndex, true);
+    const itemIndex = Math.min(...itemsToRemove.map(itemToRemove => this.__findItemIndexById(itemToRemove, true)));
+    this.__scrollToItemIfNotVisible(this.displayedItems[itemIndex][this.idInternalProperty], true);
 
     afterNextRender(this, () => {
-      const rows = this.$.grid.shadowRoot.querySelectorAll('table tbody tr');
-      const blinkingRows = Array.from(rows).filter(row => itemsToRemove.includes(String(row._item[this.idExternalProperty])));
+      const blinkingRows = this.__getAllTableRows().filter(row => itemsToRemove.includes(String(row._item[this.idExternalProperty])));
 
       // Initiate the blinking animation for the rows.
       blinkingRows.forEach(blinkingRow => {
@@ -1207,7 +1197,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         this.__selectedItems = this.__selectedItems.filter(item => !itemsToRemove.includes(String(item[this.idExternalProperty])));
         this.displayedItems.length === 0
           ? this.activeItem = null
-          : this.activeItem = this.displayedItems[Math.max(0, firstItemToRemoveIndex - 1)];
+          : this.activeItem = this.displayedItems[Math.max(0, itemIndex - 1)];
       }, 1000);
     });
   }
@@ -1332,8 +1322,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.__scrollToItemIfNotVisible(this.__activeItem[this.idInternalProperty]);
 
     afterNextRender(this, () => {
-      const rows = this.$.grid.shadowRoot.querySelectorAll('table tbody tr');
-      const activeRow = Array.from(rows).find(row => this.__compareItems(row._item, this.__activeItem));
+      const activeRow = this.__getAllTableRows().find(row => this.__compareItems(row._item, this.__activeItem));
 
       // Find the previous focused cell inside the row or by default, focus the first one.
       const focusedRow = Array.from(activeRow.children).find(cell => parseInt(cell.getAttribute('tabindex')) === 0) || activeRow.firstElementChild;
@@ -1405,21 +1394,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   /**
    * Scrolls to a specific item if he's not currently visible.
    *
-   * @param {Number | String} itemId The item that should be scrolled to if he's not currently visible.
+   * @param {Number | String} itemId The identifer of the item that should be scrolled to if he's not currently visible.
    */
   __scrollToItemIfNotVisible (itemId, useExternalProperty = false) {
-    const rows = this.$.grid.shadowRoot.querySelectorAll('table tbody tr');
+    // Find the row which contains a specific item.
+    const row = this.__getAllTableRows().find(row => this.__compareItemWithId(row._item, itemId, useExternalProperty));
 
-    let isRowIntoView = false;
-    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      if (this.__compareItemWithId(rows[rowIndex]._item, itemId, useExternalProperty)) {
-        // Scroll to the item if it's not into view taking into account the grid's internal items.
-        isRowIntoView = this.__isRowTotallyInView(rows[rowIndex]);
-        break;
-      }
-    }
-
-    if (!isRowIntoView) {
+    if (!row || !this.__isRowTotallyInView(row)) {
       this.$.grid.scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
     }
   }
@@ -1663,7 +1644,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * @param {Object} previousActiveItem The previous vaadin-grid activeItem.
    */
   __activeItemChanged (newActiveItem, previousActiveItem) {
-    if (!newActiveItem && previousActiveItem && this.forceActiveItem && this.displayedItems && this.displayedItems.length > 0) {
+    if (!newActiveItem && previousActiveItem && this.displayedItems && this.displayedItems.length > 0) {
       this.activeItem = previousActiveItem;
     }
 
@@ -2102,6 +2083,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   __selectableItems () {
     return this.displayedItems.filter(displayedItem => !displayedItem[this.disableSelectionInternalProperty]);
+  }
+
+  __getAllTableRows () {
+    return Array.from(this.$.grid.shadowRoot.querySelectorAll('table tbody tr'));
   }
 }
 
