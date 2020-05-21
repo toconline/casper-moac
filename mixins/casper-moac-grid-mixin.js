@@ -92,9 +92,6 @@ export const CasperMoacGridMixin = superClass => {
 
       this.__paintGridRows();
 
-      // Only focus the row if the grid is not currently active, otherwise do nothing in order not to mess with the grid's default behavior.
-      if (this.shadowRoot.activeElement !== this.grid) this.focusActiveCell();
-
       // If the active item changed, debounce the active item change.
       if (!this.__scheduleActiveItem || !this.__compareItems(this.__activeItem, this.__scheduleActiveItem)) {
         // This property is used to avoid delaying infinitely activating the same item which is caused when the user
