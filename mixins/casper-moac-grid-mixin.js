@@ -81,9 +81,7 @@ export const CasperMoacGridMixin = superClass => {
       const keyCode = event.key || event.code;
 
       // Ignore the event if there are no items, the user is typing in the filter input or it's not an arrow key event.
-      if (this.displayedItems.length === 0 ||
-        this.shadowRoot.activeElement === this.$.filterInput ||
-        !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
+      if (this.displayedItems.length === 0 || !['ArrowUp', 'ArrowDown'].includes(keyCode)) return;
 
       // If the user is navigating in the grid, activate the row in which the user currently is.
       if (this.shadowRoot.activeElement === this.grid) {
