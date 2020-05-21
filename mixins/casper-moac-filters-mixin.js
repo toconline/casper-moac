@@ -91,6 +91,9 @@ export const CasperMoacFiltersMixin = superClass => {
       });
     }
 
+    /**
+     * Overwrites all the existing filters with the ones present in the URL.
+     */
     updateFiltersAccordingToURL () {
       const newFiltersValues = {};
       const searchParams = new URLSearchParams(window.location.search);
