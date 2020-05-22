@@ -1,3 +1,5 @@
+import { CasperMoacFilterTypes } from '../casper-moac-constants.js';
+
 export const CasperMoacHistoryMixin = superClass => {
   return class extends superClass {
     /**
@@ -60,7 +62,7 @@ export const CasperMoacHistoryMixin = superClass => {
      * @param {Object} historyState The current's filter history state settings.
      * @param {String} prettyValueInUrl The value that is in the URL for the current filter.
      */
-    __getValueFromPrettyUrl ({ historyState }, prettyValueInUrl) {
+    __getValueFromPrettyUrl ({ historyState, type }, prettyValueInUrl) {
       if (historyState && historyState.prettyValues) {
         // Find the key which value matches with the parameter present in the URL.
         const filterValue = Object.keys(historyState.prettyValues).find(prettyValue => {
@@ -68,6 +70,13 @@ export const CasperMoacHistoryMixin = superClass => {
         });
 
         if (filterValue) return filterValue;
+      }
+
+      // Split the value that is in the URL to get the range's start and end date.
+      if (type === CasperMoacFilterTypes.CASPER_DATE_RANGE) {
+        const [start, end] = prettyValueInUrl.split(this.__dateRangeUrlSeparator);
+
+        return { start, end };
       }
 
       return prettyValueInUrl;
@@ -79,12 +88,14 @@ export const CasperMoacHistoryMixin = superClass => {
      * @param {Object} historyState The current filter's history state settings.
      * @param {String} value The current filter's value.
      */
-    __getPrettyValueForUrl ({ historyState, value }) {
+    __getPrettyValueForUrl ({ historyState, value, type }) {
       if (historyState
         && !historyState.disabled
         && historyState.prettyValues
         && historyState.prettyValues.hasOwnProperty(value)) {
         return historyState.prettyValues[value];
+      } else if (type === CasperMoacFilterTypes.CASPER_DATE_RANGE) {
+        return `${value.start}${this.__dateRangeUrlSeparator}${value.end}`;
       } else {
         return value;
       }

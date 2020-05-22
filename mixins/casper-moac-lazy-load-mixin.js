@@ -550,11 +550,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
             case CasperMoacOperators.GREATER_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} >= ${filter.value}`;
             // Custom comparisons.
             case CasperMoacOperators.CUSTOM:
+              const replaceRegex = new RegExp(`%{${filterItem.filterKey}}`, 'g');
+
               if (filter.type === CasperMoacFilterTypes.CASPER_DATE_RANGE) {
                 const dateRangeFilter = [];
 
-                if (filter.value.end) dateRangeFilter.push(filter.lazyLoad.fieldEnd.replace(/%{rangeEnd}/g, filter.value.end));
-                if (filter.value.start) dateRangeFilter.push(filter.lazyLoad.fieldStart.replace(/%{rangeStart}/g, filter.value.start));
+                if (filter.value.end) dateRangeFilter.push(filter.lazyLoad.fieldEnd.replace(replaceRegex, filter.value.end));
+                if (filter.value.start) dateRangeFilter.push(filter.lazyLoad.fieldStart.replace(replaceRegex, filter.value.start));
 
                 return dateRangeFilter.join(' AND ');
               }
@@ -569,7 +571,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
                 }
               }
 
-              return customQuery.replace(new RegExp(`%{${filterItem.filterKey}}`, 'g'), filterValue);
+              return customQuery.replace(replaceRegex, filterValue);
           }
         }).join(' AND ');
     }

@@ -447,6 +447,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         observer: '__selectedItemsChanged'
       },
       /**
+       * The character that will be used in the URL to separate the range's start and end date.
+       *
+       * @type {String}
+       */
+      __dateRangeUrlSeparator: {
+        type: String,
+        value: ','
+      },
+      /**
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
        *
        * @type {Boolean}
@@ -1685,34 +1694,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 
   /**
-   * Event listener which is fired when the user clicks on a filter's value in the summary. This will try to move
-   * the filter's overlay for UX purposes (casper-select) or display all the filters focusing the correct one.
-   *
-   * @param {Event} event The event's object.
-   */
-  __displayInlineFilters (filterKey) {
-    const filter = this.filters[filterKey];
-    const filterComponent = this.__getFilterComponent(filterKey);
-
-    switch (filter.type) {
-      case CasperMoacFilterTypes.CASPER_SELECT:
-        filterComponent.opened
-          ? filterComponent.closeDropdown()
-          : filterComponent.openDropdown(this.$.activeFilters);
-        break;
-      case CasperMoacFilterTypes.CASPER_DATE_PICKER:
-        this.__displayAllFilters = true;
-        filterComponent.open();
-        break;
-      case CasperMoacFilterTypes.PAPER_INPUT:
-      case CasperMoacFilterTypes.PAPER_CHECKBOX:
-        this.__displayAllFilters = true;
-        filterComponent.focus();
-        break;
-    }
-  }
-
-  /**
    * This method returns the DOM object that represents the casper-select, paper-input, etc, for a specific filter.
    *
    * @param {String} key The filter's unique identifier.
@@ -1740,9 +1721,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * @param {String | Number | Array | Object} value
    */
   __valueIsNotEmpty (value) {
-    return value && value.constructor.name === 'Array'
-      ? value.length > 0
-      : ![null, undefined, false, ''].includes(value);
+    if (value && value.constructor.name === 'Array') return value.length > 0;
+    if (value && value.constructor.name === 'Object') return Object.keys(value).some(key => ![null, undefined, false, ''].includes(value[key]));
+
+    return ![null, undefined, false, ''].includes(value);
   }
 
   /**

@@ -174,6 +174,25 @@ export const CasperMoacFiltersMixin = superClass => {
     }
 
     /**
+     * This method will compare two different values and return true if they are equal.
+     *
+     * @param {Object} firstValue The first value.
+     * @param {Object} secondValue The second value.
+     */
+    __areBothValuesEqual (firstValue, secondValue) {
+      if (!firstValue && !secondValue) return true;
+      if ((firstValue && !secondValue) || (!firstValue && secondValue)) return false;
+
+      // If they are both objects, compare the number of keys and the keys themselves.
+      if (firstValue.constructor === Object && secondValue.constructor === Object) {
+        return Object.keys(firstValue).length === Object.keys(secondValue) && !Object.keys(firstValue).some(key => firstValue[key] !== secondValue[key]);
+      }
+
+      // By default since we don't deal with arrays, compare them as Strings.
+      return String(firstValue) === String(secondValue);
+    }
+
+    /**
      * Bind event listeners to all the elements used to filter the dataset.
      */
     __bindFiltersEvents () {
@@ -185,8 +204,7 @@ export const CasperMoacFiltersMixin = superClass => {
         if (Object.keys(this.__ignoreFiltersValues).includes(dataset.filter)) {
           const valueToIgnore = this.__ignoreFiltersValues[dataset.filter];
 
-          const filterDidNotChange = String(valueToIgnore) === String(value) || (!this.__valueIsNotEmpty(valueToIgnore) && !this.__valueIsNotEmpty(value));
-          if (filterDidNotChange) return;
+          if (this.__areBothValuesEqual(value, valueToIgnore)) return;
 
           delete this.__ignoreFiltersValues[dataset.filter];
         }
@@ -214,12 +232,9 @@ export const CasperMoacFiltersMixin = superClass => {
         this.filterComponents.forEach(filterComponent => {
           if (filterComponent[this.attachedEventListenersInternalProperty]) return;
 
-          let eventName;
-          switch (filterComponent.nodeName.toLowerCase()) {
-            case 'paper-checkbox': eventName = 'checked-changed'; break;
-            case 'casper-date-range': eventName = 'formatted-value-changed'; break;
-            default: eventName = 'value-changed';
-          }
+          const eventName = filterComponent.nodeName.toLowerCase() === 'paper-checkbox'
+            ? 'checked-changed'
+            : 'value-changed';
 
           filterComponent.addEventListener(eventName, filterChangedCallback);
 
@@ -311,7 +326,10 @@ export const CasperMoacFiltersMixin = superClass => {
         case CasperMoacFilterTypes.CASPER_DATE_RANGE:
           const casperDateRange = this.__getFilterComponent(filterKey);
 
-          return [casperDateRange.formattedValue.start, casperDateRange.formattedValue.end].filter(date => !!date).join(' a ');
+          return [
+            casperDateRange.formattedValue.start,
+            casperDateRange.formattedValue.end
+          ].filter(date => !!date).join(' a ');
         case CasperMoacFilterTypes.CASPER_DATE_PICKER:
           const casperDatePicker = this.__getFilterComponent(filterKey);
 
@@ -426,6 +444,34 @@ export const CasperMoacFiltersMixin = superClass => {
       this.lazyLoad
         ? this.refreshItems()
         : this.__dispatchFilterChangedEvent(Object.keys(resetFiltersValue));
+    }
+
+    /**
+     * Event listener which is fired when the user clicks on a filter's value in the summary. This will try to move
+     * the filter's overlay for UX purposes (casper-select) or display all the filters focusing the correct one.
+     *
+     * @param {String} filterKey The filter's identifier.
+     */
+    __displayInlineFilters (filterKey) {
+      const filter = this.filters[filterKey];
+      const filterComponent = this.__getFilterComponent(filterKey);
+
+      switch (filter.type) {
+        case CasperMoacFilterTypes.CASPER_SELECT:
+          filterComponent.opened
+            ? filterComponent.closeDropdown()
+            : filterComponent.openDropdown(this.$.activeFilters);
+          break;
+        case CasperMoacFilterTypes.CASPER_DATE_PICKER:
+          this.__displayAllFilters = true;
+          filterComponent.open();
+          break;
+        case CasperMoacFilterTypes.PAPER_INPUT:
+        case CasperMoacFilterTypes.PAPER_CHECKBOX:
+          this.__displayAllFilters = true;
+          filterComponent.focus();
+          break;
+      }
     }
   }
 };
