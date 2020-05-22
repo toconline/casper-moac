@@ -74,8 +74,6 @@ export const CasperMoacFiltersMixin = superClass => {
         const filterComponent = this.__getFilterComponent(filterName);
 
         this.__ignoreFiltersValues[filterName] = filterValue;
-        if (displayResetFiltersPill) this.__displayResetFiltersPill = true;
-
         this.filters[filterName].type !== CasperMoacFilterTypes.PAPER_CHECKBOX
           ? filterComponent.value = filterValue
           : filterComponent.checked = filterValue;
@@ -83,6 +81,9 @@ export const CasperMoacFiltersMixin = superClass => {
         if (overrideInitialValues) this.__initialFiltersValues[filterName] = filterValue;
       }
 
+      if (displayResetFiltersPill) {
+        this.__displayResetFiltersPill = true;
+      }
 
       afterNextRender(this, () => {
         this.__renderActiveFilters();
@@ -185,7 +186,7 @@ export const CasperMoacFiltersMixin = superClass => {
 
       // If they are both objects, compare the number of keys and the keys themselves.
       if (firstValue.constructor === Object && secondValue.constructor === Object) {
-        return Object.keys(firstValue).length === Object.keys(secondValue) && !Object.keys(firstValue).some(key => firstValue[key] !== secondValue[key]);
+        return Object.keys(firstValue).length === Object.keys(secondValue).length && !Object.keys(firstValue).some(key => firstValue[key] !== secondValue[key]);
       }
 
       // By default since we don't deal with arrays, compare them as Strings.
@@ -435,9 +436,11 @@ export const CasperMoacFiltersMixin = superClass => {
       const resetFiltersValue = {};
 
       Object.keys(this.filters).forEach(filterKey => {
+        const defaultValue = this.filters[filterKey].type === CasperMoacFilterTypes.CASPER_DATE_RANGE ? { start: '', end: '' } : '';
+
         !this.__initialFiltersValues.hasOwnProperty(filterKey)
-          ? resetFiltersValue[filterKey] = ''
-          : resetFiltersValue[filterKey] = this.__initialFiltersValues[filterKey] || '';
+          ? resetFiltersValue[filterKey] = defaultValue
+          : resetFiltersValue[filterKey] = this.__initialFiltersValues[filterKey] || defaultValue;
       });
 
       this.setFiltersValue(resetFiltersValue, false);
