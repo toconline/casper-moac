@@ -44,8 +44,8 @@ export const CasperMoacHistoryMixin = superClass => {
       });
 
       searchParams.delete(this.freeFilterUrlParameterName);
-      if (this.__lastFreeFilter) {
-        searchParams.set(this.freeFilterUrlParameterName, this.__lastFreeFilter);
+      if (this.freeFilterValue) {
+        searchParams.set(this.freeFilterUrlParameterName, this.freeFilterValue);
       }
 
       const searchParamsText = searchParams.toString();

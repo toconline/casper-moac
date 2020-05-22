@@ -28,7 +28,7 @@ export const CasperMoacLocalStorageMixin = superClass => {
     /**
      * Saves the current filters information into the local storage.
      */
-    __saveFiltersIntoLocalStorage () {
+    __updateLocalStorageWithCurrentFilters () {
       if (!this.localStorageKey) return;
 
       const localStorageFilters = {};

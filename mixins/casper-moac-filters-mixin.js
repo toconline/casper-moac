@@ -63,7 +63,7 @@ export const CasperMoacFiltersMixin = superClass => {
     }
 
     /**
-     * Changes the filters values without automatically firing a request by setting the internal property '__valueChangeLock'.
+     * Changes the filters values without automatically firing a request by setting the internal property '__ignoreFiltersValues'.
      *
      * @param {Object} filterValues The object which contains the new values for each filter.
      * @param {Boolean} displayResetPill This flag states if the reset filters pill should be displayed.
@@ -86,9 +86,27 @@ export const CasperMoacFiltersMixin = superClass => {
 
       afterNextRender(this, () => {
         this.__renderActiveFilters();
-        this.__saveFiltersIntoLocalStorage();
         this.__updateUrlWithCurrentFilters();
+        this.__updateLocalStorageWithCurrentFilters();
       });
+    }
+
+    /**
+     * Overwrites all the existing filters with the ones present in the URL.
+     */
+    updateFiltersAccordingToURL () {
+      const newFiltersValues = {};
+      const searchParams = new URLSearchParams(window.location.search);
+
+      Object.keys(this.filters).forEach(filterKey => {
+        const parameterName = this.__getUrlKeyForFilter(filterKey);
+
+        newFiltersValues[filterKey] = !searchParams.has(parameterName)
+          ? ''
+          : this.__getValueFromPrettyUrl(this.filters[filterKey], searchParams.get(parameterName));
+      });
+
+      this.setFiltersValue(newFiltersValues);
     }
 
     /**
@@ -180,7 +198,7 @@ export const CasperMoacFiltersMixin = superClass => {
 
         this.__renderActiveFilters();
         this.__updateUrlWithCurrentFilters();
-        this.__saveFiltersIntoLocalStorage();
+        this.__updateLocalStorageWithCurrentFilters();
         this.__dispatchFilterChangedEvent(dataset.filter);
       };
 
@@ -360,9 +378,6 @@ export const CasperMoacFiltersMixin = superClass => {
      * @param {Object} event The event's object.
      */
     __freeFilterChanged (event) {
-      // If the user is in the search input and clicks the ArrowDown key, focus the currently active row.
-      if (event && event.code === 'ArrowDown') return this.__focusActiveRow();
-
       !!this.$.filterInput.value.trim()
         ? this.$.filterInputIcon.icon = 'fa-regular:times'
         : this.$.filterInputIcon.icon = 'fa-regular:search';

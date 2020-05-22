@@ -19,18 +19,22 @@ import './sidebar/casper-moac-sidebar.js';
 import './sidebar/casper-moac-sidebar-item.js';
 import './components/casper-moac-pill.js';
 import './components/casper-moac-active-filter.js';
+import { CasperMoacGridMixin } from './mixins/casper-moac-grid-mixin.js';
 import { CasperMoacSortingMixin } from './mixins/casper-moac-sorting-mixin.js';
 import { CasperMoacFiltersMixin } from './mixins/casper-moac-filters-mixin.js';
 import { CasperMoacHistoryMixin } from './mixins/casper-moac-history-mixin.js';
 import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
+import { CasperMoacContextMenuMixin } from './mixins/casper-moac-context-menu-mixin.js';
 import { CasperMoacLocalStorageMixin } from './mixins/casper-moac-local-storage-mixin.js';
 import { CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 
 export class CasperMoac extends CasperMoacLazyLoadMixin(
-  CasperMoacFiltersMixin(
-    CasperMoacSortingMixin(
-      CasperMoacLocalStorageMixin(
-        CasperMoacHistoryMixin(PolymerElement))))) {
+  CasperMoacGridMixin(
+    CasperMoacFiltersMixin(
+      CasperMoacSortingMixin(
+        CasperMoacContextMenuMixin(
+          CasperMoacLocalStorageMixin(
+            CasperMoacHistoryMixin(PolymerElement))))))) {
 
   static get properties () {
     return {
@@ -494,6 +498,24 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
        *
        * @type {Array}
        */
+      __displayResetFiltersPill: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Array that contains the filters which will be mapped and read from the URL.
+       *
+       * @type {Array}
+       */
+      __historyStateFilters: {
+        type: Array,
+        value: []
+      },
+      /**
+       * Array that contains the filters which will be mapped and read from the local storage.
+       *
+       * @type {Array}
+       */
       __localStorageFilters: {
         type: Array,
         value: []
@@ -794,22 +816,36 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           flex-direction: column;
         }
 
-        .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
-          overflow: hidden;
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu {
+          height: 30px;
+          display: none;
+          padding: 0 5px;
+          position: absolute;
+          align-items: center;
+          border-top-left-radius: 30px;
+          border-bottom-left-radius: 30px;
         }
 
-        .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid .context-menu-icon {
-          width: 20px;
-          height: 20px;
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu casper-icon,
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-actions"]::slotted(casper-icon) {
+          width: 25px;
+          height: 25px;
+          padding: 5px;
           border-radius: 50%;
-          display: var(--display-actions-on-hover);
+          box-sizing: border-box;
           color: var(--primary-color);
         }
 
-        .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid .context-menu-icon:hover {
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu casper-icon:hover,
+        .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-actions"]::slotted(casper-icon:not([no-hover-animation]):hover) {
+          z-index: 1;
+          color: white;
           cursor: pointer;
           background-color: var(--primary-color);
-          color: white;
+        }
+
+        .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
+          overflow: hidden;
         }
 
         .main-container vaadin-split-layout .right-side-container .epaper-container {
@@ -979,16 +1015,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                 </template>
 
                 <slot name="grid"></slot>
-
-                <!--Context Menu-->
-                <vaadin-grid-column flex-grow="0" width="40px" text-align="center">
-                  <template is="dom-if" if="[[__displayContextMenu]]">
-                    <template>
-                      <casper-icon class="context-menu-icon" on-click="__openContextMenu" icon="fa-regular:angle-down"></casper-icon>
-                    </template>
-                  </template>
-                </vaadin-grid-column>
               </vaadin-grid>
+
+              <!--Context Menu-->
+              <div id="floating-context-menu">
+                <slot name="floating-context-menu-actions"></slot>
+                <casper-icon on-click="__openContextMenu" icon="fa-regular:angle-down"></casper-icon>
+              </div>
 
               <!--No items placeholder-->
               <template is="dom-if" if="[[__hasNoItems(displayedItems, loading)]]">
@@ -1050,9 +1083,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
     this.__bindSorterEvents();
+    this.__bindVaadinGridEvents();
     this.__bindSearchInputEvents();
     this.__bindContextMenuEvents();
-    this.__monkeyPatchVaadinElements();
+    this.__bindVaadinSplitLayoutEvents();
     this.__stampGridCustomStylesTemplate();
 
     // Observe the multi selection container layout changes and resize if needed.
@@ -1063,6 +1097,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           this.__debounce('__multiSelectionResizeDebouncer', () => this.$['multi-selection-container'].style.height = `${multiSelectionElement.scrollHeight}px`);
         }
       });
+
       multiSelectionElementObserver.observe(multiSelectionElement);
     }
 
@@ -1174,12 +1209,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       ? itemsToRemove = [String(itemsToRemove)]
       : itemsToRemove = itemsToRemove.map(itemToRemove => String(itemToRemove));
 
-    const firstItemToRemoveIndex = Math.min(...itemsToRemove.map(itemToRemove => this.__findItemIndexById(itemToRemove, true)));
-    this.__scrollToItemIfNotVisible(firstItemToRemoveIndex, true);
+    const itemIndex = Math.min(...itemsToRemove.map(itemToRemove => this.__findItemIndexById(itemToRemove, true)));
+    this.__scrollToItemIfNotVisible(this.displayedItems[itemIndex][this.idInternalProperty], true);
 
     afterNextRender(this, () => {
-      const rows = this.$.grid.shadowRoot.querySelectorAll('table tbody tr');
-      const blinkingRows = Array.from(rows).filter(row => itemsToRemove.includes(String(row._item[this.idExternalProperty])));
+      const blinkingRows = this.__getAllTableRows().filter(row => itemsToRemove.includes(String(row._item[this.idExternalProperty])));
 
       // Initiate the blinking animation for the rows.
       blinkingRows.forEach(blinkingRow => {
@@ -1201,31 +1235,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         this.__selectedItems = this.__selectedItems.filter(item => !itemsToRemove.includes(String(item[this.idExternalProperty])));
         this.displayedItems.length === 0
           ? this.activeItem = null
-          : this.activeItem = this.displayedItems[Math.max(0, firstItemToRemoveIndex - 1)];
+          : this.activeItem = this.displayedItems[Math.max(0, itemIndex - 1)];
       }, 1000);
     });
-  }
-
-  /**
-   * This function is used to see if a physical row is totally into view or not.
-   *
-   * @param {Element} row The row's element object.
-   * @param {Number} offset The offset in pixels to apply to the calculations.
-   */
-  isRowIntoView (row, offset = 0) {
-    const rowBoundingClientRect = row.getBoundingClientRect();
-    const gridBoundingClientRect = this.grid.getBoundingClientRect();
-    const gridHeaderHeight = this.grid.shadowRoot.querySelector('thead').getBoundingClientRect().height;
-
-    return parseInt(rowBoundingClientRect.top) >= parseInt(gridBoundingClientRect.top + gridHeaderHeight - offset)
-      && parseInt(rowBoundingClientRect.bottom) <= parseInt(gridBoundingClientRect.bottom + offset);
   }
 
   /**
    * This method forces the vaadin-grid to redraw all its rows.
    */
   forceGridRedraw () {
-    this.grid.clearCache();
+    this.$.grid.clearCache();
     this.__paintGridRows();
   }
 
@@ -1235,15 +1254,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   restampSelectTemplate (filters) {
     if (!filters) return;
 
-    let selectElements;
+    let selectElements = [];
     if (filters.constructor.name === 'String') {
       // Select a single casper-select element.
       selectElements = [this.shadowRoot.querySelector(`casper-select[data-filter="${filters}"]`)];
     } else if (filters.constructor.name === 'Array') {
       // Build a selector that contains all the casper-selects.
-      const selectorQuery = filters.map(filter => `casper-select[data-filter="${filter}"]`);
-
-      selectElements = this.shadowRoot.querySelectorAll(selectorQuery.join(','));
+      selectElements = this.shadowRoot.querySelectorAll(filters.map(filter => `casper-select[data-filter="${filter}"]`).join(','));
     }
 
     selectElements.forEach(selectElement => {
@@ -1394,23 +1411,29 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   /**
    * Scrolls to a specific item if he's not currently visible.
    *
-   * @param {Number | String} itemId The item that should be scrolled to if he's not currently visible.
+   * @param {Number | String} itemId The identifer of the item that should be scrolled to if he's not currently visible.
    */
   __scrollToItemIfNotVisible (itemId, useExternalProperty = false) {
-    const rows = this.grid.shadowRoot.querySelectorAll('table tbody tr');
+    // Find the row which contains a specific item.
+    const row = this.__getAllTableRows().find(row => this.__compareItemWithId(row._item, itemId, useExternalProperty));
 
-    let isRowIntoView = false;
-    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      if (this.__compareItemWithId(rows[rowIndex]._item, itemId, useExternalProperty)) {
-        // Scroll to the item if it's not into view taking into account the grid's internal items.
-        isRowIntoView = this.isRowIntoView(rows[rowIndex]);
-        break;
-      }
+    if (!row || !this.__isRowTotallyInView(row)) {
+      this.$.grid.scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
     }
+  }
 
-    if (!isRowIntoView) {
-      this.grid.scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
-    }
+  /**
+   * This method checks if a specific row is totally visible or not.
+   *
+   * @param {Element} row The row we're trying to figure out if it's in view or not.
+   */
+  __isRowTotallyInView (row) {
+    const rowBoundingRect = row.getBoundingClientRect();
+    const gridBoundingRect = this.shadowRoot.querySelector('.grid-container').getBoundingClientRect();
+    const gridHeaderBoundingRect = this.$.grid.shadowRoot.querySelector('thead').getBoundingClientRect();
+
+    return parseInt(rowBoundingRect.bottom) <= parseInt(gridBoundingRect.bottom) &&
+      parseInt(rowBoundingRect.top) >= parseInt(gridBoundingRect.top + gridHeaderBoundingRect.height);
   }
 
   __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
@@ -1432,63 +1455,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         this.shadowRoot.appendChild(new templateClass().root);
       }
     });
-  }
-
-  /**
-   * As the name suggests, this method applies some monkey-patches to the vaadin elements. Firstly
-   * it adds a scroll event listener to paint the active row due to the grid's constant re-usage of rows.
-   * It also hides the vaadin-split-layout handler if there is no epaper and replaces the existing
-   * vaadin-checkbox header since its current implementation is faulty.
-   */
-  __monkeyPatchVaadinElements () {
-    this.gridScroller.addEventListener('scroll', () => {
-      this.__paintGridRows();
-
-      if (this.__contextMenu && this.__contextMenu.opened) {
-        this.__contextMenu.close();
-      }
-    });
-
-    this.grid.addEventListener('keydown', event => this.__handleGridKeyDownEvents(event));
-    this.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', event => this.__handleGridTreeToggleEvents(event));
-
-    if (!this.hasEpaper) {
-      this.$.splitLayout.$.splitter.style.display = 'none';
-    }
-
-    this.$.splitLayout.addEventListener('splitter-dragend', () => {
-      const headerContainer = this.shadowRoot.querySelector('.header-container');
-
-      afterNextRender(this, () => {
-        headerContainer.offsetWidth < 600
-          ? headerContainer.classList.add('header-container--responsive')
-          : headerContainer.classList.remove('header-container--responsive');
-      })
-    });
-
-    // Fire the initial event to make sure the header container is aligned correctly from the get-go.
-    this.$.splitLayout.dispatchEvent(new CustomEvent('splitter-dragend'));
-
-    if (!this.disableSelection) {
-      afterNextRender(this, () => {
-        this.grid.shadowRoot.querySelectorAll('table thead th').forEach(header => {
-          const selectAllCheckbox = header.querySelector('slot').assignedElements().shift().firstElementChild;
-          if (selectAllCheckbox && selectAllCheckbox.nodeName.toLowerCase() === 'vaadin-checkbox') {
-            // Create a vaadin-checkbox to replace the default one which has bugs.
-            this.__selectAllCheckbox = document.createElement('vaadin-checkbox');
-            this.__selectAllCheckbox.addEventListener('checked-changed', event => {
-              // Lock the vaadin-checkbox event handler to avoid infinite loops.
-              if (this.__selectAllCheckboxLock) return;
-
-              this.__selectedItems = !event.detail.value ? [] : [...this.__selectableItems()];
-            });
-
-            selectAllCheckbox.parentElement.appendChild(this.__selectAllCheckbox);
-            selectAllCheckbox.remove();
-          }
-        });
-      });
-    }
   }
 
   /**
@@ -1535,117 +1501,23 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 
   /**
-   * Bind event listeners to the context menu component if there is any.
+   * Adds the necessary event listeners to the split layout component.
    */
-  __bindContextMenuEvents () {
-    // Check if there is a casper-context-menu.
-    this.__contextMenu = Array.from(this.children).find(child => child.getAttribute('slot') === 'context-menu');
-    this.__displayContextMenu = !!this.__contextMenu;
+  __bindVaadinSplitLayoutEvents () {
+    if (!this.hasEpaper) this.$.splitLayout.$.splitter.style.display = 'none';
 
-    if (!this.__contextMenu) return;
+    this.$.splitLayout.addEventListener('splitter-dragend', () => {
+      const headerContainer = this.shadowRoot.querySelector('.header-container');
 
-    this.__contextMenu.noOverlap = true;
-    this.__contextMenu.dynamicAlign = true;
-    this.__contextMenu.verticalAlign = 'auto';
-    this.__contextMenu.horizontalAlign = 'auto';
-
-    // Hide the context menu when one of its items is clicked.
-    this.__contextMenu.addEventListener('click', event => {
-      if (this.__eventPathContainsNode(event, 'casper-menu-item')) {
-        this.__contextMenu.positionTarget.removeAttribute('style');
-      }
+      afterNextRender(this, () => {
+        headerContainer.offsetWidth < 600
+          ? headerContainer.classList.add('header-container--responsive')
+          : headerContainer.classList.remove('header-container--responsive');
+      })
     });
 
-    this.__contextMenu.addEventListener('opened-changed', event => {
-      if (!event.detail.value) {
-        this.shadowRoot.querySelectorAll('.context-menu-icon').forEach(contextMenuIcon => {
-          contextMenuIcon.removeAttribute('style');
-        });
-      }
-    });
-  }
-
-  /**
-   * Bind event listeners for when the user presses down the Enter or the down / up arrow keys.
-   *
-   * @param {Event} event The event's object.
-   */
-  __handleGridKeyDownEvents (event) {
-    const keyCode = event.key || event.code;
-
-    if (this.displayedItems.length === 0 || !['Enter', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
-
-    // When there are no active items, select the first one.
-    if (!this.__activeItem) {
-      this.__activeItem = this.displayedItems[0];
-    } else {
-      // Find the index of the current active item.
-      const activeItemIndex = this.__findItemIndexById(this.__activeItem[this.idInternalProperty]);
-
-      if (keyCode === 'ArrowUp' && activeItemIndex > 0) {
-        this.__activeItem = this.displayedItems[activeItemIndex - 1];
-      }
-
-      if (keyCode === 'ArrowDown' && activeItemIndex + 1 < this.displayedItems.length) {
-        this.__activeItem = this.displayedItems[activeItemIndex + 1];
-      }
-
-      if (keyCode === 'ArrowRight') {
-        this.__focusActiveRow();
-        return this.expandItem(this.activeItem);
-      }
-
-      if (keyCode === 'ArrowLeft') {
-        this.__focusActiveRow();
-        return this.collapseItem(this.activeItem);
-      }
-
-      if (keyCode === 'Enter' && !this.disableSelection && !this.__activeItem[this.disableSelectionInternalProperty]) {
-        !this.__selectedItems.find(selectedItem => this.__compareItems(selectedItem, this.__activeItem))
-          ? this.$.grid.selectItem(this.__activeItem)
-          : this.$.grid.deselectItem(this.__activeItem);
-
-        // The remaining function code only concerns the arrow navigation.
-        return;
-      }
-    }
-
-    this.__paintGridRows();
-
-    // If the active item changed, debounce the active item change.
-    if (!this.__scheduleActiveItem || !this.__compareItems(this.__activeItem, this.__scheduleActiveItem)) {
-      // This property is used to avoid delaying infinitely activating the same item which is caused when the user
-      // maintains the up / down arrows after reaching the first / last result in the table.
-      this.__scheduleActiveItem = { ...this.__activeItem };
-
-      // Only debounce when the event is repeated, meaning the user keeps the key pressed or if the activeItemDebounce was specifically set.
-      if (event.repeat || this.activeItemDebounce) {
-        this.__debounce('__activeItemDebouncer', () => {
-          this.activeItem = this.__scheduleActiveItem;
-        }, this.activeItemDebounce || 300);
-      } else {
-        this.__cancelDebounce('__activeItemDebouncer');
-        this.activeItem = this.__scheduleActiveItem;
-      }
-    }
-  }
-
-  /**
-   * This method handles the click on the casper-moac-tree-toggle components and expands / collapses the row.
-   *
-   * @param {Event} event The event's object.
-   */
-  __handleGridTreeToggleEvents (event) {
-    const parentItem = this.activeItem = this.grid.getEventContext(event).item;
-
-    const treeToggleComponent = event.composedPath().shift();
-    treeToggleComponent.disabled = true;
-
-    event.detail.expanded
-      ? this.expandItem(parentItem)
-      : this.collapseItem(parentItem);
-
-    treeToggleComponent.disabled = false;
+    // Fire the initial event to make sure the header container is aligned correctly from the get-go.
+    this.$.splitLayout.dispatchEvent(new CustomEvent('splitter-dragend'));
   }
 
   /**
@@ -1683,7 +1555,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * @param {Object} previousActiveItem The previous vaadin-grid activeItem.
    */
   __activeItemChanged (newActiveItem, previousActiveItem) {
-    if (!newActiveItem && previousActiveItem && this.forceActiveItem && this.displayedItems && this.displayedItems.length > 0) {
+    if (!newActiveItem && previousActiveItem && this.displayedItems && this.displayedItems.length > 0) {
       this.activeItem = previousActiveItem;
     }
 
@@ -1880,31 +1752,22 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   __paintGridRows () {
     afterNextRender(this, () => {
+      this.__paintFloatingContextMenu();
+
       this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
         const currentRowItem = this.displayedItems.find(item => this.__compareItems(row._item, item));
 
         if (!currentRowItem || row.hasAttribute('blink')) return;
 
-        const isRowActive = this.__activeItem && this.__compareItems(currentRowItem, this.__activeItem);
-        const isRowBackgroundColored = !!currentRowItem[this.rowBackgroundColorInternalProperty];
-
+        const rowBackgroundColor = this.__getRowBackgroundColor(currentRowItem);
         Array.from(row.children).forEach(cell => {
+          cell.style.backgroundImage = 'none';
+          cell.style.backgroundColor = rowBackgroundColor;
+
           const cellContents = cell.firstElementChild.assignedElements().shift();
 
-          // Check if the row has no active animation and is either active or colored.
-          if (isRowActive || isRowBackgroundColored) {
-            // The active background color has priority.
-            isRowActive
-              ? cell.style.backgroundColor = 'var(--casper-moac-active-item-background-color)'
-              : cell.style.backgroundColor = currentRowItem[this.rowBackgroundColorInternalProperty];
-          } else {
-            this.disableRowStripes || currentRowItem[this.idInternalProperty] % 2 === 0
-              ? cell.style.backgroundColor = 'white'
-              : cell.style.backgroundColor = 'var(--casper-moac-row-stripe-color)';
-          }
-
           // Remove the vaadin-checkbox element if this items does not support selection.
-          if (!this.disableSelection) {
+          if (!this.disableSelection && cellContents) {
             const vaadinCheckbox = cellContents.querySelector('vaadin-checkbox');
             if (vaadinCheckbox) {
               !currentRowItem[this.disableSelectionInternalProperty]
@@ -1918,27 +1781,23 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 
   /**
-   * This method focuses the row that is currently active to enable the ArrowDown / ArrowUp navigation.
+   * This method returns the row background color taking into account the item associated with it.
+   *
+   * @param {Object} item The current item whose row background color we want to know.
    */
-  __focusActiveRow () {
-    if (!this.activeItem) return;
-
-    const vaadinGridTable = this.$.grid.shadowRoot.querySelector('table');
-    const vaadinGridTableRows = vaadinGridTable.querySelectorAll('tbody tr');
-
-    // This line is necessary since when clicking the ArrowDown, the grid would slightly scroll down.
-    vaadinGridTable.style.overflow = 'hidden';
-
-    const vaadinGridTableActiveRow = Array.from(vaadinGridTableRows).find(row => this.__compareItems(row._item, this.activeItem));
-    if (vaadinGridTableActiveRow) {
-      vaadinGridTableActiveRow.firstElementChild.focus();
-      afterNextRender(this, () => { vaadinGridTable.style.overflow = ''; });
-      return;
+  __getRowBackgroundColor (item) {
+    // This means the row is currently active.
+    if (this.__activeItem && this.__compareItems(item, this.__activeItem)) {
+      return 'var(--light-primary-color)';
     }
 
-    // This means that the active row is not currently visible.
-    this.__scrollToItemIfNotVisible(this.activeItem);
-    this.__focusActiveRow();
+    // This means the row has a specific color.
+    if (!!item[this.rowBackgroundColorInternalProperty]) {
+      return item[this.rowBackgroundColorInternalProperty];
+    }
+
+    // The fallback scenario is to apply white or the striped colors.
+    return this.disableRowStripes || item[this.idInternalProperty] % 2 === 0 ? 'white' : 'var(--casper-moac-row-stripe-color)';
   }
 
   /**
@@ -1979,17 +1838,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * @param {Event} event
    */
   __openContextMenu (event) {
-    const contextMenuItem = this.$.grid.getEventContext(event).item;
-
     this.__contextMenu.positionTarget = event.target;
-    this.__contextMenu.close();
-
-    afterNextRender(this, () => {
-      this.__contextMenu.positionTarget.style.display = 'block';
-      this.__contextMenu.refit();
-      this.__contextMenu.open();
-      this.activeItem = contextMenuItem;
-    });
+    this.__contextMenu.positionTarget.style.display = 'block';
+    this.__contextMenu.refit();
+    this.__contextMenu.open();
   }
 
   /**
@@ -2117,7 +1969,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
   /**
    *
-   * @param {Object} item The item which internal / external idenifier will be used for comparison.
+   * @param {Object} item The item which internal / external identifier will be used for comparison.
    * @param {String | Number} itemId The item's identifier that we'll be used for comparison.
    * @param {Boolean} useExternalProperty This flag states which identifier should be used - internal ou external.
    */
@@ -2129,7 +1981,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
   /**
    *
-   * @param {Object} item The item which internal / external idenifier will be used for comparison.
+   * @param {Object} item The item which internal / external identifier will be used for comparison.
    * @param {String | Number} itemIds The items identifiers that we'll be used for comparison.
    * @param {Boolean} useExternalProperty This flag states which identifier should be used - internal ou external.
    */
