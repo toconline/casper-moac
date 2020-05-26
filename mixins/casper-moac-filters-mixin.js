@@ -464,6 +464,10 @@ export const CasperMoacFiltersMixin = superClass => {
           this.__displayAllFilters = true;
           filterComponent.open();
           break;
+        case CasperMoacFilterTypes.CASPER_DATE_RANGE:
+          this.__displayAllFilters = true;
+          filterComponent.openStartDatePicker();
+          break;
         case CasperMoacFilterTypes.PAPER_INPUT:
         case CasperMoacFilterTypes.PAPER_CHECKBOX:
           this.__displayAllFilters = true;
