@@ -513,12 +513,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       return this.__filters
         .filter(filterItem =>
-          this.__valueIsNotEmpty(filterItem.filter.value)
-          && filterItem.filter.lazyLoad
-          && filterItem.filter.lazyLoad.operator
-          && !filterItem.filter.lazyLoad.disabled
-          && (filterItem.filter.lazyLoad.field || filterItem.filter.lazyLoad.operator === CasperMoacOperators.CUSTOM)
-        )
+          filterItem.filter.lazyLoad &&
+          filterItem.filter.lazyLoad.operator &&
+          !filterItem.filter.lazyLoad.disabled &&
+          this.__valueIsNotEmpty(filterItem.filter.value) &&
+          (filterItem.filter.lazyLoad.field || (filterItem.filter.lazyLoad.fieldStart && filterItem.filter.lazyLoad.fieldEnd)))
         .map(filterItem => {
           const filter = filterItem.filter;
           const filterValue = filter.value.toString().trim().replace("'", "''");
@@ -551,12 +550,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
             // Custom comparisons.
             case CasperMoacOperators.CUSTOM:
               const replaceRegex = new RegExp(`%{${filterItem.filterKey}}`, 'g');
+              const filterComponent = this.__getFilterComponent(filterItem.filterKey);
 
               if (filter.type === CasperMoacFilterTypes.CASPER_DATE_RANGE) {
                 const dateRangeFilter = [];
 
-                if (filter.value.end) dateRangeFilter.push(filter.lazyLoad.fieldEnd.replace(replaceRegex, filter.value.end));
-                if (filter.value.start) dateRangeFilter.push(filter.lazyLoad.fieldStart.replace(replaceRegex, filter.value.start));
+                if (filterComponent.endDate) dateRangeFilter.push(filter.lazyLoad.fieldEnd.replace(replaceRegex, filterComponent.endDate));
+                if (filterComponent.startDate) dateRangeFilter.push(filter.lazyLoad.fieldStart.replace(replaceRegex, filterComponent.startDate));
 
                 return dateRangeFilter.join(' AND ');
               }
@@ -565,9 +565,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
               // Only allow custom queries per value in single-selection casper-select based filters.
               if (filter.type === CasperMoacFilterTypes.CASPER_SELECT && !filter.inputOptions.multiSelection) {
-                const casperSelect = this.__getFilterComponent(filterItem.filterKey);
-                if (casperSelect.selectedItems[this.resourceCustomQueryKey]) {
-                  customQuery = casperSelect.selectedItems[this.resourceCustomQueryKey];
+                if (filterComponent.selectedItems[this.resourceCustomQueryKey]) {
+                  customQuery = filterComponent.selectedItems[this.resourceCustomQueryKey];
                 }
               }
 

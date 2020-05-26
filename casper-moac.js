@@ -357,7 +357,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
        *
        * @type {Number}
        */
-      leftSideMinimumWidth: Number,
+      leftSideMinimumWidth: {
+        type: Number,
+        value: 25
+      },
       /**
        * Boolean that toggles the paper-spinner when the grid is loading items. This was required since the vaadin-grid one
        * is readoOnly.
@@ -447,13 +450,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         observer: '__selectedItemsChanged'
       },
       /**
-       * The character that will be used in the URL to separate the range's start and end date.
+       * This property is used to mark the range's start and end fields as not required.
        *
-       * @type {String}
+       * @type {Boolean}
        */
-      __dateRangeUrlSeparator: {
-        type: String,
-        value: ','
+      __dateRangeFieldsNotRequired: {
+        type: Boolean,
+        value: false
       },
       /**
        * Whether to display or not all the filters components (casper-select / paper-input / casper-date-picker).
@@ -818,9 +821,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         }
 
         .main-container vaadin-split-layout .left-side-container .grid-container {
-          min-height: 100px;
           flex-grow: 1;
           display: flex;
+          flex-basis: 250px;
           position: relative;
           flex-direction: column;
         }
@@ -955,7 +958,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                       <casper-date-range
                         data-filter$="[[item.filterKey]]"
                         value="{{item.filter.value}}"
-                        input-placeholder="[[item.filter.inputOptions.label]]">
+                        end-date-required="[[__dateRangeFieldsNotRequired]]"
+                        start-date-required="[[__dateRangeFieldsNotRequired]]"
+                        end-date-placeholder="[[item.filter.inputOptions.endDatePlaceholder]]"
+                        start-date-placeholder="[[item.filter.inputOptions.startDatePlaceholder]]">
                       </casper-date-range>
                     </template>
 
@@ -1140,8 +1146,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       itemsToAdd.forEach(item => this.resourceFormatter.call(this.page || {}, item));
     }
 
-    const rootItems = itemsToAdd.filter(itemToAdd => !this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty]));
-    const childItems = itemsToAdd.filter(itemToAdd => this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty]));
+    const rootItems = itemsToAdd.filter(itemToAdd => !!itemToAdd[this.parentExternalProperty]);
+    const childItems = itemsToAdd.filter(itemToAdd => !itemToAdd[this.parentExternalProperty]);
 
     let displayedItems = this.displayedItems;
     displayedItems = this.__addRootItems(rootItems, displayedItems, afterItemId);
@@ -1715,14 +1721,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 
   /**
-   * This method checks if the filter value is be empty since zeroes in some occasions
+   * This method checks if the filter's value is be empty since zeroes in some occasions
    * might be used as actual values and they should not be disregarded.
    *
-   * @param {String | Number | Array | Object} value
+   * @param {Object} value The value we're checking.
    */
   __valueIsNotEmpty (value) {
+    const emptyValues = [null, undefined, false, ''];
+
+    // This checks if the value is an array and contains any element.
     if (value && value.constructor.name === 'Array') return value.length > 0;
-    if (value && value.constructor.name === 'Object') return Object.keys(value).some(key => ![null, undefined, false, ''].includes(value[key]));
+    if (value && value.constructor.name === 'Object') return Object.keys(value).some(key => !emptyValues.includes(key));
 
     return ![null, undefined, false, ''].includes(value);
   }

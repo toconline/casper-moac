@@ -72,13 +72,6 @@ export const CasperMoacHistoryMixin = superClass => {
         if (filterValue) return filterValue;
       }
 
-      // Split the value that is in the URL to get the range's start and end date.
-      if (type === CasperMoacFilterTypes.CASPER_DATE_RANGE) {
-        const [start, end] = prettyValueInUrl.split(this.__dateRangeUrlSeparator);
-
-        return { start, end };
-      }
-
       return prettyValueInUrl;
     }
 
@@ -94,8 +87,6 @@ export const CasperMoacHistoryMixin = superClass => {
         && historyState.prettyValues
         && historyState.prettyValues.hasOwnProperty(value)) {
         return historyState.prettyValues[value];
-      } else if (type === CasperMoacFilterTypes.CASPER_DATE_RANGE) {
-        return `${value.start}${this.__dateRangeUrlSeparator}${value.end}`;
       } else {
         return value;
       }

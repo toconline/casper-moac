@@ -126,16 +126,10 @@ export const CasperMoacFiltersMixin = superClass => {
       const localStorageFilters = this.__retrieveFiltersFromLocalStorage();
 
       // Transform the filters object into an array to use in a dom-repeat.
-      this.__filters = Object.keys(filters).map(filterKey => {
-        const filterSettings = {
-          filterKey: filterKey,
-          filter: this.filters[filterKey]
-        };
-
-        let filterValue = filterSettings.filter.value;
-
+      this.__filters = Object.entries(filters).map(([filterKey, filter]) => {
         // Save the initial value provided by the developer.
-        this.__initialFiltersValues[filterKey] = filterSettings.filter.value;
+        let filterValue = filter.value;
+        this.__initialFiltersValues[filterKey] = filterValue;
 
         // Override the filter's default value if it's present in the local storage.
         if (this.__localStorageFilters.includes(filterKey) && localStorageFilters.hasOwnProperty(filterKey)) {
@@ -146,20 +140,23 @@ export const CasperMoacFiltersMixin = superClass => {
         if (this.__historyStateFilters.includes(filterKey)) {
           const parameterName = this.__getUrlKeyForFilter(filterKey);
           if (searchParams.has(parameterName)) {
-            filterValue = this.__getValueFromPrettyUrl(filterSettings.filter, searchParams.get(parameterName));
+            filterValue = this.__getValueFromPrettyUrl(filter, searchParams.get(parameterName));
           }
         }
 
+        // Save the initial value and ignore it down later to avoid multiple requests because of components initialization.
         if (this.__valueIsNotEmpty(filterValue)) {
           this.__ignoreFiltersValues[filterKey] = filterValue;
         }
 
-        if ((filterValue || this.__initialFiltersValues[filterKey]) && String(filterValue) !== String(this.__initialFiltersValues[filterKey])) {
+        // If this condition returns true, it means either the local storage or the URL overwrote the initial value passed by the developer.
+        if ((filterValue || this.__initialFiltersValues[filterKey]) && !this.__areBothValuesEqual(filterValue, this.__initialFiltersValues[filterKey])) {
           this.__displayResetFiltersPill = true;
         }
 
-        filterSettings.filter.value = filterValue;
-        return filterSettings;
+        filter.value = filterValue;
+
+        return { filterKey, filter };
       });
 
       // Since we already have all the values ready, filter the items.
@@ -203,9 +200,8 @@ export const CasperMoacFiltersMixin = superClass => {
 
         // This validation makes sure we're not firing requests for already fetched filters during the initialization process.
         if (Object.keys(this.__ignoreFiltersValues).includes(dataset.filter)) {
-          const valueToIgnore = this.__ignoreFiltersValues[dataset.filter];
-
-          if (this.__areBothValuesEqual(value, valueToIgnore)) return;
+          // Compare the new value with the one we're trying to ignore.
+          if (this.__areBothValuesEqual(value, this.__ignoreFiltersValues[dataset.filter])) return;
 
           delete this.__ignoreFiltersValues[dataset.filter];
         }
@@ -231,6 +227,7 @@ export const CasperMoacFiltersMixin = superClass => {
         `));
 
         this.filterComponents.forEach(filterComponent => {
+          // Check if the events were already attached previously.
           if (filterComponent[this.attachedEventListenersInternalProperty]) return;
 
           const eventName = filterComponent.nodeName.toLowerCase() === 'paper-checkbox'
@@ -436,11 +433,9 @@ export const CasperMoacFiltersMixin = superClass => {
       const resetFiltersValue = {};
 
       Object.keys(this.filters).forEach(filterKey => {
-        const defaultValue = this.filters[filterKey].type === CasperMoacFilterTypes.CASPER_DATE_RANGE ? { start: '', end: '' } : '';
-
         !this.__initialFiltersValues.hasOwnProperty(filterKey)
-          ? resetFiltersValue[filterKey] = defaultValue
-          : resetFiltersValue[filterKey] = this.__initialFiltersValues[filterKey] || defaultValue;
+          ? resetFiltersValue[filterKey] = ''
+          : resetFiltersValue[filterKey] = this.__initialFiltersValues[filterKey] || '';
       });
 
       this.setFiltersValue(resetFiltersValue, false);
