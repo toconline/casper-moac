@@ -1137,8 +1137,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       itemsToAdd.forEach(item => this.resourceFormatter.call(this.page || {}, item));
     }
 
-    const rootItems = itemsToAdd.filter(itemToAdd => !itemToAdd[this.parentExternalProperty]);
-    const childItems = itemsToAdd.filter(itemToAdd => !!itemToAdd[this.parentExternalProperty]);
+    const rootItems = itemsToAdd.filter(itemToAdd => !this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty]));
+    const childItems = itemsToAdd.filter(itemToAdd => this.__valueIsNotEmpty(itemToAdd[this.parentExternalProperty]));
 
     let displayedItems = this.displayedItems;
     displayedItems = this.__addRootItems(rootItems, displayedItems, afterItemId);
