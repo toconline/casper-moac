@@ -1752,9 +1752,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           if (!this.disableSelection && cellContents) {
             const vaadinCheckbox = cellContents.querySelector('vaadin-checkbox');
             if (vaadinCheckbox) {
-              !currentRowItem[this.disableSelectionInternalProperty]
-                ? vaadinCheckbox.style.display = ''
-                : vaadinCheckbox.style.display = 'none';
+              if (!currentRowItem[this.disableSelectionInternalProperty]) {
+                vaadinCheckbox.disabled = false;
+                vaadinCheckbox.style.display = '';
+              } else {
+                vaadinCheckbox.disabled = true;
+                vaadinCheckbox.style.display = 'none';
+              }
             }
           }
         });
