@@ -514,10 +514,10 @@ export const CasperMoacLazyLoadMixin = superClass => {
       return this.__filters
         .filter(filterItem =>
           filterItem.filter.lazyLoad &&
+          filterItem.filter.lazyLoad.field &&
           filterItem.filter.lazyLoad.operator &&
           !filterItem.filter.lazyLoad.disabled &&
-          this.__valueIsNotEmpty(filterItem.filter.value) &&
-          (filterItem.filter.lazyLoad.field || (filterItem.filter.lazyLoad.fieldStart && filterItem.filter.lazyLoad.fieldEnd)))
+          this.__valueIsNotEmpty(filterItem.filter.value))
         .map(filterItem => {
           const filter = filterItem.filter;
           const filterValue = filter.value.toString().trim().replace("'", "''");
@@ -536,6 +536,17 @@ export const CasperMoacLazyLoadMixin = superClass => {
               return filter.lazyLoad.operator === CasperMoacOperators.IN
                 ? `${filter.lazyLoad.field} IN (${escapedFilterValue})`
                 : `${filter.lazyLoad.field} NOT IN (${escapedFilterValue})`;
+            // Date comparisons.
+            case CasperMoacOperators.DATE_RANGE:
+              const filterComponent = this.__getFilterComponent(filterItem.filterKey);
+
+              if (filterComponent.startDate && filterComponent.endDate) {
+                return `${filter.lazyLoad.field} BETWEEN '${filterComponent.startDate}' AND '${filterComponent.endDate}'`;
+              } else if (filterComponent.startDate) {
+                return `${filter.lazyLoad.field} >= '${filterComponent.startDate}'`;
+              } else if (filterComponent.endDate) {
+                return `${filter.lazyLoad.field} <= '${filterComponent.endDate}'`;
+              }
             // String comparisons.
             case CasperMoacOperators.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${filterValue}%'`;
             case CasperMoacOperators.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${filterValue}'`;
@@ -549,22 +560,12 @@ export const CasperMoacLazyLoadMixin = superClass => {
             case CasperMoacOperators.GREATER_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} >= ${filter.value}`;
             // Custom comparisons.
             case CasperMoacOperators.CUSTOM:
-              const replaceRegex = new RegExp(`%{${filterItem.filterKey}}`, 'g');
-              const filterComponent = this.__getFilterComponent(filterItem.filterKey);
-
-              if (filter.type === CasperMoacFilterTypes.CASPER_DATE_RANGE) {
-                const dateRangeFilter = [];
-
-                if (filterComponent.endDate) dateRangeFilter.push(filter.lazyLoad.fieldEnd.replace(replaceRegex, filterComponent.endDate));
-                if (filterComponent.startDate) dateRangeFilter.push(filter.lazyLoad.fieldStart.replace(replaceRegex, filterComponent.startDate));
-
-                return dateRangeFilter.join(' AND ');
-              }
-
               let customQuery = filter.lazyLoad.field;
+              const replaceRegex = new RegExp(`%{${filterItem.filterKey}}`, 'g');
 
               // Only allow custom queries per value in single-selection casper-select based filters.
               if (filter.type === CasperMoacFilterTypes.CASPER_SELECT && !filter.inputOptions.multiSelection) {
+                const filterComponent = this.__getFilterComponent(filterItem.filterKey);
                 if (filterComponent.selectedItems[this.resourceCustomQueryKey]) {
                   customQuery = filterComponent.selectedItems[this.resourceCustomQueryKey];
                 }
