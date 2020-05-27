@@ -324,10 +324,13 @@ export const CasperMoacFiltersMixin = superClass => {
         case CasperMoacFilterTypes.CASPER_DATE_RANGE:
           const casperDateRange = this.__getFilterComponent(filterKey);
 
-          return [
-            casperDateRange.formattedValue.start,
-            casperDateRange.formattedValue.end
-          ].filter(date => !!date).join(' a ');
+          if (casperDateRange.formattedStartDate && casperDateRange.formattedEndDate) {
+            return `Desde ${casperDateRange.formattedStartDate} até ${casperDateRange.formattedEndDate}`;
+          } else if (casperDateRange.formattedStartDate) {
+            return `Desde ${casperDateRange.formattedStartDate}`;
+          } else if (casperDateRange.formattedEndDate) {
+            return `Até ${casperDateRange.formattedEndDate}`;
+          }
         case CasperMoacFilterTypes.CASPER_DATE_PICKER:
           const casperDatePicker = this.__getFilterComponent(filterKey);
 
