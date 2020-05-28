@@ -18,6 +18,7 @@ export const CasperMoacOperators = {
   EXACT_MATCH: 'EXACT_MATCH',
   DOES_NOT_CONTAIN: 'DOES_NOT_CONTAIN',
   // Numeric comparisons.
+  EQUALS: 'EQUALS',
   LESS_THAN: 'LESS_THAN',
   GREATER_THAN: 'GREATER_THAN',
   LESS_THAN_OR_EQUAL_TO: 'LESS_THAN_OR_EQUAL_TO',

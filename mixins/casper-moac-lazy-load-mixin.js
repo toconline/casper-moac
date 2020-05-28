@@ -48,6 +48,15 @@ export const CasperMoacLazyLoadMixin = superClass => {
           type: String,
         },
         /**
+         * List of attributes that will be used with the free filter value.
+         *
+         * @type {Array}
+         */
+        resourceFilterAttributes: {
+          type: Array,
+          value: []
+        },
+        /**
          * URL parameter to filter the results by matching a substring with a specific attribute.
          *
          * @type {String}
@@ -554,6 +563,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
             case CasperMoacOperators.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${filterValue}% '`;
             case CasperMoacOperators.DOES_NOT_CONTAIN: return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${filterValue}% '`;
             // Numeric comparisons.
+            case CasperMoacOperators.EQUALS: return `${filter.lazyLoad.field} = ${filter.value}`;
             case CasperMoacOperators.LESS_THAN: return `${filter.lazyLoad.field} < ${filter.value}`;
             case CasperMoacOperators.GREATER_THAN: return `${filter.lazyLoad.field} > ${filter.value}`;
             case CasperMoacOperators.LESS_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} <= ${filter.value}`;
