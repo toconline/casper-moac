@@ -20,9 +20,9 @@ export const CasperMoacSortingMixin = superClass => {
         sorterColumn.addEventListener('direction-changed', event => {
           const sorter = event.target;
 
-          // Check if we are listening to an event for a sorter that was already handled during initialization.
-          if (this.__initialSorters.includes(sorter)) {
-            this.__initialSorters = this.__initialSorters.filter(initialSorter => initialSorter !== sorter);
+          // The sorters with the default null value for direction don't need to execute this code and the other ones will be handled appropriately.
+          if (!sorter.__doNotIgnoreDirectionChanges) {
+            sorter.__doNotIgnoreDirectionChanges = true;
             return;
           }
 
@@ -57,7 +57,7 @@ export const CasperMoacSortingMixin = superClass => {
      */
     __guaranteeInitialSortersOrder () {
       // Guarantee the initial order is applied.
-      this.__activeSorters = this.__initialSorters = this.__sorters
+      this.__activeSorters = this.__sorters
         .filter(sorter => !!sorter.direction)
         .sort((previousSorter, nextSorter) => {
           const nextSorterOrder = !isNaN(nextSorter.sortOrder) ? nextSorter.sortOrder : Infinity;
