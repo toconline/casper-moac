@@ -21,7 +21,10 @@ export const CasperMoacSortingMixin = superClass => {
           const sorter = event.target;
 
           // Check if we are listening to an event for a sorter that was already handled during initialization.
-          if (this.__initialSorters.includes(sorter)) return this.__initialSorters.filter(initialSorter => initialSorter !== sorter);
+          if (this.__initialSorters.includes(sorter)) {
+            this.__initialSorters = this.__initialSorters.filter(initialSorter => initialSorter !== sorter);
+            return;
+          }
 
           const existingSorterIndex = this.__activeSorters.findIndex(activeSorter => activeSorter === sorter);
           if (existingSorterIndex === -1 && !!sorter.direction) {
