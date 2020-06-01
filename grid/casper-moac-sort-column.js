@@ -30,8 +30,7 @@ class CasperMoacSortColumn extends GridColumnElement {
        */
       direction: {
         type: String,
-        notify: true,
-        value: null
+        notify: true
       }
     }
   }

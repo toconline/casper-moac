@@ -14,9 +14,14 @@ export const CasperMoacSortingMixin = superClass => {
         ...this.shadowRoot.querySelector('slot[name="grid"]').assignedElements().filter(assignedElement => assignedElement.nodeName.toLowerCase() === 'casper-moac-sort-column'),
       ];
 
+      this.__guaranteeInitialSortersOrder();
+
       this.__sorters.forEach(sorterColumn => {
         sorterColumn.addEventListener('direction-changed', event => {
           const sorter = event.target;
+
+          // Check if we are listening to an event for a sorter that was already handled during initialization.
+          if (this.__initialSorters.includes(sorter)) return this.__initialSorters.filter(initialSorter => initialSorter !== sorter);
 
           const existingSorterIndex = this.__activeSorters.findIndex(activeSorter => activeSorter === sorter);
           if (existingSorterIndex === -1 && !!sorter.direction) {
@@ -42,6 +47,29 @@ export const CasperMoacSortingMixin = superClass => {
             : this.__filterLazyLoadItems();
         });
       });
+    }
+
+    /**
+     * This method makes sure that the sorters respect the columns initial sort order.
+     */
+    __guaranteeInitialSortersOrder () {
+      // Guarantee the initial order is applied.
+      this.__activeSorters = this.__initialSorters = this.__sorters
+        .filter(sorter => !!sorter.direction)
+        .sort((previousSorter, nextSorter) => {
+          const nextSorterOrder = !isNaN(nextSorter.sortOrder) ? nextSorter.sortOrder : Infinity;
+          const previousSorterOrder = !isNaN(previousSorter.sortOrder) ? previousSorter.sortOrder : Infinity;
+
+          if (previousSorterOrder < nextSorterOrder) return -1;
+          if (previousSorterOrder > nextSorterOrder) return 1;
+          return 0;
+        })
+        .map((sorter, sorterIndex) => {
+          sorter.sortOrder = sorterIndex + 1;
+          return sorter;
+        });
+
+      this.__hasActiveSorters = this.__activeSorters.length > 0;
     }
 
     /**
