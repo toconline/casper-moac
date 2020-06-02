@@ -459,7 +459,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       // Sort by ascending or descending.
       if (this.__activeSorters.length > 0) {
-        const sortParameters = this.__activeSorters.map(sorter => sorter.direction === CasperMoacSortDirections.ASCENDING ? sorter.path : `-${sorter.path}`);
+        let sortParameters = this.__activeSorters.map(sorter => sorter.direction === CasperMoacSortDirections.ASCENDING ? sorter.path : `-${sorter.path}`);
+        sortParameters = [...sortParameters, `-${this.idExternalProperty}`];
+
         resourceUrlParams = [...resourceUrlParams, `${this.resourceSortParam}=${sortParameters.join(',')}`];
       }
 
