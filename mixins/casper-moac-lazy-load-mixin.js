@@ -174,6 +174,17 @@ export const CasperMoacLazyLoadMixin = superClass => {
       return await this.__fetchRequest(this.__buildResourceUrlForAddOrUpdate(itemsToFetch, filters));
     }
 
+    upsertItemFromAPI (itemsToUpsert, afterItemId, staleDataset = true, hideSpinner = false) {
+      // Cast the object as an array to avoid ternaries when upserting the new item(s).
+      if (itemsToUpsert.constructor.name === 'Object') itemsToUpsert = [itemsToUpsert];
+
+      itemsToUpsert.forEach(itemToUpsert => {
+        this.__findItemIndexById(itemToUpsert, true) !== -1
+          ? this.updateItemFromAPI(itemToUpsert, staleDataset, hideSpinner)
+          : this.addItemFromAPI(itemToUpsert, afterItemId, staleDataset, hideSpinner);
+      });
+    }
+
     /**
      * This method will fetch specific items from the JSON API and then add them to the vaadin-grid.
      *
@@ -424,7 +435,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         let errorMessage = 'Ocorreu um erro a carregar os dados.';
 
         if (exception.errors && exception.errors.constructor === Array && exception.errors.length >= 1) {
-          if ( exception.errors[0].code ===  'FORBIDDEN_BY_GATEKEEPER') {
+          if (exception.errors[0].code === 'FORBIDDEN_BY_GATEKEEPER') {
             errorMessage = 'Não tem permissão para executar esta operação';
           } else {
             errorMessage = exception.errors[0].detail;
