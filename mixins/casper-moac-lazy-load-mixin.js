@@ -174,15 +174,29 @@ export const CasperMoacLazyLoadMixin = superClass => {
       return await this.__fetchRequest(this.__buildResourceUrlForAddOrUpdate(itemsToFetch, filters));
     }
 
+    /**
+     * This method will fetch specific items from the JSON API and then add them to the vaadin-grid if they don't exist or update otherwise.
+     *
+     * @param {Array | String | Number} itemsToUpsert The list of item identifiers that will be upserted.
+     * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
+     * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
+     * @param {Boolean} hideSpinner If this flag is set to true, the request that will be fired from this method call won't display the spinner.
+     */
     upsertItemFromAPI (itemsToUpsert, afterItemId, staleDataset = true, hideSpinner = false) {
       // Cast the object as an array to avoid ternaries when upserting the new item(s).
-      if (itemsToUpsert.constructor.name === 'Object') itemsToUpsert = [itemsToUpsert];
+      if (itemsToUpsert.constructor.name !== 'Array') itemsToUpsert = [itemsToUpsert];
+
+      const itemsToAdd = [];
+      const itemsToUpdate = [];
 
       itemsToUpsert.forEach(itemToUpsert => {
-        this.__findItemIndexById(itemToUpsert, true) !== -1
-          ? this.updateItemFromAPI(itemToUpsert, staleDataset, hideSpinner)
-          : this.addItemFromAPI(itemToUpsert, afterItemId, staleDataset, hideSpinner);
+        this.__findItemIndexById(itemToUpsert, true) === -1
+          ? itemsToAdd.push(itemToUpsert)
+          : itemsToUpdate.push(itemToUpsert);
       });
+
+      itemsToUpdate.length > 0 && this.updateItemFromAPI(itemsToUpdate, staleDataset, hideSpinner);
+      itemsToAdd.length > 0 && this.addItemFromAPI(itemsToAdd, afterItemId, staleDataset, hideSpinner);
     }
 
     /**
