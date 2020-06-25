@@ -182,27 +182,38 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
      * @param {Boolean} hideSpinner If this flag is set to true, the request that will be fired from this method call won't display the spinner.
      */
-    upsertItemFromAPI (itemsToUpsert, afterItemId, staleDataset = true, hideSpinner = false) {
-      // Cast the object as an array to avoid ternaries when upserting the new item(s).
-      if (itemsToUpsert.constructor.name !== 'Array') itemsToUpsert = [itemsToUpsert];
+    async upsertItemFromAPI (itemsToUpsert, afterItemId, staleDataset = true, hideSpinner = false) {
+      this.__hideSpinnerOnNextRequest = hideSpinner;
 
-      const itemsToAdd = [];
-      const itemsToUpdate = [];
+      const socketResponse = await this.fetchItemFromAPI(itemsToUpsert);
 
-      itemsToUpsert.forEach(itemToUpsert => {
-        this.__findItemIndexById(itemToUpsert, true) === -1
-          ? itemsToAdd.push(itemToUpsert)
-          : itemsToUpdate.push(itemToUpsert);
-      });
+      if (socketResponse) {
+        const itemsToAdd = [];
+        const itemsToUpdate = [];
 
-      itemsToUpdate.length > 0 && this.updateItemFromAPI(itemsToUpdate, staleDataset, hideSpinner);
-      itemsToAdd.length > 0 && this.addItemFromAPI(itemsToAdd, afterItemId, staleDataset, hideSpinner);
+        if (socketResponse.data.constructor.name === 'Array') {
+          socketResponse.data.forEach(itemToUpsert => {
+            // Check if the item already exists or not.
+            this.__findItemIndexById(itemToUpsert[this.idExternalProperty], true) === -1
+              ? itemsToAdd.push(itemToUpsert)
+              : itemsToUpdate.push(itemToUpsert);
+          });
+        } else {
+          // Check if the item already exists or not.
+          this.__findItemIndexById(socketResponse.data[this.idExternalProperty], true) === -1
+            ? itemsToAdd.push(socketResponse.data)
+            : itemsToUpdate.push(socketResponse.data);
+        }
+
+        itemsToUpdate.length > 0 && this.updateItemFromAPI({ data: itemsToUpdate }, staleDataset, hideSpinner);
+        itemsToAdd.length > 0 && this.addItemFromAPI({ data: itemsToAdd }, afterItemId, staleDataset, hideSpinner);
+      }
     }
 
     /**
      * This method will fetch specific items from the JSON API and then add them to the vaadin-grid.
      *
-     * @param {Array | String | Number} itemsToAdd The list of item identifiers that will be fetched from the JSON API and appended
+     * @param {Array | String | Number | Object} itemsToAdd The list of item identifiers that will be fetched from the JSON API and appended
      * to the grid using the already existing addItem method.
      * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
      * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
@@ -211,7 +222,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
     async addItemFromAPI (itemsToAdd, afterItemId, staleDataset = true, hideSpinner = false) {
       this.__hideSpinnerOnNextRequest = hideSpinner;
 
-      const socketResponse = await this.fetchItemFromAPI(itemsToAdd);
+      // When the itemsToAdd property is an Object it means it came from the upsertItemFromAPI method.
+      const socketResponse = itemsToAdd.constructor === Object ? itemsToAdd : await this.fetchItemFromAPI(itemsToAdd);
 
       if (socketResponse) {
         this.addItem(socketResponse.data, afterItemId, staleDataset);
@@ -226,7 +238,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * This method will fetch specific items from the JSON API and then replace their old versions that
      * are currently in the vaadin-grid.
      *
-     * @param {Array | String | Number} itemsToUpdate The list of item identifiers that will be fetched from the JSON API and updated
+     * @param {Array | String | Number | Object} itemsToUpdate The list of item identifiers that will be fetched from the JSON API and updated
      * in the grid using the already existing updateItem method.
      * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
      * @param {Boolean} hideSpinner If this flag is set to true, the request that will be fired from this method call won't display the spinner.
@@ -234,7 +246,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
     async updateItemFromAPI (itemsToUpdate, staleDataset = true, hideSpinner = false) {
       this.__hideSpinnerOnNextRequest = hideSpinner;
 
-      const socketResponse = await this.fetchItemFromAPI(itemsToUpdate);
+      // When the itemsToUpdate property is an Object it means it came from the upsertItemFromAPI method.
+      const socketResponse = itemsToUpdate.constructor === Object ? itemsToUpdate : await this.fetchItemFromAPI(itemsToUpdate);
 
       if (socketResponse) {
         if (socketResponse.data.constructor.name === 'Array') {
