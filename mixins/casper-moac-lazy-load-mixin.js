@@ -188,28 +188,28 @@ export const CasperMoacLazyLoadMixin = superClass => {
       const socketResponse = await this.fetchItemFromAPI(itemsToUpsert);
 
       if (socketResponse) {
-        this.__itemsToAddAPI = { data: [] };
-        this.__itemsToUpdateAPI = { data: [] };
+        const itemsToAdd = { data: [], ids: [] };
+        const itemsToUpdate = { data: [], ids: [] };
 
         // Convert the socket response into an array.
         if (socketResponse.data.constructor.name !== 'Array') socketResponse.data = [socketResponse.data];
 
         socketResponse.data.forEach(itemToUpsert => {
           // Check if the item already exists or not.
-          this.__findItemIndexById(itemToUpsert[this.idExternalProperty], true) === -1
-            ? this.__itemsToAddAPI.data.push(itemToUpsert)
-            : this.__itemsToUpdateAPI.data.push(itemToUpsert);
+          const itemExists = this.__findItemIndexById(itemToUpsert[this.idExternalProperty], true) !== -1;
+
+          if (!itemExists) {
+            itemsToAdd.data.push(itemToUpsert);
+            itemsToAdd.ids.push(itemToUpsert[this.idExternalProperty]);
+          } else {
+            itemsToUpdate.data.push(itemToUpsert);
+            itemsToUpdate.ids.push(itemToUpsert[this.idExternalProperty]);
+          }
         });
 
         // Check if there are items that need to be added or updated.
-        if (this.__itemsToUpdateAPI.data.length > 0)
-          await this.updateItemFromAPI(this.__itemsToUpdateAPI.data.map(item => item[this.idExternalProperty]), staleDataset, hideSpinner);
-
-        if (this.__itemsToAddAPI.data.length > 0)
-          await this.addItemFromAPI(this.__itemsToAddAPI.data.map(item => item[this.idExternalProperty]), afterItemId, staleDataset, hideSpinner);
-
-        this.__itemsToAddAPI = undefined;
-        this.__itemsToUpdateAPI = undefined;
+        if (itemsToUpdate.data.length > 0) this.updateItemFromAPI(itemsToUpdate, staleDataset, hideSpinner);
+        if (itemsToAdd.data.length > 0) this.addItemFromAPI(itemsToAdd, afterItemId, staleDataset, hideSpinner);
       }
     }
 
@@ -225,15 +225,16 @@ export const CasperMoacLazyLoadMixin = superClass => {
     async addItemFromAPI (itemsToAdd, afterItemId, staleDataset = true, hideSpinner = false) {
       this.__hideSpinnerOnNextRequest = hideSpinner;
 
+      // Normalize the input variable.
+      if (itemsToAdd.constructor.name !== 'Object') itemsToAdd = { ids: [itemsToAdd].flat() };
+
       // When the itemsToAdd property is an Object it means it came from the upsertItemFromAPI method.
-      const socketResponse = this.__itemsToAddAPI || await this.fetchItemFromAPI(itemsToAdd);
+      const socketResponse = itemsToAdd.data ? itemsToAdd : await this.fetchItemFromAPI(itemsToAdd.ids);
 
       if (socketResponse) {
         this.addItem(socketResponse.data, afterItemId, staleDataset);
 
-        return itemsToAdd.constructor.name === 'Array'
-          ? this.displayedItems.filter(item => this.__compareItemWithIds(item, itemsToAdd, true))
-          : this.displayedItems.find(item => this.__compareItemWithId(item, itemsToAdd, true));
+        return this.displayedItems.filter(item => this.__compareItemWithIds(item, itemsToAdd.ids, true));
       }
     }
 
@@ -249,19 +250,18 @@ export const CasperMoacLazyLoadMixin = superClass => {
     async updateItemFromAPI (itemsToUpdate, staleDataset = true, hideSpinner = false) {
       this.__hideSpinnerOnNextRequest = hideSpinner;
 
+      // Normalize the input variable.
+      if (itemsToUpdate.constructor.name !== 'Object') itemsToUpdate = { ids: [itemsToUpdate].flat() };
+
       // When the itemsToUpdate property is an Object it means it came from the upsertItemFromAPI method.
-      const socketResponse = this.__itemsToUpdateAPI || await this.fetchItemFromAPI(itemsToUpdate);
+      const socketResponse = itemsToUpdate.data ? itemsToUpdate : await this.fetchItemFromAPI(itemsToUpdate.ids);
 
       if (socketResponse) {
         if (socketResponse.data.constructor.name === 'Array') {
-          const itemToActivate = itemsToUpdate.constructor.name === 'Array'
-            ? String(itemsToUpdate[0])
-            : String(itemsToUpdate);
-
           // Sort the server's response since it could return more records than the ones requested which causes "random" items to be activated.
           const sortedServerResponse = socketResponse.data.sort((previousItem, nextItem) => {
-            if (String(nextItem[this.idExternalProperty]) === itemToActivate) return 1;
-            if (String(previousItem[this.idExternalProperty]) === itemToActivate) return -1;
+            if (String(nextItem[this.idExternalProperty]) === itemsToUpdate.ids[0]) return 1;
+            if (String(previousItem[this.idExternalProperty]) === itemsToUpdate.ids[0]) return -1;
 
             return 0;
           });
@@ -271,9 +271,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
           this.updateItem(socketResponse.data, staleDataset);
         }
 
-        return itemsToUpdate.constructor.name === 'Array'
-          ? this.displayedItems.filter(item => this.__compareItemWithIds(item, itemsToUpdate, true))
-          : this.displayedItems.find(item => this.__compareItemWithId(item, itemsToUpdate, true));
+        return this.displayedItems.filter(item => this.__compareItemWithIds(item, itemsToUpdate.ids, true));
       }
     }
 
