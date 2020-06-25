@@ -191,29 +191,22 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.__itemsToAddAPI = { data: [] };
         this.__itemsToUpdateAPI = { data: [] };
 
-        if (socketResponse.data.constructor.name === 'Array') {
-          socketResponse.data.forEach(itemToUpsert => {
-            // Check if the item already exists or not.
-            this.__findItemIndexById(itemToUpsert[this.idExternalProperty], true) === -1
-              ? this.__itemsToAddAPI.data.push(itemToUpsert)
-              : this.__itemsToUpdateAPI.data.push(itemToUpsert);
-          });
-        } else {
+        // Convert the socket response into an array.
+        if (socketResponse.data.constructor.name !== 'Array') socketResponse.data = [socketResponse.data];
+
+        socketResponse.data.forEach(itemToUpsert => {
           // Check if the item already exists or not.
-          this.__findItemIndexById(socketResponse.data[this.idExternalProperty], true) === -1
-            ? this.__itemsToAddAPI.data.push(socketResponse.data)
-            : this.__itemsToUpdateAPI.data.push(socketResponse.data);
-        }
+          this.__findItemIndexById(itemToUpsert[this.idExternalProperty], true) === -1
+            ? this.__itemsToAddAPI.data.push(itemToUpsert)
+            : this.__itemsToUpdateAPI.data.push(itemToUpsert);
+        });
 
-        // Check if there are items that need to be updated.
-        if (this.__itemsToUpdateAPI.data.length > 0) {
-          this.updateItemFromAPI(this.__itemsToUpdateAPI.data.map(item => item[this.idExternalProperty]), staleDataset, hideSpinner);
-        }
+        // Check if there are items that need to be added or updated.
+        if (this.__itemsToUpdateAPI.data.length > 0)
+          await this.updateItemFromAPI(this.__itemsToUpdateAPI.data.map(item => item[this.idExternalProperty]), staleDataset, hideSpinner);
 
-        // Check if there are items that need to be added.
-        if (this.__itemsToAddAPI.data.length > 0) {
-          this.addItemFromAPI(this.__itemsToAddAPI.data.map(item => item[this.idExternalProperty]), afterItemId, staleDataset, hideSpinner);
-        }
+        if (this.__itemsToAddAPI.data.length > 0)
+          await this.addItemFromAPI(this.__itemsToAddAPI.data.map(item => item[this.idExternalProperty]), afterItemId, staleDataset, hideSpinner);
 
         this.__itemsToAddAPI = undefined;
         this.__itemsToUpdateAPI = undefined;
