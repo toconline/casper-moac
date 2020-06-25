@@ -216,7 +216,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
     /**
      * This method will fetch specific items from the JSON API and then add them to the vaadin-grid.
      *
-     * @param {Array | String | Number} itemsToAdd The list of item identifiers that will be fetched from the JSON API and appended
+     * @param {Array | String | Number | Object} itemsToAdd The list of item identifiers that will be fetched from the JSON API and appended
      * to the grid using the already existing addItem method.
      * @param {String | Number} afterItemId The item's identifier which we'll the append the new item(s) after.
      * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
@@ -242,7 +242,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * This method will fetch specific items from the JSON API and then replace their old versions that
      * are currently in the vaadin-grid.
      *
-     * @param {Array | String | Number} itemsToUpdate The list of item identifiers that will be fetched from the JSON API and updated
+     * @param {Array | String | Number | Object} itemsToUpdate The list of item identifiers that will be fetched from the JSON API and updated
      * in the grid using the already existing updateItem method.
      * @param {Boolean} staleDataset This flag will decide if the dataset will become stale or not.
      * @param {Boolean} hideSpinner If this flag is set to true, the request that will be fired from this method call won't display the spinner.
