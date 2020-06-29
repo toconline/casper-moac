@@ -1211,11 +1211,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   removeItem (itemsToRemove, staleDataset = true) {
     // Convert the parameter to an array of strings so it's easier afterwards.
-    itemsToRemove.constructor.name !== 'Array'
-      ? itemsToRemove = [String(itemsToRemove)]
-      : itemsToRemove = itemsToRemove.map(itemToRemove => String(itemToRemove));
+    itemsToRemove = [itemsToRemove].flat().map(itemToRemove => String(itemToRemove));
 
-    const itemIndex = Math.min(...itemsToRemove.map(itemToRemove => this.__findItemIndexById(itemToRemove, true)));
+    const itemIndices = itemsToRemove
+      .map(itemToRemove => this.__findItemIndexById(itemToRemove, true))
+      .filter(itemIndex => itemIndex !== -1);
+
+    const itemIndex = Math.min(...itemIndices);
+    if (itemIndex === Infinity) return;
+
     this.__scrollToItemIfNotVisible(this.displayedItems[itemIndex][this.idInternalProperty], true);
 
     afterNextRender(this, () => {
