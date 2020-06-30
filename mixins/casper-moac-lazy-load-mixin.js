@@ -226,7 +226,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.__hideSpinnerOnNextRequest = hideSpinner;
 
       // Normalize the input variable.
-      if (itemsToAdd.constructor.name !== 'Object') itemsToAdd = { ids: [itemsToAdd].flat() };
+      const isItemsToAddArray = Array.isArray(itemsToAdd);
+      itemsToAdd = { ids: [itemsToAdd].flat() };
 
       // When the itemsToAdd property is an Object it means it came from the upsertItemFromAPI method.
       const socketResponse = itemsToAdd.data ? itemsToAdd : await this.fetchItemFromAPI(itemsToAdd.ids);
@@ -234,7 +235,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
       if (socketResponse) {
         this.addItem(socketResponse.data, afterItemId, staleDataset);
 
-        return this.displayedItems.filter(item => this.__compareItemWithIds(item, itemsToAdd.ids, true));
+        return isItemsToAddArray
+          ? this.displayedItems.filter(item => this.__compareItemWithIds(item, itemsToAdd.ids, true))
+          : this.displayedItems.find(item => this.__compareItemWithId(item, itemsToAdd.ids, true));
       }
     }
 
@@ -251,7 +254,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.__hideSpinnerOnNextRequest = hideSpinner;
 
       // Normalize the input variable.
-      if (itemsToUpdate.constructor.name !== 'Object') itemsToUpdate = { ids: [itemsToUpdate].flat() };
+      const isItemsToUpdateArray = Array.isArray(itemsToUpdate);
+      itemsToUpdate = { ids: [itemsToUpdate].flat() };
 
       // When the itemsToUpdate property is an Object it means it came from the upsertItemFromAPI method.
       const socketResponse = itemsToUpdate.data ? itemsToUpdate : await this.fetchItemFromAPI(itemsToUpdate.ids);
@@ -271,7 +275,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
           this.updateItem(socketResponse.data, staleDataset);
         }
 
-        return this.displayedItems.filter(item => this.__compareItemWithIds(item, itemsToUpdate.ids, true));
+        return isItemsToUpdateArray
+          ? this.displayedItems.filter(item => this.__compareItemWithIds(item, itemsToUpdate.ids, true))
+          : this.displayedItems.find(item => this.__compareItemWithId(item, itemsToUpdate.ids, true));
       }
     }
 
