@@ -293,6 +293,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         value: false
       },
       /**
+       * This property when set to true, toggles the flipping casper-epaper behavior.
+       *
+       * @type {Boolean}
+       */
+      hasFlippingEpaper: {
+        type: Boolean,
+        value: false
+      },
+      /**
        * Whether to display or not the number of results on the top-right corner of the filters.
        *
        * @type {Boolean}
@@ -1044,7 +1053,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
           <div class="right-side-container" style="[[__rightSideStyling()]]">
             <!--Epaper-->
-            <template is="dom-if" if="[[hasEpaper]]">
+            <template is="dom-if" if="[[__hasEpaperComponent(hasEpaper, hasFlippingEpaper)]]">
               <div class="epaper-container">
                 <slot name="right"></slot>
                 <casper-epaper
@@ -1077,7 +1086,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.grid = this.$.grid;
     this.gridScroller = this.$.grid.$.outerscroller;
 
-    if (this.hasEpaper) {
+    this.__leftSideContainer = this.shadowRoot.querySelector('.left-side-container');
+    this.__rightSideContainer = this.shadowRoot.querySelector('.right-side-container');
+
+    if (this.__hasEpaperComponent()) {
       // Save the epaper in a notifiable property so it can be used outside.
       afterNextRender(this, () => this.epaper = this.shadowRoot.querySelector('casper-epaper'));
     }
@@ -1118,6 +1130,38 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         }
       }
     }
+  }
+
+  /**
+   * This method, when the fipping epaper behavior is enabled, displays the epaper component.
+   */
+  displayEpaper () {
+    if (!this.hasFlippingEpaper) return;
+
+    this.__displayGridOrEpaper(this.__leftSideContainer, this.__rightSideContainer);
+  }
+
+  /**
+   * This method, when the fipping epaper behavior is enabled, displays the grid component.
+   */
+  displayGrid () {
+    if (!this.hasFlippingEpaper) return;
+
+    this.__displayGridOrEpaper(this.__rightSideContainer, this.__leftSideContainer);
+  }
+
+  /**
+   * This is a utility method which will hide or display the epaper and will hide or display the grid.
+   *
+   * @param {Object} elementToHide The element that will be hidden.
+   * @param {Object} elementToDisplay The element that will be displayed.
+   */
+  __displayGridOrEpaper (elementToHide, elementToDisplay) {
+    elementToHide.style.width = '0%';
+    elementToHide.style.display = 'none';
+
+    elementToDisplay.style.width = '100%';
+    elementToDisplay.style.display = 'block';
   }
 
   /**
@@ -1986,6 +2030,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   __selectableItems () {
     return this.displayedItems.filter(displayedItem => !displayedItem[this.disableSelectionInternalProperty]);
+  }
+
+  /**
+   * This method checks if there should be an epaper component or not.
+   */
+  __hasEpaperComponent () {
+    return this.hasEpaper || this.hasFlippingEpaper;
   }
 }
 
