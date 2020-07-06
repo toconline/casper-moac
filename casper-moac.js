@@ -1264,7 +1264,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     const itemIndex = Math.min(...itemIndices);
     if (itemIndex === Infinity) return;
 
-    this.__scrollToItemIfNotVisible(this.displayedItems[itemIndex][this.idInternalProperty], true);
+    this.__scrollToItemIfNotVisible(this.displayedItems[itemIndex][this.idInternalProperty]);
 
     afterNextRender(this, () => {
       const blinkingRows = this.__getAllTableRows().filter(row => itemsToRemove.includes(String(row._item[this.idExternalProperty])));
