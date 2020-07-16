@@ -109,6 +109,20 @@ export const CasperMoacGridMixin = superClass => {
     }
 
     /**
+     * This method obtains all the initial column widths and saves it.
+     */
+    __setupGridColumnsMinimumWidth () {
+      afterNextRender(this, () => {
+        const headers = this.__getAllTableHeaders();
+
+        this.__columnWidths = headers.map(header => header.offsetWidth);
+        headers.forEach((header, headerIndex) => {
+          header.style.minWidth = `${this.__columnWidths[headerIndex]}px`;
+        });
+      });
+    }
+
+    /**
      * This method returns all the grid's headers.
      */
     __getAllTableHeaders () {

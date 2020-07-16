@@ -1093,6 +1093,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.__bindSearchInputEvents();
     this.__bindContextMenuEvents();
     this.__bindVaadinSplitLayoutEvents();
+    this.__setupGridColumnsMinimumWidth();
     this.__stampGridCustomStylesTemplate();
 
     // Observe the multi selection container layout changes and resize if needed.
@@ -1220,7 +1221,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     const itemIndex = Math.min(...itemIndices);
     if (itemIndex === Infinity) return;
 
-    this.__scrollToItemIfNotVisible(this.displayedItems[itemIndex][this.idInternalProperty], true);
+    this.__scrollToItemIfNotVisible(this.displayedItems[itemIndex][this.idInternalProperty]);
 
     afterNextRender(this, () => {
       const blinkingRows = this.__getAllTableRows().filter(row => itemsToRemove.includes(String(row._item[this.idExternalProperty])));
@@ -1740,15 +1741,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     afterNextRender(this, () => {
       this.__paintFloatingContextMenu();
 
-      this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
+      this.__getAllTableRows().forEach(row => {
         const currentRowItem = this.displayedItems.find(item => this.__compareItems(row._item, item));
 
         if (!currentRowItem || row.hasAttribute('blink')) return;
 
         const rowBackgroundColor = this.__getRowBackgroundColor(currentRowItem);
-        Array.from(row.children).forEach(cell => {
+        Array.from(row.children).forEach((cell, cellIndex) => {
           cell.style.backgroundImage = 'none';
           cell.style.backgroundColor = rowBackgroundColor;
+          cell.style.minWidth = `${this.__columnWidths[cellIndex]}px`;
 
           const cellContents = cell.firstElementChild.assignedElements().shift();
 
