@@ -21,6 +21,7 @@ export const CasperMoacGridMixin = superClass => {
      */
     __bindVaadinGridEvents () {
       this.$.grid.addEventListener('keydown', event => this.__handleGridKeyDownEvents(event));
+      this.$.grid.addEventListener('column-resize', event => { event.detail.resizedColumn.flexGrow = 1; });
       this.$.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', event => this.__handleGridTreeToggleEvents(event));
 
       this.gridScroller.addEventListener('scroll', () => {
@@ -106,20 +107,6 @@ export const CasperMoacGridMixin = superClass => {
           this.activeItem = this.__scheduleActiveItem;
         }
       }
-    }
-
-    /**
-     * This method obtains all the initial column widths and saves it.
-     */
-    __setupGridColumnsMinimumWidth () {
-      afterNextRender(this, () => {
-        const headers = this.__getAllTableHeaders();
-
-        this.__columnWidths = headers.map(header => header.offsetWidth);
-        headers.forEach((header, headerIndex) => {
-          header.style.minWidth = `${this.__columnWidths[headerIndex]}px`;
-        });
-      });
     }
 
     /**

@@ -1093,7 +1093,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.__bindSearchInputEvents();
     this.__bindContextMenuEvents();
     this.__bindVaadinSplitLayoutEvents();
-    this.__setupGridColumnsMinimumWidth();
     this.__stampGridCustomStylesTemplate();
 
     // Observe the multi selection container layout changes and resize if needed.
@@ -1524,7 +1523,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         headerContainer.offsetWidth < 600
           ? headerContainer.classList.add('header-container--responsive')
           : headerContainer.classList.remove('header-container--responsive');
-      })
+      });
     });
 
     // Fire the initial event to make sure the header container is aligned correctly from the get-go.
@@ -1750,7 +1749,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         Array.from(row.children).forEach((cell, cellIndex) => {
           cell.style.backgroundImage = 'none';
           cell.style.backgroundColor = rowBackgroundColor;
-          cell.style.minWidth = `${this.__columnWidths[cellIndex]}px`;
 
           const cellContents = cell.firstElementChild.assignedElements().shift();
 
