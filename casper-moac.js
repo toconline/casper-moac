@@ -1567,7 +1567,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         headerContainer.offsetWidth < 600
           ? headerContainer.classList.add('header-container--responsive')
           : headerContainer.classList.remove('header-container--responsive');
-      })
+      });
     });
 
     // Fire the initial event to make sure the header container is aligned correctly from the get-go.
@@ -1784,13 +1784,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     afterNextRender(this, () => {
       this.__paintFloatingContextMenu();
 
-      this.$.grid.shadowRoot.querySelectorAll('table tbody tr').forEach(row => {
+      this.__getAllTableRows().forEach(row => {
         const currentRowItem = this.displayedItems.find(item => this.__compareItems(row._item, item));
 
         if (!currentRowItem || row.hasAttribute('blink')) return;
 
         const rowBackgroundColor = this.__getRowBackgroundColor(currentRowItem);
-        Array.from(row.children).forEach(cell => {
+        Array.from(row.children).forEach((cell, cellIndex) => {
           cell.style.backgroundImage = 'none';
           cell.style.backgroundColor = rowBackgroundColor;
 

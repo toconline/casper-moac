@@ -21,6 +21,7 @@ export const CasperMoacGridMixin = superClass => {
      */
     __bindVaadinGridEvents () {
       this.$.grid.addEventListener('keydown', event => this.__handleGridKeyDownEvents(event));
+      this.$.grid.addEventListener('column-resize', event => { event.detail.resizedColumn.flexGrow = 1; });
       this.$.grid.addEventListener('casper-moac-tree-toggle-expanded-changed', event => this.__handleGridTreeToggleEvents(event));
 
       this.gridScroller.addEventListener('scroll', () => {

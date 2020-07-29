@@ -224,13 +224,17 @@ export const CasperMoacLazyLoadMixin = superClass => {
      */
     async addItemFromAPI (itemsToAdd, afterItemId, staleDataset = true, hideSpinner = false) {
       this.__hideSpinnerOnNextRequest = hideSpinner;
-
-      // Normalize the input variable.
       const isItemsToAddArray = Array.isArray(itemsToAdd);
-      itemsToAdd = { ids: [itemsToAdd].flat() };
 
-      // When the itemsToAdd property is an Object it means it came from the upsertItemFromAPI method.
-      const socketResponse = itemsToAdd.data ? itemsToAdd : await this.fetchItemFromAPI(itemsToAdd.ids);
+      let socketResponse;
+      if (itemsToAdd.data) {
+        // This means the items were already fetched in the upsertItemFromAPI method.
+        socketResponse = itemsToAdd;
+      } else {
+        // Normalize the input to contain an array of identifiers.
+        itemsToAdd = { ids: [itemsToAdd].flat() };
+        socketResponse = await this.fetchItemFromAPI(itemsToAdd.ids);
+      }
 
       if (socketResponse) {
         this.addItem(socketResponse.data, afterItemId, staleDataset);
@@ -252,13 +256,17 @@ export const CasperMoacLazyLoadMixin = superClass => {
      */
     async updateItemFromAPI (itemsToUpdate, staleDataset = true, hideSpinner = false) {
       this.__hideSpinnerOnNextRequest = hideSpinner;
-
-      // Normalize the input variable.
       const isItemsToUpdateArray = Array.isArray(itemsToUpdate);
-      itemsToUpdate = { ids: [itemsToUpdate].flat() };
 
-      // When the itemsToUpdate property is an Object it means it came from the upsertItemFromAPI method.
-      const socketResponse = itemsToUpdate.data ? itemsToUpdate : await this.fetchItemFromAPI(itemsToUpdate.ids);
+      let socketResponse;
+      if (itemsToUpdate.data) {
+        // This means the items were already fetched in the upsertItemFromAPI method.
+        socketResponse = itemsToUpdate;
+      } else {
+        // Normalize the input to contain an array of identifiers.
+        itemsToUpdate = { ids: [itemsToUpdate].flat() };
+        socketResponse = await this.fetchItemFromAPI(itemsToUpdate.ids);
+      }
 
       if (socketResponse) {
         if (socketResponse.data.constructor.name === 'Array') {
