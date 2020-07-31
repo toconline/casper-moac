@@ -467,8 +467,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         if (!this.__hideSpinnerOnNextRequest) this.loading = true;
         this.__hideSpinnerOnNextRequest = false;
 
-        this.app.broker.abortPendingRequest();
-        const socketResponse = await this.app.broker.get(url, this.resourceTimeoutMs, true);
+        const socketResponse = await this.app.broker.jget(url, this.resourceTimeoutMs, true);
         this.loading = false;
 
         return socketResponse;
@@ -523,7 +522,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.__buildResourceUrlFreeFilters(),
         this.__buildResourceUrlFixedFilters(),
       ].filter(filterUrlParam => !!filterUrlParam)
-        .map(filterUrlParam => encodeURIComponent(filterUrlParam))
+        .map(filterUrlParam => encodeURIComponent(filterUrlParam).replace(/'/g, '%27'))
         .join(' AND ');
 
       if (filterResourceUrlParams) {
