@@ -467,7 +467,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         if (!this.__hideSpinnerOnNextRequest) this.loading = true;
         this.__hideSpinnerOnNextRequest = false;
 
-        const socketResponse = await this.app.broker.jget(url, this.resourceTimeoutMs, true);
+        const socketResponse = await this.app.secondarySocket.jget(url, this.resourceTimeoutMs, true);
         this.loading = false;
 
         return socketResponse;
@@ -521,9 +521,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.resourceExternalSqlFilters,
         this.__buildResourceUrlFreeFilters(),
         this.__buildResourceUrlFixedFilters(),
-      ].filter(filterUrlParam => !!filterUrlParam)
-        .map(filterUrlParam => encodeURIComponent(filterUrlParam).replace(/'/g, '%27'))
-        .join(' AND ');
+      ].filter(filterUrlParam => !!filterUrlParam).join(' AND ');
 
       if (filterResourceUrlParams) {
         resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${filterResourceUrlParams}"`];
@@ -545,7 +543,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         && this.resourceFilterAttributes
         && this.resourceFilterAttributes.length > 0) {
 
-        const filterValue = this.$.filterInput.value.toString().trim().replace("'", "''");
+        const filterValue = this.$.filterInput.value.toString().trim().replace(/'/g, "''");
 
         freeFilters = this.resourceFilterAttributes.map(filterAttribute => {
           if (filterAttribute.constructor.name === 'Object') {
@@ -583,7 +581,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
           this.__valueIsNotEmpty(filterItem.filter.value))
         .map(filterItem => {
           const filter = filterItem.filter;
-          const filterValue = filter.value.toString().trim().replace("'", "''");
+          const filterValue = filter.value.toString().trim().replace(/'/g, "''");
 
           switch (filter.lazyLoad.operator) {
             // Array comparisons.
