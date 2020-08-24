@@ -467,7 +467,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
         if (!this.__hideSpinnerOnNextRequest) this.loading = true;
         this.__hideSpinnerOnNextRequest = false;
 
-        const socketResponse = await this.app.secondarySocket.jget(url, this.resourceTimeoutMs, true);
+        this.app.broker.abortPendingRequest();
+        const socketResponse = await this.app.broker.get(url, this.resourceTimeoutMs, true);
         this.loading = false;
 
         return socketResponse;
@@ -511,9 +512,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       // Sort by ascending or descending.
       if (this.__activeSorters.length > 0) {
-        let sortParameters = this.__activeSorters.map(sorter => sorter.direction === CasperMoacSortDirections.ASCENDING ? sorter.path : `-${sorter.path}`);
-        sortParameters = [...sortParameters, `-${this.idExternalProperty}`];
+        let sortParameters = this.__activeSorters.map(sorter => {
+          const sorterPath = sorter.databaseField || sorter.path;
 
+          return sorter.direction === CasperMoacSortDirections.ASCENDING ? sorterPath : `-${sorterPath}`;
+        });
+
+        sortParameters = [...sortParameters, `-${this.idExternalProperty}`];
         resourceUrlParams = [...resourceUrlParams, `${this.resourceSortParam}=${sortParameters.join(',')}`];
       }
 
@@ -521,7 +526,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.resourceExternalSqlFilters,
         this.__buildResourceUrlFreeFilters(),
         this.__buildResourceUrlFixedFilters(),
-      ].filter(filterUrlParam => !!filterUrlParam).join(' AND ');
+      ].filter(filterUrlParam => !!filterUrlParam)
+        .map(filterUrlParam => encodeURIComponent(filterUrlParam))
+        .join(' AND ');
 
       if (filterResourceUrlParams) {
         resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${filterResourceUrlParams}"`];
@@ -575,10 +582,10 @@ export const CasperMoacLazyLoadMixin = superClass => {
       return this.__filters
         .filter(filterItem =>
           filterItem.filter.lazyLoad &&
-          filterItem.filter.lazyLoad.field &&
           filterItem.filter.lazyLoad.operator &&
           !filterItem.filter.lazyLoad.disabled &&
-          this.__valueIsNotEmpty(filterItem.filter.value))
+          this.__valueIsNotEmpty(filterItem.filter.value) &&
+          (filterItem.filter.lazyLoad.field || filterItem.filter.lazyLoad.operator === CasperMoacOperators.CUSTOM))
         .map(filterItem => {
           const filter = filterItem.filter;
           const filterValue = filter.value.toString().trim().replace(/'/g, "''");
