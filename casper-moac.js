@@ -931,7 +931,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                         multi-selection$="[[item.filter.inputOptions.multiSelection]]"
                         lazy-load-resource="[[item.filter.inputOptions.lazyLoadResource]]"
                         lazy-load-callback="[[item.filter.inputOptions.lazyLoadCallback]]"
-                        lazy-load-filter-fields="[[item.filter.inputOptions.lazyLoadFilterFields]]">
+                        lazy-load-filter-fields="[[item.filter.inputOptions.lazyLoadFilterFields]]"
+                        delay-lazy-load="[[item.filter.inputOptions.delayLazyLoad]]">
                       </casper-select>
                     </template>
 
