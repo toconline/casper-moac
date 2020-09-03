@@ -119,6 +119,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         value: false,
       },
       /**
+       * Boolean that states if the vaadin-grid should have the select all checkbox or not.
+       *
+       * @type {Boolean}
+       */
+      disableAllSelection: {
+        type: Boolean,
+        observer: '__disableAllSelectionChanged'
+      },
+      /**
        * This property disables the possibility of one item to be selected.
        *
        * @type {Boolean}
@@ -940,7 +949,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                         multi-selection$="[[item.filter.inputOptions.multiSelection]]"
                         lazy-load-resource="[[item.filter.inputOptions.lazyLoadResource]]"
                         lazy-load-callback="[[item.filter.inputOptions.lazyLoadCallback]]"
-                        lazy-load-filter-fields="[[item.filter.inputOptions.lazyLoadFilterFields]]">
+                        lazy-load-filter-fields="[[item.filter.inputOptions.lazyLoadFilterFields]]"
+                        delay-lazy-load="[[item.filter.inputOptions.delayLazyLoad]]">
                       </casper-select>
                     </template>
 
@@ -1542,14 +1552,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   __bindSearchInputEvents () {
     const searchParams = new URLSearchParams(window.location.search);
     if (searchParams.has(this.freeFilterUrlParameterName)) {
-      this.$.filterInput.value = searchParams.get(this.freeFilterUrlParameterName);
+      this.$.filterInput.value = this.freeFilterValue = searchParams.get(this.freeFilterUrlParameterName);
       this.$.filterInputIcon.icon = 'fa-regular:times';
       this.__updateFilterInputStyles(true);
     } else {
       this.$.filterInputIcon.icon = 'fa-regular:search';
     }
 
-    this.$.filterInput.addEventListener('keyup', event => this.__freeFilterChanged(event));
+    this.$.filterInput.addEventListener('keyup', () => this.__freeFilterChanged());
     this.$.filterInput.addEventListener('focus', () => { this.__updateFilterInputStyles(true); });
     this.$.filterInput.addEventListener('blur', () => { this.__updateFilterInputStyles(!!this.$.filterInput.value.trim()); });
   }
@@ -2040,4 +2050,4 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 }
 
-customElements.define('casper-moac', CasperMoac);
+window.customElements.define('casper-moac', CasperMoac);

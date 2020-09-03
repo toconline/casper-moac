@@ -57,13 +57,12 @@ export const CasperMoacLazyLoadMixin = superClass => {
           value: []
         },
         /**
-         * URL parameter to filter the results by matching a substring with a specific attribute.
+         * URL parameter to use instead of the standard "filter" which uses SQL.
          *
          * @type {String}
          */
         resourceFilterParam: {
           type: String,
-          value: 'filter'
         },
         /**
          * Function used to format the items that are returned from the JSON API.
@@ -498,9 +497,14 @@ export const CasperMoacLazyLoadMixin = superClass => {
         `${this.resourcePageSizeParam}=${this.resourcePageSize}`
       ];
 
-      // Limit the fields that are request to the JSON API.
+      // Limit the fields that are requested from the JSON API.
       if (this.resourceListAttributes && this.resourceListAttributes.length > 0) {
-        resourceUrlParams = [...resourceUrlParams, `fields[${this.resourceName}]=${this.resourceListAttributes.join(',')}`];
+        resourceUrlParams.push(`fields[${this.resourceName}]=${this.resourceListAttributes.join(',')}`);
+      }
+
+      // Apply the free filter if the developer specified an url parameter.
+      if (this.resourceFilterParam) {
+        resourceUrlParams.push(`filter[${this.resourceFilterParam}]=${this.__sanitizeValue(this.$.filterInput.value)}`);
       }
 
       // Apply the external filters that should be applied in the square bracket notation.
@@ -509,6 +513,19 @@ export const CasperMoacLazyLoadMixin = superClass => {
           resourceUrlParams.push(`filter[${key}]=${value}`);
         });
       }
+
+      // Apply all the filters that use the square bracket notation.
+      this.__filters
+        .map(filterItem => filterItem.filter)
+        .filter(filter => {
+          return filter.lazyLoad &&
+            filter.lazyLoad.field &&
+            filter.lazyLoad.useBracketNotation &&
+            !filter.lazyLoad.disabled &&
+            this.__valueIsNotEmpty(filter.value);
+        }).forEach(filter => {
+          resourceUrlParams.push(`filter[${filter.lazyLoad.field}]=${this.__sanitizeValue(filter.value)}`);
+        });
 
       // Sort by ascending or descending.
       if (this.__activeSorters.length > 0) {
@@ -531,7 +548,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         .join(' AND ');
 
       if (filterResourceUrlParams) {
-        resourceUrlParams = [...resourceUrlParams, `${this.resourceFilterParam}="${filterResourceUrlParams}"`];
+        resourceUrlParams.push(`filter="${filterResourceUrlParams}"`);
       }
 
       return resourceUrlParams.join('&');
@@ -547,10 +564,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
       // Check if there are attributes that should be filtered and if the input has already been initialized.
       if (this.$.filterInput
         && this.$.filterInput.value
+        && !this.resourceFilterParam
         && this.resourceFilterAttributes
         && this.resourceFilterAttributes.length > 0) {
 
-        const filterValue = this.$.filterInput.value.toString().trim().replace(/'/g, "''");
+        const filterValue = this.__sanitizeValue(this.$.filterInput.value);
 
         freeFilters = this.resourceFilterAttributes.map(filterAttribute => {
           if (filterAttribute.constructor.name === 'Object') {
@@ -584,11 +602,12 @@ export const CasperMoacLazyLoadMixin = superClass => {
           filterItem.filter.lazyLoad &&
           filterItem.filter.lazyLoad.operator &&
           !filterItem.filter.lazyLoad.disabled &&
+          !filterItem.filter.lazyLoad.useBracketNotation &&
           this.__valueIsNotEmpty(filterItem.filter.value) &&
           (filterItem.filter.lazyLoad.field || filterItem.filter.lazyLoad.operator === CasperMoacOperators.CUSTOM))
         .map(filterItem => {
           const filter = filterItem.filter;
-          const filterValue = filter.value.toString().trim().replace(/'/g, "''");
+          const filterValue = this.__sanitizeValue(filter.value);
 
           switch (filter.lazyLoad.operator) {
             // Array comparisons.
@@ -654,8 +673,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
       if (filters.constructor.name !== 'Array') filters = [filters];
 
       const resourceFilterParameter = items.constructor.name !== 'Array'
-        ? `${this.resourceFilterParam}="${this.idExternalProperty}::TEXT = '${items}'::TEXT"`
-        : `${this.resourceFilterParam}="${this.idExternalProperty}::TEXT IN (${items.map(item => `'${item}'::TEXT`).join(',')})"`;
+        ? `filter="${this.idExternalProperty}::TEXT = '${items}'::TEXT"`
+        : `filter="${this.idExternalProperty}::TEXT IN (${items.map(item => `'${item}'::TEXT`).join(',')})"`;
 
       let resourceUrl = this.resourceName.includes('?')
         ? `${this.resourceName}&${resourceFilterParameter}`
@@ -664,6 +683,15 @@ export const CasperMoacLazyLoadMixin = superClass => {
       if (filters.length > 0) resourceUrl = `${resourceUrl}&${filters.join('&')}`;
 
       return resourceUrl;
+    }
+
+    /**
+     * This method trims all white spaces and escapes every single quote to apply in a query.
+     *
+     * @param {String | Number} value The value this method will sanitize.
+     */
+    __sanitizeValue (value) {
+      return value.toString().trim().replace(/'/g, "''");
     }
   }
 }

@@ -393,13 +393,14 @@ export const CasperMoacFiltersMixin = superClass => {
 
     /**
      * Debounce the items filtering after the search input's value changes.
-     *
-     * @param {Object} event The event's object.
      */
-    __freeFilterChanged (event) {
+    __freeFilterChanged () {
       !!this.$.filterInput.value.trim()
         ? this.$.filterInputIcon.icon = 'fa-regular:times'
         : this.$.filterInputIcon.icon = 'fa-regular:search';
+
+      // When the component is lazily loaded, ignore the changes if the developer didn't specify no filter attributes or an URL parameter.
+      if (this.lazyLoad && !this.resourceFilterParam && (!this.resourceFilterAttributes || this.resourceFilterAttributes.length === 0)) return;
 
       this.__debounce('__freeFilterChangedDebouncer', () => {
         // Do not re-filter the items if the current value matches the last one.
