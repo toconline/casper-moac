@@ -110,6 +110,21 @@ export const CasperMoacGridMixin = superClass => {
     }
 
     /**
+     * Hides or displays the select all checkbox.
+     */
+    __disableAllSelectionChanged () {
+      this.__getAllTableHeaders().forEach(tableHeader => {
+        const assignedElement = tableHeader.firstElementChild.assignedElements().shift().firstElementChild;
+
+        if (assignedElement && assignedElement.nodeName.toLowerCase() === 'vaadin-checkbox') {
+          this.disableAllSelection
+            ? assignedElement.style.display = 'none'
+            : assignedElement.style.display = '';
+        }
+      });
+    }
+
+    /**
      * This method returns all the grid's headers.
      */
     __getAllTableHeaders () {
