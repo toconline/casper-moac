@@ -49,6 +49,8 @@ export const CasperMoacGridMixin = superClass => {
 
               selectAllCheckbox.parentElement.appendChild(this.__selectAllCheckbox);
               selectAllCheckbox.remove();
+
+              this.__disableAllSelectionChanged();
             }
           });
         });
@@ -113,15 +115,11 @@ export const CasperMoacGridMixin = superClass => {
      * Hides or displays the select all checkbox.
      */
     __disableAllSelectionChanged () {
-      this.__getAllTableHeaders().forEach(tableHeader => {
-        const assignedElement = tableHeader.firstElementChild.assignedElements().shift().firstElementChild;
+      if (!this.__selectAllCheckbox) return;
 
-        if (assignedElement && assignedElement.nodeName.toLowerCase() === 'vaadin-checkbox') {
-          this.disableAllSelection
-            ? assignedElement.style.display = 'none'
-            : assignedElement.style.display = '';
-        }
-      });
+      this.disableAllSelection
+        ? this.__selectAllCheckbox.style.display = 'none'
+        : this.__selectAllCheckbox.style.display = '';
     }
 
     /**
