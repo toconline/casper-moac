@@ -1660,6 +1660,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * Observer that fires when the selectedItems property changes.
    */
   __selectedItemsChanged () {
+    if (this.shadowRoot.querySelector('slot[name="multi-selection"]').assignedElements().length === 0) return;
+
     if (!this.selectedItems || this.selectedItems.length === 0) {
       this.$.grid.style.borderTopLeftRadius = '5px';
       this.$.grid.style.borderTopRightRadius = '5px';
