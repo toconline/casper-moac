@@ -59,4 +59,4 @@ class CasperMoacTreeToggleColumn extends GridColumnElement {
   }
 }
 
-customElements.define('casper-moac-tree-toggle-column', CasperMoacTreeToggleColumn);
+window.customElements.define('casper-moac-tree-toggle-column', CasperMoacTreeToggleColumn);

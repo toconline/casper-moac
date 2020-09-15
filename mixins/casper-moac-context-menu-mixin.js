@@ -1,5 +1,3 @@
-import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
-
 export const CasperMoacContextMenuMixin = superClass => {
   return class extends superClass {
 

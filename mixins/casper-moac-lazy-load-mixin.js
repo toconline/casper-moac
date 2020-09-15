@@ -1,4 +1,8 @@
-import { CasperMoacOperators, CasperMoacSortDirections, CasperMoacFilterTypes } from '../casper-moac-constants.js';
+import {
+  CasperMoacOperators,
+  CasperMoacFilterTypes,
+  CasperMoacSortDirections,
+} from '../casper-moac-constants.js';
 
 export const CasperMoacLazyLoadMixin = superClass => {
   return class extends superClass {

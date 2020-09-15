@@ -123,4 +123,4 @@ class CasperMoacActiveFilter extends PolymerElement {
   }
 }
 
-customElements.define('casper-moac-active-filter', CasperMoacActiveFilter);
+window.customElements.define('casper-moac-active-filter', CasperMoacActiveFilter);

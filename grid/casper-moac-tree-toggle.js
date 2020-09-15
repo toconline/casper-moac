@@ -111,4 +111,4 @@ class CasperMoacTreeToggle extends PolymerElement {
   }
 }
 
-customElements.define('casper-moac-tree-toggle', CasperMoacTreeToggle);
+window.customElements.define('casper-moac-tree-toggle', CasperMoacTreeToggle);

@@ -71,4 +71,4 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
   }
 }
 
-customElements.define('casper-moac-multi-selection-action', CasperMoacMultiSelectionAction);
+window.customElements.define('casper-moac-multi-selection-action', CasperMoacMultiSelectionAction);

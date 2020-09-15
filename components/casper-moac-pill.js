@@ -101,4 +101,4 @@ class CasperMoacPill extends PolymerElement {
   }
 }
 
-customElements.define('casper-moac-pill', CasperMoacPill);
+window.customElements.define('casper-moac-pill', CasperMoacPill);

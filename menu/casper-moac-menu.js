@@ -221,4 +221,4 @@ class CasperMoacMenu extends PolymerElement {
   }
 }
 
-customElements.define('casper-moac-menu', CasperMoacMenu);
+window.customElements.define('casper-moac-menu', CasperMoacMenu);

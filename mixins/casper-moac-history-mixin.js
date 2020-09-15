@@ -1,5 +1,3 @@
-import { CasperMoacFilterTypes } from '../casper-moac-constants.js';
-
 export const CasperMoacHistoryMixin = superClass => {
   return class extends superClass {
     /**

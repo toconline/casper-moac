@@ -17,4 +17,4 @@ class CasperMoacMultiSelectionSeparator extends PolymerElement {
   }
 }
 
-customElements.define('casper-moac-multi-selection-separator', CasperMoacMultiSelectionSeparator);
+window.customElements.define('casper-moac-multi-selection-separator', CasperMoacMultiSelectionSeparator);

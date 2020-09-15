@@ -156,4 +156,4 @@ class CasperMoacSortColumn extends GridColumnElement {
   }
 }
 
-customElements.define('casper-moac-sort-column', CasperMoacSortColumn);
+window.customElements.define('casper-moac-sort-column', CasperMoacSortColumn);

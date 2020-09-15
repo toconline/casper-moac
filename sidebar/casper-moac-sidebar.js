@@ -142,4 +142,4 @@ class CasperMoacSidebar extends PolymerElement {
   }
 }
 
-customElements.define('casper-moac-sidebar', CasperMoacSidebar);
+window.customElements.define('casper-moac-sidebar', CasperMoacSidebar);

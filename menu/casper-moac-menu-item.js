@@ -98,4 +98,4 @@ export class CasperMoacMenuItem extends PolymerElement {
   }
 }
 
-customElements.define('casper-moac-menu-item', CasperMoacMenuItem);
+window.customElements.define('casper-moac-menu-item', CasperMoacMenuItem);
