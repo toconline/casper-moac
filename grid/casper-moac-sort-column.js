@@ -8,12 +8,6 @@ class CasperMoacSortColumn extends GridColumnElement {
   static get properties () {
     return {
       /**
-       * If there are multiple sorters being applied, this states its order / priority.
-       *
-       * @type {Number}
-       */
-      sortOrder: Number,
-      /**
        * This property specifies the column data type so that the component knows how to sort the items.
        *
        * @type {String}
@@ -22,6 +16,12 @@ class CasperMoacSortColumn extends GridColumnElement {
         type: String,
         value: CasperMoacSortTypes.STRING
       },
+      /**
+       * This property when present overrides the path property when querying the database.
+       *
+       * @type {String}
+       */
+      databaseField: String,
       /**
        * This property states the direction in which the items are being sorted, either ascending
        * or deescending.
@@ -32,7 +32,13 @@ class CasperMoacSortColumn extends GridColumnElement {
         type: String,
         notify: true,
         value: null
-      }
+      },
+      /**
+       * If there are multiple sorters being applied, this states its order / priority.
+       *
+       * @type {Number}
+       */
+      sortOrder: Number,
     }
   }
 
@@ -146,12 +152,9 @@ class CasperMoacSortColumn extends GridColumnElement {
    */
   __getHeaderContainerAlignment () {
     switch (this.textAlign) {
-      case 'center':
-        return 'justify-content: center';
-      case 'end':
-        return 'justify-content: flex-end';
-      case 'start':
-        return 'justify-content: flex-start';
+      case 'end': return 'justify-content: flex-end';
+      case 'center': return 'justify-content: center';
+      case 'start': return 'justify-content: flex-start';
     }
   }
 }
