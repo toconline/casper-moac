@@ -3,11 +3,11 @@
 
 
 "@cloudware-casper/casper-button@^1.x":
-  version "1.3.0"
-  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-button/1.3.0/b5454cd927db2c13700876765dae38c0beb78c77e4cdc0b21b3caa4938851119#94a21be243475f959bcc1ba48574d45d216c1bf7"
-  integrity sha512-ORlyivYLBM1WhzmaqxW2x42TwUg+QFTSbSTDWHhlURm5eVC+DO/WGQ112NngUIeDiMp2zhm27fvGuDJhthNvlA==
+  version "1.4.0"
+  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-button/1.4.0/e4730a14434f427a6d30dc31195b4dac4fc3d46addec09dd887abb156a3ffcb7#6c4e72d16daeb0a196916ac7929ccce9085eb0e4"
+  integrity sha512-Ts/Bm+jgh1XHMeJ4jk9rEJrlP0iP0T+FA2eRWkQHRlT35/LKnmaK0XSO15ojiVzc/i6TcigF18wmIqaHqu5Stw==
   dependencies:
-    "@cloudware-casper/casper-icons" "^1.x"
+    "@cloudware-casper/casper-icons" "^2.x"
     "@polymer/iron-fit-behavior" "^3.x"
     "@polymer/iron-overlay-behavior" "^3.x"
     "@polymer/paper-button" "^3.x"
@@ -16,11 +16,11 @@
     "@vaadin/vaadin-progress-bar" "^1.x"
 
 "@cloudware-casper/casper-date-picker@^1.x":
-  version "1.7.1"
-  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-date-picker/1.7.1/22837615ae10a374e069bf1586e3d477f02fcbe940f48e0b320ca380c7336b83#ef3aed01a3fb21f4e22bdafe57a82de291feb6b4"
-  integrity sha512-zg++FMKd6B3TfIDqU9QGibxmNq78MkuI8Kh3agmBONgz+ySaVI1Dnl8IeJuft7x1otYdgoogRbsMIbxgoC56yA==
+  version "1.9.0"
+  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-date-picker/1.9.0/a8a0ab0e9f2c2425d7bdef23d7e64617704ce8e4188092ca7343fe53f298ec39#3df34df09ae20928acac2c510857fce4bd3edd79"
+  integrity sha512-GKv4HU9+WUi5KhK+LoTkmNzwwJHc9YKU1D7U5KeZe3nJpHCPxUZrbP1ZaF26jLhSD1SozQGEo5R/rr5fHV6i4A==
   dependencies:
-    "@cloudware-casper/casper-icons" "^1.x"
+    "@cloudware-casper/casper-icons" "^2.x"
     "@cloudware-casper/casper-overlay-behavior" "^1.x"
     "@polymer/paper-input" "^3.x"
     "@polymer/polymer" "^3.x"
@@ -28,11 +28,12 @@
     moment "^2.24.0"
 
 "@cloudware-casper/casper-epaper@^2.x":
-  version "2.28.0"
-  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-epaper/2.28.0/7db932f2f59cf8d3126ae55dc46803d42baf8ede68985163b09149bd1e18f28d#597ef9c558c4c49aef462816e1caab31b1ac4e45"
-  integrity sha512-OA27o7yWEqTC3hil2Nx/PgjQABoAZyp+7XCUWxyyTA/9GN+ukqxoxoXpPPDO5nuiqCs9fssX0037sktCBb0/Lw==
+  version "2.34.0"
+  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-epaper/2.34.0/81e2c1e5561067ef0b941d8fc169685ab56e1b874dce2a9b0c0056d57621f591#997514430f43eada16e2eb54b7647e9bd4e4a218"
+  integrity sha512-S12RcaeKnQA4TMtIBpYrj6hEbFURK8u+7tz8opNJ0ndtud/IWOebD/CKNLNN3MH/ApnrL5Fisu8yelaY9E8+Mg==
   dependencies:
-    "@cloudware-casper/casper-icons" "^1.x"
+    "@cloudware-casper/casper-icons" "^2.x"
+    "@cloudware-casper/casper-upload-dropzone" "^1.x"
     "@polymer/iron-component-page" "^4.x"
     "@polymer/iron-dropdown" "^3.x"
     "@polymer/iron-icon" "^3.x"
@@ -46,12 +47,19 @@
     "@polymer/promise-polyfill" "^3.0.0-pre.21"
     "@vaadin/vaadin-date-picker" "^4.x"
 
-"@cloudware-casper/casper-icons@^1.x":
-  version "1.20.1"
-  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-icons/1.20.1/6ba9149bb421104c8c9d13189d147cb467fc50ffcf6769f0e456ce44634fcf17#77db54efca20b3d3f8b4035fab0c19a08888891d"
-  integrity sha512-ds4GQU4HS8K4np4BNrYZCcN5K+/lXiUzuyf0byFJELY4TXYpm7EhdEVE+E0TIq2llygrcCMIwgaWV/gWiAsSqg==
+"@cloudware-casper/casper-icons@^2.x":
+  version "2.0.0"
+  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-icons/2.0.0/02282bd9eb18bb2f92a8bb8a9b8a72a7b22cd553b7d6d7c4e173e28c7d2324c7#4530bba4d403280c603e1c971707ce5106449ecb"
+  integrity sha512-ohFaNY6h4BVdKvX3ljKuRGui4VNZKqgNxlpdQc0caq5SnpBsHigQ3vQxBiTwy/krAAeFnBmmPXZGI6YvDtWW7w==
   dependencies:
-    "@polymer/iron-icons" "^3.x"
+    "@polymer/polymer" "^3.x"
+
+"@cloudware-casper/casper-notice@^1.x":
+  version "1.7.0"
+  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-notice/1.7.0/c1de195652710813e20e0a1996fa170d92d52cecdbb2751f1e4e5aed9c196598#386c3e6539f44c61ad59ab40d3fdbf89c9ad9a0d"
+  integrity sha512-JrkCH3VPhyFaakuiX4OUohJAQ7ZZnYu1+v/J21rdnBXKyh7JKA/rrjjJ7gZD1iKZxUdF2kRhxdeuZqVyLBizFw==
+  dependencies:
+    "@cloudware-casper/casper-icons" "^2.x"
     "@polymer/polymer" "^3.x"
 
 "@cloudware-casper/casper-overlay-behavior@^1.x":
@@ -62,12 +70,12 @@
     "@polymer/iron-overlay-behavior" "^3.x"
 
 "@cloudware-casper/casper-select@^2.x":
-  version "2.11.0"
-  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-select/2.11.0/b604b90edaa28aae1ac372a7f9528500ec42bcfe0e9655ff1d01af35c38ae710#6334a9c84b81203bcf08ac29cf8a34124356b773"
-  integrity sha512-Rp4GxNXkTGEfu2haj4Bs3+lG+RsCPGW6NF1TsgFiOQowhw/a8zFS82ceOUz/SDGBHwAUBTVdQOvqK08+Z6wzBg==
+  version "2.13.0"
+  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-select/2.13.0/efef2f77d860203fc518259d0e7e47b6ad5c37b61b27a6dce53922c6823edfed#5a0c4f173a4d3625a00ec82adaf381d6aee006c7"
+  integrity sha512-zgq+p6/jOtT+R5z3KW7+b8CU7tacODnZSID886CV2VBRLgsWCt4V7pzZDahWIwYI8+74mqemVAtjpxtnLVJnqw==
   dependencies:
     "@cloudware-casper/casper-button" "^1.x"
-    "@cloudware-casper/casper-icons" "^1.x"
+    "@cloudware-casper/casper-icons" "^2.x"
     "@cloudware-casper/casper-overlay-behavior" "^1.x"
     "@polymer/iron-fit-behavior" "^3.x"
     "@polymer/iron-input" "^3.x"
@@ -76,6 +84,17 @@
     "@polymer/paper-input" "^3.x"
     "@polymer/paper-spinner" "^3.x"
     "@polymer/polymer" "^3.x"
+
+"@cloudware-casper/casper-upload-dropzone@^1.x":
+  version "1.8.0"
+  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-upload-dropzone/1.8.0/3795bf71d7fbfaca8540cca665c1cb323fd0cb75af0697ed2840e80e25b0e471#73445b9920a4e3d97d6638972dfdbf0cfe489d24"
+  integrity sha512-N/0TPJ7YGly0yyzNKYkbcx5Dqc/+18KppN7xx6+lKuMevPEb9oEsxJquu5zqs9Sm2HjKPfAz+IzOzh9am2AYNw==
+  dependencies:
+    "@cloudware-casper/casper-button" "^1.x"
+    "@cloudware-casper/casper-icons" "^2.x"
+    "@cloudware-casper/casper-notice" "^1.x"
+    "@polymer/polymer" "^3.0.0"
+    "@vaadin/vaadin-upload" "^4.x"
 
 "@polymer/app-layout@^3.0.0-pre.26":
   version "3.1.0"
@@ -94,9 +113,9 @@
   integrity sha512-tx5TauYSmzsIvmSqepUPDYbs4/Ejz2XbZ1IkD7JEGqkdNUJlh+9KU85G56Tfdk/xjEZ8zorFfN09OSwiMrIQWA==
 
 "@polymer/iron-a11y-announcer@^3.0.0", "@polymer/iron-a11y-announcer@^3.0.0-pre.26":
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/@polymer/iron-a11y-announcer/-/iron-a11y-announcer-3.0.2.tgz#730dd36ccb2e042ecd5160ba439c2bf2f8a97412"
-  integrity sha512-LqnMF39mXyxSSRbTHRzGbcJS8nU0NVTo2raBOgOlpxw5yfGJUVcwaTJ/qy5NtWCZLRfa4suycf0oAkuUjHTXHQ==
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@polymer/iron-a11y-announcer/-/iron-a11y-announcer-3.1.0.tgz#3d3712a165070ed3cdfc39e54f95515c913c9613"
+  integrity sha512-lc5i4NKB8kSQHH0Hwu8WS3ym93m+J69OHJWSSBxwd17FI+h2wmgxDzeG9LI4ojMMck17/uc2pLe7g/UHt5/K/A==
   dependencies:
     "@polymer/polymer" "^3.0.0"
 
@@ -206,7 +225,7 @@
     "@polymer/iron-meta" "^3.0.0-pre.26"
     "@polymer/polymer" "^3.0.0"
 
-"@polymer/iron-icons@^3.0.0-pre.26", "@polymer/iron-icons@^3.x":
+"@polymer/iron-icons@^3.0.0-pre.26":
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/@polymer/iron-icons/-/iron-icons-3.0.1.tgz#c1bd31d8483afbdb5422cdc384081e19c9267cfe"
   integrity sha512-xtEI8erH2GIBiF3QxEMyW81XuVjguu6Le5WjEEpX67qd9z7jjmc4T/ke3zRUlnDydex9p8ytcwVpMIKcyvjYAQ==
@@ -445,17 +464,17 @@
   resolved "https://registry.yarnpkg.com/@polymer/promise-polyfill/-/promise-polyfill-3.0.0-pre.21.tgz#1029479274017bf58de690381915775df49fd507"
   integrity sha512-ml3GK5wU1z/HTAQPtFho9U3zEpeL20KYeNGqBtb0srNLQOvGzbB6HBHMyOq+42vYaASWu+haxuNXxMBz8ILyKQ==
 
-"@vaadin/vaadin-button@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-button/-/vaadin-button-2.3.0.tgz#53ccad7738458c1336cd94269d2a896a3f81b9c6"
-  integrity sha512-FnKvsxwBQhXWV/kW+PNY+vFF+V6cQE6IiSH32LZ6rlZ+aqsvpRLEF4yNr3sg39yBsdWfeU1J+44Ne4chPbcizA==
+"@vaadin/vaadin-button@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-button/-/vaadin-button-2.4.0.tgz#ecbdd0bf57d9992ec861ee912af0b78315ce5993"
+  integrity sha512-C94F07OOb5Ciq2BY4CklIQG+WJFA6QoTFDQl8JJloJgPI12b9kmyP8uRgfq4VAHHusqKqIvA8AB6VZuGg5lagg==
   dependencies:
     "@polymer/polymer" "^3.0.0"
-    "@vaadin/vaadin-control-state-mixin" "^2.1.1"
-    "@vaadin/vaadin-element-mixin" "^2.0.0"
+    "@vaadin/vaadin-control-state-mixin" "^2.2.1"
+    "@vaadin/vaadin-element-mixin" "^2.4.1"
     "@vaadin/vaadin-lumo-styles" "^1.3.3"
     "@vaadin/vaadin-material-styles" "^1.2.0"
-    "@vaadin/vaadin-themable-mixin" "^1.2.1"
+    "@vaadin/vaadin-themable-mixin" "^1.6.1"
 
 "@vaadin/vaadin-checkbox@^2.2.1":
   version "2.3.0"
@@ -469,41 +488,50 @@
     "@vaadin/vaadin-material-styles" "^1.2.0"
     "@vaadin/vaadin-themable-mixin" "^1.2.1"
 
-"@vaadin/vaadin-control-state-mixin@^2.1.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-control-state-mixin/-/vaadin-control-state-mixin-2.2.1.tgz#3db78d3ef2b8a55ccea431c94d872d8e443fc868"
-  integrity sha512-Y/y2aRXiQqa7sqQM2f5DkXK2U+sHEyGql67SXaXljGIMiFT0H7rfJZ+5TcXucpsUb2z+R0oCq8Q3+GES9YP9Fg==
+"@vaadin/vaadin-control-state-mixin@^2.1.1", "@vaadin/vaadin-control-state-mixin@^2.2.1", "@vaadin/vaadin-control-state-mixin@^2.2.2":
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-control-state-mixin/-/vaadin-control-state-mixin-2.2.3.tgz#da9456374f5a1f2348b4fa2cc01b0f32ee607824"
+  integrity sha512-a0a+Hh99fQ5ueKTmY6F0i94jOfdOwKFS9ppNs0amfQwO+Js5ZC84naLnyVMVtY87K98FQ1vEYqpzxDYZy6duPw==
   dependencies:
     "@polymer/polymer" "^3.0.0"
 
 "@vaadin/vaadin-date-picker@^4.x":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-date-picker/-/vaadin-date-picker-4.1.0.tgz#5c1952119a13c03219721a6c2392927fd1a2a3b6"
-  integrity sha512-wyPdxRZy6jMhgSAJGlVXrK2jCIznq0EePAiFp+gGsDCddiiEf6NpJWPj0ph0qMs8NFY0fERx7QvnTFuYC7W7QQ==
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-date-picker/-/vaadin-date-picker-4.4.0.tgz#552935b0a7703d61a022b191d01295579680ec4a"
+  integrity sha512-5FCm7MfsrB5mMNL/pdGHF2XOnQaG7iA8gll8CFt5aXuHJ932SULK/X4T+iPYdr5Qbn/6jX2uJXYYYkdhw407zw==
   dependencies:
     "@polymer/iron-a11y-announcer" "^3.0.0"
     "@polymer/iron-a11y-keys-behavior" "^3.0.0"
     "@polymer/iron-media-query" "^3.0.0"
     "@polymer/iron-resizable-behavior" "^3.0.0"
     "@polymer/polymer" "^3.0.0"
-    "@vaadin/vaadin-button" "^2.3.0"
-    "@vaadin/vaadin-control-state-mixin" "^2.1.1"
-    "@vaadin/vaadin-element-mixin" "^2.3.1"
+    "@vaadin/vaadin-button" "^2.4.0"
+    "@vaadin/vaadin-control-state-mixin" "^2.2.2"
+    "@vaadin/vaadin-element-mixin" "^2.4.1"
     "@vaadin/vaadin-lumo-styles" "^1.6.0"
     "@vaadin/vaadin-material-styles" "^1.3.2"
-    "@vaadin/vaadin-overlay" "^3.4.0"
-    "@vaadin/vaadin-text-field" "^2.6.0"
-    "@vaadin/vaadin-themable-mixin" "^1.5.2"
+    "@vaadin/vaadin-overlay" "^3.5.0"
+    "@vaadin/vaadin-text-field" "^2.8.0"
+    "@vaadin/vaadin-themable-mixin" "^1.6.1"
 
 "@vaadin/vaadin-development-mode-detector@^2.0.0":
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@vaadin/vaadin-development-mode-detector/-/vaadin-development-mode-detector-2.0.4.tgz#f49c8009856bead92d248377c36b295b5aae78e5"
   integrity sha512-S+PaFrZpK8uBIOnIHxjntTrgumd5ztuCnZww96ydGKXgo9whXfZsbMwDuD/102a/IuPUMyF+dh/n3PbWzJ6igA==
 
-"@vaadin/vaadin-element-mixin@^2.0.0", "@vaadin/vaadin-element-mixin@^2.1.1", "@vaadin/vaadin-element-mixin@^2.3.0", "@vaadin/vaadin-element-mixin@^2.3.1", "@vaadin/vaadin-element-mixin@^2.4.0":
+"@vaadin/vaadin-element-mixin@^2.1.1":
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/@vaadin/vaadin-element-mixin/-/vaadin-element-mixin-2.4.1.tgz#af65828a33169cb45ef2889aa7efe62a5bcd0db4"
   integrity sha512-Ie7fwcOmg1C71UFuRwcuo2GKS+HbKvLedfs3hGdICiuwJ56cQvQsbIlxa4utKWWCVlf6yuSvMrny8efPPenfTA==
+  dependencies:
+    "@polymer/polymer" "^3.0.0"
+    "@vaadin/vaadin-development-mode-detector" "^2.0.0"
+    "@vaadin/vaadin-usage-statistics" "^2.1.0"
+
+"@vaadin/vaadin-element-mixin@^2.3.0", "@vaadin/vaadin-element-mixin@^2.4.0", "@vaadin/vaadin-element-mixin@^2.4.1":
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-element-mixin/-/vaadin-element-mixin-2.4.2.tgz#3c8040a8e756bc274b7777723b1fba2b9895cd41"
+  integrity sha512-VSDVK0XUsFe/RohpwSzQwgqb2Pwpok6sDNhIDS4CARr3HPhq2voMzT/FowFbkEy0J1hFtN/ZfC7tkv3kdEKKIQ==
   dependencies:
     "@polymer/polymer" "^3.0.0"
     "@vaadin/vaadin-development-mode-detector" "^2.0.0"
@@ -542,10 +570,10 @@
   dependencies:
     "@polymer/polymer" "^3.0.0"
 
-"@vaadin/vaadin-overlay@^3.4.0":
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-overlay/-/vaadin-overlay-3.5.0.tgz#352b896f5a4ada97ae4f75721fdae553c5bb267b"
-  integrity sha512-w5Q4eTcbMictY1+FxeZk107Jf/dqSKwcC5QQ2osIGHixTC8ZyNsglKH0JeX4bBMKgNgby02GmxRCj4TPWz/D3Q==
+"@vaadin/vaadin-overlay@^3.5.0":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-overlay/-/vaadin-overlay-3.5.1.tgz#c4391b3c6c1f7a512b0a6f0dd96f11480feed402"
+  integrity sha512-0g+poK/BXF92L2lSKrHMY5rcKzUxCBZNzP/NDwgi4a86nbjL7CAKKZdno7Yl+j8UsTR76nOEw4fAYTFi86B0qg==
   dependencies:
     "@polymer/polymer" "^3.0.0"
     "@vaadin/vaadin-element-mixin" "^2.4.0"
@@ -553,16 +581,16 @@
     "@vaadin/vaadin-material-styles" "^1.2.0"
     "@vaadin/vaadin-themable-mixin" "^1.6.1"
 
-"@vaadin/vaadin-progress-bar@^1.x":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-progress-bar/-/vaadin-progress-bar-1.2.0.tgz#c8b362bb3f1dba7dbca930e74c1f21534c7b7f38"
-  integrity sha512-Yx7thw2KcPQtiFK7eA2pPmWn7xMaeb/yKGOPEMT4Jo7TMQtzl78wx1uy45+Ki/oX2lwZMNu3PuCa3rQNZzu1+Q==
+"@vaadin/vaadin-progress-bar@^1.3.0", "@vaadin/vaadin-progress-bar@^1.x":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-progress-bar/-/vaadin-progress-bar-1.3.0.tgz#d18485e3064accea52e567b6235fa05d3e3309ef"
+  integrity sha512-kPkG2M99UHHJVMX8TNN++KdU/rLTsDuDTNLUypcNVWDGDo0oHOY2P29yqwu8x6rGM3bIzgyQIgNSukKmIAjYcQ==
   dependencies:
     "@polymer/polymer" "^3.0.0"
-    "@vaadin/vaadin-element-mixin" "^2.3.0"
+    "@vaadin/vaadin-element-mixin" "^2.4.1"
     "@vaadin/vaadin-lumo-styles" "^1.1.0"
     "@vaadin/vaadin-material-styles" "^1.1.0"
-    "@vaadin/vaadin-themable-mixin" "^1.2.1"
+    "@vaadin/vaadin-themable-mixin" "^1.6.1"
 
 "@vaadin/vaadin-split-layout@^4.x":
   version "4.2.0"
@@ -576,7 +604,7 @@
     "@vaadin/vaadin-material-styles" "^1.1.0"
     "@vaadin/vaadin-themable-mixin" "^1.2.1"
 
-"@vaadin/vaadin-text-field@^2.1.1", "@vaadin/vaadin-text-field@^2.6.0":
+"@vaadin/vaadin-text-field@^2.1.1":
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/@vaadin/vaadin-text-field/-/vaadin-text-field-2.6.0.tgz#a7d4cf9673751977cd0cf404fad0d2092d48d3a6"
   integrity sha512-ErwPR67Fq1Zw9VWdj1ZHPk5JuNR0n+lMQk2wH7JmH1xibzXC20t2qkgaJUDnT5YpJ4Ap+7ZypUxBKWcbDu9D3A==
@@ -588,13 +616,38 @@
     "@vaadin/vaadin-material-styles" "^1.3.2"
     "@vaadin/vaadin-themable-mixin" "^1.2.1"
 
-"@vaadin/vaadin-themable-mixin@^1.2.1", "@vaadin/vaadin-themable-mixin@^1.5.2", "@vaadin/vaadin-themable-mixin@^1.6.1":
+"@vaadin/vaadin-text-field@^2.8.0":
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-text-field/-/vaadin-text-field-2.8.0.tgz#1774e335d85ee0d075eb37bc25e5f661ae1130e0"
+  integrity sha512-lHrcRsey5ABZW1qktLsspHtRDuiaKmhXdBFXOB52+NMB3V1CjFsLBPPL0cA+AtiFfZxRw5FuqbwfYaYOoFq82A==
+  dependencies:
+    "@polymer/polymer" "^3.0.0"
+    "@vaadin/vaadin-control-state-mixin" "^2.2.1"
+    "@vaadin/vaadin-element-mixin" "^2.4.1"
+    "@vaadin/vaadin-lumo-styles" "^1.6.0"
+    "@vaadin/vaadin-material-styles" "^1.3.2"
+    "@vaadin/vaadin-themable-mixin" "^1.6.1"
+
+"@vaadin/vaadin-themable-mixin@^1.2.1", "@vaadin/vaadin-themable-mixin@^1.6.1":
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@vaadin/vaadin-themable-mixin/-/vaadin-themable-mixin-1.6.1.tgz#febaeea211a23e3a9f060345252bfe101284a469"
   integrity sha512-UXjOlEfMEk/QxpBjpiO0QTjPOSiO88bhhtV+0UTfpqk8ILvJYO+6vbwcja33xY5Wi9sTAXtHixAjM0LthyXglQ==
   dependencies:
     "@polymer/polymer" "^3.0.0"
     lit-element "^2.0.0"
+
+"@vaadin/vaadin-upload@^4.x":
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-upload/-/vaadin-upload-4.4.0.tgz#32d8ba6e64ad3cacf7ac16d4a20142fab1240f3e"
+  integrity sha512-HLXotsPxJxQtjpUPBjY/lwM1n4GfzWo75vxKKZkdlh0NjYSmk7G6dq9iHyVp22zN4T03YwuTHwal6zvNoukXXg==
+  dependencies:
+    "@polymer/polymer" "^3.0.0"
+    "@vaadin/vaadin-button" "^2.4.0"
+    "@vaadin/vaadin-element-mixin" "^2.4.1"
+    "@vaadin/vaadin-lumo-styles" "^1.1.0"
+    "@vaadin/vaadin-material-styles" "^1.1.0"
+    "@vaadin/vaadin-progress-bar" "^1.3.0"
+    "@vaadin/vaadin-themable-mixin" "^1.6.1"
 
 "@vaadin/vaadin-usage-statistics@^2.1.0":
   version "2.1.0"
@@ -604,9 +657,9 @@
     "@vaadin/vaadin-development-mode-detector" "^2.0.0"
 
 "@webcomponents/shadycss@^1.9.1":
-  version "1.9.6"
-  resolved "https://registry.yarnpkg.com/@webcomponents/shadycss/-/shadycss-1.9.6.tgz#a8c5db867e49200a05cf8d5008029c09b7861979"
-  integrity sha512-5fFjvP0jQJZoXK6YzYeYcIDGJ5oEsdjr1L9VaYLw5yxNd4aRz4srMpwCwldeNG0A6Hvr9igbG7fCsBeiiCXd7A==
+  version "1.10.1"
+  resolved "https://registry.yarnpkg.com/@webcomponents/shadycss/-/shadycss-1.10.1.tgz#6f377b313c96a93a690f25206b32a20eada4b2a9"
+  integrity sha512-XEVDA7oH6o4Au9apyRDucjcIzvP44Ur4sqTMGRKCcE6sCAeKiOkRE03TCYNJAFkzckMWWT8Xx3IxG3iwjAcsRQ==
 
 clipboard@^2.0.0:
   version "2.0.6"
@@ -630,16 +683,16 @@ good-listener@^1.2.2:
     delegate "^3.1.2"
 
 lit-element@^2.0.0:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/lit-element/-/lit-element-2.3.1.tgz#73343b978fa1e73d60526c6bb6ad60f53a16c343"
-  integrity sha512-tOcUAmeO3BzwiQ7FGWdsshNvC0HVHcTFYw/TLIImmKwXYoV0E7zCBASa8IJ7DiP4cen/Yoj454gS0qqTnIGsFA==
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/lit-element/-/lit-element-2.4.0.tgz#b22607a037a8fc08f5a80736dddf7f3f5d401452"
+  integrity sha512-pBGLglxyhq/Prk2H91nA0KByq/hx/wssJBQFiYqXhGDvEnY31PRGYf1RglVzyLeRysu0IHm2K0P196uLLWmwFg==
   dependencies:
     lit-html "^1.1.1"
 
 lit-html@^1.1.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/lit-html/-/lit-html-1.2.1.tgz#1fb933dc1e2ddc095f60b8086277d4fcd9d62cc8"
-  integrity sha512-GSJHHXMGLZDzTRq59IUfL9FCdAlGfqNp/dEa7k7aBaaWD+JKaCjsAk9KYm2V12ItonVaYx2dprN66Zdm1AuBTQ==
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/lit-html/-/lit-html-1.3.0.tgz#c80f3cc5793a6dea6c07172be90a70ab20e56034"
+  integrity sha512-0Q1bwmaFH9O14vycPHw8C/IeHMk/uSDldVLIefu/kfbTBGIc44KGH6A8p1bDfxUfHdc8q6Ct7kQklWoHgr4t1Q==
 
 marked@~0.3.9:
   version "0.3.19"
@@ -647,14 +700,14 @@ marked@~0.3.9:
   integrity sha512-ea2eGWOqNxPcXv8dyERdSr/6FmzvWwzjMxpfGB/sbMccXoct+xY+YukPD+QTUZwyvK7BZwcr4m21WBOW41pAkg==
 
 moment@^2.24.0:
-  version "2.25.3"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.25.3.tgz#252ff41319cf41e47761a1a88cab30edfe9808c0"
-  integrity sha512-PuYv0PHxZvzc15Sp8ybUCoQ+xpyPWvjOuK72a5ovzp2LI32rJXOiIfyoFoYvG3s6EwwrdkMyWuRiEHSZRLJNdg==
+  version "2.28.0"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.28.0.tgz#cdfe73ce01327cee6537b0fafac2e0f21a237d75"
+  integrity sha512-Z5KOjYmnHyd/ukynmFd/WwyXHd7L4J9vTI/nn5Ap9AVUgaAE15VvQ9MOGmJJygEUklupqIrFnor/tjTwRU+tQw==
 
 prismjs@^1.11.0:
-  version "1.20.0"
-  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.20.0.tgz#9b685fc480a3514ee7198eac6a3bf5024319ff03"
-  integrity sha512-AEDjSrVNkynnw6A+B1DsFkd6AVdTnp+/WoUixFRULlCLZVRZlVQMVWio/16jv7G1FscUxQxOQhWwApgbnxr6kQ==
+  version "1.21.0"
+  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.21.0.tgz#36c086ec36b45319ec4218ee164c110f9fc015a3"
+  integrity sha512-uGdSIu1nk3kej2iZsLyDoJ7e9bnPzIgY0naW/HdknGj61zScaprVEVGHrPoXqI+M9sP0NDnTK2jpkvmldpuqDw==
   optionalDependencies:
     clipboard "^2.0.0"
 
