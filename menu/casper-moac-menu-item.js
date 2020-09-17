@@ -56,7 +56,7 @@ export class CasperMoacMenuItem extends PolymerElement {
         }
       </style>
       <div id="container">
-        <casper-icon-button disabled="[[disabled]]" icon="[[icon]]"></casper-icon-button>
+        <casper-icon-button with-border disabled="[[disabled]]" icon="[[icon]]"></casper-icon-button>
         <slot></slot>
       </div>
     `;

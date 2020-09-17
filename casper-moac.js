@@ -1296,7 +1296,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         if (!currentRowItem || row.hasAttribute('blink')) return;
 
         const rowBackgroundColor = this.__getRowBackgroundColor(currentRowItem);
-        Array.from(row.children).forEach((cell, cellIndex) => {
+        Array.from(row.children).forEach(cell => {
           cell.style.backgroundImage = 'none';
           cell.style.backgroundColor = rowBackgroundColor;
 
