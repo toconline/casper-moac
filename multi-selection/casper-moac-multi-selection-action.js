@@ -62,7 +62,7 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
         }
 
         casper-icon-button[with-text] {
-          padding: 5px 10px;
+          padding: 4px 8px;
         }
       </style>
 
