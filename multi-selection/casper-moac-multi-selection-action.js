@@ -56,12 +56,12 @@ class CasperMoacMultiSelectionAction extends PolymerElement {
         casper-icon-button {
           width: 25px;
           height: 25px;
-          padding: 5px;
+          padding: 4px;
           font-size: 12px;
           margin: 10px 2px 0;
         }
 
-        casper-icon-button[has-text] {
+        casper-icon-button[with-text] {
           padding: 5px 10px;
         }
       </style>

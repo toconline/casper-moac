@@ -6,6 +6,25 @@ export const CasperMoacSortingMixin = superClass => {
     /**
      * This method will handle the currently active sorters and re-fetch the items when the grid is lazy loaded
      * or sort locally otherwise everytime a sorter changes.
+     *
+     * @param {Object} event The event's object.
+     */
+    __removeActiveSorter (event) {
+      const path = event.target.dataset.path;
+
+      for (let sorterIndex = 0; sorterIndex < this.__sorters.length; sorterIndex++) {
+        const currentSorter = this.__sorters[sorterIndex];
+
+        if (currentSorter.path === path) {
+          currentSorter.direction = null;
+          return;
+        }
+      }
+    }
+
+    /**
+     * This method will handle the currently active sorters and re-fetch the items when the grid is lazy loaded
+     * or sort locally otherwise everytime a sorter changes.
      */
     __bindSorterEvents () {
       this.__activeSorters = [];

@@ -455,7 +455,7 @@ export const CasperMoacProperties = superClass => {
          *
          * @type {Boolean}
          */
-        __displayResetFiltersPill: {
+        __displayResetFiltersButton: {
           type: Boolean,
           value: false
         },

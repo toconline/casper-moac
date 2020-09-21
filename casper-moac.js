@@ -17,7 +17,6 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 import './sidebar/casper-moac-sidebar.js';
 import './sidebar/casper-moac-sidebar-item.js';
-import './components/casper-moac-pill.js';
 import './components/casper-moac-active-filter.js';
 import { CasperMoacProperties } from './casper-moac-properties.js';
 import { CasperMoacGridMixin } from './mixins/casper-moac-grid-mixin.js';
@@ -196,8 +195,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           background-color: var(--dark-primary-color);
         }
 
-        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header .header-title casper-moac-pill {
-          margin: 0;
+        .main-container vaadin-split-layout .left-side-container .header-container .active-filters .header .header-title casper-icon-button {
+          height: 25px;
+          padding: 4px 8px;
         }
 
         .main-container vaadin-split-layout .left-side-container .header-container .active-filters .active-filters-list {
@@ -251,6 +251,15 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
         .main-container vaadin-split-layout .left-side-container #active-sorters-container strong {
           margin-right: 10px;
+        }
+
+        .main-container vaadin-split-layout .left-side-container #active-sorters-container casper-icon-button {
+          height: 25px;
+          padding: 4px 8px;
+        }
+
+        .main-container vaadin-split-layout .left-side-container #active-sorters-container casper-icon-button:not(:last-of-type) {
+          margin-right: 8px;
         }
 
         /* Vaadin-grid */
@@ -345,7 +354,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         .main-container vaadin-split-layout .left-side-container .grid-container #floating-context-menu slot[name="floating-context-menu-actions"]::slotted(casper-icon) {
           width: 25px;
           height: 25px;
-          padding: 5px;
+          padding: 4px;
           border-radius: 50%;
           box-sizing: border-box;
           color: var(--primary-color);
@@ -398,8 +407,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
               <div class="active-filters">
                 <div class="header">
                   <div class="header-title">
-                  <!--Stale dataset icon-->
-                  <template is="dom-if" if="[[__staleDataset]]">
+                    <!--Stale dataset icon-->
+                    <template is="dom-if" if="[[__staleDataset]]">
                       <casper-icon
                         on-click="refreshItems"
                         icon="fa-regular:sync"
@@ -407,12 +416,16 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                       </casper-icon>
                     </template>
 
-                    <!--Reset filters Pill-->
-                    <template is="dom-if" if="[[__displayResetFiltersPill]]">
-                      <casper-moac-pill reverse on-click="__resetFilters">Repor filtros</casper-moac-pill>
+                    <!--Reset filters button-->
+                    <template is="dom-if" if="[[__displayResetFiltersButton]]">
+                      <casper-icon-button
+                        reverse
+                        text="Repor filtros"
+                        icon="fa-light:times"
+                        on-click="__resetFilters"></casper-icon-button>
                     </template>
 
-                    <template is="dom-if" if="[[!__displayResetFiltersPill]]">
+                    <template is="dom-if" if="[[!__displayResetFiltersButton]]">
                       <strong>Filtros ativos:</strong>
                     </template>
                   </div>
@@ -498,9 +511,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
               <div id="active-sorters-container">
                 <strong>Itens ordenados por:</strong>
                 <template is="dom-repeat" items="[[__activeSorters]]" as="activeSorter">
-                  <casper-moac-pill reverse id="[[activeSorter.path]]" on-click-callback="[[__removeActiveSorter]]">
-                    [[activeSorter.header]]
-                  </casper-moac-pill>
+                  <casper-icon-button
+                    reverse
+                    icon="fa-light:times"
+                    text="[[activeSorter.header]]"
+                    on-click="__removeActiveSorter"
+                    data-path$="[[activeSorter.path]]"></casper-icon-button>
                 </template>
               </div>
             </template>
@@ -621,18 +637,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       });
 
       multiSelectionElementObserver.observe(multiSelectionElement);
-    }
-
-    // This method gets invoked when the user clicks to remove an active sorter.
-    this.__removeActiveSorter = path => {
-      for (let sorterIndex = 0; sorterIndex < this.__sorters.length; sorterIndex++) {
-        const currentSorter = this.__sorters[sorterIndex];
-
-        if (currentSorter.path === path) {
-          currentSorter.direction = undefined;
-          return;
-        }
-      }
     }
   }
 
