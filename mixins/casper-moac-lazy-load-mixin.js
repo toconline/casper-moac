@@ -495,7 +495,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * This method will build the JSON API resource url with all the required parameters and filters.
      */
     buildResourceUrl () {
-      console.trace();
       let resourceUrlParams = [
         this.resourceTotalsMetaParam,
         `${this.resourcePageParam}=${this.__currentPage}`,
