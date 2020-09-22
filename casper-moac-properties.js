@@ -199,7 +199,8 @@ export const CasperMoacProperties = superClass => {
         filters: {
           type: Object,
           notify: true,
-          observer: '__filtersChanged'
+          observer: '__filtersChanged',
+          value: {}
         },
         /**
          * Boolean that when set to true, forces one item to be active all the time.

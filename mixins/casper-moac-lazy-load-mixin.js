@@ -325,7 +325,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
         const gridScrollerHeight = this.gridScroller.scrollHeight;
         const gridScrollerPosition = this.gridScroller.scrollTop + this.gridScroller.clientHeight;
 
-        // Re-fetch new items when the users scrolls past the 200px threshold.
+        // Re-fetch new items when the users scrolls past the 500px threshold.
         if (gridScrollerHeight - gridScrollerPosition <= 500) {
           this.__debounceFetchResourceItems();
         }
@@ -495,6 +495,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
      * This method will build the JSON API resource url with all the required parameters and filters.
      */
     buildResourceUrl () {
+      console.trace();
       let resourceUrlParams = [
         this.resourceTotalsMetaParam,
         `${this.resourcePageParam}=${this.__currentPage}`,
