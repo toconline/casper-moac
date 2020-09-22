@@ -39,6 +39,12 @@ class CasperMoacSortColumn extends GridColumnElement {
        * @type {Number}
        */
       sortOrder: Number,
+      /**
+       * The header's tooltip.
+       *
+       * @type {String}
+       */
+      tooltip: String,
     }
   }
 
@@ -81,7 +87,11 @@ class CasperMoacSortColumn extends GridColumnElement {
           }
         </style>
 
-        <div id="header-container" on-click="__toggleDirection" style="[[__getHeaderContainerAlignment()]]">
+        <div
+          id="header-container"
+          tooltip$="[[tooltip]]"
+          on-click="__toggleDirection"
+          style="[[__getHeaderContainerAlignment()]]">
           <span id="header-title">[[header]]</span>
 
           <div id="header-sort">
