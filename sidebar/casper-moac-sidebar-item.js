@@ -12,7 +12,7 @@ class CasperMoacSidebarItem extends PolymerElement {
        */
       sidebarOpened: {
         type: Boolean,
-        observer: '__sidebarOpenedChanged'
+        observer: '__openedChanged'
       },
       /**
        * The icon that will be used on the sidebar item's header.
@@ -46,7 +46,6 @@ class CasperMoacSidebarItem extends PolymerElement {
        */
       opened: {
         type: Boolean,
-        value: false,
         notify: true,
         observer: '__openedChanged'
       }
@@ -185,22 +184,14 @@ class CasperMoacSidebarItem extends PolymerElement {
     this.opened = false;
   }
 
-  __sidebarOpenedChanged (sidebarOpened) {
-    sidebarOpened
-      ? this.$.title.classList.remove('sidebar-item-header-title--collapsed')
-      : this.$.title.classList.add('sidebar-item-header-title--collapsed');
-  }
-
   /**
    * Observer that gets fired when the opened property changes and triggers the sidebar item opening / close animation.
-   *
-   * @param {Boolean} opened The current opened state of the sidebar item.
    */
-  __openedChanged (opened) {
+  __openedChanged () {
     afterNextRender(this, () => {
       const dropdownIcon = this.shadowRoot.querySelector('#header-dropdown-icon');
 
-      if (opened) {
+      if (this.opened && this.sidebarOpened) {
         this.$.outerBody.style.maxHeight = `${this.$.innerBody.scrollHeight}px`;
         if (dropdownIcon) dropdownIcon.setAttribute('rotate', true);
       } else {
