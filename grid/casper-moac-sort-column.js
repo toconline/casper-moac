@@ -51,55 +51,19 @@ class CasperMoacSortColumn extends GridColumnElement {
   static get template () {
     return html`
       <template class="header">
-        <style>
-          #header-container {
-            width: 100%;
-            display: inline-flex;
-            user-select: none;
-          }
-
-          #header-container:hover {
-            cursor: pointer;
-          }
-
-          #header-container #header-title {
-            flex-shrink: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-
-          #header-container #header-sort {
-            flex-shrink: 0;
-            margin-left: 5px;
-            display: flex;
-            align-items: center;
-          }
-
-          #header-container #header-sort casper-icon {
-            width: 15px;
-            height: 15px;
-            color: white;
-          }
-
-          #header-container #header-sort #header-sort-order {
-            width: 10px;
-            font-size: 10px;
-          }
-        </style>
-
         <div
-          id="header-container"
           tooltip$="[[tooltip]]"
           on-click="__toggleDirection"
+          class="casper-moac-sort-column"
           style="[[__getHeaderContainerAlignment()]]">
-          <span id="header-title">[[header]]</span>
+          <span class="header-title">[[header]]</span>
 
-          <div id="header-sort">
+          <div class="header-sort">
             <casper-icon icon="[[__getIcon(direction)]]" style="[[__getIconOpacity(direction)]]"></casper-icon>
 
             <!--Only display the sort order when there is more than one sort-->
             <template is="dom-if" if="[[sortOrder]]">
-              <span id="header-sort-order">[[sortOrder]]</span>
+              <span class="header-sort-order">[[sortOrder]]</span>
             </template>
           </div>
         </div>
@@ -131,7 +95,7 @@ class CasperMoacSortColumn extends GridColumnElement {
       : directions[0];
 
     // Manipulate the icon and opacity.
-    this.__headerIcon = this.__headerIcon || event.target.closest('#header-container').querySelector('casper-icon');
+    this.__headerIcon = this.__headerIcon || event.target.closest('.casper-moac-sort-column').querySelector('casper-icon');
     this.__headerIcon.icon = this.__getIcon(this.direction);
     this.__headerIcon.style = this.__getIconOpacity(this.direction);
   }
