@@ -40,6 +40,7 @@ export const CasperMoacGridMixin = superClass => {
             if (selectAllCheckbox && selectAllCheckbox.nodeName.toLowerCase() === 'vaadin-checkbox') {
               // Create a vaadin-checkbox to replace the default one which has bugs.
               this.__selectAllCheckbox = document.createElement('vaadin-checkbox');
+              this.__selectAllCheckbox.setAttribute('light', true);
               this.__selectAllCheckbox.addEventListener('checked-changed', event => {
                 // Lock the vaadin-checkbox event handler to avoid infinite loops.
                 if (this.__selectAllCheckboxLock) return;
