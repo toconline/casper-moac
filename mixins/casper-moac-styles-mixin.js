@@ -95,7 +95,6 @@ export const CasperMoacStylesMixin = superClass => {
           .main-container vaadin-split-layout .left-side-container .header-container {
             display: flex;
             flex-wrap: wrap;
-            margin-bottom: 10px;
             padding-bottom: 10px;
             justify-content: center;
             border-bottom: 1px solid var(--primary-color);
@@ -241,10 +240,8 @@ export const CasperMoacStylesMixin = superClass => {
           .main-container vaadin-split-layout .left-side-container .filters-container {
             display: grid;
             padding: 10px;
-            padding-top: 0;
             grid-row-gap: 10px;
             grid-column-gap: 10px;
-            margin-bottom: 10px;
             border-bottom: 1px solid var(--primary-color);
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
           }
@@ -269,7 +266,7 @@ export const CasperMoacStylesMixin = superClass => {
           }
 
           .main-container vaadin-split-layout .left-side-container #active-sorters-container {
-            padding: 10px 0;
+            padding: 10px;
             display: flex;
             font-size: 0.75em;
             align-items: center;
