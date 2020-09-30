@@ -108,6 +108,9 @@ export const CasperMoacFiltersMixin = superClass => {
       });
 
       this.setFiltersValue(newFiltersValues);
+
+      // Update the free filter as well.
+      this.$.filterInput.value = this.freeFilterValue = searchParams.get(this.freeFilterUrlParameterName) || '';
     }
 
     /**
