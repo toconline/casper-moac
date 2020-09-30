@@ -16,6 +16,16 @@ export const CasperMoacGridMixin = superClass => {
     }
 
     /**
+     * This method finds the physical row for a specific item id.
+     *
+     * @param {String | Number} itemId The item id we're looking for.
+     * @param {Boolean} useExternalProperty Flag that states which property we should use to find the row.
+     */
+    findGridRowByItemId (itemId, useExternalProperty = false) {
+      return this.__getAllTableRows().find(row => this.__compareItemWithId(row._item, itemId, useExternalProperty));
+    }
+
+    /**
      * This method adds a scroll event listener to paint the active row due to the grid's constant re-usage of rows and replaces the existing
      * vaadin-checkbox header since it the default codebase does not meet our requirements.
      */
