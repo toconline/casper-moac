@@ -10,7 +10,7 @@ export const CasperMoacGridMixin = superClass => {
       if (!this.__activeItem) return;
 
       // Make sure the active row is currently in view.
-      this.__scrollToItemIfNotVisible(this.__activeItem[this.idInternalProperty]);
+      this.scrollToItem(this.__activeItem[this.idInternalProperty]);
 
       afterNextRender(this, () => this.__getTableActiveCell().focus());
     }

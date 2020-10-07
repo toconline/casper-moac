@@ -372,7 +372,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
     if (rootItems.length > 0) this.activeItem = rootItems[0];
 
-    afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]));
+    afterNextRender(this, () => this.scrollToItem(this.activeItem[this.idInternalProperty]));
   }
 
   /**
@@ -422,7 +422,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.forceGridRedraw();
     this.__staleDataset = staleDataset;
 
-    afterNextRender(this, () => this.__scrollToItemIfNotVisible(this.activeItem[this.idInternalProperty]));
+    afterNextRender(this, () => this.scrollToItem(this.activeItem[this.idInternalProperty]));
   }
 
   /**
@@ -441,7 +441,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     const itemIndex = Math.min(...itemIndices);
     if (itemIndex === Infinity) return;
 
-    this.__scrollToItemIfNotVisible(this.displayedItems[itemIndex][this.idInternalProperty]);
+    this.scrollToItem(this.displayedItems[itemIndex][this.idInternalProperty]);
 
     afterNextRender(this, () => {
       const blinkingRows = this.__getAllTableRows().filter(row => itemsToRemove.includes(String(row._item[this.idExternalProperty])));
@@ -640,17 +640,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   }
 
   /**
-   * Scrolls to a specific item if he's not currently visible.
+   * Scrolls to a specific item.
    *
-   * @param {Number | String} itemId The identifer of the item that should be scrolled to if he's not currently visible.
+   * @param {Number | String} itemId The identifer of the item that should be scrolled to.
    */
-  __scrollToItemIfNotVisible (itemId, useExternalProperty = false) {
-    // Find the row which contains a specific item.
-    const row = this.__getAllTableRows().find(row => this.__compareItemWithId(row._item, itemId, useExternalProperty));
-
-    if (!row || !this.__isRowTotallyInView(row)) {
-      this.$.grid.scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
-    }
+  scrollToItem (itemId, useExternalProperty = false) {
+    this.$.grid.scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
   }
 
   /**
@@ -908,7 +903,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     let itemIndex = 0;
     if (this.__activateItemId) {
       itemIndex = this.__findItemIndexById(this.__activateItemId, true);
-      this.__scrollToItemIfNotVisible(this.__activateItemId, true);
+      this.scrollToItem(this.__activateItemId, true);
       this.__activateItemId = undefined;
     }
 
