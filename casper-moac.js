@@ -736,6 +736,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       const headerContainer = this.shadowRoot.querySelector('.header-container');
 
       afterNextRender(this, () => {
+        // Skip this behavior entirely if this component is hidden.
+        if (!this.offsetParent) return;
+
         headerContainer.offsetWidth < 600
           ? headerContainer.classList.add('header-container--responsive')
           : headerContainer.classList.remove('header-container--responsive');
