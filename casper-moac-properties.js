@@ -276,6 +276,15 @@ export const CasperMoacProperties = superClass => {
           value: false
         },
         /**
+         * This property changes the header background color.
+         *
+         * @type {String}
+         */
+        headerBackgroundColor: {
+          type: String,
+          observer: '__headerBackgroundColorChanged'
+        },
+        /**
          * Whether to display or not the number of results on the top-right corner of the filters.
          *
          * @type {Boolean}

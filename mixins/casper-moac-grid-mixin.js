@@ -153,5 +153,16 @@ export const CasperMoacGridMixin = superClass => {
     __getTableActiveCell () {
       return this.$.grid.shadowRoot.querySelector('td[tabindex="0"]');
     }
+
+    /**
+     * This method gets called when the headerBackgroundColor property changes.
+     */
+    __headerBackgroundColorChanged (headerBackgroundColor) {
+      afterNextRender(this, () => {
+        this.__getAllTableHeaders().forEach(tableHeader => {
+          tableHeader.style.backgroundColor = headerBackgroundColor;
+        });
+      });
+    }
   }
 };
