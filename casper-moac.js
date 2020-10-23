@@ -645,7 +645,12 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * @param {Number | String} itemId The identifer of the item that should be scrolled to.
    */
   scrollToItem (itemId, useExternalProperty = false) {
-    this.$.grid.scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
+    // Find the row which contains a specific item.
+    const row = this.__getAllTableRows().find(row => this.__compareItemWithId(row._item, itemId, useExternalProperty));
+
+    if (!row || !this.__isRowTotallyInView(row)) {
+      this.$.grid.scrollToIndex(this.__findItemIndexById(itemId, useExternalProperty));
+    }
   }
 
   /**
