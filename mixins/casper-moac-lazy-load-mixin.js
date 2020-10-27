@@ -355,6 +355,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
         // Check if all the required parameters were provided.
         if (missingProperties.length > 0) return;
 
+        // Make sure every casper-select is already rendered before proceeding.
+        if (Object.entries(this.filters).some(([filterKey, filterOptions]) => filterOptions.type === CasperMoacFilterTypes.CASPER_SELECT && !this.__getFilterComponent(filterKey))) {
+          return afterNextRender(this, () => { this.__debounceFetchResourceItems(); });
+        }
+
         this.__currentPage++;
 
         if (this.beforeJsonApiRequest) {
@@ -614,6 +619,18 @@ export const CasperMoacLazyLoadMixin = superClass => {
           const filterValue = this.__sanitizeValue(filter.value);
 
           switch (filter.lazyLoad.operator) {
+            // Numeric comparisons.
+            case CasperMoacOperators.EQUALS: return `${filter.lazyLoad.field} = ${filter.value}`;
+            case CasperMoacOperators.LESS_THAN: return `${filter.lazyLoad.field} < ${filter.value}`;
+            case CasperMoacOperators.GREATER_THAN: return `${filter.lazyLoad.field} > ${filter.value}`;
+            case CasperMoacOperators.LESS_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} <= ${filter.value}`;
+            case CasperMoacOperators.GREATER_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} >= ${filter.value}`;
+            // String comparisons.
+            case CasperMoacOperators.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${filterValue}%'`;
+            case CasperMoacOperators.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${filterValue}'`;
+            case CasperMoacOperators.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${filterValue}'`;
+            case CasperMoacOperators.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${filterValue}% '`;
+            case CasperMoacOperators.DOES_NOT_CONTAIN: return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${filterValue}% '`;
             // Array comparisons.
             case CasperMoacOperators.IN:
             case CasperMoacOperators.NOT_IN:
@@ -638,18 +655,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
               } else if (filterComponent.endDate) {
                 return `${filter.lazyLoad.field} <= '${filterComponent.endDate}'`;
               }
-            // String comparisons.
-            case CasperMoacOperators.CONTAINS: return `${filter.lazyLoad.field}::TEXT ILIKE '%${filterValue}%'`;
-            case CasperMoacOperators.ENDS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '%${filterValue}'`;
-            case CasperMoacOperators.EXACT_MATCH: return `${filter.lazyLoad.field}::TEXT ILIKE '${filterValue}'`;
-            case CasperMoacOperators.STARTS_WITH: return `${filter.lazyLoad.field}::TEXT ILIKE '${filterValue}% '`;
-            case CasperMoacOperators.DOES_NOT_CONTAIN: return `${filter.lazyLoad.field}::TEXT NOT ILIKE '%${filterValue}% '`;
-            // Numeric comparisons.
-            case CasperMoacOperators.EQUALS: return `${filter.lazyLoad.field} = ${filter.value}`;
-            case CasperMoacOperators.LESS_THAN: return `${filter.lazyLoad.field} < ${filter.value}`;
-            case CasperMoacOperators.GREATER_THAN: return `${filter.lazyLoad.field} > ${filter.value}`;
-            case CasperMoacOperators.LESS_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} <= ${filter.value}`;
-            case CasperMoacOperators.GREATER_THAN_OR_EQUAL_TO: return `${filter.lazyLoad.field} >= ${filter.value}`;
             // Custom comparisons.
             case CasperMoacOperators.CUSTOM:
               let customQuery = filter.lazyLoad.field;
@@ -658,11 +663,6 @@ export const CasperMoacLazyLoadMixin = superClass => {
               // Only allow custom queries per value in single-selection casper-select based filters.
               if (filter.type === CasperMoacFilterTypes.CASPER_SELECT) {
                 const filterComponent = this.__getFilterComponent(filterItem.filterKey);
-
-                // This means the casper-select is not in the DOM yet or does not have the selected items.
-                if (!filterComponent || !filterComponent.selectedItems || Object.keys(filterComponent.selectedItems).length === 0) {
-                  return this.__buildResourceUrlFixedFilters();
-                }
 
                 // Check if every selected item has the customQuery property.
                 const selectedItems = [filterComponent.selectedItems].flat();
