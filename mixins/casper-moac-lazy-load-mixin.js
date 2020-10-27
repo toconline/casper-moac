@@ -660,7 +660,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
                 const filterComponent = this.__getFilterComponent(filterItem.filterKey);
 
                 // Check if every selected item has the customQuery property.
-                const selectedItems = [...filterComponent.selectedItems];
+                const selectedItems = [filterComponent.selectedItems].flat();
                 if (selectedItems.every(selectedItem => !!selectedItem[this.resourceCustomQueryKey])) {
                   customQuery = `(${selectedItems.map(selectedItem => selectedItem[this.resourceCustomQueryKey]).join(' OR ')})`;
                 }
