@@ -659,6 +659,11 @@ export const CasperMoacLazyLoadMixin = superClass => {
               if (filter.type === CasperMoacFilterTypes.CASPER_SELECT) {
                 const filterComponent = this.__getFilterComponent(filterItem.filterKey);
 
+                // This means the casper-select is not in the DOM yet or does not have the selected items.
+                if (!filterComponent || !filterComponent.selectedItems || Object.keys(filterComponent.selectedItems).length === 0) {
+                  return this.__buildResourceUrlFixedFilters();
+                }
+
                 // Check if every selected item has the customQuery property.
                 const selectedItems = [filterComponent.selectedItems].flat();
                 if (selectedItems.every(selectedItem => !!selectedItem[this.resourceCustomQueryKey])) {
