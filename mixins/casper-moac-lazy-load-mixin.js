@@ -4,6 +4,8 @@ import {
   CasperMoacSortDirections,
 } from '../casper-moac-constants.js';
 
+import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
+
 export const CasperMoacLazyLoadMixin = superClass => {
   return class extends superClass {
 
@@ -355,10 +357,18 @@ export const CasperMoacLazyLoadMixin = superClass => {
         // Check if all the required parameters were provided.
         if (missingProperties.length > 0) return;
 
-        // Make sure every casper-select is already rendered before proceeding.
-        if (Object.entries(this.filters).some(([filterKey, filterOptions]) => filterOptions.type === CasperMoacFilterTypes.CASPER_SELECT && !this.__getFilterComponent(filterKey))) {
-          return afterNextRender(this, () => { this.__debounceFetchResourceItems(); });
-        }
+        // Make sure every casper-select is already rendered and have selected items before proceeding.
+        const missingComponent = Object.entries(this.filters).some(([filterKey, filterOptions]) => {
+          const filterComponent = this.__getFilterComponent(filterKey);
+
+          return !filterComponent || (
+            filterOptions.type === CasperMoacFilterTypes.CASPER_SELECT &&
+            Object.keys(filterComponent.selectedItems).length === 0 &&
+            this.__valueIsNotEmpty(filterOptions.value)
+          );
+        });
+
+        if (missingComponent) return afterNextRender(this, () => { this.__debounceFetchResourceItems(); });
 
         this.__currentPage++;
 
