@@ -876,7 +876,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     if (this.$.filterInput.value.trim() && originalItems.length > 0) {
       // Either retrieve the list of filter attributes from the properties or from the first item's existing keys.
       let filterAttributes = this.resourceFilterAttributes;
-      if (!filterAttributes) filterAttributes = Object.keys(originalItems[0]);
+      if (!filterAttributes || filterAttributes.length === 0) filterAttributes = Object.keys(originalItems[0]);
 
       if (filterAttributes) {
         const filterTerm = this.__normalizeVariable(this.$.filterInput.value);
