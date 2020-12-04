@@ -338,7 +338,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     elementToHide.style.display = 'none';
 
     elementToDisplay.style.width = '100%';
-    elementToDisplay.style.display = 'block';
+    elementToDisplay.style.display = '';
   }
 
   /**
