@@ -1178,6 +1178,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * @param {Boolean} useExternalProperty This flag states which identifier should be used - internal ou external.
    */
   __compareItems (previousItem, nextItem, useExternalProperty = false) {
+    // This check is required to avoid accessing properties of a null.
+    if (!previousItem || !nextItem) return;
+
     return useExternalProperty
       ? String(previousItem[this.idExternalProperty]) === String(nextItem[this.idExternalProperty])
       : String(previousItem[this.idInternalProperty]) === String(nextItem[this.idInternalProperty]);
