@@ -422,6 +422,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.forceGridRedraw();
     this.__staleDataset = staleDataset;
 
+    if (!this.activeItem) return;
+
     afterNextRender(this, () => this.scrollToItem(this.activeItem[this.idInternalProperty]));
   }
 
