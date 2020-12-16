@@ -10,16 +10,11 @@ export const CasperMoacHistoryMixin = superClass => {
           const nextHistoryState = this.filters[b].historyState;
           const previousHistoryState = this.filters[a].historyState;
 
-          if ((nextHistoryState === undefined || nextHistoryState.priority === undefined) &&
-            (previousHistoryState === undefined || previousHistoryState.priority === undefined)) return 0;
+          if (nextHistoryState?.priority === undefined && previousHistoryState?.priority === undefined) return 0;
+          if (nextHistoryState?.priority === undefined) return -1;
+          if (previousHistoryState?.priority === undefined) return 1;
 
-          if (nextHistoryState === undefined || nextHistoryState.priority === undefined) return -1;
-          if (previousHistoryState === undefined || previousHistoryState.priority === undefined) return 1;
-
-          if (previousHistoryState.priority < nextHistoryState.priority) return -1;
-          if (previousHistoryState.priority > nextHistoryState.priority) return 1;
-
-          return 0;
+          return previousHistoryState.priority - nextHistoryState.priority;
         });
     }
 
