@@ -416,6 +416,13 @@ export const CasperMoacProperties = superClass => {
           value: '__parent'
         },
         /**
+         * When this property contains a value, all the URL params will be prefixed to avoid collision with other
+         * components which may be present.
+         *
+         * @type {String}
+         */
+        prefixUrlParams: String,
+        /**
          * List of attributes that should be used to filter.
          *
          * @type {Array}
