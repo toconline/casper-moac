@@ -38,7 +38,7 @@ export const CasperMoacHistoryMixin = superClass => {
         }
       });
 
-      const freeFilterUrlParam = this.__getUrlKeyWithPreffix(this.freeFilterUrlParameterName);
+      const freeFilterUrlParam = this.__getUrlKeyWithPrefix(this.freeFilterUrlParameterName);
       searchParams.delete(freeFilterUrlParam);
       if (this.freeFilterValue) {
         searchParams.set(freeFilterUrlParam, this.freeFilterValue);
@@ -92,7 +92,7 @@ export const CasperMoacHistoryMixin = superClass => {
      * @param {String} filterKey The filter identifier.
      */
     __getUrlKeyForFilter (filterKey) {
-      let parameterName = this.__getUrlKeyWithPreffix(filterKey);
+      let parameterName = this.__getUrlKeyWithPrefix(filterKey);
 
       const historyState = this.filters[filterKey].historyState;
       if (historyState && historyState.key) {
@@ -103,11 +103,11 @@ export const CasperMoacHistoryMixin = superClass => {
     }
 
     /**
-     * Preffixes an URL parameter if this behaviour was opted-in.
+     * Prefixes an URL parameter if this behaviour was opted-in.
      *
      * @param {String} urlParameter The URL parameter.
      */
-    __getUrlKeyWithPreffix (urlParameter) {
+    __getUrlKeyWithPrefix (urlParameter) {
       return !this.prefixUrlParams
         ? urlParameter
         : this.prefixUrlParams + urlParameter.charAt(0).toUpperCase() + urlParameter.slice(1);

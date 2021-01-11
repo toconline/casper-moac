@@ -128,8 +128,13 @@ export const CasperMoacFiltersMixin = superClass => {
       const searchParams = new URLSearchParams(window.location.search);
       const localStorageFilters = this.__retrieveFiltersFromLocalStorage();
 
+      // This object will contain the origin of each filter's initial value.
+      const filtersValueOrigins = {};
+
       // Transform the filters object into an array to use in a dom-repeat.
       this.__filters = Object.entries(filters).map(([filterKey, filter]) => {
+        filtersValueOrigins[filterKey] = { value: this.__valueIsNotEmpty(filter.value), localStorage: false, url: false };
+
         // Save the initial value provided by the developer.
         let filterValue = filter.value;
         this.__initialFiltersValues[filterKey] = filterValue;
@@ -137,6 +142,7 @@ export const CasperMoacFiltersMixin = superClass => {
         // Override the filter's default value if it's present in the local storage.
         if (this.__localStorageFilters.includes(filterKey) && localStorageFilters.hasOwnProperty(filterKey)) {
           filterValue = localStorageFilters[filterKey];
+          filtersValueOrigins[filterKey] = { value: false, localStorage: true, url: false };
         }
 
         // Override the filter's default value if it's present in the URL.
@@ -144,6 +150,7 @@ export const CasperMoacFiltersMixin = superClass => {
           const parameterName = this.__getUrlKeyForFilter(filterKey);
           if (searchParams.has(parameterName)) {
             filterValue = this.__getValueFromPrettyUrl(filter, searchParams.get(parameterName));
+            filtersValueOrigins[filterKey] = { value: false, localStorage: false, url: true };
           }
         }
 
@@ -166,6 +173,12 @@ export const CasperMoacFiltersMixin = superClass => {
       !this.lazyLoad
         ? this.__filterItems()
         : this.__filterLazyLoadItems();
+
+      this.dispatchEvent(new CustomEvent('filters-initialized', {
+        bubbles: true,
+        composed: true,
+        detail: filtersValueOrigins
+      }));
 
       afterNextRender(this, () => {
         this.__bindFiltersEvents();
