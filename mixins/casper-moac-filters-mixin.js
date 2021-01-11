@@ -174,11 +174,13 @@ export const CasperMoacFiltersMixin = superClass => {
         ? this.__filterItems()
         : this.__filterLazyLoadItems();
 
-      this.dispatchEvent(new CustomEvent('filters-initialized', {
-        bubbles: true,
-        composed: true,
-        detail: filtersValueOrigins
-      }));
+      if (Object.keys(filtersValueOrigins) > 0) {
+        this.dispatchEvent(new CustomEvent('filters-initialized', {
+          bubbles: true,
+          composed: true,
+          detail: filtersValueOrigins
+        }));
+      }
 
       afterNextRender(this, () => {
         this.__bindFiltersEvents();
