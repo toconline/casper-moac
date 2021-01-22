@@ -10,16 +10,11 @@ export const CasperMoacHistoryMixin = superClass => {
           const nextHistoryState = this.filters[b].historyState;
           const previousHistoryState = this.filters[a].historyState;
 
-          if ((nextHistoryState === undefined || nextHistoryState.priority === undefined) &&
-            (previousHistoryState === undefined || previousHistoryState.priority === undefined)) return 0;
+          if (nextHistoryState?.priority === undefined && previousHistoryState?.priority === undefined) return 0;
+          if (nextHistoryState?.priority === undefined) return -1;
+          if (previousHistoryState?.priority === undefined) return 1;
 
-          if (nextHistoryState === undefined || nextHistoryState.priority === undefined) return -1;
-          if (previousHistoryState === undefined || previousHistoryState.priority === undefined) return 1;
-
-          if (previousHistoryState.priority < nextHistoryState.priority) return -1;
-          if (previousHistoryState.priority > nextHistoryState.priority) return 1;
-
-          return 0;
+          return previousHistoryState.priority - nextHistoryState.priority;
         });
     }
 
@@ -43,9 +38,10 @@ export const CasperMoacHistoryMixin = superClass => {
         }
       });
 
-      searchParams.delete(this.freeFilterUrlParameterName);
+      const freeFilterUrlParam = this.__getUrlKeyWithPrefix(this.freeFilterUrlParameterName);
+      searchParams.delete(freeFilterUrlParam);
       if (this.freeFilterValue) {
-        searchParams.set(this.freeFilterUrlParameterName, this.freeFilterValue);
+        searchParams.set(freeFilterUrlParam, this.freeFilterValue);
       }
 
       const searchParamsText = searchParams.toString();
@@ -60,7 +56,7 @@ export const CasperMoacHistoryMixin = superClass => {
      * @param {Object} historyState The current's filter history state settings.
      * @param {String} prettyValueInUrl The value that is in the URL for the current filter.
      */
-    __getValueFromPrettyUrl ({ historyState, type }, prettyValueInUrl) {
+    __getValueFromPrettyUrl ({ historyState }, prettyValueInUrl) {
       if (historyState && historyState.prettyValues) {
         // Find the key which value matches with the parameter present in the URL.
         const filterValue = Object.keys(historyState.prettyValues).find(prettyValue => {
@@ -79,7 +75,7 @@ export const CasperMoacHistoryMixin = superClass => {
      * @param {Object} historyState The current filter's history state settings.
      * @param {String} value The current filter's value.
      */
-    __getPrettyValueForUrl ({ historyState, value, type }) {
+    __getPrettyValueForUrl ({ historyState, value }) {
       if (historyState
         && !historyState.disabled
         && historyState.prettyValues
@@ -96,7 +92,7 @@ export const CasperMoacHistoryMixin = superClass => {
      * @param {String} filterKey The filter identifier.
      */
     __getUrlKeyForFilter (filterKey) {
-      let parameterName = filterKey;
+      let parameterName = this.__getUrlKeyWithPrefix(filterKey);
 
       const historyState = this.filters[filterKey].historyState;
       if (historyState && historyState.key) {
@@ -104,6 +100,17 @@ export const CasperMoacHistoryMixin = superClass => {
       }
 
       return parameterName;
+    }
+
+    /**
+     * Prefixes an URL parameter if this behaviour was opted-in.
+     *
+     * @param {String} urlParameter The URL parameter.
+     */
+    __getUrlKeyWithPrefix (urlParameter) {
+      return !this.prefixUrlParams
+        ? urlParameter
+        : this.prefixUrlParams + urlParameter.charAt(0).toUpperCase() + urlParameter.slice(1);
     }
   }
 };

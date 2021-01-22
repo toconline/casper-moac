@@ -720,8 +720,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   __bindSearchInputEvents () {
     const searchParams = new URLSearchParams(window.location.search);
-    if (searchParams.has(this.freeFilterUrlParameterName)) {
-      this.$.filterInput.value = this.freeFilterValue = searchParams.get(this.freeFilterUrlParameterName);
+    const freeFilterUrlParam = this.__getUrlKeyWithPrefix(this.freeFilterUrlParameterName);
+
+    if (searchParams.has(freeFilterUrlParam)) {
+      this.$.filterInput.value = this.freeFilterValue = searchParams.get(freeFilterUrlParam);
       this.$.filterInputIcon.icon = 'fa-regular:times';
       this.__updateFilterInputStyles(true);
     } else {
