@@ -134,7 +134,6 @@ export const CasperMoacFiltersMixin = superClass => {
       // Transform the filters object into an array to use in a dom-repeat.
       this.__filters = Object.entries(filters).map(([filterKey, filter]) => {
         filtersValueOrigins[filterKey] = { value: this.__valueIsNotEmpty(filter.value), localStorage: false, url: false };
-
         // Save the initial value provided by the developer.
         let filterValue = filter.value;
         this.__initialFiltersValues[filterKey] = filterValue;
@@ -174,7 +173,7 @@ export const CasperMoacFiltersMixin = superClass => {
         ? this.__filterItems()
         : this.__filterLazyLoadItems();
 
-      if (Object.keys(filtersValueOrigins) > 0) {
+      if (Object.keys(filtersValueOrigins).length > 0) {
         this.dispatchEvent(new CustomEvent('filters-initialized', {
           bubbles: true,
           composed: true,
