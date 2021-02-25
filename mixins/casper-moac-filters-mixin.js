@@ -446,23 +446,42 @@ export const CasperMoacFiltersMixin = superClass => {
     }
 
     /**
+     * Dispatches a custom event that'll alert the page that the filters have been resetted.
+     *
+     * @param {String | Array} filter The filter(s) that have been resetted.
+     */
+    __dispatchFilterResetted (filter) {
+      // Dispatches the custom event to inform the page using casper-moac that the filters have been resetted.
+      this.dispatchEvent(new CustomEvent('filters-resetted', {
+        bubbles: true,
+        composed: true,
+        detail: { filter: filter }
+      }));
+    }
+
+
+    /**
      * Resets the filters to the initial values.
      */
     __resetFilters () {
+
       this.__displayResetFiltersButton = false;
 
       const resetFiltersValue = {};
 
-      Object.keys(this.filters).forEach(filterKey => {
-        !this.__initialFiltersValues.hasOwnProperty(filterKey)
-          ? resetFiltersValue[filterKey] = ''
-          : resetFiltersValue[filterKey] = this.__initialFiltersValues[filterKey] || '';
+      Object.entries(this.filters).forEach(([filterKey, filterObj]) => {
+        const value = !this.__initialFiltersValues.hasOwnProperty(filterKey) ? '' : this.__initialFiltersValues[filterKey] || '';
+        if (value != filterObj.value || !this.lazyLoad) resetFiltersValue[filterKey] = value;
       });
 
       this.setFiltersValue(resetFiltersValue, false);
-      this.lazyLoad
-        ? this.refreshItems()
-        : this.__dispatchFilterChangedEvent(Object.keys(resetFiltersValue));
+
+      if (this.lazyLoad) {
+        this.refreshItems();
+        this.__dispatchFilterResetted(Object.keys(resetFiltersValue));
+      } else {
+        this.__dispatchFilterChangedEvent(Object.keys(resetFiltersValue));
+      }
     }
 
     /**
