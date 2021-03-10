@@ -313,6 +313,10 @@ export const CasperMoacLazyLoadMixin = superClass => {
         this.__activateItemId = activateItemId;
       }
 
+      // Reset resource children cache & expandedItems on refresh items
+      this.expandedItems = [];
+      this.__resourceChildrenCache = {};
+
       this.__debounceFetchResourceItems();
     }
 
