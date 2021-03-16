@@ -169,9 +169,13 @@ export const CasperMoacFiltersMixin = superClass => {
       });
 
       // Since we already have all the values ready, filter the items.
-      !this.lazyLoad
-        ? this.__filterItems()
-        : this.__filterLazyLoadItems();
+      if (this.lazyLoad) {
+        this.__filterLazyLoadItems();
+      } else if (this.treeGrid) {
+        this.refreshTreeItems();
+      } else {
+        this.__filterItems();
+      }
 
       if (Object.keys(filtersValueOrigins).length > 0) {
         this.dispatchEvent(new CustomEvent('filters-initialized', {

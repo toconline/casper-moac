@@ -27,6 +27,7 @@ import { CasperMoacHistoryMixin } from './mixins/casper-moac-history-mixin.js';
 import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
 import { CasperMoacContextMenuMixin } from './mixins/casper-moac-context-menu-mixin.js';
 import { CasperMoacLocalStorageMixin } from './mixins/casper-moac-local-storage-mixin.js';
+import { CasperMoacTreeMixin } from './mixins/casper-moac-tree-mixin.js';
 import { CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 
 export class CasperMoac extends CasperMoacLazyLoadMixin(
@@ -37,7 +38,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           CasperMoacSortingMixin(
             CasperMoacContextMenuMixin(
               CasperMoacLocalStorageMixin(
-                CasperMoacHistoryMixin(PolymerElement))))))))) {
+                CasperMoacTreeMixin(
+                  CasperMoacHistoryMixin(PolymerElement)))))))))) {
 
   static get observers () {
     return [
@@ -284,9 +286,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     }
 
     // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
-    this.lazyLoad
-      ? this.__initializeLazyLoad()
-      : afterNextRender(this, () => this.__filterItems());
+    if (this.lazyLoad) {
+      this.__initializeLazyLoad();
+    } else if (this.treeGrid) {
+      this._initializeTreeGrid();
+    } else {
+      afterNextRender(this, () => this.__filterItems());
+    }
 
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
     this.__bindSorterEvents();
@@ -903,9 +909,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.displayedItems = this.__addInternalIdentifierToItems(this.__sortItems(displayedItems));
     this.forceGridRedraw();
     this.__activateItem();
-    this.__numberOfResults = displayedItems.length === originalItems.length
-      ? `${displayedItems.length} ${this.multiSelectionLabel}`
-      : `${displayedItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
+
+    if (!this.treeGrid) {
+      this.__numberOfResults = displayedItems.length === originalItems.length
+        ? `${displayedItems.length} ${this.multiSelectionLabel}`
+        : `${displayedItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
+    } else {
+      this.__numberOfResults = `${this._userArray.length} de ${this._allIdsArray.length} ${this.multiSelectionLabel}`;
+    }
   }
 
   /**

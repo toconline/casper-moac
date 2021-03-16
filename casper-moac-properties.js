@@ -448,6 +448,15 @@ export const CasperMoacProperties = superClass => {
           value: () => [],
           observer: '__selectedItemsChanged'
         },
+         /**
+         * Flag used to activate the casper-moac's tree grid mode.
+         *
+         * @type {Boolean}
+         */
+        treeGrid: {
+          type: Boolean,
+          value: false
+        },
         /**
          * This property is used to mark the range's start and end fields as not required.
          *
