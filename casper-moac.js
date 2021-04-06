@@ -915,7 +915,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
         ? `${displayedItems.length} ${this.multiSelectionLabel}`
         : `${displayedItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
     } else {
-      this.__numberOfResults = `${this._userArray.length} de ${this._allIdsArray.length} ${this.multiSelectionLabel}`;
+      this.__numberOfResults = `${this._sizeUserIds} de ${this._sizeAllIds} ${this.multiSelectionLabel}`;
     }
   }
 

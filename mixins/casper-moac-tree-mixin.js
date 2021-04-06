@@ -13,22 +13,38 @@ export const CasperMoacTreeMixin = superClass => {
           value: 100
         },
         /**
-         * Array of objects that contain all of the ids with their parent
+         * Number of all the items in the resource
          *
-         * @type {Array}
+         * @type {Number}
          */
-         _allIdsArray: {
-          type: Array,
-          value: []
+         _sizeAllIds: {
+          type: Number,
+          value: 0
         },
         /**
-         * Array that contains all the ids that the user requested
+         * Number of items in the user array
          *
-         * @type {Array}
+         * @type {Number}
          */
-         _userArray: {
-          type: Array,
-          value: []
+         _sizeUserIds: {
+          type: Number,
+          value: 0
+        },
+        /**
+         * Id of the first item in the user array
+         *
+         * @type {Number}
+         */
+         _userFirstId: {
+          type: Number
+        },
+        /**
+         * Id of the last item in the user array
+         *
+         * @type {Number}
+         */
+         _userLastId: {
+          type: Number
         },
         /**
          * Array that contains all the items that are rendered in the grid (length <= _maxNrOFItems)
@@ -47,6 +63,19 @@ export const CasperMoacTreeMixin = superClass => {
         _treeColumn: {
           type: Object,
           value: {}
+        },
+        /**
+         * Array that contains all the ids that were expanded by the user
+         *
+         * @type {Array}
+         */
+         _expandedIds: {
+          type: Array,
+          value: []
+        },
+        _treeGrid: {
+          type: Boolean,
+          value: true
         }
       }
     }
@@ -56,20 +85,17 @@ export const CasperMoacTreeMixin = superClass => {
       try {
         this.loading = true;
 
-        const apiResponse = await this.app.broker.get(`${this.treeResource}?fields[${this.treeResource}]=parent_id`, 300000);
-
-        // Get all the items ids and parents
-        this._allIdsArray = apiResponse.data;
-
-
-
-        // Get orphans
-        this._userArray = this._allIdsArray.filter(item => item.parent_id === null).map(item => { return {id: item.id} });
-
+        const subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, 'parent_id', 3000);
+        this._sizeAllIds  = subscribeResponse.all_ids_size;
+        this._sizeUserIds = subscribeResponse.user_ids_size;
+        this._userFirstId = subscribeResponse.user_first_id;
+        this._userLastId  = subscribeResponse.user_last_id;
         await this._renderItems();
 
       } catch (exception) {
         this.loading = false;
+
+        console.error(exception);
 
         let errorMessage = 'Ocorreu um erro a carregar os dados.';
 
@@ -86,39 +112,43 @@ export const CasperMoacTreeMixin = superClass => {
     }
 
     // Public methods that expands a node given an event (for the on click) or given the id of the parent node
-    expand (event, parentId = undefined) {
-      if (!parentId) parentId = event.detail.parent_id;
+    async expand (event, parentId = undefined) {
+      console.time('expand');
 
+      if (!parentId) parentId = event.detail.parent_id;
       this._newActiveItemId = parentId;
 
-      const children = this._allIdsArray.filter(item => (item.parent_id == parentId)).map(a => {return {id: a.id}});
-
-      // Careful with duplicates
-      const parentIdx = this._findWithAttr(this._userArray, 'id', parentId);
-      this._userArray.splice(parentIdx+1, 0, ...children);
-      this._userArray = [...new Set(this._userArray)];
-      this._userArray[parentIdx].expanded = true;
-
-      this._renderItems();
+      try {
+        const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, +this._newActiveItemId, 3000);
+        this._sizeUserIds = expandResponse.user_ids_size;
+        this._userFirstId = expandResponse.user_first_id;
+        this._userLastId  = expandResponse.user_last_id;
+        console.timeEnd('expand');
+        this._renderItems();
+      } catch (error) {
+        console.timeEnd('expand');
+        console.error(error);
+      }
     }
 
     // Public method that collapses the nodes given an event (for the on click) or given the id of the parent node
-    collapse (event, parentId = undefined) {
+    async collapse (event, parentId = undefined) {
       console.time('collapse');
 
       if (!parentId) parentId = event.detail.parent_id;
-
       this._newActiveItemId = parentId;
 
-      const children = this._allIdsArray.filter(item => (item.parent_id == parentId)).map(a => a.id);
-
-      this._deleteItems(children);
-
-      const parentIdx = this._findWithAttr(this._userArray, 'id', parentId);
-      this._userArray[parentIdx].expanded = false;
-
-      console.timeEnd('collapse');
-      this._renderItems();
+      try {
+        const collapseResponse = await this.app.socket2.collapseLazyload(this.treeResource, +this._newActiveItemId, 3000);
+        this._sizeUserIds = collapseResponse.user_ids_size;
+        this._userFirstId = collapseResponse.user_first_id;
+        this._userLastId  = collapseResponse.user_last_id;
+        console.timeEnd('collapse');
+        this._renderItems();
+      } catch (error) {
+        console.timeEnd('collapse');
+        console.error(error);
+      }
     }
 
     _initializeTreeGrid () {
@@ -145,7 +175,7 @@ export const CasperMoacTreeMixin = superClass => {
         this._lastScrollTop = this.gridScroller.scrollTop;
 
         // Re-fetch new items when the users scrolls past the 500px threshold.
-        if ((gridScrollerHeight - gridScrollerPosition <= 1 || this.gridScroller.scrollTop === 0) && this._userArray.length > this._maxNrOfItems) {
+        if ((gridScrollerHeight - gridScrollerPosition <= 1 || this.gridScroller.scrollTop === 0) && this._sizeUserIds > this._maxNrOfItems) {
           this._lastScrollTop = undefined;
           if (goingDown === true) {
             this.__debounce('treeDebouncer', this._scrollAndRenderBot.bind(this));
@@ -160,57 +190,35 @@ export const CasperMoacTreeMixin = superClass => {
       console.time('renderItems');
       this.loading = true;
 
-      if (this._userArray.length <= this._maxNrOfItems) {
-        this._renderedArray = this._userArray.map(item => item.id);
-      } else {
-
-        let activeItemIndex = 0;
-        if (this._newActiveItemId) {
-          activeItemIndex = this._findWithAttr(this._userArray, 'id', this._newActiveItemId);
-        } else if (this.activeItem) {
-          activeItemIndex = this._findWithAttr(this._userArray, 'id', this.activeItem.id);
-        }
-
-        let firstIdx;
-        let lastIdx;
-        if (direction === 'up') {
-          // Going up so render more items up top
-          firstIdx = Math.max(Math.min(activeItemIndex - Math.round(this._maxNrOfItems * 0.75), this._userArray.length-this._maxNrOfItems), 0);
-          lastIdx = Math.min(Math.max(activeItemIndex + Math.round(this._maxNrOfItems * 0.25),this._maxNrOfItems), this._userArray.length);
-        } else if (direction === 'down') {
-          // Going down so render more items down low
-          firstIdx = Math.max(Math.min(activeItemIndex - Math.round(this._maxNrOfItems * 0.25), this._userArray.length-this._maxNrOfItems), 0);
-          lastIdx = Math.min(Math.max(activeItemIndex + Math.round(this._maxNrOfItems * 0.75), this._maxNrOfItems), this._userArray.length);
-        } else {
-          firstIdx = Math.max(Math.min(activeItemIndex - Math.round(this._maxNrOfItems * 0.5), this._userArray.length-this._maxNrOfItems), 0);
-          lastIdx = Math.min(Math.max(activeItemIndex + Math.round(this._maxNrOfItems * 0.5),this._maxNrOfItems), this._userArray.length);
-        }
-        this._renderedArray = this._userArray.slice(firstIdx, lastIdx).map(item => item.id);
-      }
-
       try {
-        const response = await this.app.broker.get(`${this.treeResource}?filter="id IN (${String(this._renderedArray)})"`, 30000);
+        let activeItemId = 0;
+        if (this._newActiveItemId) activeItemId = +this._newActiveItemId;
+        const response = await this.app.socket2.getLazyload(this.treeResource, {active_id: activeItemId, direction: direction}, 3000);
 
-        if (response.data[0].child_count === undefined || response.data[0].level === undefined) {
-          throw('Each item given to the grid MUST have the following properties: child_count and level');
+        /* Temporary martelada... */
+        response.data = response.data.map((item) => {let obj = {}; item.attributes.id = item.id; obj = item.attributes; return obj;});
+
+        if (this._treeGrid) {
+          if (response.data[0].child_count === undefined || response.data[0].level === undefined) {
+            throw('Each item given to the grid MUST have the following properties: child_count and level');
+          }
+
+          let maxLevel = 1;
+          response.data.forEach( item => {
+                                            item.child_count > 0 ? item.has_children = true : item.has_children = false;
+                                            if (item.level > maxLevel) maxLevel = item.level;
+                                            if (response.data.filter(obj => obj.parent_id == item.id).length > 0) item.expanded = true;
+                                          });
+
+          const newColumnWidth = (80+(maxLevel*20))+'px';
+          this._treeColumn.width = newColumnWidth;
         }
 
-        response.data.forEach( item => {
-                                          item.expanded = this._userArray.filter(e => e.id === item.id)[0].expanded;
-                                          item.child_count > 0 ? item.has_children = true : item.has_children = false;
-                                        });
-
-        let maxLevel = 1;
-        for (const item of response.data) {
-          if (item.level > maxLevel) maxLevel = item.level;
-        }
-        const newColumnWidth = (80+(maxLevel*20))+'px';
-        this._treeColumn.width = newColumnWidth;
-
+        this._renderedArray = response.data;
         if (this._newActiveItemId) {
-          this.setItems(response.data, this._newActiveItemId);
+          this.setItems(this._renderedArray, this._newActiveItemId);
         } else {
-          this.setItems(response.data);
+          this.setItems(this._renderedArray);
         }
       } catch (exception) {
         console.error(exception);
@@ -222,50 +230,17 @@ export const CasperMoacTreeMixin = superClass => {
     }
 
     _scrollAndRenderTop () {
-      this._renderedArray.sort((a,b) => a.localeCompare(b));
-      if (this._userArray[0].id != this._renderedArray[0]) {
-        this._newActiveItemId = this._renderedArray[0];
+      if (this._userFirstId && this._userFirstId != this._renderedArray[0].id) {
+        this._newActiveItemId = this._renderedArray[0].id;
         this._renderItems('up');
       }
     }
 
     _scrollAndRenderBot () {
-      this._renderedArray.sort((a,b) => a.localeCompare(b));
-      if (this._userArray[this._userArray.length-1].id != this._renderedArray[this._renderedArray.length-1]) {
-
-        // Trying to eyeball item to select -- this could be better (38 is the height of each row)
-        this._newActiveItemId = this._renderedArray[this._renderedArray.length-Math.round(this.gridScroller.clientHeight/38)];
+      if (this._userLastId && this._userLastId != this._renderedArray[this._renderedArray.length -1].id) {
+        this._newActiveItemId = this._renderedArray[this._renderedArray.length-Math.round(this.gridScroller.clientHeight/38)].id;
         this._renderItems('down');
       }
-    }
-
-    // Deletes items recursively from the user array (used for collapsing)
-    _deleteItems (ids) {
-      if (ids.length === 1) {
-        const index = this._findWithAttr(this._userArray, 'id', ids[0]);
-
-        if (index > -1) {
-          if (this._userArray[index].expanded) {
-            const children = this._allIdsArray.filter(item => (item.parent_id == ids[0] && this._findWithAttr(this._userArray, 'id', item.id) > -1)).map(a => a.id);
-            if (children.length > 0) {
-              this._deleteItems(children);
-            }
-          }
-          this._userArray.splice(index, 1);
-        }
-      } else {
-        ids.forEach(id => this._deleteItems([id]));
-      }
-    }
-
-    // Finds the index of an element inside an array of objects given the atribute and value
-    _findWithAttr (array, attr, value) {
-      for (let i = 0; i < array.length; i += 1) {
-        if (array[i][attr] === value) {
-          return i;
-        }
-      }
-      return -1;
     }
   }
 }
