@@ -65,11 +65,11 @@ export const CasperMoacTreeMixin = superClass => {
           value: {}
         },
         /**
-         * Array that contains all the ids that were expanded by the user
+         * Array that contains all the items that were expanded by the user
          *
          * @type {Array}
          */
-         _expandedIds: {
+         _expandedItems: {
           type: Array,
           value: []
         },
@@ -85,69 +85,105 @@ export const CasperMoacTreeMixin = superClass => {
       try {
         this.loading = true;
 
-        const subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, 'parent_id', 3000);
+        const subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, 'parendt_id', 3000);
+
+        // subscribeLazyload isnt flagged as jsonapi so we have to check for errors ourselves
+        if (subscribeResponse.errors) {
+          throw(subscribeResponse.errors);
+        }
         this._sizeAllIds  = subscribeResponse.all_ids_size;
         this._sizeUserIds = subscribeResponse.user_ids_size;
         this._userFirstId = subscribeResponse.user_first_id;
         this._userLastId  = subscribeResponse.user_last_id;
-        await this._renderItems();
 
-      } catch (exception) {
-        this.loading = false;
-
-        console.error(exception);
-
-        let errorMessage = 'Ocorreu um erro a carregar os dados.';
-
-        if (exception.errors && exception.errors.constructor === Array && exception.errors.length >= 1) {
-          if (exception.errors[0].code === 'FORBIDDEN_BY_GATEKEEPER') {
-            errorMessage = 'Não tem permissão para executar esta operação';
-          } else {
-            errorMessage = exception.errors[0].detail;
+        if (this._expandedItems.length > 0) {
+          for (const item of this._expandedItems) {
+            const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, item.id, 3000);
+            this._sizeUserIds = expandResponse.user_ids_size;
+            this._userFirstId = expandResponse.user_first_id;
+            this._userLastId  = expandResponse.user_last_id;
           }
         }
 
-        this.app.openToast({ text: errorMessage, backgroundColor: 'red' });
+        await this._renderItems();
+
+      } catch (error) {
+        this.loading = false;
+        console.error(error);
+        this.app.openToast({ text: 'Ocorreu um erro a carregar os dados.', backgroundColor: 'red' });
       }
     }
 
-    // Public methods that expands a node given an event (for the on click) or given the id of the parent node
-    async expand (event, parentId = undefined) {
-      console.time('expand');
-
+    // Public methods that expands a node given an event (for the on click) or given the id and parent_id
+    async expand (event, id = undefined, parentId = undefined) {
+      if (!id) id = event.detail.id;
+      this._newActiveItemId = id;
       if (!parentId) parentId = event.detail.parent_id;
-      this._newActiveItemId = parentId;
+
+      if (!id) {
+        console.error('Invalid id...');
+        return;
+      }
+
+      for (const item of this._expandedItems) {
+        if (item.id === +id) {
+          console.error('id already expanded...');
+          return;
+        }
+      }
 
       try {
+        console.time('expand');
+        this._expandedItems.push({id: +this._newActiveItemId, parentId: +parentId});
         const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, +this._newActiveItemId, 3000);
         this._sizeUserIds = expandResponse.user_ids_size;
         this._userFirstId = expandResponse.user_first_id;
         this._userLastId  = expandResponse.user_last_id;
+
         console.timeEnd('expand');
         this._renderItems();
       } catch (error) {
         console.timeEnd('expand');
-        console.error(error);
+        this._handleErrors(error);
       }
     }
 
-    // Public method that collapses the nodes given an event (for the on click) or given the id of the parent node
-    async collapse (event, parentId = undefined) {
-      console.time('collapse');
-
+    // Public method that collapses the nodes given an event (for the on click) or given the id and parent_id
+    async collapse (event, id = undefined, parentId = undefined) {
+      if (!id) id = event.detail.id;
+      this._newActiveItemId = id;
       if (!parentId) parentId = event.detail.parent_id;
-      this._newActiveItemId = parentId;
+
+      if (!id) {
+        console.error('Invalid id...');
+        return;
+      }
+
+      let expandedId = false;
+      for (const item of this._expandedItems) {
+        if (item.id === +id) {
+          expandedId = true;
+          break;
+        }
+      }
+      if (!expandedId) {
+        console.error('Cant collapse unexpanded id...');
+        return;
+      }
 
       try {
+        console.time('collapse');
+        this._deleteExpandedIds(+this._newActiveItemId)
         const collapseResponse = await this.app.socket2.collapseLazyload(this.treeResource, +this._newActiveItemId, 3000);
         this._sizeUserIds = collapseResponse.user_ids_size;
         this._userFirstId = collapseResponse.user_first_id;
         this._userLastId  = collapseResponse.user_last_id;
+
         console.timeEnd('collapse');
         this._renderItems();
       } catch (error) {
         console.timeEnd('collapse');
-        console.error(error);
+        this._handleErrors(error);
       }
     }
 
@@ -195,9 +231,6 @@ export const CasperMoacTreeMixin = superClass => {
         if (this._newActiveItemId) activeItemId = +this._newActiveItemId;
         const response = await this.app.socket2.getLazyload(this.treeResource, {active_id: activeItemId, direction: direction}, 3000);
 
-        /* Temporary martelada... */
-        response.data = response.data.map((item) => {let obj = {}; item.attributes.id = item.id; obj = item.attributes; return obj;});
-
         if (this._treeGrid) {
           if (response.data[0].child_count === undefined || response.data[0].level === undefined) {
             throw('Each item given to the grid MUST have the following properties: child_count and level');
@@ -207,7 +240,7 @@ export const CasperMoacTreeMixin = superClass => {
           response.data.forEach( item => {
                                             item.child_count > 0 ? item.has_children = true : item.has_children = false;
                                             if (item.level > maxLevel) maxLevel = item.level;
-                                            if (response.data.filter(obj => obj.parent_id == item.id).length > 0) item.expanded = true;
+                                            if (this._expandedItems.filter(obj => obj.id == item.id).length > 0) item.expanded = true;
                                           });
 
           const newColumnWidth = (80+(maxLevel*20))+'px';
@@ -220,9 +253,8 @@ export const CasperMoacTreeMixin = superClass => {
         } else {
           this.setItems(this._renderedArray);
         }
-      } catch (exception) {
-        console.error(exception);
-        this.app.openToast({ text: 'Ocorreu um erro a carregar os dados.', backgroundColor: 'red' });
+      } catch (error) {
+        this._handleErrors(error);
       }
 
       this.loading = false;
@@ -240,6 +272,37 @@ export const CasperMoacTreeMixin = superClass => {
       if (this._userLastId && this._userLastId != this._renderedArray[this._renderedArray.length -1].id) {
         this._newActiveItemId = this._renderedArray[this._renderedArray.length-Math.round(this.gridScroller.clientHeight/38)].id;
         this._renderItems('down');
+      }
+    }
+
+    _deleteExpandedIds (id) {
+      this._expandedItems.forEach(item => {if (item.parentId === id) {this._deleteExpandedIds(item.id)}});
+
+      for (const idx in this._expandedItems) {
+        if (this._expandedItems[idx].id === id) {
+          this._expandedItems.splice(idx, 1);
+          return;
+        }
+      }
+    }
+
+    _handleErrors (error) {
+      if (error && error.payload_errors && error.payload_errors[0].internal.why === 'urn not subscribed!') {
+        console.log('Session died, resubscribing...');
+        this.refreshTreeItems();
+      } else {
+        let errorMessage = 'Ocorreu um erro a carregar os dados.';
+        if (error && error.constructor === Array && error.length >= 1) {
+          if (error[0].code === 'FORBIDDEN_BY_GATEKEEPER') {
+            errorMessage = 'Não tem permissão para executar esta operação';
+          } else {
+            errorMessage = error[0].detail;
+          }
+        } else {
+          console.error(error);
+        }
+
+        this.app.openToast({text: errorMessage, backgroundColor: 'red' });
       }
     }
   }

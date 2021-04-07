@@ -87,7 +87,7 @@ class CasperMoacTreeColumn extends GridColumnElement {
     this.dispatchEvent(new CustomEvent('casper-moac-tree-column-expand', {
       bubbles: true,
       composed: true,
-      detail: { parent_id: event.target.dataItem.id }
+      detail: { id: event.target.dataItem.id, parent_id: event.target.dataItem.parent_id }
     }));
   }
 
@@ -98,7 +98,7 @@ class CasperMoacTreeColumn extends GridColumnElement {
     this.dispatchEvent(new CustomEvent('casper-moac-tree-column-collapse', {
       bubbles: true,
       composed: true,
-      detail: { parent_id: event.target.dataItem.id }
+      detail: { id: event.target.dataItem.id, parent_id: event.target.dataItem.parent_id }
     }));
   }
 
