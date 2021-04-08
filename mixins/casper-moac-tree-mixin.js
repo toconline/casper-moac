@@ -69,7 +69,7 @@ export const CasperMoacTreeMixin = superClass => {
          *
          * @type {Array}
          */
-         _expandedItems: {
+         expandedItems: {
           type: Array,
           value: []
         },
@@ -85,7 +85,18 @@ export const CasperMoacTreeMixin = superClass => {
       try {
         this.loading = true;
 
-        const subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, 'parendt_id', 3000);
+        // try {
+        //   const url = this.resourceName.includes('?')
+        //   ? `${this.resourceName}&${this.buildResourceUrl()}`
+        //   : `${this.resourceName}?${this.buildResourceUrl()}`;
+        //   this.treeResource = decodeURIComponent(url);
+        // } catch (error) {
+        //   this.treeResource = this.resourceName;
+        // }
+
+        this.treeResource = this.resourceName;
+
+        const subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, 'parent_id', 3000);
 
         // subscribeLazyload isnt flagged as jsonapi so we have to check for errors ourselves
         if (subscribeResponse.errors) {
@@ -96,8 +107,8 @@ export const CasperMoacTreeMixin = superClass => {
         this._userFirstId = subscribeResponse.user_first_id;
         this._userLastId  = subscribeResponse.user_last_id;
 
-        if (this._expandedItems.length > 0) {
-          for (const item of this._expandedItems) {
+        if (this.expandedItems.length > 0) {
+          for (const item of this.expandedItems) {
             const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, item.id, 3000);
             this._sizeUserIds = expandResponse.user_ids_size;
             this._userFirstId = expandResponse.user_first_id;
@@ -125,7 +136,7 @@ export const CasperMoacTreeMixin = superClass => {
         return;
       }
 
-      for (const item of this._expandedItems) {
+      for (const item of this.expandedItems) {
         if (item.id === +id) {
           console.error('id already expanded...');
           return;
@@ -134,7 +145,7 @@ export const CasperMoacTreeMixin = superClass => {
 
       try {
         console.time('expand');
-        this._expandedItems.push({id: +this._newActiveItemId, parentId: +parentId});
+        this.expandedItems.push({id: +this._newActiveItemId, parentId: +parentId});
         const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, +this._newActiveItemId, 3000);
         this._sizeUserIds = expandResponse.user_ids_size;
         this._userFirstId = expandResponse.user_first_id;
@@ -160,7 +171,7 @@ export const CasperMoacTreeMixin = superClass => {
       }
 
       let expandedId = false;
-      for (const item of this._expandedItems) {
+      for (const item of this.expandedItems) {
         if (item.id === +id) {
           expandedId = true;
           break;
@@ -240,7 +251,7 @@ export const CasperMoacTreeMixin = superClass => {
           response.data.forEach( item => {
                                             item.child_count > 0 ? item.has_children = true : item.has_children = false;
                                             if (item.level > maxLevel) maxLevel = item.level;
-                                            if (this._expandedItems.filter(obj => obj.id == item.id).length > 0) item.expanded = true;
+                                            if (this.expandedItems.filter(obj => obj.id == item.id).length > 0) item.expanded = true;
                                           });
 
           const newColumnWidth = (80+(maxLevel*20))+'px';
@@ -276,11 +287,11 @@ export const CasperMoacTreeMixin = superClass => {
     }
 
     _deleteExpandedIds (id) {
-      this._expandedItems.forEach(item => {if (item.parentId === id) {this._deleteExpandedIds(item.id)}});
+      this.expandedItems.forEach(item => {if (item.parentId === id) {this._deleteExpandedIds(item.id)}});
 
-      for (const idx in this._expandedItems) {
-        if (this._expandedItems[idx].id === id) {
-          this._expandedItems.splice(idx, 1);
+      for (const idx in this.expandedItems) {
+        if (this.expandedItems[idx].id === id) {
+          this.expandedItems.splice(idx, 1);
           return;
         }
       }
