@@ -172,7 +172,7 @@ export const CasperMoacFiltersMixin = superClass => {
       if (this.lazyLoad) {
         this.__filterLazyLoadItems();
       } else if (this.treeGrid) {
-        this.refreshTreeItems();
+        this._filterTreeItems();
       } else {
         this.__filterItems();
       }
@@ -230,7 +230,11 @@ export const CasperMoacFiltersMixin = superClass => {
         this.__displayResetFiltersButton = true;
 
         // Force the re-fetch of items if one the filter changes.
-        if (this.lazyLoad) this.refreshItems();
+        if (this.lazyLoad) {
+          this.refreshItems();
+        } else if (this.treeGrid) {
+          this.refreshTreeItems();
+        }
 
         this.__renderActiveFilters();
         this.__updateUrlWithCurrentFilters();
@@ -429,9 +433,14 @@ export const CasperMoacFiltersMixin = superClass => {
         this.freeFilterValue = this.$.filterInput.value.trim();
 
         this.__updateUrlWithCurrentFilters();
-        !this.lazyLoad
-          ? this.__filterItems()
-          : this.__filterLazyLoadItems();
+
+        if (this.lazyLoad) {
+          this.__filterLazyLoadItems();
+        } else if (this.treeGrid) {
+          this._filterTreeItems();
+        } else {
+          this.__filterItems()
+        }
       });
     }
 

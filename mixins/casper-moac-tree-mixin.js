@@ -36,7 +36,7 @@ export const CasperMoacTreeMixin = superClass => {
          * @type {Number}
          */
          _userFirstId: {
-          type: Number
+          type: String
         },
         /**
          * Id of the last item in the user array
@@ -44,7 +44,7 @@ export const CasperMoacTreeMixin = superClass => {
          * @type {Number}
          */
          _userLastId: {
-          type: Number
+          type: String
         },
         /**
          * Array that contains all the items that are rendered in the grid (length <= _maxNrOFItems)
@@ -73,7 +73,7 @@ export const CasperMoacTreeMixin = superClass => {
           type: Array,
           value: []
         },
-        _treeGrid: {
+        _treeLoad: {
           type: Boolean,
           value: true
         }
@@ -84,41 +84,62 @@ export const CasperMoacTreeMixin = superClass => {
     async refreshTreeItems () {
       try {
         this.loading = true;
-
-        // try {
-        //   const url = this.resourceName.includes('?')
-        //   ? `${this.resourceName}&${this.buildResourceUrl()}`
-        //   : `${this.resourceName}?${this.buildResourceUrl()}`;
-        //   this.treeResource = decodeURIComponent(url);
-        // } catch (error) {
-        //   this.treeResource = this.resourceName;
-        // }
-
+        this._newActiveItemId = undefined;
         this.treeResource = this.resourceName;
 
-        const subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, 'parent_id', 3000);
+        let subscribeResponse;
+        if (this._treeLoad) {
+          console.time('subscribe');
+          subscribeResponse = await this.app.socket2.subscribeTreeLazyload(this.treeResource, 'id', 'parent_id', 'subentity', 'general_ledger', 15000);
+          console.timeEnd('subscribe');
 
-        // subscribeLazyload isnt flagged as jsonapi so we have to check for errors ourselves
-        if (subscribeResponse.errors) {
-          throw(subscribeResponse.errors);
-        }
-        this._sizeAllIds  = subscribeResponse.all_ids_size;
-        this._sizeUserIds = subscribeResponse.user_ids_size;
-        this._userFirstId = subscribeResponse.user_first_id;
-        this._userLastId  = subscribeResponse.user_last_id;
-
-        if (this.expandedItems.length > 0) {
-          for (const item of this.expandedItems) {
-            const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, item.id, 3000);
-            this._sizeUserIds = expandResponse.user_ids_size;
-            this._userFirstId = expandResponse.user_first_id;
-            this._userLastId  = expandResponse.user_last_id;
+          // subscribeLazyload isnt flagged as jsonapi so we have to check for errors ourselves
+          if (subscribeResponse.errors || !subscribeResponse.ok || Object.keys(subscribeResponse).length === 0) {
+            throw(subscribeResponse.errors);
           }
+          this._sizeAllIds  = subscribeResponse.all_ids_size;
+          this._sizeUserIds = subscribeResponse.user_ids_size;
+          this._userFirstId = subscribeResponse.user_first_id;
+          this._userLastId  = subscribeResponse.user_last_id;
+
+          if (this.expandedItems.length > 0) {
+            for (const item of this.expandedItems) {
+              const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, item.id, 3000);
+              this._sizeUserIds = expandResponse.user_ids_size;
+              this._userFirstId = expandResponse.user_first_id;
+              this._userLastId  = expandResponse.user_last_id;
+            }
+          }
+        } else {
+          try {
+            const url = this.resourceName.includes('?')
+            ? `${this.resourceName}&${this.buildResourceUrl()}`
+            : `${this.resourceName}?${this.buildResourceUrl()}`;
+            this.treeResource = decodeURIComponent(url);
+          } catch (error) {
+            this.treeResource = this.resourceName;
+          }
+
+          // TODO: we have to fix the uri manually
+          this.treeResource = this.treeResource.replace(/%/g, "%25");
+          this.treeResource = this.treeResource.replace(/'/g, "%27");
+          console.time('subscribe');
+          subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, 'id', 'parent_id', 15000);
+          console.timeEnd('subscribe');
+
+          // subscribeLazyload isnt flagged as jsonapi so we have to check for errors ourselves
+          if (subscribeResponse.errors || Object.keys(subscribeResponse).length === 0) {
+            throw(subscribeResponse.errors);
+          }
+          this._sizeAllIds  = subscribeResponse.all_ids_size;
+          this._sizeUserIds = subscribeResponse.user_ids_size;
+          this._userFirstId = subscribeResponse.user_first_id;
+          this._userLastId  = subscribeResponse.user_last_id;
         }
 
         await this._renderItems();
-
       } catch (error) {
+        console.timeEnd('subscribe');
         this.loading = false;
         console.error(error);
         this.app.openToast({ text: 'Ocorreu um erro a carregar os dados.', backgroundColor: 'red' });
@@ -137,7 +158,7 @@ export const CasperMoacTreeMixin = superClass => {
       }
 
       for (const item of this.expandedItems) {
-        if (item.id === +id) {
+        if (item.id === id) {
           console.error('id already expanded...');
           return;
         }
@@ -145,8 +166,8 @@ export const CasperMoacTreeMixin = superClass => {
 
       try {
         console.time('expand');
-        this.expandedItems.push({id: +this._newActiveItemId, parentId: +parentId});
-        const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, +this._newActiveItemId, 3000);
+        this.expandedItems.push({id: this._newActiveItemId, parentId: parentId});
+        const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, this._newActiveItemId, 3000);
         this._sizeUserIds = expandResponse.user_ids_size;
         this._userFirstId = expandResponse.user_first_id;
         this._userLastId  = expandResponse.user_last_id;
@@ -172,7 +193,7 @@ export const CasperMoacTreeMixin = superClass => {
 
       let expandedId = false;
       for (const item of this.expandedItems) {
-        if (item.id === +id) {
+        if (item.id === id) {
           expandedId = true;
           break;
         }
@@ -184,8 +205,8 @@ export const CasperMoacTreeMixin = superClass => {
 
       try {
         console.time('collapse');
-        this._deleteExpandedIds(+this._newActiveItemId)
-        const collapseResponse = await this.app.socket2.collapseLazyload(this.treeResource, +this._newActiveItemId, 3000);
+        this._deleteExpandedIds(this._newActiveItemId)
+        const collapseResponse = await this.app.socket2.collapseLazyload(this.treeResource, this._newActiveItemId, 3000);
         this._sizeUserIds = collapseResponse.user_ids_size;
         this._userFirstId = collapseResponse.user_first_id;
         this._userLastId  = collapseResponse.user_last_id;
@@ -238,11 +259,13 @@ export const CasperMoacTreeMixin = superClass => {
       this.loading = true;
 
       try {
-        let activeItemId = 0;
-        if (this._newActiveItemId) activeItemId = +this._newActiveItemId;
+        let activeItemId = "0";
+        if (this._newActiveItemId) activeItemId = this._newActiveItemId;
+        console.time('getll');
         const response = await this.app.socket2.getLazyload(this.treeResource, {active_id: activeItemId, direction: direction}, 3000);
+        console.timeEnd('getll');
 
-        if (this._treeGrid) {
+        if (this._treeLoad) {
           if (response.data[0].child_count === undefined || response.data[0].level === undefined) {
             throw('Each item given to the grid MUST have the following properties: child_count and level');
           }
@@ -256,6 +279,11 @@ export const CasperMoacTreeMixin = superClass => {
 
           const newColumnWidth = (80+(maxLevel*20))+'px';
           this._treeColumn.width = newColumnWidth;
+        } else {
+          this._treeColumn.width = '120px';
+          if (response.data[0].level !== undefined) {
+            response.data.forEach( item => {  item.level = 1 });
+          }
         }
 
         this._renderedArray = response.data;
@@ -287,7 +315,12 @@ export const CasperMoacTreeMixin = superClass => {
     }
 
     _deleteExpandedIds (id) {
-      this.expandedItems.forEach(item => {if (item.parentId === id) {this._deleteExpandedIds(item.id)}});
+      for (let idx = 0; idx < this.expandedItems.length; idx++) {
+        if (id === this.expandedItems[idx].parentId){
+          this._deleteExpandedIds(this.expandedItems[idx].id);
+          idx--;
+        }
+      }
 
       for (const idx in this.expandedItems) {
         if (this.expandedItems[idx].id === id) {
@@ -315,6 +348,11 @@ export const CasperMoacTreeMixin = superClass => {
 
         this.app.openToast({text: errorMessage, backgroundColor: 'red' });
       }
+    }
+
+    _filterTreeItems () {
+      this.freeFilterValue ? this._treeLoad = false : this._treeLoad = true;
+      this.refreshTreeItems();
     }
   }
 }
