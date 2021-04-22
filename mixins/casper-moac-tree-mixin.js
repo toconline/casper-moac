@@ -36,7 +36,7 @@ export const CasperMoacTreeMixin = superClass => {
          * @type {Number}
          */
          _userFirstId: {
-          type: String
+          type: Number
         },
         /**
          * Id of the last item in the user array
@@ -44,7 +44,7 @@ export const CasperMoacTreeMixin = superClass => {
          * @type {Number}
          */
          _userLastId: {
-          type: String
+          type: Number
         },
         /**
          * Array that contains all the items that are rendered in the grid (length <= _maxNrOFItems)
@@ -148,9 +148,9 @@ export const CasperMoacTreeMixin = superClass => {
 
     // Public methods that expands a node given an event (for the on click) or given the id and parent_id
     async expand (event, id = undefined, parentId = undefined) {
-      if (!id) id = event.detail.id;
+      if (!id) id = +event.detail.id;
       this._newActiveItemId = id;
-      if (!parentId) parentId = event.detail.parent_id;
+      if (!parentId) parentId = +event.detail.parent_id;
 
       if (!id) {
         console.error('Invalid id...');
@@ -182,9 +182,9 @@ export const CasperMoacTreeMixin = superClass => {
 
     // Public method that collapses the nodes given an event (for the on click) or given the id and parent_id
     async collapse (event, id = undefined, parentId = undefined) {
-      if (!id) id = event.detail.id;
+      if (!id) id = +event.detail.id;
       this._newActiveItemId = id;
-      if (!parentId) parentId = event.detail.parent_id;
+      if (!parentId) parentId = +event.detail.parent_id;
 
       if (!id) {
         console.error('Invalid id...');
@@ -259,7 +259,7 @@ export const CasperMoacTreeMixin = superClass => {
       this.loading = true;
 
       try {
-        let activeItemId = "0";
+        let activeItemId = 0;
         if (this._newActiveItemId) activeItemId = this._newActiveItemId;
         console.time('getll');
         const response = await this.app.socket2.getLazyload(this.treeResource, {active_id: activeItemId, direction: direction}, 3000);
@@ -293,6 +293,7 @@ export const CasperMoacTreeMixin = superClass => {
           this.setItems(this._renderedArray);
         }
       } catch (error) {
+        console.timeEnd('getll');
         this._handleErrors(error);
       }
 
@@ -302,14 +303,14 @@ export const CasperMoacTreeMixin = superClass => {
 
     _scrollAndRenderTop () {
       if (this._userFirstId && this._userFirstId != this._renderedArray[0].id) {
-        this._newActiveItemId = this._renderedArray[0].id;
+        this._newActiveItemId = +this._renderedArray[0].id;
         this._renderItems('up');
       }
     }
 
     _scrollAndRenderBot () {
       if (this._userLastId && this._userLastId != this._renderedArray[this._renderedArray.length -1].id) {
-        this._newActiveItemId = this._renderedArray[this._renderedArray.length-Math.round(this.gridScroller.clientHeight/38)].id;
+        this._newActiveItemId = +this._renderedArray[this._renderedArray.length-Math.round(this.gridScroller.clientHeight/38)].id;
         this._renderItems('down');
       }
     }
