@@ -282,9 +282,10 @@ export const CasperMoacTreeMixin = superClass => {
           this._treeColumn.width = newColumnWidth;
         } else {
           this._treeColumn.width = '120px';
-          if (response.data.length > 0 && response.data[0].level !== undefined) {
-            response.data.forEach( item => {  item.level = 1 });
-          }
+          response.data.forEach( item => {  if (item.level !== undefined) item.level = 1;
+                                            if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item);
+                                         });
+
         }
 
         this._renderedArray = response.data;
