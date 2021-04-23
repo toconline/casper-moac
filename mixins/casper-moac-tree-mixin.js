@@ -275,6 +275,7 @@ export const CasperMoacTreeMixin = superClass => {
                                             item.child_count > 0 ? item.has_children = true : item.has_children = false;
                                             if (item.level > maxLevel) maxLevel = item.level;
                                             if (this.expandedItems.filter(obj => obj.id == item.id).length > 0) item.expanded = true;
+                                            if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item);
                                           });
 
           const newColumnWidth = (80+(maxLevel*20))+'px';
