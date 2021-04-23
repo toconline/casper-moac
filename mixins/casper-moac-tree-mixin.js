@@ -1,3 +1,11 @@
+import {
+  CasperMoacOperators,
+  CasperMoacFilterTypes,
+  CasperMoacSortDirections,
+} from '../casper-moac-constants.js';
+
+import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
+
 export const CasperMoacTreeMixin = superClass => {
   return class extends superClass {
 
@@ -219,6 +227,38 @@ export const CasperMoacTreeMixin = superClass => {
       }
     }
 
+    _debounceFetchTreeItems () {
+      this.__debounce('__fetchTreeItemsDebouncer', () => {
+        // Make sure every casper-select is already rendered and have selected items before proceeding.
+        const missingComponent = Object.entries(this.filters).some(([filterKey, filterOptions]) => {
+          const filterComponent = this.__getFilterComponent(filterKey);
+
+          return !filterComponent || (
+            filterOptions.type === CasperMoacFilterTypes.CASPER_SELECT &&
+            Object.keys(filterComponent.selectedItems).length === 0 &&
+            this.__valueIsNotEmpty(filterOptions.value)
+          );
+        });
+
+        if (missingComponent) return afterNextRender(this, () => { this._debounceFetchTreeItems(); });
+
+        this.refreshTreeItems();
+      });
+    }
+
+    _filterTreeItems () {
+      afterNextRender(this, ()  => {
+        if (this.buildResourceUrl() !== "") {
+          this._treeLoad = false;
+          this._debounceFetchTreeItems();
+        } else {
+          this._treeLoad = true;
+          this._debounceFetchTreeItems();
+        }
+      });
+    }
+
+
     _initializeTreeGrid () {
       this.addEventListener('casper-moac-tree-column-expand', this.expand.bind(this));
       this.addEventListener('casper-moac-tree-column-collapse', this.collapse.bind(this));
@@ -351,11 +391,6 @@ export const CasperMoacTreeMixin = superClass => {
 
         this.app.openToast({text: errorMessage, backgroundColor: 'red' });
       }
-    }
-
-    _filterTreeItems () {
-      this.freeFilterValue ? this._treeLoad = false : this._treeLoad = true;
-      this.refreshTreeItems();
     }
   }
 }

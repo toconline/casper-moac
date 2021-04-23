@@ -520,7 +520,8 @@ export const CasperMoacLazyLoadMixin = superClass => {
         `${this.resourcePageSizeParam}=${this.resourcePageSize}`
       ];
 
-      if (this.treeGrid) resourceUrlParams = [this.resourceTotalsMetaParam];
+      // TODO: this might be wrong
+      if (this.treeGrid) resourceUrlParams = [];
 
       // Limit the fields that are requested from the JSON API.
       if (this.resourceListAttributes && this.resourceListAttributes.length > 0) {
