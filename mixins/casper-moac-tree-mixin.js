@@ -198,6 +198,7 @@ export const CasperMoacTreeMixin = superClass => {
         response.data.forEach( item => {
                                           item.expanded = this._userArray.filter(e => e.id === item.id)[0].expanded;
                                           item.child_count > 0 ? item.has_children = true : item.has_children = false;
+                                          if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item);
                                         });
 
         let maxLevel = 1;
