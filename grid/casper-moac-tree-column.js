@@ -3,6 +3,13 @@ import { html } from '@polymer/polymer/polymer-element.js';
 import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js';
 
 class CasperMoacTreeColumn extends GridColumnElement {
+  static get properties () {
+    return {
+      valueClass: {
+        type: String
+      }
+    }
+  }
 
   static get template () {
     return html`
@@ -14,6 +21,7 @@ class CasperMoacTreeColumn extends GridColumnElement {
             height: 15px;
             color: darkgrey;
             margin-right: -2px;
+            margin-top: -2px;
             vertical-align: middle;
             transition: all 200ms linear;
           }
@@ -25,7 +33,10 @@ class CasperMoacTreeColumn extends GridColumnElement {
 
           .tree-column {
             display: flex;
+            align-items: center;
+            margin-left: -10px;
           }
+
         </style>
         <div class="tree-column">
           <div style="margin-left: calc(([[item.level]]-1)*11px);" hidden$=[[!item.has_children]]>
@@ -43,10 +54,10 @@ class CasperMoacTreeColumn extends GridColumnElement {
               class="expand-icon"
               on-click="_collapse">
             </casper-icon>
-            <span class="link-style">[[_getPathProp(item,path)]]</span>
+            <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
           </div>
           <div style="margin-left: calc((11px * ([[item.level]]-1)) + 17px);" hidden$=[[item.has_children]]>
-            <span class="link-style">[[_getPathProp(item,path)]]</span>
+            <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
           </div>
         </div>
       </template>

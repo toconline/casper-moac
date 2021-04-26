@@ -160,17 +160,10 @@ export const CasperMoacTreeMixin = superClass => {
       this._newActiveItemId = id;
       if (!parentId) parentId = +event.detail.parent_id;
 
-      if (!id) {
-        console.error('Invalid id...');
-        return;
-      }
+      if (!id) return;
 
-      for (const item of this.expandedItems) {
-        if (item.id === id) {
-          console.error('id already expanded...');
-          return;
-        }
-      }
+      for (const item of this.expandedItems)
+        if (item.id === id) return;
 
       try {
         console.time('expand');
@@ -194,10 +187,7 @@ export const CasperMoacTreeMixin = superClass => {
       this._newActiveItemId = id;
       if (!parentId) parentId = +event.detail.parent_id;
 
-      if (!id) {
-        console.error('Invalid id...');
-        return;
-      }
+      if (!id) return;
 
       let expandedId = false;
       for (const item of this.expandedItems) {
@@ -206,10 +196,7 @@ export const CasperMoacTreeMixin = superClass => {
           break;
         }
       }
-      if (!expandedId) {
-        console.error('Cant collapse unexpanded id...');
-        return;
-      }
+      if (!expandedId) return;
 
       try {
         console.time('collapse');
@@ -264,7 +251,7 @@ export const CasperMoacTreeMixin = superClass => {
       this.addEventListener('casper-moac-tree-column-collapse', this.collapse.bind(this));
 
       const treeColumns = [
-        ...this.shadowRoot.querySelector('slot[name="grid-before"]').assignedElements().filter(assignedElement => assignedElement.nodeName.toLowerCase() === 'casper-moac-tree-column')
+        ...this.shadowRoot.querySelector('slot[name="grid"]').assignedElements().filter(assignedElement => assignedElement.nodeName.toLowerCase() === 'casper-moac-tree-column')
       ];
       this._treeColumn = treeColumns[0];
 
@@ -305,28 +292,25 @@ export const CasperMoacTreeMixin = superClass => {
         const response = await this.app.socket2.getLazyload(this.treeResource, {active_id: activeItemId, direction: direction}, 3000);
         console.timeEnd('getll');
 
+        let maxLevel = 1;
         if (this._treeLoad) {
           if (response.data[0].child_count === undefined || response.data[0].level === undefined) {
-            throw('Each item given to the grid MUST have the following properties: child_count and level');
+            throw('Each item given to the tree grid MUST have the following properties: child_count and level');
           }
-
-          let maxLevel = 1;
           response.data.forEach( item => {
                                             item.child_count > 0 ? item.has_children = true : item.has_children = false;
                                             if (item.level > maxLevel) maxLevel = item.level;
                                             if (this.expandedItems.filter(obj => obj.id == item.id).length > 0) item.expanded = true;
                                             if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item);
                                           });
-
-          const newColumnWidth = (80+(maxLevel*20))+'px';
-          this._treeColumn.width = newColumnWidth;
         } else {
-          this._treeColumn.width = '120px';
-          response.data.forEach( item => {  if (item.level !== undefined) item.level = 1;
+          response.data.forEach( item => {  if (item.level && item.level > maxLevel) maxLevel = item.level;
                                             if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item);
                                          });
 
         }
+
+        if (this._treeColumn) this._treeColumn.width = (50+(maxLevel*20))+'px';
 
         this._renderedArray = response.data;
         if (this._newActiveItemId) {
