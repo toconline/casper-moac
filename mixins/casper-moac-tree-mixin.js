@@ -89,70 +89,10 @@ export const CasperMoacTreeMixin = superClass => {
     }
 
     // Public method to reload the items in the tree grid
-    async refreshTreeItems () {
-      try {
-        this.loading = true;
-        this._newActiveItemId = undefined;
-        this.treeResource = this.resourceName;
-
-        let subscribeResponse;
-        if (this._treeLoad) {
-          console.time('subscribe');
-          subscribeResponse = await this.app.socket2.subscribeTreeLazyload(this.treeResource, 'id', 'parent_id', 'subentity', 'general_ledger', 15000);
-          console.timeEnd('subscribe');
-
-          // subscribeLazyload isnt flagged as jsonapi so we have to check for errors ourselves
-          if (subscribeResponse.errors || !subscribeResponse.ok || Object.keys(subscribeResponse).length === 0) {
-            throw(subscribeResponse.errors);
-          }
-          this._sizeAllIds  = subscribeResponse.all_ids_size;
-          this._sizeUserIds = subscribeResponse.user_ids_size;
-          this._userFirstId = subscribeResponse.user_first_id;
-          this._userLastId  = subscribeResponse.user_last_id;
-
-          if (this.expandedItems.length > 0) {
-            for (const item of this.expandedItems) {
-              const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, item.id, 3000);
-              this._sizeUserIds = expandResponse.user_ids_size;
-              this._userFirstId = expandResponse.user_first_id;
-              this._userLastId  = expandResponse.user_last_id;
-            }
-          }
-        } else {
-          try {
-            const url = this.resourceName.includes('?')
-            ? `${this.resourceName}&${this.buildResourceUrl()}`
-            : `${this.resourceName}?${this.buildResourceUrl()}`;
-            this.treeResource = decodeURIComponent(url);
-          } catch (error) {
-            this.treeResource = this.resourceName;
-          }
-
-          // TODO: we have to fix the uri manually
-          this.treeResource = this.treeResource.replace(/%/g, "%25");
-          this.treeResource = this.treeResource.replace(/'/g, "%27");
-          console.time('subscribe');
-          subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, 'id', 'parent_id', 15000);
-          console.timeEnd('subscribe');
-
-          // subscribeLazyload isnt flagged as jsonapi so we have to check for errors ourselves
-          if (subscribeResponse.errors || Object.keys(subscribeResponse).length === 0) {
-            throw(subscribeResponse.errors);
-          }
-          this._sizeAllIds  = subscribeResponse.all_ids_size;
-          this._sizeUserIds = subscribeResponse.user_ids_size;
-          this._userFirstId = subscribeResponse.user_first_id;
-          this._userLastId  = subscribeResponse.user_last_id;
-        }
-
-        await this._renderItems();
-      } catch (error) {
-        console.timeEnd('subscribe');
-        this.loading = false;
-        console.error(error);
-        this.app.openToast({ text: 'Ocorreu um erro a carregar os dados.', backgroundColor: 'red' });
-      }
+    refreshTreeItems () {
+      this._debounceFetchTreeItems();
     }
+
 
     // Public methods that expands a node given an event (for the on click) or given the id and parent_id
     async expand (event, id = undefined, parentId = undefined) {
@@ -214,6 +154,71 @@ export const CasperMoacTreeMixin = superClass => {
       }
     }
 
+    async _fetchTreeItems () {
+      try {
+        this.loading = true;
+        this._newActiveItemId = undefined;
+        this.treeResource = this.resourceName;
+
+        let subscribeResponse;
+        if (this._treeLoad) {
+          console.time('subscribe');
+          subscribeResponse = await this.app.socket2.subscribeTreeLazyload(this.treeResource, 'id', 'parent_id', 'subentity', 'general_ledger', 15000);
+          console.timeEnd('subscribe');
+
+          // subscribeLazyload isnt flagged as jsonapi so we have to check for errors ourselves
+          if (subscribeResponse.errors || !subscribeResponse.ok || Object.keys(subscribeResponse).length === 0) {
+            throw(subscribeResponse.errors);
+          }
+          this._sizeAllIds  = subscribeResponse.all_ids_size;
+          this._sizeUserIds = subscribeResponse.user_ids_size;
+          this._userFirstId = subscribeResponse.user_first_id;
+          this._userLastId  = subscribeResponse.user_last_id;
+
+          if (this.expandedItems.length > 0) {
+            for (const item of this.expandedItems) {
+              const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, item.id, 3000);
+              this._sizeUserIds = expandResponse.user_ids_size;
+              this._userFirstId = expandResponse.user_first_id;
+              this._userLastId  = expandResponse.user_last_id;
+            }
+          }
+        } else {
+          try {
+            const url = this.resourceName.includes('?')
+            ? `${this.resourceName}&${this.buildResourceUrl()}`
+            : `${this.resourceName}?${this.buildResourceUrl()}`;
+            this.treeResource = decodeURIComponent(url);
+          } catch (error) {
+            this.treeResource = this.resourceName;
+          }
+
+          // TODO: we have to fix the uri manually
+          this.treeResource = this.treeResource.replace(/%/g, "%25");
+          this.treeResource = this.treeResource.replace(/'/g, "%27");
+          console.time('subscribe');
+          subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, 'id', 'parent_id', 15000);
+          console.timeEnd('subscribe');
+
+          // subscribeLazyload isnt flagged as jsonapi so we have to check for errors ourselves
+          if (subscribeResponse.errors || Object.keys(subscribeResponse).length === 0) {
+            throw(subscribeResponse.errors);
+          }
+          this._sizeAllIds  = subscribeResponse.all_ids_size;
+          this._sizeUserIds = subscribeResponse.user_ids_size;
+          this._userFirstId = subscribeResponse.user_first_id;
+          this._userLastId  = subscribeResponse.user_last_id;
+        }
+
+        this._renderItems();
+      } catch (error) {
+        console.timeEnd('subscribe');
+        this.loading = false;
+        console.error(error);
+        this.app.openToast({ text: 'Ocorreu um erro a carregar os dados.', backgroundColor: 'red' });
+      }
+    }
+
     _debounceFetchTreeItems () {
       this.__debounce('__fetchTreeItemsDebouncer', () => {
         // Make sure every casper-select is already rendered and have selected items before proceeding.
@@ -229,7 +234,7 @@ export const CasperMoacTreeMixin = superClass => {
 
         if (missingComponent) return afterNextRender(this, () => { this._debounceFetchTreeItems(); });
 
-        this.refreshTreeItems();
+        this._fetchTreeItems();
       });
     }
 
@@ -360,7 +365,7 @@ export const CasperMoacTreeMixin = superClass => {
     _handleErrors (error) {
       if (error && error.payload_errors && error.payload_errors[0].internal.why === 'urn not subscribed!') {
         console.log('Session died, resubscribing...');
-        this.refreshTreeItems();
+        this._debounceFetchTreeItems();
       } else {
         let errorMessage = 'Ocorreu um erro a carregar os dados.';
         if (error && error.constructor === Array && error.length >= 1) {
