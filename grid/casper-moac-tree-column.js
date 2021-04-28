@@ -37,31 +37,87 @@ class CasperMoacTreeColumn extends GridColumnElement {
             margin-left: -10px;
           }
 
+          .acc-crumb {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 5px;
+          }
+
+          .acc-crumb-circle {
+            /* background-color: var(--status-gray); */
+            width: 6px;
+            height: 6px;
+            border: solid 2px rgb(12, 84, 96);
+            border-radius: 100%;
+          }
+
+          .acc-crumb-circle:hover {
+            cursor: pointer;
+            /* opacity: 0.8 !important; */
+            background-color: rgb(12, 84, 96);
+          }
+
+          .acc-crumb-line {
+            background-color: rgb(12, 84, 96);
+            width: 13px;
+            height: 1px;
+          }
+
+          .acc-crumb-circle-selected {
+            opacity: 1;
+          }
+
         </style>
         <div class="tree-column">
-          <div style="margin-left: calc(([[item.level]]-1)*11px);" hidden$=[[!item.has_children]]>
-            <casper-icon
-              hidden$=[[item.expanded]]
-              icon="fa-solid:caret-right"
-              data-item=[[item]]
-              class="expand-icon"
-              on-click="_expand">
-            </casper-icon>
-            <casper-icon
-              hidden$=[[!item.expanded]]
-              icon="fa-solid:caret-down"
-              data-item=[[item]]
-              class="expand-icon"
-              on-click="_collapse">
-            </casper-icon>
-            <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
-          </div>
-          <div style="margin-left: calc((11px * ([[item.level]]-1)) + 17px);" hidden$=[[item.has_children]]>
-            <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
-          </div>
+          <template is="dom-if" if="[[!item.not_tree]]">
+            <div style="margin-left: calc(([[item.level]]-1)*11px);" hidden$=[[!item.has_children]]>
+              <casper-icon
+                hidden$=[[item.expanded]]
+                icon="fa-solid:caret-right"
+                data-item=[[item]]
+                class="expand-icon"
+                on-click="_expand">
+              </casper-icon>
+              <casper-icon
+                hidden$=[[!item.expanded]]
+                icon="fa-solid:caret-down"
+                data-item=[[item]]
+                class="expand-icon"
+                on-click="_collapse">
+              </casper-icon>
+              <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
+            </div>
+            <div style="margin-left: calc((11px * ([[item.level]]-1)) + 17px);" hidden$=[[item.has_children]]>
+              <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
+            </div>
+          </template>
+
+          <template is="dom-if" if="[[item.not_tree]]">
+            <div class="acc-crumb">
+              <template is="dom-repeat" items=[[getParentIds(item)]] as="parentId">
+                <div style="opacity: [[getOpacity(index, item.parent_ids)]]" class="acc-crumb-circle" tooltip="[[parentId]]"></div>
+                <div style="opacity: [[getOpacity(index, item.parent_ids)]]" class="acc-crumb-line"></div>
+              </template>
+              <div class="acc-crumb-circle acc-crumb-circle-selected" tooltip=[[item.id]]></div>
+              <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
+            </div>
+          </template>
+
         </div>
       </template>
     `;
+  }
+
+  scaleBetween (unscaledNum, minAllowed, maxAllowed, min, max) {
+    return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
+  }
+
+  getParentIds (item) {
+    return item.parent_ids.filter(e => e != item.id);
+  }
+
+  getOpacity (index, array) {
+    return this.scaleBetween((index)/array.length, 0.4, 1, 0, 1);
   }
 
   /**

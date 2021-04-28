@@ -193,6 +193,8 @@ export const CasperMoacTreeMixin = superClass => {
             this.treeResource = this.resourceName;
           }
 
+          if (this.treeResource.length - this.resourceName.length === 1) this.treeResource = this.resourceName;
+
           // TODO: we have to fix the uri manually
           this.treeResource = this.treeResource.replace(/%/g, "%25");
           this.treeResource = this.treeResource.replace(/'/g, "%27");
@@ -308,14 +310,16 @@ export const CasperMoacTreeMixin = superClass => {
                                             if (this.expandedItems.filter(obj => obj.id == item.id).length > 0) item.expanded = true;
                                             if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item);
                                           });
+          if (this._treeColumn) this._treeColumn.width = (50+(maxLevel*20))+'px';
         } else {
           response.data.forEach( item => {  if (item.level && item.level > maxLevel) maxLevel = item.level;
+                                            item.not_tree = true;
                                             if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item);
                                          });
-
+          if (this._treeColumn) this._treeColumn.width = (50+(maxLevel*28))+'px';
         }
 
-        if (this._treeColumn) this._treeColumn.width = (50+(maxLevel*20))+'px';
+
 
         this._renderedArray = response.data;
         if (this._newActiveItemId) {
