@@ -34,7 +34,7 @@ export const CasperMoacStylesMixin = superClass => {
       return html`
         <style>
           .header-toggle-father {
-            border: solid 1px rgb(12, 84, 96);
+            border: solid 1px rgba(12, 84, 96, .7);
             border-radius: 7px;
             background-color: rgba(12, 84, 96, .5);
             margin: 2px 0;
@@ -42,7 +42,7 @@ export const CasperMoacStylesMixin = superClass => {
 
           .header-toggle-title {
             display: inline-flex;
-            padding: 3px 15px;
+            padding: 2px 15px;
             opacity: .5;
           }
 
