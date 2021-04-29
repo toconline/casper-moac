@@ -59,6 +59,8 @@ class CasperMoacToggleColumn extends GridColumnElement {
       header2: String,
       /**
        * First header's title class.
+       * 
+       * @type {String}
        */
       header1Class: {
         type: String,
@@ -66,10 +68,21 @@ class CasperMoacToggleColumn extends GridColumnElement {
       },
       /**
        * Second header's title class.
+       * 
+       * @type {String}
        */
        header2Class: {
         type: String,
         value: 'header-title header-toggle-title'
+      },
+      /**
+       * The header's selected button/title.
+       * 
+       * @type {String}
+       */
+      selectedButton: {
+        type: String,
+        value: 'first'
       }
     }
   }
@@ -93,7 +106,7 @@ class CasperMoacToggleColumn extends GridColumnElement {
           </div>
         </div> -->
 
-        <div tooltip$="[[tooltip]]" class="casper-moac-sort-column" style="[[__getHeaderContainerAlignment()]]">
+        <div tooltip$="[[tooltip]]" class="casper-moac-sort-column" style="[[__getHeaderContainerAlignment()]]" selected$="[[selectedButton]]">
           <div class="header-toggle-father">
             <span id="first-title" class$="[[header1Class]]" on-click="__toggleClass">[[header1]]</span>
             <span id="second-title" class$="[[header2Class]]" on-click="__toggleClass">[[header2]]</span>
@@ -168,14 +181,27 @@ class CasperMoacToggleColumn extends GridColumnElement {
    * This method 
    */
   __toggleClass (event) {
-    let initialClass = 'header-title header-toggle-title';
+    if (event && event.currentTarget) {
+      let initialClass = 'header-title header-toggle-title';
 
-    if (event && event.currentTarget && event.currentTarget.id === 'first-title') {
-      this.header1Class = `${initialClass} selected-header-toggle-title`;
-      this.header2Class = initialClass;
-    } else if (event && event.currentTarget && event.currentTarget.id === 'second-title') {
-      this.header2Class = `${initialClass} selected-header-toggle-title`;
-      this.header1Class = initialClass;
+      if (event.currentTarget.id === 'first-title') {
+        this.header1Class = `${initialClass} selected-header-toggle-title`;
+        this.header2Class = initialClass;
+  
+        this.selectedButton = 'first';
+      } else if (event.currentTarget.id === 'second-title') {
+        this.header2Class = `${initialClass} selected-header-toggle-title`;
+        this.header1Class = initialClass;
+  
+        this.selectedButton = 'second';
+      }
+      event.stopImmediatePropagation();
+  
+      this.dispatchEvent(new CustomEvent('casper-moac-toggle', {
+        bubbles: true,
+        composed: true,
+        detail: { target_id: event.currentTarget.id }
+      }));
     }
   }
 

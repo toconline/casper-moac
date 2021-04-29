@@ -126,7 +126,7 @@ export const CasperMoacTreeMixin = superClass => {
       this.addEventListener('casper-moac-tree-column-collapse', this.collapse.bind(this));
 
       const treeColumns = [
-        ...this.shadowRoot.querySelector('slot[name="grid-before"]').assignedElements().filter(assignedElement => assignedElement.nodeName.toLowerCase() === 'casper-moac-tree-column')
+        ...this.shadowRoot.querySelector('slot[name="grid"]').assignedElements().filter(assignedElement => assignedElement.nodeName.toLowerCase() === 'casper-moac-tree-column')
       ];
       this._treeColumn = treeColumns[0];
 
