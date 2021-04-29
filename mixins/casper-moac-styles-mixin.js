@@ -8,6 +8,7 @@ export const CasperMoacStylesMixin = superClass => {
         ${this.__genericStyles()}
         ${this.__casperMoacColumnStyles()}
         ${this.__casperMoacSortColumnStyles()}
+        ${this.__casperMoacToggleColumnStyles()}
       `;
     }
 
@@ -21,6 +22,37 @@ export const CasperMoacStylesMixin = superClass => {
             width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
+          }
+        </style>
+      `;
+    }
+
+    /**
+     * This method returns the styles that will be used for the casper-moac-toggle-column component.
+     */
+    static __casperMoacToggleColumnStyles () {
+      return html`
+        <style>
+          .header-toggle-father {
+            border: solid 1px rgb(12, 84, 96);
+            border-radius: 7px;
+            background-color: rgba(12, 84, 96, .5);
+            margin: 2px 0;
+          }
+
+          .header-toggle-title {
+            display: inline-flex;
+            padding: 3px 15px;
+            opacity: .5;
+          }
+
+          .selected-header-toggle-title {
+            /* border-bottom: solid 3px orange; */
+            background-color: whitesmoke;
+            border-radius: 7px;
+            color: var(--primary-color);
+            box-shadow: 2px 2px 3px rgb(12, 84, 96);
+            opacity: 1;
           }
         </style>
       `;
