@@ -33,26 +33,26 @@ export const CasperMoacStylesMixin = superClass => {
     static __casperMoacToggleColumnStyles () {
       return html`
         <style>
-          .header-toggle-father {
+          .toggle-buttons-container {
             border: solid 1px rgba(12, 84, 96, .7);
             border-radius: 7px;
             background-color: rgba(12, 84, 96, .5);
             margin: 2px 0;
           }
 
-          .header-toggle-title {
+          .toggle-button {
             display: inline-flex;
             padding: 2px 15px;
             opacity: .5;
           }
 
-          .selected-header-toggle-title {
-            /* border-bottom: solid 3px orange; */
+          .selected-toggle-button {
             background-color: whitesmoke;
             border-radius: 7px;
             color: var(--primary-color);
             box-shadow: 2px 2px 3px rgb(12, 84, 96);
             opacity: 1;
+            cursor: default;
           }
         </style>
       `;
