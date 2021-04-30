@@ -97,7 +97,7 @@ export const CasperMoacGridMixin = superClass => {
       // Ignore the event if there are no items, the user is typing in the filter input or it's not an arrow key event.
       if (this.displayedItems.length === 0 || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
 
-      if (['ArrowLeft', 'ArrowRight'].includes(keyCode) && this.treeGrid && this.activeItem && this.activeItem.id && this.activeItem.parent_id !== undefined) {
+      if (['ArrowLeft', 'ArrowRight'].includes(keyCode) && this.socketLazyLoad && this.activeItem && this.activeItem.id && this.activeItem.parent_id !== undefined) {
         event.stopImmediatePropagation();
         if (keyCode === 'ArrowLeft' && this.activeItem.expanded) {
           // Collapse

@@ -171,8 +171,8 @@ export const CasperMoacFiltersMixin = superClass => {
       // Since we already have all the values ready, filter the items.
       if (this.lazyLoad) {
         this.__filterLazyLoadItems();
-      } else if (this.treeGrid) {
-        this._filterTreeItems();
+      } else if (this.socketLazyLoad) {
+        this._filterSocketItems();
       } else {
         this.__filterItems();
       }
@@ -232,8 +232,8 @@ export const CasperMoacFiltersMixin = superClass => {
         // Force the re-fetch of items if one the filter changes.
         if (this.lazyLoad) {
           this.refreshItems();
-        } else if (this.treeGrid) {
-          this._filterTreeItems();
+        } else if (this.socketLazyLoad) {
+          this._filterSocketItems();
         }
 
         this.__renderActiveFilters();
@@ -425,7 +425,7 @@ export const CasperMoacFiltersMixin = superClass => {
         : this.$.filterInputIcon.icon = 'fa-regular:search';
 
       // When the component is lazily loaded, ignore the changes if the developer didn't specify no filter attributes or an URL parameter.
-      if ((this.lazyLoad || this.treeGrid) && !this.resourceFilterParam && (!this.resourceFilterAttributes || this.resourceFilterAttributes.length === 0)) return;
+      if ((this.lazyLoad || this.socketLazyLoad) && !this.resourceFilterParam && (!this.resourceFilterAttributes || this.resourceFilterAttributes.length === 0)) return;
 
       this.__debounce('__freeFilterChangedDebouncer', () => {
         // Do not re-filter the items if the current value matches the last one.
@@ -436,8 +436,8 @@ export const CasperMoacFiltersMixin = superClass => {
 
         if (this.lazyLoad) {
           this.__filterLazyLoadItems();
-        } else if (this.treeGrid) {
-          this._filterTreeItems();
+        } else if (this.socketLazyLoad) {
+          this._filterSocketItems();
         } else {
           this.__filterItems()
         }
@@ -492,8 +492,8 @@ export const CasperMoacFiltersMixin = superClass => {
       if (this.lazyLoad) {
         this.refreshItems();
         this.__dispatchFilterResetted(Object.keys(resetFiltersValue));
-      } else if (this.treeGrid) {
-        this._filterTreeItems();
+      } else if (this.socketLazyLoad) {
+        this._filterSocketItems();
         this.__dispatchFilterChangedEvent(Object.keys(resetFiltersValue));
       } else {
         this.__dispatchFilterChangedEvent(Object.keys(resetFiltersValue));

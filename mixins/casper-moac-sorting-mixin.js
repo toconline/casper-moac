@@ -67,8 +67,8 @@ export const CasperMoacSortingMixin = superClass => {
 
           if (this.lazyLoad) {
             this.__filterLazyLoadItems();
-          } else if (this.treeGrid) {
-            this._filterTreeItems();
+          } else if (this.socketLazyLoad) {
+            this._filterSocketItems();
           } else {
             this.__filterItems()
           }

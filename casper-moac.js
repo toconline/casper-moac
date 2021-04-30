@@ -103,6 +103,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                     </template>
                   </div>
 
+                  <template is="dom-if" if="[[socketLazyLoad]]">
+                    <casper-icon-button
+                      text="Ver arvore"
+                      icon="fa-light:repeat"
+                      hidden$=[[treeView]]
+                      on-click="showTreeView"></casper-icon-button>
+                  </template>
+
                   <template is="dom-if" if="[[!hideNumberResults]]">
                     [[__numberOfResults]]
                   </template>
@@ -288,8 +296,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
     if (this.lazyLoad) {
       this.__initializeLazyLoad();
-    } else if (this.treeGrid) {
-      this._initializeTreeGrid();
+    } else if (this.socketLazyLoad) {
+      this._initializeSocketLazyLoad();
     } else {
       afterNextRender(this, () => this.__filterItems());
     }
@@ -910,7 +918,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.forceGridRedraw();
     this.__activateItem();
 
-    if (!this.treeGrid) {
+    if (!this.socketLazyLoad) {
       this.__numberOfResults = displayedItems.length === originalItems.length
         ? `${displayedItems.length} ${this.multiSelectionLabel}`
         : `${displayedItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;

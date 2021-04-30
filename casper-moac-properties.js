@@ -449,11 +449,11 @@ export const CasperMoacProperties = superClass => {
           observer: '__selectedItemsChanged'
         },
          /**
-         * Flag used to activate the casper-moac's tree grid mode.
+         * Flag used to activate the casper-moac's epaper lazy load mode.
          *
          * @type {Boolean}
          */
-        treeGrid: {
+        socketLazyLoad: {
           type: Boolean,
           value: false
         },

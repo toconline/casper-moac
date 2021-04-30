@@ -81,7 +81,12 @@ export const CasperMoacTreeMixin = superClass => {
           type: Array,
           value: []
         },
-        _treeLoad: {
+        /**
+         * Flag to control the grid view
+         *
+         * @type {Boolean}
+         */
+        treeView: {
           type: Boolean,
           value: true
         }
@@ -89,8 +94,8 @@ export const CasperMoacTreeMixin = superClass => {
     }
 
     // Public method to reload the items in the tree grid
-    refreshTreeItems () {
-      this._debounceFetchTreeItems();
+    refreshSocketItems () {
+      this._debounceFetchSocketItems();
     }
 
 
@@ -154,14 +159,43 @@ export const CasperMoacTreeMixin = superClass => {
       }
     }
 
+    // Public method that changes back to tree view
+    async showTreeView () {
+      if (!this.treeView) {
+        this.treeView = true;
+        let resetedVals = {};
+        Object.keys(this.filters).forEach((key) => resetedVals[key] = '');
+        this.setFiltersValue(resetedVals, false, true);
+        this.__clearFilterInput();
+        this._debounceFetchSocketItems();
+      }
+    }
+
+    _expandMultiple (event) {
+      if (event.detail && event.detail.ids.length > 0 && event.detail.idx > -1) {
+        this._newActiveItemId = +event.detail.ids[event.detail.idx];
+        event.detail.ids = event.detail.ids.slice(0, event.detail.idx + 1);
+
+        // TODO: check for dups or clean already expanded items
+        for (let i = 0; i < event.detail.ids.length; i++) {
+          this.expandedItems.push({id: +event.detail.ids[i], parentId: +(i > 0 ? event.detail.ids[i-1] : 0) });
+        }
+        this.treeView = false;
+        this.showTreeView();
+      } else {
+        return;
+      }
+    }
+
+
     async _fetchTreeItems () {
       try {
         this.loading = true;
-        this._newActiveItemId = undefined;
+        // this._newActiveItemId = undefined;
         this.treeResource = this.resourceName;
 
         let subscribeResponse;
-        if (this._treeLoad) {
+        if (this.treeView) {
           console.time('subscribe');
           subscribeResponse = await this.app.socket2.subscribeTreeLazyload(this.treeResource, 'id', 'parent_id', 'subentity', 'general_ledger', 15000);
           console.timeEnd('subscribe');
@@ -221,7 +255,7 @@ export const CasperMoacTreeMixin = superClass => {
       }
     }
 
-    _debounceFetchTreeItems () {
+    _debounceFetchSocketItems () {
       this.__debounce('__fetchTreeItemsDebouncer', () => {
         // Make sure every casper-select is already rendered and have selected items before proceeding.
         const missingComponent = Object.entries(this.filters).some(([filterKey, filterOptions]) => {
@@ -234,27 +268,28 @@ export const CasperMoacTreeMixin = superClass => {
           );
         });
 
-        if (missingComponent) return afterNextRender(this, () => { this._debounceFetchTreeItems(); });
+        if (missingComponent) return afterNextRender(this, () => { this._debounceFetchSocketItems(); });
 
         this._fetchTreeItems();
       });
     }
 
-    _filterTreeItems () {
+    _filterSocketItems () {
       afterNextRender(this, ()  => {
         if (this.buildResourceUrl() !== "") {
-          this._treeLoad = false;
-          this._debounceFetchTreeItems();
-        } else {
-          this._treeLoad = true;
-          this._debounceFetchTreeItems();
+          this.treeView = false;
+          this._debounceFetchSocketItems();
+        } else if (!this.treeView) {
+          this.treeView = true;
+          this._debounceFetchSocketItems();
         }
       });
     }
 
 
-    _initializeTreeGrid () {
+    _initializeSocketLazyLoad () {
       this.addEventListener('casper-moac-tree-column-expand', this.expand.bind(this));
+      this.addEventListener('casper-moac-tree-column-expand-multiple', this._expandMultiple.bind(this));
       this.addEventListener('casper-moac-tree-column-collapse', this.collapse.bind(this));
 
       const treeColumns = [
@@ -300,7 +335,7 @@ export const CasperMoacTreeMixin = superClass => {
         console.timeEnd('getll');
 
         let maxLevel = 1;
-        if (this._treeLoad) {
+        if (this.treeView) {
           if (response.data[0].child_count === undefined || response.data[0].level === undefined) {
             throw('Each item given to the tree grid MUST have the following properties: child_count and level');
           }
@@ -369,7 +404,7 @@ export const CasperMoacTreeMixin = superClass => {
     _handleErrors (error) {
       if (error && error.payload_errors && error.payload_errors[0].internal.why === 'urn not subscribed!') {
         console.log('Session died, resubscribing...');
-        this._debounceFetchTreeItems();
+        this._debounceFetchSocketItems();
       } else {
         let errorMessage = 'Ocorreu um erro a carregar os dados.';
         if (error && error.constructor === Array && error.length >= 1) {

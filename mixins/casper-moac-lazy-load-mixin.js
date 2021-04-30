@@ -521,7 +521,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       ];
 
       // TODO: this might be wrong
-      if (this.treeGrid) resourceUrlParams = [];
+      if (this.socketLazyLoad) resourceUrlParams = [];
 
       // Limit the fields that are requested from the JSON API.
       if (this.resourceListAttributes && this.resourceListAttributes.length > 0) {

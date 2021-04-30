@@ -95,10 +95,10 @@ class CasperMoacTreeColumn extends GridColumnElement {
           <template is="dom-if" if="[[item.not_tree]]">
             <div class="acc-crumb">
               <template is="dom-repeat" items=[[getParentIds(item)]] as="parentId">
-                <div style="opacity: [[getOpacity(index, item.parent_ids)]]" class="acc-crumb-circle" tooltip="[[parentId]]"></div>
+                <div style="opacity: [[getOpacity(index, item.parent_ids)]]" class="acc-crumb-circle" tooltip="[[parentId]]" data-item="[[item]]" on-click="_expandMultiple"></div>
                 <div style="opacity: [[getOpacity(index, item.parent_ids)]]" class="acc-crumb-line"></div>
               </template>
-              <div class="acc-crumb-circle acc-crumb-circle-selected" tooltip=[[item.id]]></div>
+              <div class="acc-crumb-circle acc-crumb-circle-selected" tooltip="[[item.id]]" data-item="[[item]]" on-click="_expandMultiple"></div>
               <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
             </div>
           </template>
@@ -149,24 +149,41 @@ class CasperMoacTreeColumn extends GridColumnElement {
 
   // Dispatch an event to inform the casper-moac element that user has expanded a node.
   _expand (event) {
-    event.stopImmediatePropagation();
+    if (event && event.target && event.target.dataItem) {
+      event.stopImmediatePropagation();
 
-    this.dispatchEvent(new CustomEvent('casper-moac-tree-column-expand', {
-      bubbles: true,
-      composed: true,
-      detail: { id: event.target.dataItem.id, parent_id: event.target.dataItem.parent_id }
-    }));
+      this.dispatchEvent(new CustomEvent('casper-moac-tree-column-expand', {
+        bubbles: true,
+        composed: true,
+        detail: { id: event.target.dataItem.id, parent_id: event.target.dataItem.parent_id }
+      }));
+    }
+  }
+
+  // Dispatch an event to inform the casper-moac element that user has expanded multiple nodes.
+  _expandMultiple (event) {
+    if (event && event.target && event.target.dataItem && event.target.tooltip) {
+      event.stopImmediatePropagation();
+
+      this.dispatchEvent(new CustomEvent('casper-moac-tree-column-expand-multiple', {
+        bubbles: true,
+        composed: true,
+        detail: { ids: event.target.dataItem.parent_ids, idx: event.target.dataItem.parent_ids.indexOf(event.target.tooltip) }
+      }));
+    }
   }
 
   // Dispatch an event to inform the casper-moac element that user has collapsed a node.
   _collapse (event) {
-    event.stopImmediatePropagation();
+    if (event && event.target && event.target.dataItem) {
+      event.stopImmediatePropagation();
 
-    this.dispatchEvent(new CustomEvent('casper-moac-tree-column-collapse', {
-      bubbles: true,
-      composed: true,
-      detail: { id: event.target.dataItem.id, parent_id: event.target.dataItem.parent_id }
-    }));
+      this.dispatchEvent(new CustomEvent('casper-moac-tree-column-collapse', {
+        bubbles: true,
+        composed: true,
+        detail: { id: event.target.dataItem.id, parent_id: event.target.dataItem.parent_id }
+      }));
+    }
   }
 
   _getPathProp (item, value) {
