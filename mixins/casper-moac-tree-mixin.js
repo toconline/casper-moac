@@ -160,7 +160,7 @@ export const CasperMoacTreeMixin = superClass => {
     }
 
     // Public method that changes back to tree view
-    async showTreeView () {
+    showTreeView () {
       if (!this.treeView) {
         this.treeView = true;
         let resetedVals = {};
@@ -176,9 +176,10 @@ export const CasperMoacTreeMixin = superClass => {
         this._newActiveItemId = +event.detail.ids[event.detail.idx];
         event.detail.ids = event.detail.ids.slice(0, event.detail.idx + 1);
 
-        // TODO: check for dups or clean already expanded items
+        // Check for dups
         for (let i = 0; i < event.detail.ids.length; i++) {
-          this.expandedItems.push({id: +event.detail.ids[i], parentId: +(i > 0 ? event.detail.ids[i-1] : 0) });
+          const newItem = {id: +event.detail.ids[i], parentId: +(i > 0 ? event.detail.ids[i-1] : 0) };
+          if (this.expandedItems.filter(e => e.id == newItem.id).length === 0) this.expandedItems.push(newItem);
         }
         this.treeView = false;
         this.showTreeView();
@@ -191,7 +192,6 @@ export const CasperMoacTreeMixin = superClass => {
     async _fetchTreeItems () {
       try {
         this.loading = true;
-        // this._newActiveItemId = undefined;
         this.treeResource = this.resourceName;
 
         let subscribeResponse;
@@ -218,6 +218,7 @@ export const CasperMoacTreeMixin = superClass => {
             }
           }
         } else {
+          this._newActiveItemId = undefined;
           try {
             const url = this.resourceName.includes('?')
             ? `${this.resourceName}&${this.buildResourceUrl()}`

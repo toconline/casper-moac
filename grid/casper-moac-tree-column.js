@@ -94,11 +94,11 @@ class CasperMoacTreeColumn extends GridColumnElement {
 
           <template is="dom-if" if="[[item.not_tree]]">
             <div class="acc-crumb">
-              <template is="dom-repeat" items=[[getParentIds(item)]] as="parentId">
-                <div style="opacity: [[getOpacity(index, item.parent_ids)]]" class="acc-crumb-circle" tooltip="[[parentId]]" data-item="[[item]]" on-click="_expandMultiple"></div>
-                <div style="opacity: [[getOpacity(index, item.parent_ids)]]" class="acc-crumb-line"></div>
+              <template is="dom-repeat" items=[[_getParentIds(item)]] as="parentId">
+                <div style="opacity: [[_getOpacity(index, item.parent_ids)]]" class="acc-crumb-circle" data-parent="[[parentId]]" data-item="[[item]]" on-click="_expandMultiple"></div>
+                <div style="opacity: [[_getOpacity(index, item.parent_ids)]]" class="acc-crumb-line"></div>
               </template>
-              <div class="acc-crumb-circle acc-crumb-circle-selected" tooltip="[[item.id]]" data-item="[[item]]" on-click="_expandMultiple"></div>
+              <div class="acc-crumb-circle acc-crumb-circle-selected" data-parent="[[item.id]]" data-item="[[item]]" on-click="_expandMultiple"></div>
               <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
             </div>
           </template>
@@ -108,16 +108,16 @@ class CasperMoacTreeColumn extends GridColumnElement {
     `;
   }
 
-  scaleBetween (unscaledNum, minAllowed, maxAllowed, min, max) {
+  _scaleBetween (unscaledNum, minAllowed, maxAllowed, min, max) {
     return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
   }
 
-  getParentIds (item) {
+  _getParentIds (item) {
     return item.parent_ids.filter(e => e != item.id);
   }
 
-  getOpacity (index, array) {
-    return this.scaleBetween((index)/array.length, 0.4, 1, 0, 1);
+  _getOpacity (index, array) {
+    return this._scaleBetween((index)/array.length, 0.4, 1, 0, 1);
   }
 
   /**
@@ -162,13 +162,13 @@ class CasperMoacTreeColumn extends GridColumnElement {
 
   // Dispatch an event to inform the casper-moac element that user has expanded multiple nodes.
   _expandMultiple (event) {
-    if (event && event.target && event.target.dataItem && event.target.tooltip) {
+    if (event && event.target && event.target.dataItem && event.target.dataParent) {
       event.stopImmediatePropagation();
 
       this.dispatchEvent(new CustomEvent('casper-moac-tree-column-expand-multiple', {
         bubbles: true,
         composed: true,
-        detail: { ids: event.target.dataItem.parent_ids, idx: event.target.dataItem.parent_ids.indexOf(event.target.tooltip) }
+        detail: { ids: event.target.dataItem.parent_ids, idx: event.target.dataItem.parent_ids.indexOf(event.target.dataParent) }
       }));
     }
   }
