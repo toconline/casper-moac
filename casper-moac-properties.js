@@ -530,6 +530,24 @@ export const CasperMoacProperties = superClass => {
         __localStorageFilters: {
           type: Array,
           value: []
+        },
+        /**
+         * Indicates if the paper tabs creation has already run.
+         *
+         * @type {Boolean}
+         */
+        __firstTimeDisplayingFilters: {
+          type: Boolean,
+          value: true
+        },
+        /**
+         * Indicates if the page has paper tabs.
+         *
+         * @type {Boolean}
+         */
+        hasTabs: {
+          type: Boolean,
+          value: false
         }
       };
     }
