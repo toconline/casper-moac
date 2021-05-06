@@ -286,8 +286,9 @@ export const CasperMoacStylesMixin = superClass => {
 
           /* TODO corrigir isto */
           .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container {
-            grid-column-start: 1;
-            grid-column-end: 6;
+            /* grid-column-start: 1;
+            grid-column-end: 6; */
+            grid-column: 1 / -1;
           }
 
           /* TODO */
