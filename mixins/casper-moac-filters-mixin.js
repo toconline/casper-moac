@@ -410,6 +410,13 @@ export const CasperMoacFiltersMixin = superClass => {
           this.__displayAllFiltersButtonSpan.innerHTML = 'Ver todos os filtros';
         }
       });
+
+      // AQUI
+      // The first time that this function runs, another one is called to insert paper tabs (categories for the filters)
+      if (this.__firstTimeDisplayingFilters) {
+        this.__firstTimeDisplayingFilters = false;
+        this.__createFiltersPaperTabs();
+      } 
     }
 
     /**
@@ -519,5 +526,104 @@ export const CasperMoacFiltersMixin = superClass => {
           break;
       }
     }
+
+    /**
+     * This function is responsible for creating the filters paper tabs.
+     *
+     */
+    __createFiltersPaperTabs () {
+      // First we need to check if any of the filters has a key 'tab'. If not, then we return
+      for (const obj of this.__filters) {
+        if (obj.filter.tab) {
+          this.hasTabs = true;
+          break;
+        }
+      }
+      if (!this.hasTabs) return;
+
+      const paperTabsContainer = this.$.paperTabsContainer;
+      paperTabsContainer.classList.add('paper-tabs-container');
+
+      paperTabsContainer.innerHTML = '<paper-tabs id="paperTabs"></paper-tabs>';
+      const paperTabs = paperTabsContainer.children.paperTabs;
+
+      let paperTabsChildren = '';
+
+      for (const obj of this.__filters) {
+        if (obj.filter.tab) {
+          const tabName = obj.filter.tab;
+
+          if (paperTabsChildren) {
+            // Here we check if the tab already exists
+            if (paperTabsChildren.includes(`data-type="${tabName}"`)) continue;
+            
+            paperTabsChildren += `<paper-tab data-type="${tabName}">${tabName}</paper-tab>`;
+          // The first time there are no children, so we add the tab
+          } else {
+            paperTabsChildren += `<paper-tab data-type="${tabName}">${tabName}</paper-tab>`;
+          }
+        }
+      }
+      paperTabs.innerHTML = paperTabsChildren;
+
+      paperTabs.addEventListener('selected-changed', (event) => this.__paperTabFiltersChanged(event));
+      this.changeFiltersPaperTab(0);
+    }
+
+    /**
+     * This function fires when the filters selected tab changes.
+     * It is responsible for identifying the filters that should be hidden / displayed for the selected tab.
+     *
+     * @param {Object} event The event's object.
+     */
+    __paperTabFiltersChanged (event) {
+      if (event && event.detail && event.detail.value !== undefined) {
+        const tabIndex = event.detail.value;
+        const paperTabs = this.$.paperTabsContainer.children.paperTabs;
+        const selectedTab = paperTabs.children[tabIndex].dataset.type;
+      
+        const filterElements = this.$.filtersContainer.querySelectorAll('.filter-container');
+
+        for (const filterEl of filterElements) {
+          let currentFilterName;
+
+          // We need to go inside the current filter element and get the filter's name
+          for (let i = 0; i < filterEl.childElementCount; i++) {
+            if (filterEl.children[i].tagName !== 'DOM-IF' && filterEl.children[i].dataset && filterEl.children[i].dataset.filter) {
+              currentFilterName = filterEl.children[i].dataset.filter;
+              break;
+            }
+          }
+
+          // Next we need to check the filter objects to find out if the current filter belongs to the selected tab or not
+          for (const obj of this.__filters) {
+            if (currentFilterName === obj.filterKey) { 
+              const currentFilterTab = obj.filter.tab;
+
+              if (currentFilterTab !== selectedTab) {
+                filterEl.hidden = true;
+              } else {
+                filterEl.hidden = false;
+              }
+
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    /**
+     * Public function to change the active paper tab in the filters.
+     *
+     * @param {Number} tabIndex The index of the paper tab that will be selected.
+     */
+    changeFiltersPaperTab (tabIndex) {
+      if (isNaN(tabIndex) || +tabIndex < 0 || !this.hasTabs) return;
+
+      const paperTabs = this.$.paperTabsContainer.children.paperTabs;
+      paperTabs.selected = tabIndex;
+    }
+    
   }
 };

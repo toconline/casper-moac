@@ -278,6 +278,36 @@ export const CasperMoacStylesMixin = superClass => {
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
           }
 
+          /* TODO: Filters casper-select. Se mudarmos o tamanho, também é preciso mudar nas multiple-selection */
+          .main-container vaadin-split-layout .left-side-container .filters-container casper-select {
+            --casper-select-single-paper-input-container-label: { font-size: 14px; }
+            --casper-select-single-paper-input-container-input: { font-size: 14px; }
+          }
+
+          /* TODO corrigir isto */
+          .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container {
+            grid-column-start: 1;
+            grid-column-end: 6;
+          }
+
+          /* TODO */
+          .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tabs {
+            font-family: var(--material-font-family);
+            --paper-tabs-selection-bar-color: var(--primary-color);
+            --paper-tab-ink: var(--primary-color);
+          }
+
+          /* TODO */
+          .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tab {
+            width: 70px;
+            border-radius: 4px;
+          }
+
+          /* TODO */
+          .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tab:hover {
+            color: var(--primary-color);
+          }
+
           .main-container vaadin-split-layout .left-side-container .filters-container .filter-container-invisible {
             display: none;
           }
