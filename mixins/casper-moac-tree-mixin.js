@@ -89,6 +89,24 @@ export const CasperMoacTreeMixin = superClass => {
         treeView: {
           type: Boolean,
           value: true
+        },
+        /**
+         * Flag to force list
+         *
+         * @type {Boolean}
+         */
+         forceListView: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         * Number of resubscribing attempts available (to avoid spamming)
+         *
+         * @type {Number}
+         */
+        _resubscribeAttempts: {
+          type: Number,
+          value: 10
         }
       }
     }
@@ -161,7 +179,7 @@ export const CasperMoacTreeMixin = superClass => {
 
     // Public method that changes back to tree view
     showTreeView () {
-      if (!this.treeView) {
+      if (!this.treeView && !this.forceListView) {
         this.treeView = true;
         let resetedVals = {};
         Object.keys(this.filters).forEach((key) => resetedVals[key] = '');
@@ -194,10 +212,13 @@ export const CasperMoacTreeMixin = superClass => {
         this.loading = true;
         this.treeResource = this.resourceName;
 
+        if (this.forceListView) this.treeView = false;
+
         let subscribeResponse;
         if (this.treeView) {
           console.time('subscribe');
-          subscribeResponse = await this.app.socket2.subscribeTreeLazyload(this.treeResource, 'id', 'parent_id', 'subentity', 'general_ledger', 15000);
+          const subscribeData =  {parentColumn: 'parent_id', idColumn: 'id', tableType: 'subentity', tableName: 'general_ledger'};
+          subscribeResponse = await this.app.socket2.subscribeTreeLazyload(this.treeResource, subscribeData, 15000);
           console.timeEnd('subscribe');
 
           // subscribeLazyload isnt flagged as jsonapi so we have to check for errors ourselves
@@ -234,7 +255,8 @@ export const CasperMoacTreeMixin = superClass => {
           this.treeResource = this.treeResource.replace(/%/g, "%25");
           this.treeResource = this.treeResource.replace(/'/g, "%27");
           console.time('subscribe');
-          subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, 'id', 'parent_id', 15000);
+          const subscribeData =  {parentColumn: 'parent_id', idColumn: 'id'};
+          subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, subscribeData, 15000);
           console.timeEnd('subscribe');
 
           // subscribeLazyload isnt flagged as jsonapi so we have to check for errors ourselves
@@ -332,7 +354,7 @@ export const CasperMoacTreeMixin = superClass => {
         let activeItemId = 0;
         if (this._newActiveItemId) activeItemId = this._newActiveItemId;
         console.time('getll');
-        const response = await this.app.socket2.getLazyload(this.treeResource, {active_id: activeItemId, direction: direction}, 3000);
+        const response = await this.app.socket2.getLazyload(this.treeResource, {idColumn: 'id', activeId: activeItemId, direction: direction}, 3000);
         console.timeEnd('getll');
 
         let maxLevel = 1;
@@ -404,8 +426,11 @@ export const CasperMoacTreeMixin = superClass => {
 
     _handleErrors (error) {
       if (error && error.payload_errors && error.payload_errors[0].internal.why === 'urn not subscribed!') {
-        console.log('Session died, resubscribing...');
-        this._debounceFetchSocketItems();
+        if (this._resubscribeAttempts > 0) {
+          console.log('Session died, resubscribing...');
+          this._resubscribeAttempts--;
+          this._debounceFetchSocketItems();
+        }
       } else {
         let errorMessage = 'Ocorreu um erro a carregar os dados.';
         if (error && error.constructor === Array && error.length >= 1) {
@@ -417,7 +442,7 @@ export const CasperMoacTreeMixin = superClass => {
         } else {
           console.error(error);
         }
-
+        console.error(error);
         this.app.openToast({text: errorMessage, backgroundColor: 'red' });
       }
     }
