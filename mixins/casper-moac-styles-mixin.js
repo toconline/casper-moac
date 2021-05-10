@@ -286,9 +286,9 @@ export const CasperMoacStylesMixin = superClass => {
 
           /* TODO corrigir isto */
           .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container {
-            /* grid-column-start: 1;
-            grid-column-end: 6; */
             grid-column: 1 / -1;
+            /* grid-column-start: 1;
+            grid-column-end: none; */
           }
 
           /* TODO */
@@ -300,8 +300,11 @@ export const CasperMoacStylesMixin = superClass => {
 
           /* TODO */
           .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tab {
-            width: 70px;
+            box-sizing: border-box;
             border-radius: 4px;
+            /* --paper-tab-content-focused: {
+              border-bottom: solid 10px grey;
+            } */
           }
 
           /* TODO */

@@ -543,9 +543,11 @@ export const CasperMoacFiltersMixin = superClass => {
 
       const paperTabsContainer = this.$.paperTabsContainer;
       paperTabsContainer.classList.add('paper-tabs-container');
-
       paperTabsContainer.innerHTML = '<paper-tabs id="paperTabs"></paper-tabs>';
       const paperTabs = paperTabsContainer.children.paperTabs;
+
+      // The minimum tab width will be the same as each filter's width
+      const tabWidth = this.$.filtersContainer.querySelector('.filter-container').offsetWidth;
 
       let paperTabsChildren = '';
 
@@ -553,18 +555,34 @@ export const CasperMoacFiltersMixin = superClass => {
         if (obj.filter.tab) {
           const tabName = obj.filter.tab;
 
-          if (paperTabsChildren) {
-            // Here we check if the tab already exists
-            if (paperTabsChildren.includes(`data-type="${tabName}"`)) continue;
-            
-            paperTabsChildren += `<paper-tab data-type="${tabName}">${tabName}</paper-tab>`;
-          // The first time there are no children, so we add the tab
+          // If the tab already exists, we skip this one
+          if (paperTabsChildren.includes(`data-type="${tabName}"`)) {
+            continue;
           } else {
-            paperTabsChildren += `<paper-tab data-type="${tabName}">${tabName}</paper-tab>`;
+            paperTabsChildren += `<paper-tab data-type="${tabName}" style="width:${tabWidth}px">${tabName}</paper-tab>`;
+          }
+        // If no tab was specified for the filter, then we create a "others" tab and insert it there
+        } else {
+          obj.filter.tab = 'others';
+
+          if (paperTabsChildren.includes('data-type="others"')) {
+            continue;
+          } else {
+            paperTabsChildren += `<paper-tab data-type="others" style="width:${tabWidth}px">Outros filtros</paper-tab>`;
           }
         }
       }
       paperTabs.innerHTML = paperTabsChildren;
+
+      // for (const tab of paperTabs.children) {
+      //   tab.style.width = `${filterWidth}px`;
+      // }
+
+      // If the width of all paper tabs combined is bigger than that of their parent, then we need to add the following attributes
+      if ((paperTabs.childElementCount * tabWidth) > paperTabs.offsetWidth) {
+        paperTabs.setAttribute('scrollable', '');
+        paperTabs.setAttribute('fit-container', '');
+      }
 
       paperTabs.addEventListener('selected-changed', (event) => this.__paperTabFiltersChanged(event));
       this.changeFiltersPaperTab(0);
@@ -624,6 +642,6 @@ export const CasperMoacFiltersMixin = superClass => {
       const paperTabs = this.$.paperTabsContainer.children.paperTabs;
       paperTabs.selected = tabIndex;
     }
-    
+
   }
 };
