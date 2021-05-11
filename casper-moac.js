@@ -7,9 +7,12 @@ import '@cloudware-casper/casper-epaper/casper-epaper.js';
 import '@cloudware-casper/casper-select/casper-select.js';
 import '@cloudware-casper/casper-date-range/casper-date-range.js';
 import '@cloudware-casper/casper-date-picker/casper-date-picker.js';
+import '@cloudware-casper/casper-tabs/casper-tabs.js';
+import '@cloudware-casper/casper-tabs/casper-tab.js';
+import '@cloudware-casper/casper-icons/casper-icon.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
-import '@polymer/paper-tabs/paper-tabs.js';
+// import '@polymer/paper-tabs/paper-tabs.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { templatize } from '@polymer/polymer/lib/utils/templatize.js';
@@ -114,7 +117,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
             <div hidden$="[[!__displayAllFilters]]">
               <div id="filtersContainer" class="filters-container">
-                <div id="paperTabsContainer"></div>
+                <div id="casperTabsContainer"></div>
                 <template is="dom-repeat" items="[[__filters]]" restamp>
                   <div class$="[[__filterContainerClassName(item.filter)]]">
                     <!--Casper-Select filter-->

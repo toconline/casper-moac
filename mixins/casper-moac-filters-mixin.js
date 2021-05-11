@@ -415,7 +415,7 @@ export const CasperMoacFiltersMixin = superClass => {
       // The first time that this function runs, another one is called to insert paper tabs (categories for the filters)
       if (this.__firstTimeDisplayingFilters) {
         this.__firstTimeDisplayingFilters = false;
-        this.__createFiltersPaperTabs();
+        this.__createFiltersTabs();
       } 
     }
 
@@ -531,7 +531,7 @@ export const CasperMoacFiltersMixin = superClass => {
      * This function is responsible for creating the filters paper tabs.
      *
      */
-    __createFiltersPaperTabs () {
+     __createFiltersTabs () {
       // First we need to check if any of the filters has a key 'tab'. If not, then we return
       for (const obj of this.__filters) {
         if (obj.filter.tab) {
@@ -541,52 +541,169 @@ export const CasperMoacFiltersMixin = superClass => {
       }
       if (!this.hasTabs) return;
 
-      const paperTabsContainer = this.$.paperTabsContainer;
-      paperTabsContainer.classList.add('paper-tabs-container');
-      paperTabsContainer.innerHTML = '<paper-tabs id="paperTabs"></paper-tabs>';
-      const paperTabs = paperTabsContainer.children.paperTabs;
+      const casperTabsContainer = this.$.casperTabsContainer;
+      casperTabsContainer.classList.add('casper-tabs-container');
 
-      // The minimum tab width will be the same as each filter's width
-      const tabWidth = this.$.filtersContainer.querySelector('.filter-container').offsetWidth;
-
-      let paperTabsChildren = '';
+      let casperTabsHtml = '<casper-tabs id="casperTabs">';
 
       for (const obj of this.__filters) {
         if (obj.filter.tab) {
           const tabName = obj.filter.tab;
 
           // If the tab already exists, we skip this one
-          if (paperTabsChildren.includes(`data-type="${tabName}"`)) {
+          if (casperTabsHtml.includes(`data-type="${tabName}"`)) {
             continue;
           } else {
-            paperTabsChildren += `<paper-tab data-type="${tabName}" style="width:${tabWidth}px">${tabName}</paper-tab>`;
+            casperTabsHtml += `<casper-tab data-type="${tabName}">${tabName}</casper-tab>`;
           }
         // If no tab was specified for the filter, then we create a "others" tab and insert it there
         } else {
           obj.filter.tab = 'others';
 
-          if (paperTabsChildren.includes('data-type="others"')) {
+          if (casperTabsHtml.includes('data-type="others"')) {
             continue;
           } else {
-            paperTabsChildren += `<paper-tab data-type="others" style="width:${tabWidth}px">Outros filtros</paper-tab>`;
+            casperTabsHtml += `<casper-tab data-type="others">Outros filtros</casper-tab>`;
           }
         }
       }
-      paperTabs.innerHTML = paperTabsChildren;
 
-      // for (const tab of paperTabs.children) {
-      //   tab.style.width = `${filterWidth}px`;
-      // }
+      casperTabsHtml += '</casper-tabs>';
+      casperTabsContainer.innerHTML = casperTabsHtml;
 
-      // If the width of all paper tabs combined is bigger than that of their parent, then we need to add the following attributes
-      if ((paperTabs.childElementCount * tabWidth) > paperTabs.offsetWidth) {
-        paperTabs.setAttribute('scrollable', '');
-        paperTabs.setAttribute('fit-container', '');
+      const casperTabs = casperTabsContainer.querySelector('#casperTabs');
+      casperTabs.classList.add('hide-tabs-scroll'); // hides scrollbar
+
+      // icons scroll
+      const leftIcon = document.createElement('span');
+      leftIcon.setAttribute('id', 'leftIconScroll');
+      leftIcon.classList.add('casper-tabs-container-scroll-icons');
+      leftIcon.innerHTML = '<casper-icon icon="fa-regular:angle-left"></casper-icon>';
+      casperTabsContainer.insertBefore(leftIcon, casperTabs);
+
+      const rightIcon = document.createElement('span');
+      rightIcon.setAttribute('id', 'rightIconScroll');
+      rightIcon.classList.add('casper-tabs-container-scroll-icons');
+      rightIcon.innerHTML = '<casper-icon icon="fa-regular:angle-right"></casper-icon>';
+      casperTabsContainer.appendChild(rightIcon);
+
+      if (casperTabs.offsetWidth < casperTabsContainer.offsetWidth) {
+        rightIcon.style.display = 'none';
+        leftIcon.style.display = 'none';
       }
 
-      paperTabs.addEventListener('selected-changed', (event) => this.__paperTabFiltersChanged(event));
-      this.changeFiltersPaperTab(0);
+      leftIcon.addEventListener('click', this.__scrollCasperTabs.bind(casperTabs, 'left'));
+      rightIcon.addEventListener('click', this.__scrollCasperTabs.bind(casperTabs, 'right'));
+
+      casperTabs.addEventListener('selected-index-changed', (event) => this.__tabFiltersChanged(event));
+      this.changeFiltersTab(0);
+
+
+      // This will observe the resize of the given elements (entries)
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          if (entry.target.id === 'casperTabsContainer') {
+            const casperTabsContainer = entry.target;
+            const casperTabs = entry.target.querySelector('#casperTabs');
+            const leftIcon = casperTabsContainer.querySelector('#leftIconScroll');
+            const rightIcon = casperTabsContainer.querySelector('#rightIconScroll');
+
+            let allTabsWidth = 0;
+            for (const tab of casperTabs.children) {
+              allTabsWidth += tab.offsetWidth;
+            }
+            
+            if (casperTabsContainer.offsetWidth < allTabsWidth) {
+              rightIcon.style.display = 'flex';
+              leftIcon.style.display = 'flex';
+            } else {
+              rightIcon.style.display = 'none';
+              leftIcon.style.display = 'none';
+            }
+          }
+
+
+          // const cr = entry.contentRect;
+          // console.log('Element:', entry.target);
+          // console.log(`Element size: ${cr.width}px x ${cr.height}px`);
+          // console.log(`Element padding: ${cr.top}px ; ${cr.left}px`);
+        }
+      });
+      
+      // Observe one or multiple elements
+      resizeObserver.observe(casperTabsContainer);
     }
+
+    __scrollCasperTabs (direction) {
+      if (direction === 'right') {
+        this.scrollLeft += 30;
+      } else if (direction === 'left') {
+        this.scrollLeft -= 30;
+      }
+    }
+
+
+
+
+    // __createFiltersTabs () {
+    //   // First we need to check if any of the filters has a key 'tab'. If not, then we return
+    //   for (const obj of this.__filters) {
+    //     if (obj.filter.tab) {
+    //       this.hasTabs = true;
+    //       break;
+    //     }
+    //   }
+    //   if (!this.hasTabs) return;
+
+    //   const paperTabsContainer = this.$.paperTabsContainer;
+    //   paperTabsContainer.classList.add('paper-tabs-container');
+    //   paperTabsContainer.innerHTML = '<paper-tabs id="paperTabs"></paper-tabs>';
+    //   const paperTabs = paperTabsContainer.children.paperTabs;
+
+    //   // The minimum tab width will be the same as each filter's width
+    //   const tabWidth = this.$.filtersContainer.querySelector('.filter-container').offsetWidth;
+
+    //   let paperTabsChildren = '';
+
+    //   for (const obj of this.__filters) {
+    //     if (obj.filter.tab) {
+    //       const tabName = obj.filter.tab;
+
+    //       // If the tab already exists, we skip this one
+    //       if (paperTabsChildren.includes(`data-type="${tabName}"`)) {
+    //         continue;
+    //       } else {
+    //         paperTabsChildren += `<paper-tab data-type="${tabName}" style="width:${tabWidth}px">${tabName}</paper-tab>`;
+    //       }
+    //     // If no tab was specified for the filter, then we create a "others" tab and insert it there
+    //     } else {
+    //       obj.filter.tab = 'others';
+
+    //       if (paperTabsChildren.includes('data-type="others"')) {
+    //         continue;
+    //       } else {
+    //         paperTabsChildren += `<paper-tab data-type="others" style="width:${tabWidth}px">Outros filtros</paper-tab>`;
+    //       }
+    //     }
+    //   }
+    //   paperTabs.innerHTML = paperTabsChildren;
+
+    //   // for (const tab of paperTabs.children) {
+    //   //   tab.style.width = `${filterWidth}px`;
+    //   // }
+
+    //   // If the width of all paper tabs combined is bigger than that of their parent, then we need to add the following attributes
+    //   if ((paperTabs.childElementCount * tabWidth) > paperTabs.offsetWidth) {
+    //     paperTabs.setAttribute('scrollable', '');
+    //     paperTabs.setAttribute('fit-container', '');
+    //   }
+
+    //   paperTabs.addEventListener('selected-changed', (event) => this.__tabFiltersChanged(event));
+    //   this.changeFiltersTab(0);
+    // }
+
+
+
 
     /**
      * This function fires when the filters selected tab changes.
@@ -594,11 +711,18 @@ export const CasperMoacFiltersMixin = superClass => {
      *
      * @param {Object} event The event's object.
      */
-    __paperTabFiltersChanged (event) {
+    __tabFiltersChanged (event) {
       if (event && event.detail && event.detail.value !== undefined) {
         const tabIndex = event.detail.value;
-        const paperTabs = this.$.paperTabsContainer.children.paperTabs;
-        const selectedTab = paperTabs.children[tabIndex].dataset.type;
+        const casperTabs = this.$.casperTabsContainer.querySelector('#casperTabs');
+
+        // for (const tab of casperTabs.children) {
+        //   if (tab.active) tab.active = false;
+        // }
+
+        const selectedTab = casperTabs.children[tabIndex];
+        // selectedTab.active = true;
+        const selectedTabType = selectedTab.dataset.type;
       
         const filterElements = this.$.filtersContainer.querySelectorAll('.filter-container');
 
@@ -618,7 +742,7 @@ export const CasperMoacFiltersMixin = superClass => {
             if (currentFilterName === obj.filterKey) { 
               const currentFilterTab = obj.filter.tab;
 
-              if (currentFilterTab !== selectedTab) {
+              if (currentFilterTab !== selectedTabType) {
                 filterEl.hidden = true;
               } else {
                 filterEl.hidden = false;
@@ -632,15 +756,15 @@ export const CasperMoacFiltersMixin = superClass => {
     }
 
     /**
-     * Public function to change the active paper tab in the filters.
+     * Public function to change the active tab in the filters.
      *
-     * @param {Number} tabIndex The index of the paper tab that will be selected.
+     * @param {Number} tabIndex The index of the tab that will be selected.
      */
-    changeFiltersPaperTab (tabIndex) {
+    changeFiltersTab (tabIndex) {
       if (isNaN(tabIndex) || +tabIndex < 0 || !this.hasTabs) return;
 
-      const paperTabs = this.$.paperTabsContainer.children.paperTabs;
-      paperTabs.selected = tabIndex;
+      const casperTabs = this.$.casperTabsContainer.querySelector('#casperTabs');
+      casperTabs.selectedIndex = tabIndex;
     }
 
   }
