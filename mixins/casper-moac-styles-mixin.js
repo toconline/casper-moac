@@ -280,34 +280,77 @@ export const CasperMoacStylesMixin = superClass => {
 
           /* TODO: Filters casper-select. Se mudarmos o tamanho, também é preciso mudar nas multiple-selection */
           .main-container vaadin-split-layout .left-side-container .filters-container casper-select {
-            --casper-select-single-paper-input-container-label: { font-size: 14px; }
-            --casper-select-single-paper-input-container-input: { font-size: 14px; }
+            --casper-select-single-paper-input-container-label: { font-size: 14px; };
+            --casper-select-single-paper-input-container-input: { font-size: 14px; };
+          }
+
+          /* TODO: corrigir font-size nas multiple selection etc */
+          .main-container vaadin-split-layout .left-side-container .filters-container paper-input {
+            --paper-input-container-input: { font-size: 14px; };
+            --paper-input-container-label: { font-size: 14px; };
           }
 
           /* TODO corrigir isto */
-          .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container {
-            /* grid-column-start: 1;
-            grid-column-end: 6; */
+          /* .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container {
             grid-column: 1 / -1;
+          } */
+
+          /* TODO corrigir isto */
+          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container {
+            grid-column: 1 / -1;
+            display: inline-flex;
+            justify-content: center;
+            /* grid-column-start: 1;
+            grid-column-end: none; */
           }
 
           /* TODO */
-          .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tabs {
+          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container .casper-tabs-container-scroll-icons {
+            display: flex;
+            align-items: center;
+            color: rgb(124, 124, 124);
+            cursor: pointer;
+          }
+
+          /* TODO */
+          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container casper-tabs {
+            /* margin: 0 auto; */
+            border: 1px solid rgb(124, 124, 124);
+            font-size: 14px;
+            margin: 0 15px;
+            overflow: scroll;
+          }
+
+          /* TODO */
+          /* Hide scrollbar for Chrome, Safari and Opera */
+          .hide-tabs-scroll::-webkit-scrollbar {
+            display: none;
+          }
+
+          /* TODO */
+          /* Hide scrollbar for IE, Edge and Firefox */
+          .hide-tabs-scroll {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+          }
+
+          /* TODO */
+          /* .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tabs {
             font-family: var(--material-font-family);
             --paper-tabs-selection-bar-color: var(--primary-color);
             --paper-tab-ink: var(--primary-color);
-          }
+          } */
 
           /* TODO */
-          .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tab {
-            width: 70px;
+          /* .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tab {
+            box-sizing: border-box;
             border-radius: 4px;
-          }
+          } */
 
           /* TODO */
-          .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tab:hover {
+          /* .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tab:hover {
             color: var(--primary-color);
-          }
+          } */
 
           .main-container vaadin-split-layout .left-side-container .filters-container .filter-container-invisible {
             display: none;
