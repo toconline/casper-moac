@@ -588,8 +588,10 @@ export const CasperMoacFiltersMixin = superClass => {
       casperTabsContainer.appendChild(rightIcon);
 
       if (casperTabs.offsetWidth < casperTabsContainer.offsetWidth) {
-        rightIcon.style.display = 'none';
-        leftIcon.style.display = 'none';
+        // rightIcon.style.display = 'none';
+        // leftIcon.style.display = 'none';
+        rightIcon.style.visibility = 'hidden';
+        leftIcon.style.visibility = 'hidden';
       }
 
       leftIcon.addEventListener('click', this.__scrollCasperTabs.bind(casperTabs, 'left'));
@@ -613,15 +615,17 @@ export const CasperMoacFiltersMixin = superClass => {
               allTabsWidth += tab.offsetWidth;
             }
             
-            if (casperTabsContainer.offsetWidth < allTabsWidth) {
-              rightIcon.style.display = 'flex';
-              leftIcon.style.display = 'flex';
+            // If the width of the tabs container is smaller than the width of all tabs combined plus the scroll arrows (left and right), then we show the right arrow
+            if (casperTabsContainer.offsetWidth < (allTabsWidth + leftIcon.offsetWidth * 2)) {
+              // rightIcon.style.display = 'flex';
+              rightIcon.style.visibility = 'visible';
             } else {
-              rightIcon.style.display = 'none';
-              leftIcon.style.display = 'none';
+              // rightIcon.style.display = 'none';
+              // leftIcon.style.display = 'none';
+              rightIcon.style.visibility = 'hidden';
+              leftIcon.style.visibility = 'hidden';
             }
           }
-
 
           // const cr = entry.contentRect;
           // console.log('Element:', entry.target);
@@ -636,74 +640,30 @@ export const CasperMoacFiltersMixin = superClass => {
 
     __scrollCasperTabs (direction) {
       if (direction === 'right') {
-        this.scrollLeft += 30;
+        this.scrollLeft += 100;
       } else if (direction === 'left') {
-        this.scrollLeft -= 30;
+        this.scrollLeft -= 100;
       }
+      
+      if ((this.offsetWidth + this.scrollLeft) > this.scrollWidth) { // chegámos ao fim do scroll
+        // this.nextElementSibling.style.display = 'none'; // direita
+        this.nextElementSibling.style.visibility = 'hidden'; // direita
+      } else {
+        // this.nextElementSibling.style.display = 'flex'; // direita
+        this.nextElementSibling.style.visibility = 'visible'; // direita
+      }
+
+      if (this.scrollLeft === 0) { // estamos no início do scroll
+        // this.previousSibling.style.display = 'none'; // esquerda
+        this.previousSibling.style.visibility = 'hidden'; // esquerda
+      } else {
+        // this.previousSibling.style.display = 'flex';
+        this.previousSibling.style.visibility = 'visible';
+      }
+
+    
+      
     }
-
-
-
-
-    // __createFiltersTabs () {
-    //   // First we need to check if any of the filters has a key 'tab'. If not, then we return
-    //   for (const obj of this.__filters) {
-    //     if (obj.filter.tab) {
-    //       this.hasTabs = true;
-    //       break;
-    //     }
-    //   }
-    //   if (!this.hasTabs) return;
-
-    //   const paperTabsContainer = this.$.paperTabsContainer;
-    //   paperTabsContainer.classList.add('paper-tabs-container');
-    //   paperTabsContainer.innerHTML = '<paper-tabs id="paperTabs"></paper-tabs>';
-    //   const paperTabs = paperTabsContainer.children.paperTabs;
-
-    //   // The minimum tab width will be the same as each filter's width
-    //   const tabWidth = this.$.filtersContainer.querySelector('.filter-container').offsetWidth;
-
-    //   let paperTabsChildren = '';
-
-    //   for (const obj of this.__filters) {
-    //     if (obj.filter.tab) {
-    //       const tabName = obj.filter.tab;
-
-    //       // If the tab already exists, we skip this one
-    //       if (paperTabsChildren.includes(`data-type="${tabName}"`)) {
-    //         continue;
-    //       } else {
-    //         paperTabsChildren += `<paper-tab data-type="${tabName}" style="width:${tabWidth}px">${tabName}</paper-tab>`;
-    //       }
-    //     // If no tab was specified for the filter, then we create a "others" tab and insert it there
-    //     } else {
-    //       obj.filter.tab = 'others';
-
-    //       if (paperTabsChildren.includes('data-type="others"')) {
-    //         continue;
-    //       } else {
-    //         paperTabsChildren += `<paper-tab data-type="others" style="width:${tabWidth}px">Outros filtros</paper-tab>`;
-    //       }
-    //     }
-    //   }
-    //   paperTabs.innerHTML = paperTabsChildren;
-
-    //   // for (const tab of paperTabs.children) {
-    //   //   tab.style.width = `${filterWidth}px`;
-    //   // }
-
-    //   // If the width of all paper tabs combined is bigger than that of their parent, then we need to add the following attributes
-    //   if ((paperTabs.childElementCount * tabWidth) > paperTabs.offsetWidth) {
-    //     paperTabs.setAttribute('scrollable', '');
-    //     paperTabs.setAttribute('fit-container', '');
-    //   }
-
-    //   paperTabs.addEventListener('selected-changed', (event) => this.__tabFiltersChanged(event));
-    //   this.changeFiltersTab(0);
-    // }
-
-
-
 
     /**
      * This function fires when the filters selected tab changes.

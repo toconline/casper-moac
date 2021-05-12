@@ -291,11 +291,6 @@ export const CasperMoacStylesMixin = superClass => {
           }
 
           /* TODO corrigir isto */
-          /* .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container {
-            grid-column: 1 / -1;
-          } */
-
-          /* TODO corrigir isto */
           .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container {
             grid-column: 1 / -1;
             display: inline-flex;
@@ -319,6 +314,7 @@ export const CasperMoacStylesMixin = superClass => {
             font-size: 14px;
             margin: 0 15px;
             overflow: scroll;
+            /* scroll-behavior: smooth; */
           }
 
           /* TODO */
@@ -333,24 +329,6 @@ export const CasperMoacStylesMixin = superClass => {
             -ms-overflow-style: none;  /* IE and Edge */
             scrollbar-width: none;  /* Firefox */
           }
-
-          /* TODO */
-          /* .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tabs {
-            font-family: var(--material-font-family);
-            --paper-tabs-selection-bar-color: var(--primary-color);
-            --paper-tab-ink: var(--primary-color);
-          } */
-
-          /* TODO */
-          /* .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tab {
-            box-sizing: border-box;
-            border-radius: 4px;
-          } */
-
-          /* TODO */
-          /* .main-container vaadin-split-layout .left-side-container .filters-container .paper-tabs-container paper-tab:hover {
-            color: var(--primary-color);
-          } */
 
           .main-container vaadin-split-layout .left-side-container .filters-container .filter-container-invisible {
             display: none;
