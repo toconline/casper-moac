@@ -586,136 +586,132 @@ export const CasperMoacFiltersMixin = superClass => {
       const casperTabs = casperTabsContainer.querySelector('#casperTabs');
       casperTabs.classList.add('hide-tabs-scroll'); // hides scrollbar
 
-      // icons scroll
-      const leftIcon = document.createElement('span');
-      leftIcon.setAttribute('id', 'leftIconScroll');
-      leftIcon.classList.add('casper-tabs-container-scroll-icons');
-      leftIcon.innerHTML = '<casper-icon icon="fa-regular:angle-left"></casper-icon>';
-      casperTabsContainer.insertBefore(leftIcon, casperTabs);
+      // Here we create the scroll arrows and set their styles
+      const leftArrow = document.createElement('span');
+      leftArrow.setAttribute('id', 'leftArrow');
+      leftArrow.classList.add('casper-tabs-container-scroll-icons');
+      leftArrow.innerHTML = '<casper-icon icon="fa-regular:angle-left"></casper-icon>';
+      casperTabsContainer.insertBefore(leftArrow, casperTabs);
 
-      const rightIcon = document.createElement('span');
-      rightIcon.setAttribute('id', 'rightIconScroll');
-      rightIcon.classList.add('casper-tabs-container-scroll-icons');
-      rightIcon.innerHTML = '<casper-icon icon="fa-regular:angle-right"></casper-icon>';
-      casperTabsContainer.appendChild(rightIcon);
+      const rightArrow = document.createElement('span');
+      rightArrow.setAttribute('id', 'rightArrow');
+      rightArrow.classList.add('casper-tabs-container-scroll-icons');
+      rightArrow.innerHTML = '<casper-icon icon="fa-regular:angle-right"></casper-icon>';
+      casperTabsContainer.appendChild(rightArrow);
 
+      // ver se isto é necessário (e corrigir condição)
       if (casperTabs.offsetWidth < casperTabsContainer.offsetWidth) {
-        rightIcon.style.display = 'none';
-        leftIcon.style.display = 'none';
+        rightArrow.style.visibility = 'hidden';
+        leftArrow.style.visibility = 'hidden';
       }
-
-      leftIcon.addEventListener('click', this.__scrollCasperTabs.bind(casperTabs, 'left'));
-      rightIcon.addEventListener('click', this.__scrollCasperTabs.bind(casperTabs, 'right'));
-
-      casperTabs.addEventListener('selected-index-changed', (event) => this.__tabFiltersChanged(event));
-      this.changeFiltersTab(0);
-
 
       // This will observe the resize of the given elements (entries)
       const resizeObserver = new ResizeObserver((entries) => {
-        for (let entry of entries) {
+        for (const entry of entries) {
           if (entry.target.id === 'casperTabsContainer') {
             const casperTabsContainer = entry.target;
             const casperTabs = entry.target.querySelector('#casperTabs');
-            const leftIcon = casperTabsContainer.querySelector('#leftIconScroll');
-            const rightIcon = casperTabsContainer.querySelector('#rightIconScroll');
+            const leftArrow = casperTabsContainer.querySelector('#leftArrow');
+            const rightArrow = casperTabsContainer.querySelector('#rightArrow');
 
             let allTabsWidth = 0;
             for (const tab of casperTabs.children) {
               allTabsWidth += tab.offsetWidth;
             }
             
-            if (casperTabsContainer.offsetWidth < allTabsWidth) {
-              rightIcon.style.display = 'flex';
-              leftIcon.style.display = 'flex';
+            // If the width of all tabs plus the two scroll arrows is bigger than the width of their container, then we show the right arrow
+            if ((allTabsWidth + leftArrow.offsetWidth * 2) > casperTabsContainer.offsetWidth) {
+              rightArrow.style.visibility = 'visible';
             } else {
-              rightIcon.style.display = 'none';
-              leftIcon.style.display = 'none';
+              rightArrow.style.visibility = 'hidden';
+              leftArrow.style.visibility = 'hidden';
             }
           }
-
-
-          // const cr = entry.contentRect;
-          // console.log('Element:', entry.target);
-          // console.log(`Element size: ${cr.width}px x ${cr.height}px`);
-          // console.log(`Element padding: ${cr.top}px ; ${cr.left}px`);
         }
       });
-      
-      // Observe one or multiple elements
       resizeObserver.observe(casperTabsContainer);
+
+      leftArrow.addEventListener('click', this.__scrollCasperTabs.bind(casperTabs, 'left', 150));
+      rightArrow.addEventListener('click', this.__scrollCasperTabs.bind(casperTabs, 'right', 150));
+
+      casperTabs.addEventListener('selected-index-changed', (event) => this.__tabFiltersChanged(event));
+      casperTabs.addEventListener('click', (event) => this.__findScrollDirection(event));
+      this.changeFiltersTab(0);
     }
 
-    __scrollCasperTabs (direction) {
+    /**
+     * This function fires when the user clicks on a scroll arrow. It is responsible for scrolling the casper tabs.
+     * 'This' inside this function refers to the casperTabs
+     *
+     * @param {String} direction The direction of the scroll.
+     * @param {Number} value The value of the scroll.
+     */
+    __scrollCasperTabs (direction, value) {
       if (direction === 'right') {
-        this.scrollLeft += 30;
+        this.scrollLeft += value;
       } else if (direction === 'left') {
-        this.scrollLeft -= 30;
+        this.scrollLeft -= value;
       }
+      
+      // Here we need a timeout to make sure that the scroll-behavior: smooth has finished
+      setTimeout(() => {
+        const casperTabsContainer = this.parentElement;
+        const leftArrow = casperTabsContainer.querySelector('#leftArrow');
+        const rightArrow = casperTabsContainer.querySelector('#rightArrow');
+
+        // Here we're at the end of the scroll
+        if ((this.offsetWidth + this.scrollLeft) > this.scrollWidth) {
+          rightArrow.style.visibility = 'hidden';
+        } else {
+          rightArrow.style.visibility = 'visible';
+        }
+  
+        // Here we're at the beginning of the scroll
+        if (this.scrollLeft === 0) { 
+          leftArrow.style.visibility = 'hidden';
+        } else {
+          leftArrow.style.visibility = 'visible';
+        }
+      }, 200);
     }
 
+    __findScrollDirection (event) { // verificar event
+      const casperTabs = event.currentTarget;
 
+      // Here there's no need to scroll
+      if (casperTabs.offsetWidth >= casperTabs.scrollWidth) return;
 
+      const tabIndex = casperTabs.selectedIndex;
+      const selectedTab = casperTabs.children[tabIndex];
 
-    // __createFiltersTabs () {
-    //   // First we need to check if any of the filters has a key 'tab'. If not, then we return
-    //   for (const obj of this.__filters) {
-    //     if (obj.filter.tab) {
-    //       this.hasTabs = true;
-    //       break;
-    //     }
-    //   }
-    //   if (!this.hasTabs) return;
+      const middleX = casperTabs.offsetWidth / 2;
+      const clickX = event.clientX - casperTabs.getBoundingClientRect().left;
 
-    //   const paperTabsContainer = this.$.paperTabsContainer;
-    //   paperTabsContainer.classList.add('paper-tabs-container');
-    //   paperTabsContainer.innerHTML = '<paper-tabs id="paperTabs"></paper-tabs>';
-    //   const paperTabs = paperTabsContainer.children.paperTabs;
+      let direction;
+      if (clickX > middleX) {
+        direction = 'right';
+      } else if (clickX < middleX) {
+        direction = 'left';
+      }
+      
+      const scrollValue = selectedTab.offsetWidth;
+    
+      this.__scrollCasperTabs.call(casperTabs, direction, scrollValue);
 
-    //   // The minimum tab width will be the same as each filter's width
-    //   const tabWidth = this.$.filtersContainer.querySelector('.filter-container').offsetWidth;
-
-    //   let paperTabsChildren = '';
-
-    //   for (const obj of this.__filters) {
-    //     if (obj.filter.tab) {
-    //       const tabName = obj.filter.tab;
-
-    //       // If the tab already exists, we skip this one
-    //       if (paperTabsChildren.includes(`data-type="${tabName}"`)) {
-    //         continue;
-    //       } else {
-    //         paperTabsChildren += `<paper-tab data-type="${tabName}" style="width:${tabWidth}px">${tabName}</paper-tab>`;
-    //       }
-    //     // If no tab was specified for the filter, then we create a "others" tab and insert it there
-    //     } else {
-    //       obj.filter.tab = 'others';
-
-    //       if (paperTabsChildren.includes('data-type="others"')) {
-    //         continue;
-    //       } else {
-    //         paperTabsChildren += `<paper-tab data-type="others" style="width:${tabWidth}px">Outros filtros</paper-tab>`;
-    //       }
-    //     }
-    //   }
-    //   paperTabs.innerHTML = paperTabsChildren;
-
-    //   // for (const tab of paperTabs.children) {
-    //   //   tab.style.width = `${filterWidth}px`;
-    //   // }
-
-    //   // If the width of all paper tabs combined is bigger than that of their parent, then we need to add the following attributes
-    //   if ((paperTabs.childElementCount * tabWidth) > paperTabs.offsetWidth) {
-    //     paperTabs.setAttribute('scrollable', '');
-    //     paperTabs.setAttribute('fit-container', '');
-    //   }
-
-    //   paperTabs.addEventListener('selected-changed', (event) => this.__tabFiltersChanged(event));
-    //   this.changeFiltersTab(0);
-    // }
-
-
-
+      // let scrollValue;
+      // let visibleWidthOfSelectedTab = casperTabs.offsetWidth;
+      // if (direction === 'right') {
+      //   for (let i = 0; i < tabIndex; i++) {
+      //     visibleWidthOfSelectedTab -= casperTabs.children[i].offsetWidth;
+      //   }
+      //   scrollValue = selectedTab.offsetWidth - visibleWidthOfSelectedTab + 15;
+      // } else if (direction === 'left') {
+      //   for (let i = casperTabs.childElementCount - 1; i > tabIndex; i--) {
+      //     visibleWidthOfSelectedTab -= casperTabs.children[i].offsetWidth;
+      //   }
+      //   scrollValue = selectedTab.offsetWidth - visibleWidthOfSelectedTab + 15;
+      // }
+    }
 
     /**
      * This function fires when the filters selected tab changes.
@@ -727,13 +723,7 @@ export const CasperMoacFiltersMixin = superClass => {
       if (event && event.detail && event.detail.value !== undefined) {
         const tabIndex = event.detail.value;
         const casperTabs = this.$.casperTabsContainer.querySelector('#casperTabs');
-
-        // for (const tab of casperTabs.children) {
-        //   if (tab.active) tab.active = false;
-        // }
-
         const selectedTab = casperTabs.children[tabIndex];
-        // selectedTab.active = true;
         const selectedTabType = selectedTab.dataset.type;
       
         const filterElements = this.$.filtersContainer.querySelectorAll('.filter-container');
