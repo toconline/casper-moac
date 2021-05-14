@@ -305,6 +305,7 @@ export const CasperMoacStylesMixin = superClass => {
             align-items: center;
             color: rgb(124, 124, 124);
             cursor: pointer;
+            /* visibility: hidden; */
           }
 
           /* TODO */
@@ -314,7 +315,7 @@ export const CasperMoacStylesMixin = superClass => {
             font-size: 14px;
             margin: 0 15px;
             overflow: scroll;
-            /* scroll-behavior: smooth; */
+            scroll-behavior: smooth;
           }
 
           /* TODO */
