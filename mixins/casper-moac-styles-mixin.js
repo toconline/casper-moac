@@ -300,7 +300,7 @@ export const CasperMoacStylesMixin = superClass => {
           }
 
           /* TODO */
-          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container .casper-tabs-container-scroll-icons {
+          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container .casper-tabs-container-scroll-arrows {
             display: flex;
             align-items: center;
             color: rgb(124, 124, 124);
@@ -316,19 +316,14 @@ export const CasperMoacStylesMixin = superClass => {
             margin: 0 15px;
             overflow: scroll;
             scroll-behavior: smooth;
+            -ms-overflow-style: none;  /* Hides scrollbar for IE and Edge */
+            scrollbar-width: none;  /* Hides scrollbar for Firefox */
           }
 
           /* TODO */
-          /* Hide scrollbar for Chrome, Safari and Opera */
-          .hide-tabs-scroll::-webkit-scrollbar {
+          /* Hides scrollbar for Chrome, Safari and Opera */
+          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container casper-tabs::-webkit-scrollbar {
             display: none;
-          }
-
-          /* TODO */
-          /* Hide scrollbar for IE, Edge and Firefox */
-          .hide-tabs-scroll {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
           }
 
           .main-container vaadin-split-layout .left-side-container .filters-container .filter-container-invisible {
