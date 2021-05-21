@@ -70,7 +70,7 @@ class CasperMoacTreeColumn extends GridColumnElement {
         </style>
         <div class="tree-column">
           <template is="dom-if" if="[[!item.not_tree]]">
-            <div style="margin-left: calc(([[item.level]]-1)*11px);" hidden$=[[!item.has_children]]>
+            <div style="[[_getStyleForColumn(item.level,'true')]]" hidden$=[[!item.has_children]]>
               <casper-icon
                 hidden$=[[item.expanded]]
                 icon="fa-solid:caret-right"
@@ -87,7 +87,7 @@ class CasperMoacTreeColumn extends GridColumnElement {
               </casper-icon>
               <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
             </div>
-            <div style="margin-left: calc((11px * ([[item.level]]-1)) + 17px);" hidden$=[[item.has_children]]>
+            <div style="[[_getStyleForColumn(item.level,'false')]]" hidden$=[[item.has_children]]>
               <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
             </div>
           </template>
@@ -184,6 +184,17 @@ class CasperMoacTreeColumn extends GridColumnElement {
         detail: { id: event.target.dataItem.id, parent_id: event.target.dataItem.parent_id }
       }));
     }
+  }
+
+  _getStyleForColumn (level, expandable) {
+    let value = 0;
+    if (expandable === 'true') {
+      value = ((level-1)*11) + 10;
+    } else {
+      value = ((11 * (level-1)) + 17) + 10;
+    }
+
+    return `margin-left: ${value}px;`;
   }
 
   _getPathProp (item, value) {
