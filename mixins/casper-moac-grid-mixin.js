@@ -98,7 +98,6 @@ export const CasperMoacGridMixin = superClass => {
       if (this.displayedItems.length === 0 || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
 
       if (['ArrowLeft', 'ArrowRight'].includes(keyCode) && this.socketLazyLoad && this.activeItem && this.activeItem.id && this.activeItem.parent_id !== undefined) {
-        event.stopImmediatePropagation();
         if (keyCode === 'ArrowLeft' && this.activeItem.expanded) {
           // Collapse
           this.dispatchEvent(new CustomEvent('casper-moac-tree-column-collapse', {

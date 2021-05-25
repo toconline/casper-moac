@@ -940,6 +940,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     if (this.__activateItemId) {
       itemIndex = this.__findItemIndexById(this.__activateItemId, true);
       this.scrollToItem(this.__activateItemId, true);
+
+      // Focus a cell in the row to make arrow navigation fluid
+      const row = this.__getAllTableRows().find(row => this.__compareItemWithId(row._item, this.__activateItemId, true));
+      if (row !== undefined && row.firstElementChild) row.firstElementChild.focus();
+
       this.__activateItemId = undefined;
     }
 
@@ -1041,7 +1046,24 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     }
 
     // The fallback scenario is to apply white or the striped colors.
-    return this.disableRowStripes || item[this.idInternalProperty] % 2 === 0 ? 'white' : 'var(--casper-moac-row-stripe-color)';
+    if (this.treeView && this.maxExpandedLevel > 1) {
+      let startingColor = 225;
+
+      // Constant gradient (not much difference between levels)
+      // if (item.level) {
+      //   startingColor = Math.min(255, startingColor + (+item.level)*5);
+      // }
+
+      // Always changing gradient (might be distracting)
+      if ((+item.level) > 1) {
+        const step = Math.round((255 - startingColor)/(this.maxExpandedLevel-1));
+        startingColor = Math.min(255, startingColor + (step*((+item.level)-1)));
+      }
+
+      return `rgb(${startingColor},${startingColor},${startingColor})`;
+    } else {
+      return this.disableRowStripes || item[this.idInternalProperty] % 2 === 0 ? 'white' : 'var(--casper-moac-row-stripe-color)';
+    }
   }
 
   /**

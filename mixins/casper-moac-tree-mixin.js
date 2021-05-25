@@ -82,6 +82,15 @@ export const CasperMoacTreeMixin = superClass => {
           value: []
         },
         /**
+         * Flag to expand the first level
+         *
+         * @type {Boolean}
+         */
+        expandFirstLevel: {
+          type: Boolean,
+          value: false
+        },
+        /**
          * Flag to control the grid view
          *
          * @type {Boolean}
@@ -98,6 +107,15 @@ export const CasperMoacTreeMixin = superClass => {
          forceListView: {
           type: Boolean,
           value: false
+        },
+        /**
+         * Max expanded level
+         *
+         * @type {Number}
+         */
+        maxExpandedLevel: {
+          type: Number,
+          value: 1
         },
         /**
          * Number of resubscribing attempts available (to avoid spamming)
@@ -230,14 +248,20 @@ export const CasperMoacTreeMixin = superClass => {
           this._userFirstId = subscribeResponse.user_first_id;
           this._userLastId  = subscribeResponse.user_last_id;
 
-          if (this.expandedItems.length > 0) {
-            for (const item of this.expandedItems) {
-              const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, item.id, 3000);
-              this._sizeUserIds = expandResponse.user_ids_size;
-              this._userFirstId = expandResponse.user_first_id;
-              this._userLastId  = expandResponse.user_last_id;
+          if (this.expandFirstLevel && this.expandedItems.length === 0) {
+            for (let id = this._userFirstId; id <= this._userLastId; id++) {
+              this.expandedItems.push({id: id, parentId: 0});
             }
+            this.expandFirstLevel = false;
           }
+
+          for (const item of this.expandedItems) {
+            const expandResponse = await this.app.socket2.expandLazyload(this.treeResource, item.id, 3000);
+            this._sizeUserIds = expandResponse.user_ids_size;
+            this._userFirstId = expandResponse.user_first_id;
+            this._userLastId  = expandResponse.user_last_id;
+          }
+
         } else {
           this._newActiveItemId = undefined;
           try {
@@ -357,24 +381,24 @@ export const CasperMoacTreeMixin = superClass => {
         const response = await this.app.socket2.getLazyload(this.treeResource, {idColumn: 'id', activeId: activeItemId, direction: direction}, 3000);
         console.timeEnd('getll');
 
-        let maxLevel = 1;
+        this.maxExpandedLevel = 1;
         if (this.treeView) {
           if (response.data[0].child_count === undefined || response.data[0].level === undefined) {
             throw('Each item given to the tree grid MUST have the following properties: child_count and level');
           }
           response.data.forEach( item => {
                                             item.child_count > 0 ? item.has_children = true : item.has_children = false;
-                                            if (item.level > maxLevel) maxLevel = item.level;
+                                            if (item.level > this.maxExpandedLevel) this.maxExpandedLevel = item.level;
                                             if (this.expandedItems.filter(obj => obj.id == item.id).length > 0) item.expanded = true;
                                             if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item);
                                           });
-          if (this._treeColumn) this._treeColumn.width = (50+(maxLevel*20))+'px';
+          if (this._treeColumn) this._treeColumn.width = (50+(this.maxExpandedLevel*20))+'px';
         } else {
-          response.data.forEach( item => {  if (item.level && item.level > maxLevel) maxLevel = item.level;
+          response.data.forEach( item => {  if (item.level && item.level > this.maxExpandedLevel) this.maxExpandedLevel = item.level;
                                             item.not_tree = true;
                                             if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item);
                                          });
-          if (this._treeColumn) this._treeColumn.width = (50+(maxLevel*28))+'px';
+          if (this._treeColumn) this._treeColumn.width = (50+(this.maxExpandedLevel*28))+'px';
         }
 
 

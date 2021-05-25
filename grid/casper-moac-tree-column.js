@@ -7,6 +7,9 @@ class CasperMoacTreeColumn extends GridColumnElement {
     return {
       valueClass: {
         type: String
+      },
+      valueTooltip: {
+        type: String
       }
     }
   }
@@ -85,10 +88,10 @@ class CasperMoacTreeColumn extends GridColumnElement {
                 class="expand-icon"
                 on-click="_collapse">
               </casper-icon>
-              <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
+              <span class$="[[valueClass]]" tooltip="[[_getTooltipText(item)]]">[[_getPathProp(item,path)]]</span>
             </div>
             <div style="[[_getStyleForColumn(item.level,'false')]]" hidden$=[[item.has_children]]>
-              <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
+              <span class$="[[valueClass]]" tooltip="[[_getTooltipText(item)]]">[[_getPathProp(item,path)]]</span>
             </div>
           </template>
 
@@ -99,7 +102,7 @@ class CasperMoacTreeColumn extends GridColumnElement {
                 <div style="opacity: [[_getOpacity(index, item.parent_ids)]]" class="acc-crumb-line"></div>
               </template>
               <div class="acc-crumb-circle acc-crumb-circle-selected" data-parent="[[item.id]]" data-item="[[item]]" on-click="_expandMultiple"></div>
-              <span class$="[[valueClass]]">[[_getPathProp(item,path)]]</span>
+              <span class$="[[valueClass]]" tooltip="[[_getTooltipText(item)]]">[[_getPathProp(item,path)]]</span>
             </div>
           </template>
 
@@ -199,6 +202,10 @@ class CasperMoacTreeColumn extends GridColumnElement {
 
   _getPathProp (item, value) {
     if (item) return item[value];
+  }
+
+  _getTooltipText (item) {
+    if (item) return item[this.valueTooltip];
   }
 }
 
