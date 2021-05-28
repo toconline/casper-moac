@@ -381,27 +381,29 @@ export const CasperMoacTreeMixin = superClass => {
         const response = await this.app.socket2.getLazyload(this.treeResource, {idColumn: 'id', activeId: activeItemId, direction: direction}, 3000);
         console.timeEnd('getll');
 
+        this._responseIncluded = response.included;
         this.maxExpandedLevel = 1;
         if (this.treeView) {
           if (response.data[0].child_count === undefined || response.data[0].level === undefined) {
             throw('Each item given to the tree grid MUST have the following properties: child_count and level');
           }
+          this._responseIncluded = response.included;
           response.data.forEach( item => {
                                             item.child_count > 0 ? item.has_children = true : item.has_children = false;
                                             if (item.level > this.maxExpandedLevel) this.maxExpandedLevel = item.level;
                                             if (this.expandedItems.filter(obj => obj.id == item.id).length > 0) item.expanded = true;
-                                            if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item);
+                                            if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item, this._responseIncluded);
                                           });
+
           if (this._treeColumn) this._treeColumn.width = (50+(this.maxExpandedLevel*20))+'px';
         } else {
           response.data.forEach( item => {  if (item.level && item.level > this.maxExpandedLevel) this.maxExpandedLevel = item.level;
                                             item.not_tree = true;
-                                            if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item);
+                                            if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item, this._responseIncluded);
                                          });
           if (this._treeColumn) this._treeColumn.width = (50+(this.maxExpandedLevel*28))+'px';
         }
-
-
+        this._responseIncluded = undefined;
 
         this._renderedArray = response.data;
         if (this._newActiveItemId) {

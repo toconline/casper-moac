@@ -1046,24 +1046,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     }
 
     // The fallback scenario is to apply white or the striped colors.
-    if (this.treeView && this.maxExpandedLevel > 1) {
-      let startingColor = 225;
-
-      // Constant gradient (not much difference between levels)
-      // if (item.level) {
-      //   startingColor = Math.min(255, startingColor + (+item.level)*5);
-      // }
-
-      // Always changing gradient (might be distracting)
-      if ((+item.level) > 1) {
-        const step = Math.round((255 - startingColor)/(this.maxExpandedLevel-1));
-        startingColor = Math.min(255, startingColor + (step*((+item.level)-1)));
-      }
-
-      return `rgb(${startingColor},${startingColor},${startingColor})`;
-    } else {
-      return this.disableRowStripes || item[this.idInternalProperty] % 2 === 0 ? 'white' : 'var(--casper-moac-row-stripe-color)';
-    }
+    return this.disableRowStripes || item[this.idInternalProperty] % 2 === 0 ? 'white' : 'var(--casper-moac-row-stripe-color)';
   }
 
   /**

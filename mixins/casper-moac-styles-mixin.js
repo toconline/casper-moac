@@ -423,8 +423,6 @@ export const CasperMoacStylesMixin = superClass => {
             overflow: hidden;
             padding: 10px;
             align-items: center;
-            border-top-left-radius: 5px;
-            border-top-right-radius: 5px;
             background-color: #1A39601A;
             justify-content: space-between;
             transition: height 100ms linear;
@@ -480,6 +478,8 @@ export const CasperMoacStylesMixin = superClass => {
           }
 
           .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
             overflow: hidden;
           }
 
