@@ -12,7 +12,6 @@ import '@cloudware-casper/casper-tabs/casper-tab.js';
 import '@cloudware-casper/casper-icons/casper-icon.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
-// import '@polymer/paper-tabs/paper-tabs.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { templatize } from '@polymer/polymer/lib/utils/templatize.js';
@@ -72,7 +71,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
                   <!--Show/hide the active filters-->
                   <template is="dom-if" if="[[__hasFilters]]">
-                    <paper-button id="displayAllFilters" on-click="__toggleDisplayAllFilters">
+                    <paper-button hidden$="[[__displayAllFilters]]" class="display-all-filters-btn" id="displayAllFilters" on-click="__toggleDisplayAllFilters">
                       <span>Ver todos os filtros</span>
                       <casper-icon icon="fa-regular:angle-down"></casper-icon>
                     </paper-button>
@@ -94,26 +93,27 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                     </template>
 
                     <!--Reset filters button-->
-                    <template is="dom-if" if="[[__displayResetFiltersButton]]">
+                    <template is="dom-if" if="[[!socketLazyLoad]]">
                       <casper-icon-button
                         reverse
+                        hidden$=[[!__displayResetFiltersButton]]
                         text="Repor filtros"
                         icon="fa-light:times"
                         on-click="__resetFilters"></casper-icon-button>
+                      <strong hidden$=[[__displayResetFiltersButton]]>Filtros ativos:</strong>
                     </template>
 
-                    <template is="dom-if" if="[[!__displayResetFiltersButton]]">
-                      <strong>Filtros ativos:</strong>
+                    <!--Clear filters button-->
+                    <template is="dom-if" if="[[socketLazyLoad]]">
+                      <casper-icon-button
+                        reverse
+                        text="Limpar pesquisa"
+                        icon="fa-light:times"
+                        hidden$=[[treeView]]
+                        on-click="showTreeView"></casper-icon-button>
+                      <strong hidden$=[[!treeView]]>Filtros ativos:</strong>
                     </template>
                   </div>
-
-                  <template is="dom-if" if="[[socketLazyLoad]]">
-                    <casper-icon-button
-                      text="Ver arvore"
-                      icon="fa-light:repeat"
-                      hidden$=[[treeView]]
-                      on-click="showTreeView"></casper-icon-button>
-                  </template>
 
                   <template is="dom-if" if="[[!hideNumberResults]]">
                     [[__numberOfResults]]
@@ -123,7 +123,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
               </div>
             </div>
 
-            <div hidden$="[[!__displayAllFilters]]">
+            <div id="topContainer" class="top-container" hidden$="[[!__displayAllFilters]]">
               <div id="filtersContainer" class="filters-container">
                 <div id="casperTabsContainer" hidden$="[[!hasTabs]]"></div>
                 <template is="dom-repeat" items="[[__filters]]" restamp>
@@ -188,6 +188,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                   </div>
                 </template>
               </div>
+              <paper-button class="display-all-filters-btn display-all-filters-hide" on-click="__toggleDisplayAllFilters">
+                <span>Esconder todos os filtros</span>
+                <casper-icon rotate icon="fa-regular:angle-down"></casper-icon>
+              </paper-button>
             </div>
 
             <slot name="left"></slot>
@@ -1075,10 +1079,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
   __toggleDisplayAllFilters (event) {
     const paperButton = this.__eventPathContainsNode(event, 'paper-button');
 
-    this.__displayAllFilters = !this.__displayAllFilters;
-    !this.__displayAllFilters
-      ? paperButton.style.backgroundColor = ''
-      : paperButton.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.2)';
+    const headerContainer = this.shadowRoot.querySelector('.header-container');
+    if (!this.__displayAllFilters) {
+      this.__displayAllFilters = !this.__displayAllFilters;
+      headerContainer.classList.add('header-container-expanded');
+      this.$.topContainer.classList.add('top-container-expanded');
+    } else {
+      setTimeout(() => {
+        this.__displayAllFilters = !this.__displayAllFilters;
+        headerContainer.classList.remove('header-container-expanded');
+      }, 400);
+
+      this.$.topContainer.classList.remove('top-container-expanded');
+    }
   }
 
   /**

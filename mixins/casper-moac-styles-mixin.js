@@ -128,8 +128,23 @@ export const CasperMoacStylesMixin = superClass => {
             display: flex;
             flex-wrap: wrap;
             padding-bottom: 10px;
-            justify-content: center;
             border-bottom: 1px solid var(--primary-color);
+            justify-content: center;
+          }
+
+          .main-container vaadin-split-layout .left-side-container .header-container-expanded {
+            border-bottom: 0px solid var(--primary-color);
+          }
+
+          .main-container vaadin-split-layout .left-side-container .top-container {
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--primary-color);
+            max-height: 0%;
+            transition: all 0.4s ease-in-out;
+          }
+
+          .main-container vaadin-split-layout .left-side-container .top-container-expanded {
+            max-height: 100%;
           }
 
           .main-container vaadin-split-layout .left-side-container .header-container.header-container--responsive {
@@ -149,7 +164,6 @@ export const CasperMoacStylesMixin = superClass => {
             display: flex;
             flex-grow: 1;
             flex-direction: column;
-            height: 70px;
             padding: 0 10px;
             text-align: center;
             position: relative;
@@ -185,7 +199,7 @@ export const CasperMoacStylesMixin = superClass => {
             color: var(--dark-primary-color);
           }
 
-          .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters {
+          .main-container vaadin-split-layout .left-side-container .display-all-filters-btn {
             margin: 0;
             width: 100%;
             height: 35px;
@@ -198,11 +212,11 @@ export const CasperMoacStylesMixin = superClass => {
             transition: background-color 100ms linear;
           }
 
-          .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters:hover {
+          .main-container vaadin-split-layout .left-side-container .display-all-filters-btn:hover {
             background-color: rgba(var(--primary-color-rgb), 0.2);
           }
 
-          .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters casper-icon {
+          .main-container vaadin-split-layout .left-side-container .display-all-filters-btn casper-icon {
             width: 15px;
             height: 15px;
             margin-left: 5px;
@@ -210,8 +224,12 @@ export const CasperMoacStylesMixin = superClass => {
             color: var(--primary-color);
           }
 
-          .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters casper-icon[rotate] {
+          .main-container vaadin-split-layout .left-side-container .display-all-filters-btn casper-icon[rotate] {
             transform: rotate(180deg);
+          }
+
+          .main-container vaadin-split-layout .left-side-container .display-all-filters-hide {
+            background-color: rgba(var(--primary-color-rgb), 0.2);
           }
 
           /* Active filters summary */
@@ -274,7 +292,6 @@ export const CasperMoacStylesMixin = superClass => {
             padding: 10px;
             grid-row-gap: 10px;
             grid-column-gap: 10px;
-            border-bottom: 1px solid var(--primary-color);
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
           }
 
