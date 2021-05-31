@@ -30,7 +30,7 @@ class CasperMoacToggleColumn extends GridColumnElement {
        */
       firstButtonClass: {
         type: String,
-        value: 'header-title toggle-button selected-toggle-button'
+        value: 'toggle-button selected-toggle-button'
       },
       /**
        * Second button's class.
@@ -39,7 +39,7 @@ class CasperMoacToggleColumn extends GridColumnElement {
        */
        secondButtonClass: {
         type: String,
-        value: 'header-title toggle-button'
+        value: 'toggle-button'
       },
       /**
        * Selected button.
@@ -56,7 +56,7 @@ class CasperMoacToggleColumn extends GridColumnElement {
   static get template () {
     return html`
       <template class="header">
-        <div tooltip$="[[tooltip]]" class="casper-moac-sort-column" style="[[__getHeaderContainerAlignment()]]">
+        <div tooltip$="[[tooltip]]" class="casper-moac-toggle-column" style="[[__getHeaderContainerAlignment()]]">
           <div class="toggle-buttons-container">
             <span id="first-button" class$="[[firstButtonClass]]" on-click="__toggleButton">[[button1]]</span>
             <span id="second-button" class$="[[secondButtonClass]]" on-click="__toggleButton">[[button2]]</span>
@@ -94,7 +94,7 @@ class CasperMoacToggleColumn extends GridColumnElement {
   __toggleButton (event) {
     if (event && event.currentTarget && event.currentTarget.id) {
       const targetId = event.currentTarget.id;
-      const initialClass = 'header-title toggle-button';
+      const initialClass = 'toggle-button';
 
       if (targetId === 'first-button') {
         this.firstButtonClass = `${initialClass} selected-toggle-button`;
@@ -115,7 +115,6 @@ class CasperMoacToggleColumn extends GridColumnElement {
       }));
     }
   }
-
 }
 
 window.customElements.define('casper-moac-toggle-column', CasperMoacToggleColumn);
