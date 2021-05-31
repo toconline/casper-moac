@@ -272,6 +272,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                   <slot name="casper-epaper-actions" slot="casper-epaper-actions"></slot>
                   <slot name="casper-epaper-line-menu" slot="casper-epaper-line-menu"></slot>
                   <slot name="casper-epaper-context-menu" slot="casper-epaper-context-menu"></slot>
+                  <slot name="casper-cta-button" slot="casper-cta-button"></slot>
                 </casper-epaper>
               </div>
             </template>
