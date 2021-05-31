@@ -33,26 +33,37 @@ export const CasperMoacStylesMixin = superClass => {
     static __casperMoacToggleColumnStyles () {
       return html`
         <style>
-          .toggle-buttons-container {
+          .casper-moac-toggle-column {
+            width: 100%;
+            display: inline-flex;
+            user-select: none;
+          }
+
+          .casper-moac-toggle-column .toggle-buttons-container {
+            display: inline-flex;
             border: solid 1px rgba(12, 84, 96, .7);
             border-radius: 7px;
             background-color: rgba(12, 84, 96, .5);
             margin: 2px 0;
           }
 
-          .toggle-button {
-            display: inline-flex;
+          .casper-moac-toggle-column .toggle-buttons-container .toggle-button {
+            display: inline-block;
             padding: 2px 15px;
             opacity: .5;
           }
 
-          .selected-toggle-button {
-            background-color: whitesmoke;
+          .casper-moac-toggle-column .toggle-buttons-container .selected-toggle-button {
+            background-color: #fff;
             border-radius: 7px;
             color: var(--primary-color);
             box-shadow: 2px 2px 3px rgb(12, 84, 96);
             opacity: 1;
-            cursor: default;
+          }
+
+          .casper-moac-toggle-column .toggle-buttons-container span:not(.selected-toggle-button):hover {
+            background-color: rgba(12, 84, 96, .7);
+            cursor: pointer;
           }
         </style>
       `;
@@ -312,12 +323,13 @@ export const CasperMoacStylesMixin = superClass => {
             grid-column: 1 / -1;
             display: inline-flex;
             justify-content: center;
+            margin-bottom: -10px;
             /* grid-column-start: 1;
             grid-column-end: none; */
           }
 
           /* TODO */
-          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container .casper-tabs-container-scroll-icons {
+          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container .casper-tabs-container-scroll-arrows {
             display: flex;
             align-items: center;
             color: rgb(124, 124, 124);
@@ -333,19 +345,14 @@ export const CasperMoacStylesMixin = superClass => {
             margin: 0 15px;
             overflow: scroll;
             scroll-behavior: smooth;
+            -ms-overflow-style: none;  /* Hides scrollbar for IE and Edge */
+            scrollbar-width: none;  /* Hides scrollbar for Firefox */
           }
 
           /* TODO */
-          /* Hide scrollbar for Chrome, Safari and Opera */
-          .hide-tabs-scroll::-webkit-scrollbar {
+          /* Hides scrollbar for Chrome, Safari and Opera */
+          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container casper-tabs::-webkit-scrollbar {
             display: none;
-          }
-
-          /* TODO */
-          /* Hide scrollbar for IE, Edge and Firefox */
-          .hide-tabs-scroll {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
           }
 
           .main-container vaadin-split-layout .left-side-container .filters-container .filter-container-invisible {
