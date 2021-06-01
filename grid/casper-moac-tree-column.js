@@ -1,5 +1,6 @@
 import '@cloudware-casper/casper-icons/casper-icon.js';
-import { html } from '@polymer/polymer/polymer-element.js';
+import { LitElement, html } from 'lit-element';
+import { render } from 'lit-html';
 import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js';
 
 class CasperMoacTreeColumn extends GridColumnElement {
@@ -10,15 +11,65 @@ class CasperMoacTreeColumn extends GridColumnElement {
       },
       valueTooltip: {
         type: String
+      },
+      valueClick: {
+        type: Function
       }
     }
   }
 
-  static get template () {
-    return html`
-      <template class="header"><span>[[header]]</span></template>
-      <template class="body">
-        <style>
+  ready () {
+    super.ready();
+
+    this.headerRenderer = (headerContent) => {
+      render( html`
+        <div tooltip="${this.tooltip}" style=${this._getHeaderContainerAlignment()}>
+          <span>${this.header}</span>
+        </div>
+      `, headerContent);
+    }
+
+    this.renderer = (cellContent, gridColumn, itemData) => {
+      const item = itemData.item;
+      let cellHtml;
+      if (item.not_tree) {
+        cellHtml = html`
+          <div class="acc-crumb">
+            ${this._getParentIds(item).map((parentId, index) => html`
+              <div style="opacity: ${this._getOpacity(index, item.parent_ids)}" class="acc-crumb-circle" .dataParent=${parentId} .dataItem=${item} @click=${this._expandMultiple}></div>
+              <div style="opacity: ${this._getOpacity(index, item.parent_ids)}" class="acc-crumb-line"></div>
+            `)}
+            <div class="acc-crumb-circle acc-crumb-circle-selected" .dataParent=${item.id} .dataItem=${item} @click=${this._expandMultiple}></div>
+            <span class="${this.valueClass}" @click=${this.valueClick} tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>
+          </div>
+        `;
+      } else {
+        cellHtml = html`
+          <div style="${this._getStyleForColumn(item.level,'true')}" ?hidden=${!item.has_children}>
+            <casper-icon
+              ?hidden=${item.expanded}
+              icon="fa-solid:caret-right"
+              .dataItem=${item}
+              class="expand-icon"
+              @click=${this._expand}>
+            </casper-icon>
+            <casper-icon
+              ?hidden=${!item.expanded}
+              icon="fa-solid:caret-down"
+              .dataItem=${item}
+              class="expand-icon"
+              @click=${this._collapse}>
+            </casper-icon>
+            <span class="${this.valueClass}" @click=${this.valueClick} tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>
+          </div>
+          <div style="${this._getStyleForColumn(item.level,'false')}" ?hidden=${item.has_children}>
+            <span class="${this.valueClass}" @click=${this.valueClick} tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>
+          </div>
+        `;
+      }
+
+      render( html`
+       <style>
           .expand-icon {
             width: 15px;
             height: 15px;
@@ -28,126 +79,44 @@ class CasperMoacTreeColumn extends GridColumnElement {
             vertical-align: middle;
             transition: all 200ms linear;
           }
-
           .expand-icon:hover {
             cursor: pointer;
             color: var(--primary-color);
           }
-
           .tree-column {
             display: flex;
             align-items: center;
             margin-left: -10px;
           }
-
           .acc-crumb {
             display: inline-flex;
             align-items: center;
             margin-left: 5px;
           }
-
           .acc-crumb-circle {
-            /* background-color: var(--status-gray); */
             width: 6px;
             height: 6px;
             border: solid 2px rgb(12, 84, 96);
             border-radius: 100%;
           }
-
           .acc-crumb-circle:hover {
             cursor: pointer;
-            /* opacity: 0.8 !important; */
             background-color: rgb(12, 84, 96);
           }
-
           .acc-crumb-line {
             background-color: rgb(12, 84, 96);
             width: 13px;
             height: 1px;
           }
-
           .acc-crumb-circle-selected {
             opacity: 1;
           }
-
         </style>
         <div class="tree-column">
-          <template is="dom-if" if="[[!item.not_tree]]">
-            <div style="[[_getStyleForColumn(item.level,'true')]]" hidden$=[[!item.has_children]]>
-              <casper-icon
-                hidden$=[[item.expanded]]
-                icon="fa-solid:caret-right"
-                data-item=[[item]]
-                class="expand-icon"
-                on-click="_expand">
-              </casper-icon>
-              <casper-icon
-                hidden$=[[!item.expanded]]
-                icon="fa-solid:caret-down"
-                data-item=[[item]]
-                class="expand-icon"
-                on-click="_collapse">
-              </casper-icon>
-              <span class$="[[valueClass]]" tooltip="[[_getTooltipText(item)]]">[[_getPathProp(item,path)]]</span>
-            </div>
-            <div style="[[_getStyleForColumn(item.level,'false')]]" hidden$=[[item.has_children]]>
-              <span class$="[[valueClass]]" tooltip="[[_getTooltipText(item)]]">[[_getPathProp(item,path)]]</span>
-            </div>
-          </template>
-
-          <template is="dom-if" if="[[item.not_tree]]">
-            <div class="acc-crumb">
-              <template is="dom-repeat" items=[[_getParentIds(item)]] as="parentId">
-                <div style="opacity: [[_getOpacity(index, item.parent_ids)]]" class="acc-crumb-circle" data-parent="[[parentId]]" data-item="[[item]]" on-click="_expandMultiple"></div>
-                <div style="opacity: [[_getOpacity(index, item.parent_ids)]]" class="acc-crumb-line"></div>
-              </template>
-              <div class="acc-crumb-circle acc-crumb-circle-selected" data-parent="[[item.id]]" data-item="[[item]]" on-click="_expandMultiple"></div>
-              <span class$="[[valueClass]]" tooltip="[[_getTooltipText(item)]]">[[_getPathProp(item,path)]]</span>
-            </div>
-          </template>
-
+          ${cellHtml}
         </div>
-      </template>
-    `;
-  }
-
-  _scaleBetween (unscaledNum, minAllowed, maxAllowed, min, max) {
-    return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
-  }
-
-  _getParentIds (item) {
-    return item.parent_ids.filter(e => e != item.id);
-  }
-
-  _getOpacity (index, array) {
-    return this._scaleBetween((index)/array.length, 0.4, 1, 0, 1);
-  }
-
-  /**
-   * Method invoked from the vaadin grid itself to stamp the header's template and bind the dataHost.
-   */
-   _prepareHeaderTemplate () {
-    return this._prepareTemplate(this.shadowRoot.querySelector('template.header'));
-  }
-
-  /**
-   * Method invoked from the vaadin grid itself to stamp the body's template and bind the dataHost.
-   */
-  _prepareBodyTemplate () {
-    return this._prepareTemplate(this.shadowRoot.querySelector('template.body'));
-  }
-
-  /**
-   * This method is invoked by both _prepareHeaderTemplate and _prepareBodyTemplate which are vaadin-grid
-   * protected methods to setup both templates.
-   *
-   * @param {Element} template The template element.
-   */
-  _prepareTemplate (template) {
-    const bodyTemplate = this._prepareTemplatizer(template);
-    bodyTemplate.templatizer.dataHost = this;
-
-    return bodyTemplate;
+      `, cellContent);
+    }
   }
 
   // Dispatch an event to inform the casper-moac element that user has expanded a node.
@@ -198,6 +167,26 @@ class CasperMoacTreeColumn extends GridColumnElement {
     }
 
     return `margin-left: ${value}px;`;
+  }
+
+  _getScaleBetween (unscaledNum, minAllowed, maxAllowed, min, max) {
+    return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
+  }
+
+  _getParentIds (item) {
+    return item.parent_ids.filter(e => e != item.id);
+  }
+
+  _getOpacity (index, array) {
+    return this._getScaleBetween((index)/array.length, 0.4, 1, 0, 1);
+  }
+
+  _getHeaderContainerAlignment () {
+    switch (this.textAlign) {
+      case 'end': return 'justify-content: flex-end';
+      case 'center': return 'justify-content: center';
+      case 'start': return 'justify-content: flex-start';
+    }
   }
 
   _getPathProp (item, value) {
