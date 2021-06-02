@@ -125,6 +125,41 @@ export const CasperMoacTreeMixin = superClass => {
         _resubscribeAttempts: {
           type: Number,
           value: 10
+        },
+        /**
+         * Name of the column that contains the id
+         *
+         * @type {String}
+         */
+        idColumn: {
+          type: String,
+          value: 'id'
+        },
+        /**
+         * Name of the column that contains the parent_id
+         *
+         * @type {String}
+         */
+        parentColumn: {
+          type: String,
+          value: 'parent_id'
+        },
+        /**
+         * Type of the table, sharded or subentity
+         *
+         * @type {String}
+         */
+        tableType: {
+          type: String,
+          value: 'subentity'
+        },
+        /**
+         * Name of the table
+         *
+         * @type {String}
+         */
+        tableName: {
+          type: String
         }
       }
     }
@@ -133,7 +168,6 @@ export const CasperMoacTreeMixin = superClass => {
     refreshSocketItems () {
       this._debounceFetchSocketItems();
     }
-
 
     // Public methods that expands a node given an event (for the on click) or given the id and parent_id
     async expand (event, id = undefined, parentId = undefined) {
@@ -232,10 +266,12 @@ export const CasperMoacTreeMixin = superClass => {
 
         if (this.forceListView) this.treeView = false;
 
+        if (!this.tableName) throw('Invalid table name');
+
         let subscribeResponse;
         if (this.treeView) {
           console.time('subscribe');
-          const subscribeData =  {parentColumn: 'parent_id', idColumn: 'id', tableType: 'subentity', tableName: 'general_ledger'};
+          const subscribeData =  {idColumn: this.idColumn, parentColumn: this.parentColumn, tableType: this.tableType, tableName: this.tableName};
           subscribeResponse = await this.app.socket2.subscribeTreeLazyload(this.treeResource, subscribeData, 15000);
           console.timeEnd('subscribe');
 
@@ -279,7 +315,7 @@ export const CasperMoacTreeMixin = superClass => {
           this.treeResource = this.treeResource.replace(/%/g, "%25");
           this.treeResource = this.treeResource.replace(/'/g, "%27");
           console.time('subscribe');
-          const subscribeData =  {parentColumn: 'parent_id', idColumn: 'id'};
+          const subscribeData =  {idColumn: this.idColumn, parentColumn: this.parentColumn};
           subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, subscribeData, 15000);
           console.timeEnd('subscribe');
 
