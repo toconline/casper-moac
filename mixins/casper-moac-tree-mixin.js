@@ -315,8 +315,7 @@ export const CasperMoacTreeMixin = superClass => {
           this.treeResource = this.treeResource.replace(/%/g, "%25");
           this.treeResource = this.treeResource.replace(/'/g, "%27");
           console.time('subscribe');
-          const subscribeData =  {idColumn: this.idColumn, parentColumn: this.parentColumn};
-          subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, subscribeData, 15000);
+          subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, this.parentColumn, 15000);
           console.timeEnd('subscribe');
 
           // subscribeLazyload isnt flagged as jsonapi so we have to check for errors ourselves
