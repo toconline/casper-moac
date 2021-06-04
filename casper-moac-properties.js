@@ -267,6 +267,15 @@ export const CasperMoacProperties = superClass => {
           value: false
         },
         /**
+         * This property when set to true, displays the expand-epaper-button component.
+         *
+         * @type {Boolean}
+         */
+        hasEpaperButton: {
+          type: Boolean,
+          value: false
+        },
+        /**
          * This property when set to true, toggles the flipping casper-epaper behavior.
          *
          * @type {Boolean}

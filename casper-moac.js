@@ -21,6 +21,7 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import './sidebar/casper-moac-sidebar.js';
 import './sidebar/casper-moac-sidebar-item.js';
 import './components/casper-moac-active-filter.js';
+import './components/casper-expand-epaper-button.js';
 import { CasperMoacProperties } from './casper-moac-properties.js';
 import { CasperMoacGridMixin } from './mixins/casper-moac-grid-mixin.js';
 import { CasperMoacStylesMixin } from './mixins/casper-moac-styles-mixin.js';
@@ -280,6 +281,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                 </casper-epaper>
               </div>
             </template>
+            <casper-expand-epaper-button
+              id="epaperButton"
+              epaper-expanded={{epaperExpanded}}
+              hidden$="[[!__hasEpaperAndButton(hasEpaper, hasEpaperButton)]]">
+            </casper-expand-epaper-button>
           </div>
         </vaadin-split-layout>
 
@@ -301,6 +307,23 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     if (this.__hasEpaperComponent()) {
       // Save the epaper in a notifiable property so it can be used outside.
       afterNextRender(this, () => this.epaper = this.shadowRoot.querySelector('casper-epaper'));
+
+      if (this.hasEpaperButton) {
+        this.__leftSideContainer.classList.add('epaper-transition-class');
+        this.__rightSideContainer.classList.add('epaper-transition-class');
+
+        afterNextRender(this, ()  => {
+          this.$.epaperButton.addEventListener('epaper-expanded-changed', (event) => {this._expandCollapseEpaper(event)});
+          this.$.epaperButton.fitInto = this.$.splitLayout.$.splitter;
+          this.$.epaperButton.positionTarget = this.$.splitLayout.$.splitter;
+          this.$.epaperButton.open();
+
+          this.$.splitLayout.addEventListener('iron-resize', (event) => {
+            this.$.epaperButton.refit();
+            this.epaperExpanded = true;
+          });
+        });
+      }
     }
 
     // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
@@ -603,6 +626,32 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     delete parentItem[this.rowBackgroundColorInternalProperty];
 
     this.displayedItems = this.__removeChildItemsRecursively(this.displayedItems, parentItem);
+  }
+
+  toggleEpaper () {
+    if (this.hasEpaperButton) {
+      this.epaperExpanded = !this.epaperExpanded;
+      this._expandCollapseEpaper();
+    }
+  }
+
+  _expandCollapseEpaper (event) {
+    if (this.hasEpaperButton) {
+      let leftWidth = 40;
+      if (!this.epaperExpanded) {
+        leftWidth = 100;
+      }
+      this.$.epaperButton.close();
+
+      this.__leftSideContainer.setAttribute('style', `width: ${leftWidth}% !important`);
+      this.__rightSideContainer.setAttribute('style', `width: ${100 - leftWidth}% !important`);
+      setTimeout(() => {
+        this.$.epaperButton.fitInto = this.$.splitLayout.$.splitter;
+        this.$.epaperButton.positionTarget = this.$.splitLayout.$.splitter;
+        this.$.epaperButton.open();
+        this.$.splitLayout.dispatchEvent(new CustomEvent('splitter-dragend'));
+      }, 700);
+    }
   }
 
   /**
@@ -1269,6 +1318,13 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   __hasEpaperComponent () {
     return this.hasEpaper || this.hasFlippingEpaper;
+  }
+
+  /**
+   * This method checks if there is epaper and epaperbutton;
+   */
+  __hasEpaperAndButton () {
+    return this.hasEpaper && this.hasEpaperButton;
   }
 }
 

@@ -512,6 +512,11 @@ export const CasperMoacStylesMixin = superClass => {
             height: 100%;
             overflow: hidden;
           }
+
+          .epaper-transition-class {
+            transition: width 700ms ease-in-out;
+          }
+
         </style>
       `;
     }
