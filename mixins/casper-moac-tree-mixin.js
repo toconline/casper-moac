@@ -266,7 +266,7 @@ export const CasperMoacTreeMixin = superClass => {
 
         if (this.forceListView) this.treeView = false;
 
-        if (!this.tableName) throw('Invalid table name');
+        if (!this.tableName && this.treeView) throw('Invalid table name');
 
         let subscribeResponse;
         if (this.treeView) {
@@ -299,7 +299,7 @@ export const CasperMoacTreeMixin = superClass => {
           }
 
         } else {
-          this._newActiveItemId = undefined;
+          // this._newActiveItemId = undefined;
           try {
             const url = this.resourceName.includes('?')
             ? `${this.resourceName}&${this.buildResourceUrl()}`

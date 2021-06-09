@@ -1,4 +1,5 @@
-import { html } from '@polymer/polymer/polymer-element.js';
+import {LitElement, html} from 'lit-element';
+import {render} from 'lit-html';
 import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js';
 
 class CasperMoacToggleColumn extends GridColumnElement {
@@ -24,26 +25,8 @@ class CasperMoacToggleColumn extends GridColumnElement {
        */
       button2: String,
       /**
-       * First button's class.
-       * 
-       * @type {String}
-       */
-      firstButtonClass: {
-        type: String,
-        value: 'toggle-button selected-toggle-button'
-      },
-      /**
-       * Second button's class.
-       * 
-       * @type {String}
-       */
-       secondButtonClass: {
-        type: String,
-        value: 'toggle-button'
-      },
-      /**
        * Selected button.
-       * 
+       *
        * @type {String}
        */
        selectedButton: {
@@ -53,27 +36,19 @@ class CasperMoacToggleColumn extends GridColumnElement {
     }
   }
 
-  static get template () {
-    return html`
-      <template class="header">
-        <div tooltip$="[[tooltip]]" class="casper-moac-toggle-column" style="[[__getHeaderContainerAlignment()]]">
-          <div class="toggle-buttons-container">
-            <span id="first-button" class$="[[firstButtonClass]]" on-click="__toggleButton">[[button1]]</span>
-            <span id="second-button" class$="[[secondButtonClass]]" on-click="__toggleButton">[[button2]]</span>
-          </div>
-        </div>
-      </template>
-    `;
-  }
+  ready () {
+    super.ready();
 
-  /**
-   * Method invoked from the vaadin grid itself to stamp the template and bind the dataHost.
-   */
-  _prepareHeaderTemplate () {
-    const headerTemplate = this._prepareTemplatizer(this.shadowRoot.querySelector('template'));
-    headerTemplate.templatizer.dataHost = this;
-
-    return headerTemplate;
+    this.headerRenderer = (headerCell) => {
+      render( html`
+       <div tooltip="${this.tooltip}" class="casper-moac-toggle-column" style=${this.__getHeaderContainerAlignment()}>
+         <div class="toggle-buttons-container">
+           <span id="first-button" class="toggle-button selected-toggle-button" @click=${this.__toggleButton.bind(this)}>${this.button1}</span>
+           <span id="second-button" class="toggle-button" @click=${this.__toggleButton.bind(this)}>${this.button2}</span>
+         </div>
+       </div>
+      `, headerCell);
+    }
   }
 
   /**
@@ -88,7 +63,7 @@ class CasperMoacToggleColumn extends GridColumnElement {
   }
 
   /**
-   * This method is called when the user clicks on a toggle button. 
+   * This method is called when the user clicks on a toggle button.
    * It sets the correct classes and dispatches a new event that can be listened to elsewhere.
    */
   __toggleButton (event) {
@@ -96,18 +71,21 @@ class CasperMoacToggleColumn extends GridColumnElement {
       const targetId = event.currentTarget.id;
       const initialClass = 'toggle-button';
 
+      const firstButton = this.parentElement.shadowRoot.getElementById('first-button');
+      const secondButton = this.parentElement.shadowRoot.getElementById('second-button');
+
       if (targetId === 'first-button') {
-        this.firstButtonClass = `${initialClass} selected-toggle-button`;
-        this.secondButtonClass = initialClass;
+        firstButton.classList.add('selected-toggle-button');
+        secondButton.classList.remove('selected-toggle-button');
       } else if (targetId === 'second-button') {
-        this.secondButtonClass = `${initialClass} selected-toggle-button`;
-        this.firstButtonClass = initialClass;
+        secondButton.classList.add('selected-toggle-button');
+        firstButton.classList.remove('selected-toggle-button');
       }
 
       this.selectedButton = targetId;
 
       event.stopImmediatePropagation();
-  
+
       this.dispatchEvent(new CustomEvent('casper-moac-toggle-column-toggle', {
         bubbles: true,
         composed: true,

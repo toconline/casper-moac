@@ -110,9 +110,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                         reverse
                         text="Limpar pesquisa"
                         icon="fa-light:times"
-                        hidden$=[[treeView]]
+                        hidden$=[[!__displayClearFilter(treeView)]]
                         on-click="showTreeView"></casper-icon-button>
-                      <strong hidden$=[[!treeView]]>Filtros ativos:</strong>
+                      <strong hidden$=[[__displayClearFilter(treeView)]]>Filtros ativos:</strong>
                     </template>
                   </div>
 
@@ -1325,6 +1325,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   __hasEpaperAndButton () {
     return this.hasEpaper && this.hasEpaperButton;
+  }
+
+  __displayClearFilter () {
+    return !this.forceListView && !this.treeView;
   }
 }
 
