@@ -42,7 +42,7 @@ export const CasperMoacStylesMixin = superClass => {
           .casper-moac-toggle-column .toggle-buttons-container {
             display: inline-flex;
             border: solid 1px rgba(12, 84, 96, .7);
-            border-radius: 7px;
+            border-radius: 7.5px;
             background-color: rgba(12, 84, 96, .5);
             margin: 2px 0;
           }
@@ -64,6 +64,7 @@ export const CasperMoacStylesMixin = superClass => {
           .casper-moac-toggle-column .toggle-buttons-container span:not(.selected-toggle-button):hover {
             background-color: rgba(12, 84, 96, .7);
             cursor: pointer;
+            border-radius: 4px;
           }
         </style>
       `;
