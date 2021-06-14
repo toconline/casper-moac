@@ -571,125 +571,12 @@ export const CasperMoacFiltersMixin = superClass => {
       casperTabsHtml += '</casper-tabs>';
       casperTabsContainer.innerHTML = casperTabsHtml;
       const casperTabs = casperTabsContainer.querySelector('#casperTabs');
+      const tabsContainer = casperTabs.shadowRoot.querySelector('#tabsContainer');
+      casperTabs.style.width = '100%';
+      tabsContainer.style.border = '1px solid rgb(124, 124, 124)';
 
-      // Here we create the scroll arrows and set their styles
-      const leftArrow = document.createElement('span');
-      leftArrow.setAttribute('id', 'leftArrow');
-      leftArrow.classList.add('casper-tabs-container-scroll-arrows');
-      leftArrow.innerHTML = '<casper-icon icon="fa-regular:angle-left"></casper-icon>';
-      casperTabsContainer.insertBefore(leftArrow, casperTabs);
-
-      const rightArrow = document.createElement('span');
-      rightArrow.setAttribute('id', 'rightArrow');
-      rightArrow.classList.add('casper-tabs-container-scroll-arrows');
-      rightArrow.innerHTML = '<casper-icon icon="fa-regular:angle-right"></casper-icon>';
-      casperTabsContainer.appendChild(rightArrow);
-
-      // ver se isto é necessário (e corrigir condição)
-      // if (casperTabs.offsetWidth < casperTabsContainer.offsetWidth) {
-      //   rightArrow.style.visibility = 'hidden';
-      //   leftArrow.style.visibility = 'hidden';
-      // }
-
-      // This will observe the resize of the given elements (entries)
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          if (entry.target.id === 'casperTabsContainer') {
-            const casperTabsContainer = entry.target;
-            const casperTabs = entry.target.querySelector('#casperTabs');
-            const leftArrow = casperTabsContainer.querySelector('#leftArrow');
-            const rightArrow = casperTabsContainer.querySelector('#rightArrow');
-
-            let allTabsWidth = 0;
-            for (const tab of casperTabs.children) {
-              allTabsWidth += tab.offsetWidth;
-            }
-            
-            // If the width of all tabs plus the two scroll arrows is bigger than the width of their container, then we show the right arrow
-            if ((allTabsWidth + leftArrow.offsetWidth * 2) > casperTabsContainer.offsetWidth) {
-              rightArrow.style.visibility = 'visible';
-            } else {
-              rightArrow.style.visibility = 'hidden';
-              leftArrow.style.visibility = 'hidden';
-            }
-          }
-        }
-      });
-      resizeObserver.observe(casperTabsContainer);
-
-      leftArrow.addEventListener('click', this.__scrollFiltersTabs.bind(casperTabs, 'left', 150));
-      rightArrow.addEventListener('click', this.__scrollFiltersTabs.bind(casperTabs, 'right', 150));
       casperTabs.addEventListener('selected-index-changed', event => this.__tabFiltersChanged(event));
-      casperTabs.addEventListener('click', event => this.__findTabsScrollDirection(event));
       this.changeFiltersTab(0);
-    }
-
-    /**
-     * This function fires when the user clicks on a scroll arrow. It is responsible for scrolling the casper tabs.
-     * 'This' inside this function refers to the casperTabs
-     *
-     * @param {String} direction The direction of the scroll.
-     * @param {Number} value The value of the scroll.
-     */
-    __scrollFiltersTabs (direction, value) {
-      if (direction === 'right') {
-        this.scrollLeft += value;
-      } else if (direction === 'left') {
-        this.scrollLeft -= value;
-      }
-      
-      // Here we need a timeout to make sure that the scroll-behavior: smooth has finished
-      setTimeout(() => {
-        const casperTabsContainer = this.parentElement;
-        const leftArrow = casperTabsContainer.querySelector('#leftArrow');
-        const rightArrow = casperTabsContainer.querySelector('#rightArrow');
-
-        // Here we're at the end of the scroll
-        if ((this.offsetWidth + this.scrollLeft) > this.scrollWidth) {
-          rightArrow.style.visibility = 'hidden';
-        } else {
-          rightArrow.style.visibility = 'visible';
-        }
-  
-        // Here we're at the beginning of the scroll
-        if (this.scrollLeft === 0) { 
-          leftArrow.style.visibility = 'hidden';
-        } else {
-          leftArrow.style.visibility = 'visible';
-        }
-      }, 200);
-    }
-
-    /**
-     * This function fires when the user clicks on the casper tabs. 
-     * It is responsible for finding whether the tabs should scroll left or right.
-     *
-     * @param {Object} event The event's object.
-     */
-    __findTabsScrollDirection (event) { 
-      if (event && event.currentTarget) {
-        const casperTabs = event.currentTarget;
-
-        // Here there's no need to scroll
-        if (casperTabs.offsetWidth >= casperTabs.scrollWidth) return;
-
-        const tabIndex = casperTabs.selectedIndex;
-        const selectedTab = casperTabs.children[tabIndex];
-
-        const middleX = casperTabs.offsetWidth / 2;
-        const clickX = event.clientX - casperTabs.getBoundingClientRect().left;
-
-        let direction;
-        if (clickX >= middleX) {
-          direction = 'right';
-        } else if (clickX < middleX) {
-          direction = 'left';
-        }
-        
-        const scrollValue = selectedTab.offsetWidth;
-      
-        this.__scrollFiltersTabs.call(casperTabs, direction, scrollValue);
-      }
     }
 
     /**

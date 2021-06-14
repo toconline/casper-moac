@@ -312,33 +312,6 @@ export const CasperMoacStylesMixin = superClass => {
             grid-column-end: none; */
           }
 
-          /* TODO */
-          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container .casper-tabs-container-scroll-arrows {
-            display: flex;
-            align-items: center;
-            color: rgb(124, 124, 124);
-            cursor: pointer;
-            /* visibility: hidden; */
-          }
-
-          /* TODO */
-          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container casper-tabs {
-            /* margin: 0 auto; */
-            border: 1px solid rgb(124, 124, 124);
-            font-size: 14px;
-            margin: 0 15px;
-            overflow: scroll;
-            scroll-behavior: smooth;
-            -ms-overflow-style: none;  /* Hides scrollbar for IE and Edge */
-            scrollbar-width: none;  /* Hides scrollbar for Firefox */
-          }
-
-          /* TODO */
-          /* Hides scrollbar for Chrome, Safari and Opera */
-          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container casper-tabs::-webkit-scrollbar {
-            display: none;
-          }
-
           .main-container vaadin-split-layout .left-side-container .filters-container .filter-container-invisible {
             display: none;
           }
