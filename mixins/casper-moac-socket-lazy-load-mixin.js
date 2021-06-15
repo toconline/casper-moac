@@ -6,7 +6,7 @@ import {
 
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
-export const CasperMoacTreeMixin = superClass => {
+export const CasperMoacSocketLazyLoadMixin = superClass => {
   return class extends superClass {
 
     static get properties () {

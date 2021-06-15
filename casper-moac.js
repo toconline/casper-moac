@@ -31,7 +31,7 @@ import { CasperMoacHistoryMixin } from './mixins/casper-moac-history-mixin.js';
 import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
 import { CasperMoacContextMenuMixin } from './mixins/casper-moac-context-menu-mixin.js';
 import { CasperMoacLocalStorageMixin } from './mixins/casper-moac-local-storage-mixin.js';
-import { CasperMoacTreeMixin } from './mixins/casper-moac-tree-mixin.js';
+import { CasperMoacSocketLazyLoadMixin } from './mixins/casper-moac-socket-lazy-load-mixin.js';
 import { CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 
 export class CasperMoac extends CasperMoacLazyLoadMixin(
@@ -42,7 +42,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           CasperMoacSortingMixin(
             CasperMoacContextMenuMixin(
               CasperMoacLocalStorageMixin(
-                CasperMoacTreeMixin(
+                CasperMoacSocketLazyLoadMixin(
                   CasperMoacHistoryMixin(PolymerElement)))))))))) {
 
   static get observers () {
