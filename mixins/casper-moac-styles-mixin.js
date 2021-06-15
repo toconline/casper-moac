@@ -290,26 +290,30 @@ export const CasperMoacStylesMixin = superClass => {
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
           }
 
-          /* TODO: Filters casper-select. Se mudarmos o tamanho, também é preciso mudar nas multiple-selection */
+          /* TODO */
           .main-container vaadin-split-layout .left-side-container .filters-container casper-select {
             --casper-select-single-paper-input-container-label: { font-size: 14px; };
             --casper-select-single-paper-input-container-input: { font-size: 14px; };
           }
 
-          /* TODO: corrigir font-size nas multiple selection etc */
-          .main-container vaadin-split-layout .left-side-container .filters-container paper-input {
-            --paper-input-container-input: { font-size: 14px; };
+          /* TODO falta corrigir font size do input */
+          .main-container vaadin-split-layout .left-side-container .filters-container casper-select[multi-selection] {
             --paper-input-container-label: { font-size: 14px; };
+            /* --paper-input-container-input: { font-size: 2px; background-color: pink }; */
           }
 
-          /* TODO corrigir isto */
+          /* TODO */
+          .main-container vaadin-split-layout .left-side-container .filters-container paper-input {
+            --paper-input-container-label: { font-size: 14px; };
+            --paper-input-container-input: { font-size: 14px; };
+          }
+
+          /* TODO */
           .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container {
             grid-column: 1 / -1;
             display: inline-flex;
             justify-content: center;
             margin-bottom: -10px;
-            /* grid-column-start: 1;
-            grid-column-end: none; */
           }
 
           .main-container vaadin-split-layout .left-side-container .filters-container .filter-container-invisible {

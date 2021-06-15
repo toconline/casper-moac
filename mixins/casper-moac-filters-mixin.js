@@ -531,7 +531,7 @@ export const CasperMoacFiltersMixin = superClass => {
      * This function is responsible for creating the filters tabs.
      *
      */
-     __createFiltersTabs () {
+    __createFiltersTabs () {
       // First we need to check if any of the filters has a key 'tab'. If not, then we return
       for (const obj of this.__filters) {
         if (obj.filter.tab) {
@@ -544,7 +544,7 @@ export const CasperMoacFiltersMixin = superClass => {
       const casperTabsContainer = this.$.casperTabsContainer;
       casperTabsContainer.classList.add('casper-tabs-container');
 
-      let casperTabsHtml = '<casper-tabs id="casperTabs">';
+      let casperTabsHtml = '<casper-tabs id="casperTabs" filters-theme>';
 
       for (const obj of this.__filters) {
         if (obj.filter.tab) {
@@ -570,11 +570,8 @@ export const CasperMoacFiltersMixin = superClass => {
 
       casperTabsHtml += '</casper-tabs>';
       casperTabsContainer.innerHTML = casperTabsHtml;
-      const casperTabs = casperTabsContainer.querySelector('#casperTabs');
-      const tabsContainer = casperTabs.shadowRoot.querySelector('#tabsContainer');
-      casperTabs.style.width = '100%';
-      tabsContainer.style.border = '1px solid rgb(124, 124, 124)';
 
+      const casperTabs = casperTabsContainer.querySelector('#casperTabs');
       casperTabs.addEventListener('selected-index-changed', event => this.__tabFiltersChanged(event));
       this.changeFiltersTab(0);
     }
@@ -586,10 +583,10 @@ export const CasperMoacFiltersMixin = superClass => {
      * @param {Object} event The event's object.
      */
     __tabFiltersChanged (event) {
-      if (event && event.detail && event.detail.value !== undefined) {
+      if (event && event.currentTarget && event.currentTarget.id === 'casperTabs' && event.detail && event.detail.value !== undefined) {
         const tabIndex = event.detail.value;
-        const casperTabs = this.$.casperTabsContainer.querySelector('#casperTabs');
-        const selectedTab = casperTabs.children[tabIndex];
+        const casperTabs = event.currentTarget;
+        const selectedTab = casperTabs.shadowRoot.querySelector('slot').assignedElements()[tabIndex];
         const selectedTabType = selectedTab.dataset.type;
       
         const filterElements = this.$.filtersContainer.querySelectorAll('.filter-container');
