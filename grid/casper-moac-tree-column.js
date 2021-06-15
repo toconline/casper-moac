@@ -23,7 +23,7 @@ class CasperMoacTreeColumn extends GridColumnElement {
 
     this.headerRenderer = (headerContent) => {
       render( html`
-        <div tooltip="${this.tooltip}" style=${this._getHeaderContainerAlignment()}>
+        <div .tooltip="${this.tooltip}" style=${this._getHeaderContainerAlignment()}>
           <span>${this.header}</span>
         </div>
       `, headerContent);

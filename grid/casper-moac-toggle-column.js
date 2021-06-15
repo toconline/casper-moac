@@ -41,7 +41,7 @@ class CasperMoacToggleColumn extends GridColumnElement {
 
     this.headerRenderer = (headerCell) => {
       render( html`
-       <div tooltip="${this.tooltip}" class="casper-moac-toggle-column" style=${this.__getHeaderContainerAlignment()}>
+       <div .tooltip="${this.tooltip}" class="casper-moac-toggle-column" style=${this.__getHeaderContainerAlignment()}>
          <div class="toggle-buttons-container">
            <span id="first-button" class="toggle-button selected-toggle-button" @click=${this.__toggleButton.bind(this)}>${this.button1}</span>
            <span id="second-button" class="toggle-button" @click=${this.__toggleButton.bind(this)}>${this.button2}</span>
