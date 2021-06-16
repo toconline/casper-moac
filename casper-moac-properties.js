@@ -541,7 +541,7 @@ export const CasperMoacProperties = superClass => {
           value: []
         },
         /**
-         * Indicates if the paper tabs creation has already run.
+         * Controls when the casper tabs can be created.
          *
          * @type {Boolean}
          */
@@ -550,11 +550,11 @@ export const CasperMoacProperties = superClass => {
           value: true
         },
         /**
-         * Indicates if the page has paper tabs.
+         * Indicates if the page has casper tabs.
          *
          * @type {Boolean}
          */
-        hasTabs: {
+        __hasTabs: {
           type: Boolean,
           value: false
         }

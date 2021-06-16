@@ -126,7 +126,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
             <div id="topContainer" class="top-container" hidden$="[[!__displayAllFilters]]">
               <div id="filtersContainer" class="filters-container">
-                <div id="casperTabsContainer" hidden$="[[!hasTabs]]"></div>
+                <div id="casperTabsContainer" hidden$="[[!__hasTabs]]"></div>
                 <template is="dom-repeat" items="[[__filters]]" restamp>
                   <div class$="[[__filterContainerClassName(item.filter)]]">
                     <!--Casper-Select filter-->

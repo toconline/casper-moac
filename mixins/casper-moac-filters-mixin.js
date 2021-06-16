@@ -415,8 +415,7 @@ export const CasperMoacFiltersMixin = superClass => {
         }
       });
 
-      // AQUI
-      // The first time that this function runs, another one is called to insert paper tabs (categories for the filters)
+      // The first time that this function runs, another one is called to insert casper tabs (categories for the filters)
       if (this.__firstTimeDisplayingFilters) {
         this.__firstTimeDisplayingFilters = false;
         this.__createFiltersTabs();
@@ -543,20 +542,20 @@ export const CasperMoacFiltersMixin = superClass => {
      * This function is responsible for creating the filters tabs.
      *
      */
-     __createFiltersTabs () {
+    __createFiltersTabs () {
       // First we need to check if any of the filters has a key 'tab'. If not, then we return
       for (const obj of this.__filters) {
         if (obj.filter.tab) {
-          this.hasTabs = true;
+          this.__hasTabs = true;
           break;
         }
       }
-      if (!this.hasTabs) return;
+      if (!this.__hasTabs) return;
 
       const casperTabsContainer = this.$.casperTabsContainer;
       casperTabsContainer.classList.add('casper-tabs-container');
 
-      let casperTabsHtml = '<casper-tabs id="casperTabs">';
+      let casperTabsHtml = '<casper-tabs id="casperTabs" filters-theme>';
 
       for (const obj of this.__filters) {
         if (obj.filter.tab) {
@@ -582,126 +581,10 @@ export const CasperMoacFiltersMixin = superClass => {
 
       casperTabsHtml += '</casper-tabs>';
       casperTabsContainer.innerHTML = casperTabsHtml;
+
       const casperTabs = casperTabsContainer.querySelector('#casperTabs');
-
-      // Here we create the scroll arrows and set their styles
-      const leftArrow = document.createElement('span');
-      leftArrow.setAttribute('id', 'leftArrow');
-      leftArrow.classList.add('casper-tabs-container-scroll-arrows');
-      leftArrow.innerHTML = '<casper-icon icon="fa-regular:angle-left"></casper-icon>';
-      casperTabsContainer.insertBefore(leftArrow, casperTabs);
-
-      const rightArrow = document.createElement('span');
-      rightArrow.setAttribute('id', 'rightArrow');
-      rightArrow.classList.add('casper-tabs-container-scroll-arrows');
-      rightArrow.innerHTML = '<casper-icon icon="fa-regular:angle-right"></casper-icon>';
-      casperTabsContainer.appendChild(rightArrow);
-
-      // ver se isto é necessário (e corrigir condição)
-      // if (casperTabs.offsetWidth < casperTabsContainer.offsetWidth) {
-      //   rightArrow.style.visibility = 'hidden';
-      //   leftArrow.style.visibility = 'hidden';
-      // }
-
-      // This will observe the resize of the given elements (entries)
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          if (entry.target.id === 'casperTabsContainer') {
-            const casperTabsContainer = entry.target;
-            const casperTabs = entry.target.querySelector('#casperTabs');
-            const leftArrow = casperTabsContainer.querySelector('#leftArrow');
-            const rightArrow = casperTabsContainer.querySelector('#rightArrow');
-
-            let allTabsWidth = 0;
-            for (const tab of casperTabs.children) {
-              allTabsWidth += tab.offsetWidth;
-            }
-            
-            // If the width of all tabs plus the two scroll arrows is bigger than the width of their container, then we show the right arrow
-            if ((allTabsWidth + leftArrow.offsetWidth * 2) > casperTabsContainer.offsetWidth) {
-              rightArrow.style.visibility = 'visible';
-            } else {
-              rightArrow.style.visibility = 'hidden';
-              leftArrow.style.visibility = 'hidden';
-            }
-          }
-        }
-      });
-      resizeObserver.observe(casperTabsContainer);
-
-      leftArrow.addEventListener('click', this.__scrollFiltersTabs.bind(casperTabs, 'left', 150));
-      rightArrow.addEventListener('click', this.__scrollFiltersTabs.bind(casperTabs, 'right', 150));
       casperTabs.addEventListener('selected-index-changed', event => this.__tabFiltersChanged(event));
-      casperTabs.addEventListener('click', event => this.__findTabsScrollDirection(event));
       this.changeFiltersTab(0);
-    }
-
-    /**
-     * This function fires when the user clicks on a scroll arrow. It is responsible for scrolling the casper tabs.
-     * 'This' inside this function refers to the casperTabs
-     *
-     * @param {String} direction The direction of the scroll.
-     * @param {Number} value The value of the scroll.
-     */
-    __scrollFiltersTabs (direction, value) {
-      if (direction === 'right') {
-        this.scrollLeft += value;
-      } else if (direction === 'left') {
-        this.scrollLeft -= value;
-      }
-      
-      // Here we need a timeout to make sure that the scroll-behavior: smooth has finished
-      setTimeout(() => {
-        const casperTabsContainer = this.parentElement;
-        const leftArrow = casperTabsContainer.querySelector('#leftArrow');
-        const rightArrow = casperTabsContainer.querySelector('#rightArrow');
-
-        // Here we're at the end of the scroll
-        if ((this.offsetWidth + this.scrollLeft) > this.scrollWidth) {
-          rightArrow.style.visibility = 'hidden';
-        } else {
-          rightArrow.style.visibility = 'visible';
-        }
-  
-        // Here we're at the beginning of the scroll
-        if (this.scrollLeft === 0) { 
-          leftArrow.style.visibility = 'hidden';
-        } else {
-          leftArrow.style.visibility = 'visible';
-        }
-      }, 200);
-    }
-
-    /**
-     * This function fires when the user clicks on the casper tabs. 
-     * It is responsible for finding whether the tabs should scroll left or right.
-     *
-     * @param {Object} event The event's object.
-     */
-    __findTabsScrollDirection (event) { 
-      if (event && event.currentTarget) {
-        const casperTabs = event.currentTarget;
-
-        // Here there's no need to scroll
-        if (casperTabs.offsetWidth >= casperTabs.scrollWidth) return;
-
-        const tabIndex = casperTabs.selectedIndex;
-        const selectedTab = casperTabs.children[tabIndex];
-
-        const middleX = casperTabs.offsetWidth / 2;
-        const clickX = event.clientX - casperTabs.getBoundingClientRect().left;
-
-        let direction;
-        if (clickX >= middleX) {
-          direction = 'right';
-        } else if (clickX < middleX) {
-          direction = 'left';
-        }
-        
-        const scrollValue = selectedTab.offsetWidth;
-      
-        this.__scrollFiltersTabs.call(casperTabs, direction, scrollValue);
-      }
     }
 
     /**
@@ -711,10 +594,10 @@ export const CasperMoacFiltersMixin = superClass => {
      * @param {Object} event The event's object.
      */
     __tabFiltersChanged (event) {
-      if (event && event.detail && event.detail.value !== undefined) {
+      if (event && event.currentTarget && event.currentTarget.id === 'casperTabs' && event.detail && event.detail.value !== undefined) {
         const tabIndex = event.detail.value;
-        const casperTabs = this.$.casperTabsContainer.querySelector('#casperTabs');
-        const selectedTab = casperTabs.children[tabIndex];
+        const casperTabs = event.currentTarget;
+        const selectedTab = casperTabs.shadowRoot.querySelector('slot').assignedElements()[tabIndex];
         const selectedTabType = selectedTab.dataset.type;
       
         const filterElements = this.$.filtersContainer.querySelectorAll('.filter-container');
@@ -754,7 +637,7 @@ export const CasperMoacFiltersMixin = superClass => {
      * @param {Number} tabIndex The index of the tab that will be selected.
      */
     changeFiltersTab (tabIndex) {
-      if (isNaN(tabIndex) || +tabIndex < 0 || !this.hasTabs) return;
+      if (isNaN(tabIndex) || +tabIndex < 0 || !this.__hasTabs) return;
 
       const casperTabs = this.$.casperTabsContainer.querySelector('#casperTabs');
       casperTabs.selectedIndex = tabIndex;

@@ -42,7 +42,7 @@ export const CasperMoacStylesMixin = superClass => {
           .casper-moac-toggle-column .toggle-buttons-container {
             display: inline-flex;
             border: solid 1px rgba(12, 84, 96, .7);
-            border-radius: 7px;
+            border-radius: 7.5px;
             background-color: rgba(12, 84, 96, .5);
             margin: 2px 0;
           }
@@ -64,6 +64,7 @@ export const CasperMoacStylesMixin = superClass => {
           .casper-moac-toggle-column .toggle-buttons-container span:not(.selected-toggle-button):hover {
             background-color: rgba(12, 84, 96, .7);
             cursor: pointer;
+            border-radius: 4px;
           }
         </style>
       `;
@@ -306,53 +307,26 @@ export const CasperMoacStylesMixin = superClass => {
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
           }
 
-          /* TODO: Filters casper-select. Se mudarmos o tamanho, também é preciso mudar nas multiple-selection */
           .main-container vaadin-split-layout .left-side-container .filters-container casper-select {
             --casper-select-single-paper-input-container-label: { font-size: 14px; };
             --casper-select-single-paper-input-container-input: { font-size: 14px; };
           }
 
-          /* TODO: corrigir font-size nas multiple selection etc */
-          .main-container vaadin-split-layout .left-side-container .filters-container paper-input {
-            --paper-input-container-input: { font-size: 14px; };
+          .main-container vaadin-split-layout .left-side-container .filters-container casper-select[multi-selection] {
             --paper-input-container-label: { font-size: 14px; };
           }
 
-          /* TODO corrigir isto */
+          .main-container vaadin-split-layout .left-side-container .filters-container paper-input {
+            --paper-input-container-label: { font-size: 14px; };
+            --paper-input-container-input: { font-size: 14px; };
+          }
+
+          /* Casper tabs container inside the filters container */
           .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container {
             grid-column: 1 / -1;
             display: inline-flex;
             justify-content: center;
             margin-bottom: -10px;
-            /* grid-column-start: 1;
-            grid-column-end: none; */
-          }
-
-          /* TODO */
-          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container .casper-tabs-container-scroll-arrows {
-            display: flex;
-            align-items: center;
-            color: rgb(124, 124, 124);
-            cursor: pointer;
-            /* visibility: hidden; */
-          }
-
-          /* TODO */
-          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container casper-tabs {
-            /* margin: 0 auto; */
-            border: 1px solid rgb(124, 124, 124);
-            font-size: 14px;
-            margin: 0 15px;
-            overflow: scroll;
-            scroll-behavior: smooth;
-            -ms-overflow-style: none;  /* Hides scrollbar for IE and Edge */
-            scrollbar-width: none;  /* Hides scrollbar for Firefox */
-          }
-
-          /* TODO */
-          /* Hides scrollbar for Chrome, Safari and Opera */
-          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container casper-tabs::-webkit-scrollbar {
-            display: none;
           }
 
           .main-container vaadin-split-layout .left-side-container .filters-container .filter-container-invisible {
