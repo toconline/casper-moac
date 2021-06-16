@@ -290,25 +290,21 @@ export const CasperMoacStylesMixin = superClass => {
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
           }
 
-          /* TODO */
           .main-container vaadin-split-layout .left-side-container .filters-container casper-select {
             --casper-select-single-paper-input-container-label: { font-size: 14px; };
             --casper-select-single-paper-input-container-input: { font-size: 14px; };
           }
 
-          /* TODO falta corrigir font size do input */
           .main-container vaadin-split-layout .left-side-container .filters-container casper-select[multi-selection] {
             --paper-input-container-label: { font-size: 14px; };
-            /* --paper-input-container-input: { font-size: 2px; background-color: pink }; */
           }
 
-          /* TODO */
           .main-container vaadin-split-layout .left-side-container .filters-container paper-input {
             --paper-input-container-label: { font-size: 14px; };
             --paper-input-container-input: { font-size: 14px; };
           }
 
-          /* TODO */
+          /* Casper tabs container inside the filters container */
           .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container {
             grid-column: 1 / -1;
             display: inline-flex;

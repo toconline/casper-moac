@@ -411,8 +411,7 @@ export const CasperMoacFiltersMixin = superClass => {
         }
       });
 
-      // AQUI
-      // The first time that this function runs, another one is called to insert paper tabs (categories for the filters)
+      // The first time that this function runs, another one is called to insert casper tabs (categories for the filters)
       if (this.__firstTimeDisplayingFilters) {
         this.__firstTimeDisplayingFilters = false;
         this.__createFiltersTabs();
@@ -535,11 +534,11 @@ export const CasperMoacFiltersMixin = superClass => {
       // First we need to check if any of the filters has a key 'tab'. If not, then we return
       for (const obj of this.__filters) {
         if (obj.filter.tab) {
-          this.hasTabs = true;
+          this.__hasTabs = true;
           break;
         }
       }
-      if (!this.hasTabs) return;
+      if (!this.__hasTabs) return;
 
       const casperTabsContainer = this.$.casperTabsContainer;
       casperTabsContainer.classList.add('casper-tabs-container');
@@ -626,7 +625,7 @@ export const CasperMoacFiltersMixin = superClass => {
      * @param {Number} tabIndex The index of the tab that will be selected.
      */
     changeFiltersTab (tabIndex) {
-      if (isNaN(tabIndex) || +tabIndex < 0 || !this.hasTabs) return;
+      if (isNaN(tabIndex) || +tabIndex < 0 || !this.__hasTabs) return;
 
       const casperTabs = this.$.casperTabsContainer.querySelector('#casperTabs');
       casperTabs.selectedIndex = tabIndex;
