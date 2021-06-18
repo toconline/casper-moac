@@ -318,9 +318,18 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           this.$.epaperButton.positionTarget = this.$.splitLayout.$.splitter;
           this.$.epaperButton.open();
 
+          let checkExpansion = true;
           this.$.splitLayout.addEventListener('iron-resize', (event) => {
-            this.$.epaperButton.refit();
-            this.epaperExpanded = true;
+            // this.$.epaperButton.refit();
+            // Check every 0.5s if the epaper is expanded
+            if (checkExpansion) {
+              if (this.__rightSideContainer.offsetWidth > 5)
+                this.epaperExpanded = true;
+              else
+                this.epaperExpanded = false;
+              checkExpansion = false
+              setTimeout(() => { checkExpansion = true; }, 500);
+            }
           });
         });
       }
