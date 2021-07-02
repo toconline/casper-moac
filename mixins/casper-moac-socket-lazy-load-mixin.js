@@ -149,7 +149,7 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
          *
          * @type {String}
          */
-        tableType: {
+        tableSchema: {
           type: String,
           value: 'subentity'
         },
@@ -271,7 +271,7 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
         let subscribeResponse;
         if (this.treeView) {
           console.time('subscribe');
-          const subscribeData =  {idColumn: this.idColumn, parentColumn: this.parentColumn, tableType: this.tableType, tableName: this.tableName};
+          const subscribeData =  {idColumn: this.idColumn, parentColumn: this.parentColumn, tableSchema: this.tableSchema, tableName: this.tableName};
           subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, subscribeData, 15000);
           console.timeEnd('subscribe');
 
