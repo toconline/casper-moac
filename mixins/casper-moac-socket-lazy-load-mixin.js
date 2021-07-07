@@ -145,6 +145,32 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
           value: 'parent_id'
         },
         /**
+         * Name of the column which to sort by
+         *
+         * @type {String}
+         */
+        sortColumn: {
+          type: String
+        },
+         /**
+         * Name of the column that contains the number of children
+         *
+         * @type {String}
+         */
+         countColumn: {
+          type: String,
+          value: 'child_count'
+        },
+        /**
+         * Name of the column that contains the level
+         *
+         * @type {String}
+         */
+         levelColumn: {
+          type: String,
+          value: 'level'
+        },
+        /**
          * Type of the table, sharded or subentity
          *
          * @type {String}
@@ -271,7 +297,11 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
         let subscribeResponse;
         if (this.treeView) {
           console.time('subscribe');
-          const subscribeData =  {idColumn: this.idColumn, parentColumn: this.parentColumn, tableSchema: this.tableSchema, tableName: this.tableName};
+          const subscribeData =  {idColumn: this.idColumn,
+                                  parentColumn: this.parentColumn,
+                                  sortColumn: this.sortColumn,
+                                  tableSchema: this.tableSchema,
+                                  tableName: this.tableName};
           subscribeResponse = await this.app.socket2.subscribeLazyload(this.treeResource, subscribeData, 15000);
           console.timeEnd('subscribe');
 
@@ -419,23 +449,38 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
         this._responseIncluded = response.included;
         this.maxExpandedLevel = 1;
         if (this.treeView) {
-          if (response.data[0].child_count === undefined || response.data[0].level === undefined) {
-            throw('Each item given to the tree grid MUST have the following properties: child_count and level');
+          if (response.data[0][this.countColumn] === undefined) {
+            throw('Each item given to the tree grid MUST have a child_count!');
           }
           this._responseIncluded = response.included;
-          response.data.forEach( item => {
-                                            item.child_count > 0 ? item.has_children = true : item.has_children = false;
-                                            if (item.level > this.maxExpandedLevel) this.maxExpandedLevel = item.level;
-                                            if (this.expandedItems.filter(obj => obj.id == item.id).length > 0) item.expanded = true;
-                                            if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item, this._responseIncluded);
-                                          });
+
+          for (const item of response.data) {
+            item[this.countColumn] > 0 ? item.has_children = true : item.has_children = false;
+
+            if (item[this.levelColumn] === undefined) {
+              item[this.parentColumn] ? item[this.levelColumn] = 2 : item[this.levelColumn] = 1;
+            }
+
+            if (item[this.levelColumn] > this.maxExpandedLevel) {
+              this.maxExpandedLevel = item[this.levelColumn];
+            }
+
+            if (this.expandedItems.filter(obj => obj.id == item.id).length > 0) item.expanded = true;
+            if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item, this._responseIncluded);
+          }
 
           if (this._treeColumn) this._treeColumn.width = (50+(this.maxExpandedLevel*20))+'px';
         } else {
-          response.data.forEach( item => {  if (item.level && item.level > this.maxExpandedLevel) this.maxExpandedLevel = item.level;
-                                            item.not_tree = true;
-                                            if (this.resourceFormatter) this.resourceFormatter.call(this.page || {}, item, this._responseIncluded);
-                                         });
+
+          for (const item of response.data) {
+            item.not_tree = true;
+
+            if (item[this.levelColumn] && item[this.levelColumn] > this.maxExpandedLevel)
+              this.maxExpandedLevel = item[this.levelColumn];
+
+            if (this.resourceFormatter)
+              this.resourceFormatter.call(this.page || {}, item, this._responseIncluded);
+          }
           if (this._treeColumn) this._treeColumn.width = (50+(this.maxExpandedLevel*28))+'px';
         }
         this._responseIncluded = undefined;

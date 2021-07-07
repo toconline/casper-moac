@@ -39,8 +39,8 @@ class CasperMoacTreeColumn extends GridColumnElement {
               <div style="opacity: ${this._getOpacity(index, item.parent_ids)}" class="acc-crumb-circle" .dataParent=${parentId} .dataItem=${item} @click=${this._expandMultiple}></div>
               <div style="opacity: ${this._getOpacity(index, item.parent_ids)}" class="acc-crumb-line"></div>
             `)}
-            <div class="acc-crumb-circle acc-crumb-circle-selected" .dataParent=${item.id} .dataItem=${item} @click=${this._expandMultiple}></div>
-            <span class="${this.valueClass}" @click=${this.valueClick} tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>
+            ${item.parent_ids ? html `<div class="acc-crumb-circle acc-crumb-circle-selected" .dataParent=${item.id} .dataItem=${item} @click=${this._expandMultiple}></div>` : html ``}
+            <span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>
           </div>
         `;
       } else {
@@ -60,10 +60,10 @@ class CasperMoacTreeColumn extends GridColumnElement {
               class="expand-icon"
               @click=${this._collapse}>
             </casper-icon>
-            <span class="${this.valueClass}" @click=${this.valueClick} tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>
+            <span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>
           </div>
           <div style="${this._getStyleForColumn(item.level,'false')}" ?hidden=${item.has_children}>
-            <span class="${this.valueClass}" @click=${this.valueClick} tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>
+            <span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>
           </div>
         `;
       }
@@ -174,7 +174,11 @@ class CasperMoacTreeColumn extends GridColumnElement {
   }
 
   _getParentIds (item) {
-    return item.parent_ids.filter(e => e != item.id);
+    if (item.parent_ids) {
+      return item.parent_ids.filter(e => e != item.id);
+    } else {
+      return [];
+    }
   }
 
   _getOpacity (index, array) {
