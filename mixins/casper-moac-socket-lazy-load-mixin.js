@@ -454,7 +454,34 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
           }
           this._responseIncluded = response.included;
 
-          for (const item of response.data) {
+          /*
+          * We need to sort the data again.
+          * Can't trust the order that comes from jsonapi.
+          * And don't worry its quite fast ~0.1 ms
+          */
+
+          // Find all the parents and put them in an array
+          let sortedData = response.data.filter(e => !e[this.parentColumn]);
+          // Iterate through the expanded items
+          for (let idx = 0; idx < this.expandedItems.length; idx++) {
+            const item = this.expandedItems[idx];
+            // Find the children and put them in an array
+            const children = response.data.filter(e => e[this.parentColumn] == item.id);
+            if (children.length <= 0) continue;
+            // Find the index of the expanded item in the initial array
+            let parentIdx = -1;
+            for (let idx = 0; idx < sortedData.length; idx++) {
+              const e = sortedData[idx];
+              if (e.id == item.id) {
+                parentIdx = idx;
+                break;
+              }
+            }
+            // Positions each of the children next to its parent
+            sortedData = [...sortedData.slice(0,(parentIdx+1)), ...children, ...sortedData.slice((parentIdx+1))];
+          }
+
+          for (const item of sortedData) {
             item[this.countColumn] > 0 ? item.has_children = true : item.has_children = false;
 
             if (item[this.levelColumn] === undefined) {
@@ -470,6 +497,7 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
           }
 
           if (this._treeColumn) this._treeColumn.width = (50+(this.maxExpandedLevel*20))+'px';
+          this._renderedArray = sortedData;
         } else {
 
           for (const item of response.data) {
@@ -482,10 +510,10 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
               this.resourceFormatter.call(this.page || {}, item, this._responseIncluded);
           }
           if (this._treeColumn) this._treeColumn.width = (50+(this.maxExpandedLevel*28))+'px';
+          this._renderedArray = response.data;
         }
         this._responseIncluded = undefined;
 
-        this._renderedArray = response.data;
         if (this._newActiveItemId) {
           this.setItems(this._renderedArray, this._newActiveItemId);
         } else {
