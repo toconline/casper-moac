@@ -442,8 +442,16 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
       try {
         let activeItemId = 0;
         if (this._newActiveItemId) activeItemId = this._newActiveItemId;
+
+        let ratio = 0.5;
+        if (direction === 'up') {
+          ratio = 0.25;
+        } else if (direction === 'down') {
+          ratio = 0.75;
+        }
+
         console.time('getll');
-        const response = await this.app.socket2.getLazyload(this.treeResource, {idColumn: 'id', activeId: activeItemId, direction: direction}, 3000);
+        const response = await this.app.socket2.getLazyload(this.treeResource, {idColumn: 'id', activeId: activeItemId, ratio: ratio}, 3000);
         console.timeEnd('getll');
 
         this._responseIncluded = response.included;
