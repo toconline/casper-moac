@@ -14,6 +14,9 @@ class CasperMoacTreeColumn extends GridColumnElement {
       },
       valueClick: {
         type: Function
+      },
+      customValue: {
+        type: Function
       }
     }
   }
@@ -40,7 +43,8 @@ class CasperMoacTreeColumn extends GridColumnElement {
               <div style="opacity: ${this._getOpacity(index, item.parent_ids)}" class="acc-crumb-line"></div>
             `)}
             ${item.parent_ids ? html `<div class="acc-crumb-circle acc-crumb-circle-selected" .dataParent=${item.id} .dataItem=${item} @click=${this._expandMultiple}></div>` : html ``}
-            <span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>
+            ${this.customValue ? this.customValue(item) :
+              html`<span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>`}
           </div>
         `;
       } else {
@@ -60,10 +64,12 @@ class CasperMoacTreeColumn extends GridColumnElement {
               class="expand-icon"
               @click=${this._collapse}>
             </casper-icon>
-            <span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>
+            ${this.customValue ? this.customValue(item) :
+              html`<span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>`}
           </div>
           <div style="${this._getStyleForColumn(item.level,'false')}" ?hidden=${item.has_children}>
-            <span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>
+            ${this.customValue ? this.customValue(item) :
+              html`<span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>`}
           </div>
         `;
       }
