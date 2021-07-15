@@ -157,7 +157,7 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
          *
          * @type {String}
          */
-         countColumn: {
+         childCountColumn: {
           type: String,
           value: 'child_count'
         },
@@ -457,7 +457,7 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
         this._responseIncluded = response.included;
         this.maxExpandedLevel = 1;
         if (this.treeView) {
-          if (response.data[0][this.countColumn] === undefined) {
+          if (response.data[0][this.childCountColumn] === undefined) {
             throw('Each item given to the tree grid MUST have a child_count!');
           }
           this._responseIncluded = response.included;
@@ -490,7 +490,7 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
           }
 
           for (const item of sortedData) {
-            item[this.countColumn] > 0 ? item.has_children = true : item.has_children = false;
+            item[this.childCountColumn] > 0 ? item.has_children = true : item.has_children = false;
 
             if (item[this.levelColumn] === undefined) {
               item[this.parentColumn] ? item[this.levelColumn] = 2 : item[this.levelColumn] = 1;
