@@ -195,6 +195,12 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
       this._debounceFetchSocketItems();
     }
 
+    // Public method to resubscribe and reload the items in the tree grid
+    async forceRefreshSocketItems () {
+      await this.app.socket2.unsubscribeAllLazyload(3000);
+      this.refreshSocketItems();
+    }
+
     // Public methods that expands a node given an event (for the on click) or given the id and parent_id
     async expand (event, id = undefined, parentId = undefined) {
       if (!id) id = +event.detail.id;
