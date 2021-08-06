@@ -24,6 +24,8 @@ class CasperMoacTreeColumn extends GridColumnElement {
   ready () {
     super.ready();
 
+    this.initialWidth = parseInt(this.width,10);
+
     this.headerRenderer = (headerContent) => {
       render( html`
         <div .tooltip="${this.tooltip}" style=${this._getHeaderContainerAlignment()}>
@@ -43,13 +45,15 @@ class CasperMoacTreeColumn extends GridColumnElement {
               <div style="opacity: ${this._getOpacity(index, item.parent_ids)}" class="acc-crumb-line"></div>
             `)}
             ${item.parent_ids ? html `<div class="acc-crumb-circle acc-crumb-circle-selected" .dataParent=${item.id} .dataItem=${item} @click=${this._expandMultiple}></div>` : html ``}
-            ${this.customValue ? this.customValue(item) :
-              html`<span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>`}
+            <span class="value-container">
+              ${this.customValue ? this.customValue(item) :
+                html`<span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>`}
+            </span>
           </div>
         `;
       } else {
         cellHtml = html`
-          <div style="${this._getStyleForColumn(item.level,'true')}" ?hidden=${!item.has_children}>
+          <div style="${this.getStyleForColumn(item.level,'true')}" ?hidden=${!item.has_children}>
             <casper-icon
               ?hidden=${item.expanded}
               icon="fa-solid:caret-right"
@@ -64,12 +68,16 @@ class CasperMoacTreeColumn extends GridColumnElement {
               class="expand-icon"
               @click=${this._collapse}>
             </casper-icon>
-            ${this.customValue ? this.customValue(item) :
-              html`<span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>`}
+            <span class="value-container">
+              ${this.customValue ? this.customValue(item) :
+                html`<span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>`}
+            </span>
           </div>
-          <div style="${this._getStyleForColumn(item.level,'false')}" ?hidden=${item.has_children}>
-            ${this.customValue ? this.customValue(item) :
-              html`<span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>`}
+          <div style="${this.getStyleForColumn(item.level,'false')}" ?hidden=${item.has_children}>
+            <span class="value-container">
+              ${this.customValue ? this.customValue(item) :
+                html`<span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>`}
+            </span>
           </div>
         `;
       }
@@ -116,6 +124,10 @@ class CasperMoacTreeColumn extends GridColumnElement {
           }
           .acc-crumb-circle-selected {
             opacity: 1;
+          }
+          .value-container {
+            padding: 0 8px;
+            font-weight: 800;
           }
         </style>
         <div class="tree-column">
@@ -164,7 +176,7 @@ class CasperMoacTreeColumn extends GridColumnElement {
     }
   }
 
-  _getStyleForColumn (level, expandable) {
+  getStyleForColumn (level, expandable) {
     let value = 0;
     if (expandable === 'true') {
       value = ((level-1)*11) + 10;
