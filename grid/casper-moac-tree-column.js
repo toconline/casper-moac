@@ -17,6 +17,10 @@ class CasperMoacTreeColumn extends GridColumnElement {
       },
       customValue: {
         type: Function
+      },
+      parentColumn: {
+        type: String,
+        value: 'parent_id'
       }
     }
   }
@@ -24,7 +28,8 @@ class CasperMoacTreeColumn extends GridColumnElement {
   ready () {
     super.ready();
 
-    this.initialWidth = parseInt(this.width,10);
+    // This vaadin grid property sets the width automatically
+    this.autoWidth = true;
 
     this.headerRenderer = (headerContent) => {
       render( html`
@@ -53,27 +58,27 @@ class CasperMoacTreeColumn extends GridColumnElement {
         `;
       } else {
         cellHtml = html`
-          <div style="${this.getStyleForColumn(item.level,'true')}" ?hidden=${!item.has_children}>
+          <div style="${this.getStyleForColumn(item.level, true)}" ?hidden=${!item.has_children}>
             <casper-icon
               ?hidden=${item.expanded}
               icon="fa-solid:caret-right"
               .dataItem=${item}
               class="expand-icon"
-              @click=${this._expand}>
+              @click=${this._expand.bind(this)}>
             </casper-icon>
             <casper-icon
               ?hidden=${!item.expanded}
               icon="fa-solid:caret-down"
               .dataItem=${item}
               class="expand-icon"
-              @click=${this._collapse}>
+              @click=${this._collapse.bind(this)}>
             </casper-icon>
             <span class="value-container">
               ${this.customValue ? this.customValue(item) :
                 html`<span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>`}
             </span>
           </div>
-          <div style="${this.getStyleForColumn(item.level,'false')}" ?hidden=${item.has_children}>
+          <div style="${this.getStyleForColumn(item.level, false)}" ?hidden=${item.has_children}>
             <span class="value-container">
               ${this.customValue ? this.customValue(item) :
                 html`<span class="${this.valueClass}" @click=${this.valueClick} .tooltip="${this._getTooltipText(item)}">${this._getPathProp(item,this.path)}</span>`}
@@ -145,7 +150,7 @@ class CasperMoacTreeColumn extends GridColumnElement {
       this.dispatchEvent(new CustomEvent('casper-moac-tree-column-expand', {
         bubbles: true,
         composed: true,
-        detail: { id: event.target.dataItem.id, parent_id: event.target.dataItem.parent_id }
+        detail: { id: event.target.dataItem.id, parent_id: event.target.dataItem[this.parentColumn] }
       }));
     }
   }
@@ -171,14 +176,14 @@ class CasperMoacTreeColumn extends GridColumnElement {
       this.dispatchEvent(new CustomEvent('casper-moac-tree-column-collapse', {
         bubbles: true,
         composed: true,
-        detail: { id: event.target.dataItem.id, parent_id: event.target.dataItem.parent_id }
+        detail: { id: event.target.dataItem.id, parent_id: event.target.dataItem[this.parentColumn] }
       }));
     }
   }
 
   getStyleForColumn (level, expandable) {
     let value = 0;
-    if (expandable === 'true') {
+    if (expandable) {
       value = ((level-1)*11) + 10;
     } else {
       value = ((11 * (level-1)) + 17) + 10;
