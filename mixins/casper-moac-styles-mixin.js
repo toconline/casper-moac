@@ -156,7 +156,7 @@ export const CasperMoacStylesMixin = superClass => {
           }
 
           .main-container vaadin-split-layout .left-side-container .top-container-expanded {
-            max-height: 100%;
+            max-height: 200%; /* Martelada: some moacs don't have 100% max-height */
           }
 
           .main-container vaadin-split-layout .left-side-container .header-container.header-container--responsive {
