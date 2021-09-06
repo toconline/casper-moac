@@ -555,7 +555,7 @@ export const CasperMoacFiltersMixin = superClass => {
       const casperTabsContainer = this.$.casperTabsContainer;
       casperTabsContainer.classList.add('casper-tabs-container');
 
-      let casperTabsHtml = '<casper-tabs id="casperTabs" filters-theme>';
+      let casperTabsHtml = '<casper-tabs id="casperTabs">';
 
       for (const obj of this.__filters) {
         if (obj.filter.tab) {
