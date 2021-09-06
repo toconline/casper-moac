@@ -419,7 +419,7 @@ export const CasperMoacFiltersMixin = superClass => {
       if (this.__firstTimeDisplayingFilters) {
         this.__firstTimeDisplayingFilters = false;
         this.__createFiltersTabs();
-      } 
+      }
     }
 
     /**
@@ -523,16 +523,16 @@ export const CasperMoacFiltersMixin = superClass => {
             : filterComponent.openDropdown(this.$.activeFilters);
           break;
         case CasperMoacFilterTypes.CASPER_DATE_PICKER:
-          this.__displayAllFilters = true;
+          if (this.__displayAllFilters === false) this.__toggleDisplayAllFilters();
           filterComponent.open();
           break;
         case CasperMoacFilterTypes.CASPER_DATE_RANGE:
-          this.__displayAllFilters = true;
+          if (this.__displayAllFilters === false) this.__toggleDisplayAllFilters();
           filterComponent.openStartDatePicker();
           break;
         case CasperMoacFilterTypes.PAPER_INPUT:
         case CasperMoacFilterTypes.PAPER_CHECKBOX:
-          this.__displayAllFilters = true;
+          if (this.__displayAllFilters === false) this.__toggleDisplayAllFilters();
           filterComponent.focus();
           break;
       }
@@ -599,7 +599,7 @@ export const CasperMoacFiltersMixin = superClass => {
         const casperTabs = event.currentTarget;
         const selectedTab = casperTabs.shadowRoot.querySelector('slot').assignedElements()[tabIndex];
         const selectedTabType = selectedTab.dataset.type;
-      
+
         const filterElements = this.$.filtersContainer.querySelectorAll('.filter-container');
 
         for (const filterEl of filterElements) {
@@ -615,7 +615,7 @@ export const CasperMoacFiltersMixin = superClass => {
 
           // Next we need to check the filter objects to find out if the current filter belongs to the selected tab or not
           for (const obj of this.__filters) {
-            if (currentFilterName === obj.filterKey) { 
+            if (currentFilterName === obj.filterKey) {
               const currentFilterTab = obj.filter.tab;
 
               if (currentFilterTab !== selectedTabType) {

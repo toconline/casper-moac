@@ -1135,8 +1135,6 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * @param {Object} event The event's object.
    */
   __toggleDisplayAllFilters (event) {
-    const paperButton = this.__eventPathContainsNode(event, 'paper-button');
-
     const headerContainer = this.shadowRoot.querySelector('.header-container');
     if (!this.__displayAllFilters) {
       this.__displayAllFilters = !this.__displayAllFilters;
