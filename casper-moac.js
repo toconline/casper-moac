@@ -7,6 +7,9 @@ import '@cloudware-casper/casper-epaper/casper-epaper.js';
 import '@cloudware-casper/casper-select/casper-select.js';
 import '@cloudware-casper/casper-date-range/casper-date-range.js';
 import '@cloudware-casper/casper-date-picker/casper-date-picker.js';
+import '@cloudware-casper/casper-tabs/casper-tabs.js';
+import '@cloudware-casper/casper-tabs/casper-tab.js';
+import '@cloudware-casper/casper-icons/casper-icon.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
@@ -18,6 +21,7 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import './sidebar/casper-moac-sidebar.js';
 import './sidebar/casper-moac-sidebar-item.js';
 import './components/casper-moac-active-filter.js';
+import './components/casper-expand-epaper-button.js';
 import { CasperMoacProperties } from './casper-moac-properties.js';
 import { CasperMoacGridMixin } from './mixins/casper-moac-grid-mixin.js';
 import { CasperMoacStylesMixin } from './mixins/casper-moac-styles-mixin.js';
@@ -27,6 +31,7 @@ import { CasperMoacHistoryMixin } from './mixins/casper-moac-history-mixin.js';
 import { CasperMoacLazyLoadMixin } from './mixins/casper-moac-lazy-load-mixin.js';
 import { CasperMoacContextMenuMixin } from './mixins/casper-moac-context-menu-mixin.js';
 import { CasperMoacLocalStorageMixin } from './mixins/casper-moac-local-storage-mixin.js';
+import { CasperMoacSocketLazyLoadMixin } from './mixins/casper-moac-socket-lazy-load-mixin.js';
 import { CasperMoacFilterTypes, CasperMoacOperators } from './casper-moac-constants.js';
 
 export class CasperMoac extends CasperMoacLazyLoadMixin(
@@ -37,7 +42,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
           CasperMoacSortingMixin(
             CasperMoacContextMenuMixin(
               CasperMoacLocalStorageMixin(
-                CasperMoacHistoryMixin(PolymerElement))))))))) {
+                CasperMoacSocketLazyLoadMixin(
+                  CasperMoacHistoryMixin(PolymerElement)))))))))) {
 
   static get observers () {
     return [
@@ -66,7 +72,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
                   <!--Show/hide the active filters-->
                   <template is="dom-if" if="[[__hasFilters]]">
-                    <paper-button id="displayAllFilters" on-click="__toggleDisplayAllFilters">
+                    <paper-button hidden$="[[__displayAllFilters]]" class="display-all-filters-btn" id="displayAllFilters" on-click="__toggleDisplayAllFilters">
                       <span>Ver todos os filtros</span>
                       <casper-icon icon="fa-regular:angle-down"></casper-icon>
                     </paper-button>
@@ -88,16 +94,25 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                     </template>
 
                     <!--Reset filters button-->
-                    <template is="dom-if" if="[[__displayResetFiltersButton]]">
+                    <template is="dom-if" if="[[!socketLazyLoad]]">
                       <casper-icon-button
                         reverse
+                        hidden$=[[!__displayResetFiltersButton]]
                         text="Repor filtros"
                         icon="fa-light:times"
                         on-click="__resetFilters"></casper-icon-button>
+                      <strong hidden$=[[__displayResetFiltersButton]]>Filtros ativos:</strong>
                     </template>
 
-                    <template is="dom-if" if="[[!__displayResetFiltersButton]]">
-                      <strong>Filtros ativos:</strong>
+                    <!--Clear filters button-->
+                    <template is="dom-if" if="[[socketLazyLoad]]">
+                      <casper-icon-button
+                        reverse
+                        text="Limpar pesquisa"
+                        icon="fa-light:times"
+                        hidden$=[[!__displayClearFilter(treeView)]]
+                        on-click="showTreeView"></casper-icon-button>
+                      <strong hidden$=[[__displayClearFilter(treeView)]]>Filtros ativos:</strong>
                     </template>
                   </div>
 
@@ -109,8 +124,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
               </div>
             </div>
 
-            <div hidden$="[[!__displayAllFilters]]">
-              <div class="filters-container">
+            <div id="topContainer" class="top-container" hidden$="[[!__displayAllFilters]]">
+              <div id="filtersContainer" class="filters-container">
+                <div id="casperTabsContainer" hidden$="[[!__hasTabs]]"></div>
                 <template is="dom-repeat" items="[[__filters]]" restamp>
                   <div class$="[[__filterContainerClassName(item.filter)]]">
                     <!--Casper-Select filter-->
@@ -173,6 +189,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                   </div>
                 </template>
               </div>
+              <paper-button class="display-all-filters-btn display-all-filters-hide" on-click="__toggleDisplayAllFilters">
+                <span>Esconder todos os filtros</span>
+                <casper-icon rotate icon="fa-regular:angle-down"></casper-icon>
+              </paper-button>
             </div>
 
             <slot name="left"></slot>
@@ -261,6 +281,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                 </casper-epaper>
               </div>
             </template>
+            <casper-expand-epaper-button
+              id="epaperButton"
+              epaper-expanded={{epaperExpanded}}
+              hidden$="[[!__hasEpaperAndButton(hasEpaper, hasEpaperButton)]]">
+            </casper-expand-epaper-button>
           </div>
         </vaadin-split-layout>
 
@@ -282,12 +307,42 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     if (this.__hasEpaperComponent()) {
       // Save the epaper in a notifiable property so it can be used outside.
       afterNextRender(this, () => this.epaper = this.shadowRoot.querySelector('casper-epaper'));
+
+      if (this.hasEpaperButton) {
+        this.__leftSideContainer.classList.add('epaper-transition-class');
+        this.__rightSideContainer.classList.add('epaper-transition-class');
+
+        afterNextRender(this, ()  => {
+          this.$.epaperButton.addEventListener('epaper-expanded-changed', (event) => {this._expandCollapseEpaper(event)});
+          this.$.epaperButton.fitInto = this.$.splitLayout.$.splitter;
+          this.$.epaperButton.positionTarget = this.$.splitLayout.$.splitter;
+          this.$.epaperButton.open();
+
+          let checkExpansion = true;
+          this.$.splitLayout.addEventListener('iron-resize', (event) => {
+            // this.$.epaperButton.refit();
+            // Check every 0.5s if the epaper is expanded
+            if (checkExpansion) {
+              if (this.__rightSideContainer.offsetWidth > 5)
+                this.epaperExpanded = true;
+              else
+                this.epaperExpanded = false;
+              checkExpansion = false
+              setTimeout(() => { checkExpansion = true; }, 500);
+            }
+          });
+        });
+      }
     }
 
     // Either provide the Vaadin Grid the lazy load function or manually trigger the filter function.
-    this.lazyLoad
-      ? this.__initializeLazyLoad()
-      : afterNextRender(this, () => this.__filterItems());
+    if (this.lazyLoad) {
+      this.__initializeLazyLoad();
+    } else if (this.socketLazyLoad) {
+      this._initializeSocketLazyLoad();
+    } else {
+      afterNextRender(this, () => this.__filterItems());
+    }
 
     this.addEventListener('mousemove', event => this.app.tooltip.mouseMoveToolip(event));
     this.__bindSorterEvents();
@@ -580,6 +635,32 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     delete parentItem[this.rowBackgroundColorInternalProperty];
 
     this.displayedItems = this.__removeChildItemsRecursively(this.displayedItems, parentItem);
+  }
+
+  toggleEpaper () {
+    if (this.hasEpaperButton) {
+      this.epaperExpanded = !this.epaperExpanded;
+      this._expandCollapseEpaper();
+    }
+  }
+
+  _expandCollapseEpaper (event) {
+    if (this.hasEpaperButton) {
+      let leftWidth = 40;
+      if (!this.epaperExpanded) {
+        leftWidth = 100;
+      }
+      this.$.epaperButton.close();
+
+      this.__leftSideContainer.setAttribute('style', `width: ${leftWidth}% !important`);
+      this.__rightSideContainer.setAttribute('style', `width: ${100 - leftWidth}% !important`);
+      setTimeout(() => {
+        this.$.epaperButton.fitInto = this.$.splitLayout.$.splitter;
+        this.$.epaperButton.positionTarget = this.$.splitLayout.$.splitter;
+        this.$.epaperButton.open();
+        this.$.splitLayout.dispatchEvent(new CustomEvent('splitter-dragend'));
+      }, 700);
+    }
   }
 
   /**
@@ -904,9 +985,14 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     this.displayedItems = this.__addInternalIdentifierToItems(this.__sortItems(displayedItems));
     this.forceGridRedraw();
     this.__activateItem();
-    this.__numberOfResults = displayedItems.length === originalItems.length
-      ? `${displayedItems.length} ${this.multiSelectionLabel}`
-      : `${displayedItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
+
+    if (!this.socketLazyLoad) {
+      this.__numberOfResults = displayedItems.length === originalItems.length
+        ? `${displayedItems.length} ${this.multiSelectionLabel}`
+        : `${displayedItems.length} de ${this.items.length} ${this.multiSelectionLabel}`;
+    } else {
+      this.__numberOfResults = `${this._sizeUserIds} de ${this._sizeAllIds} ${this.multiSelectionLabel}`;
+    }
   }
 
   /**
@@ -917,6 +1003,11 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     if (this.__activateItemId) {
       itemIndex = this.__findItemIndexById(this.__activateItemId, true);
       this.scrollToItem(this.__activateItemId, true);
+
+      // Focus a cell in the row to make arrow navigation fluid
+      const row = this.__getAllTableRows().find(row => this.__compareItemWithId(row._item, this.__activateItemId, true));
+      if (row !== undefined && row.firstElementChild) row.firstElementChild.focus();
+
       this.__activateItemId = undefined;
     }
 
@@ -1044,12 +1135,19 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * @param {Object} event The event's object.
    */
   __toggleDisplayAllFilters (event) {
-    const paperButton = this.__eventPathContainsNode(event, 'paper-button');
+    const headerContainer = this.shadowRoot.querySelector('.header-container');
+    if (!this.__displayAllFilters) {
+      this.__displayAllFilters = !this.__displayAllFilters;
+      headerContainer.classList.add('header-container-expanded');
+      this.$.topContainer.classList.add('top-container-expanded');
+    } else {
+      setTimeout(() => {
+        this.__displayAllFilters = !this.__displayAllFilters;
+        headerContainer.classList.remove('header-container-expanded');
+      }, 400);
 
-    this.__displayAllFilters = !this.__displayAllFilters;
-    !this.__displayAllFilters
-      ? paperButton.style.backgroundColor = ''
-      : paperButton.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.2)';
+      this.$.topContainer.classList.remove('top-container-expanded');
+    }
   }
 
   /**
@@ -1227,6 +1325,17 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    */
   __hasEpaperComponent () {
     return this.hasEpaper || this.hasFlippingEpaper;
+  }
+
+  /**
+   * This method checks if there is epaper and epaperbutton;
+   */
+  __hasEpaperAndButton () {
+    return this.hasEpaper && this.hasEpaperButton;
+  }
+
+  __displayClearFilter () {
+    return !this.forceListView && !this.treeView;
   }
 }
 

@@ -267,6 +267,15 @@ export const CasperMoacProperties = superClass => {
           value: false
         },
         /**
+         * This property when set to true, displays the expand-epaper-button component.
+         *
+         * @type {Boolean}
+         */
+        hasEpaperButton: {
+          type: Boolean,
+          value: false
+        },
+        /**
          * This property when set to true, toggles the flipping casper-epaper behavior.
          *
          * @type {Boolean}
@@ -448,6 +457,15 @@ export const CasperMoacProperties = superClass => {
           value: () => [],
           observer: '__selectedItemsChanged'
         },
+         /**
+         * Flag used to activate the casper-moac's epaper lazy load mode.
+         *
+         * @type {Boolean}
+         */
+        socketLazyLoad: {
+          type: Boolean,
+          value: false
+        },
         /**
          * This property is used to mark the range's start and end fields as not required.
          *
@@ -521,6 +539,24 @@ export const CasperMoacProperties = superClass => {
         __localStorageFilters: {
           type: Array,
           value: []
+        },
+        /**
+         * Controls when the casper tabs can be created.
+         *
+         * @type {Boolean}
+         */
+        __firstTimeDisplayingFilters: {
+          type: Boolean,
+          value: true
+        },
+        /**
+         * Indicates if the page has casper tabs.
+         *
+         * @type {Boolean}
+         */
+        __hasTabs: {
+          type: Boolean,
+          value: false
         }
       };
     }

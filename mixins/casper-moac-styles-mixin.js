@@ -8,6 +8,7 @@ export const CasperMoacStylesMixin = superClass => {
         ${this.__genericStyles()}
         ${this.__casperMoacColumnStyles()}
         ${this.__casperMoacSortColumnStyles()}
+        ${this.__casperMoacToggleColumnStyles()}
       `;
     }
 
@@ -21,6 +22,49 @@ export const CasperMoacStylesMixin = superClass => {
             width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
+          }
+        </style>
+      `;
+    }
+
+    /**
+     * This method returns the styles that will be used for the casper-moac-toggle-column component.
+     */
+    static __casperMoacToggleColumnStyles () {
+      return html`
+        <style>
+          .casper-moac-toggle-column {
+            width: 100%;
+            display: inline-flex;
+            user-select: none;
+          }
+
+          .casper-moac-toggle-column .toggle-buttons-container {
+            display: inline-flex;
+            border: solid 1px rgba(12, 84, 96, .7);
+            border-radius: 7.5px;
+            background-color: rgba(12, 84, 96, .5);
+            margin: 2px 0;
+          }
+
+          .casper-moac-toggle-column .toggle-buttons-container .toggle-button {
+            display: inline-block;
+            padding: 2px 15px;
+            opacity: .5;
+          }
+
+          .casper-moac-toggle-column .toggle-buttons-container .selected-toggle-button {
+            background-color: #fff;
+            border-radius: 7px;
+            color: var(--primary-color);
+            box-shadow: 2px 2px 3px rgb(12, 84, 96);
+            opacity: 1;
+          }
+
+          .casper-moac-toggle-column .toggle-buttons-container span:not(.selected-toggle-button):hover {
+            background-color: rgba(12, 84, 96, .7);
+            cursor: pointer;
+            border-radius: 4px;
           }
         </style>
       `;
@@ -96,8 +140,23 @@ export const CasperMoacStylesMixin = superClass => {
             display: flex;
             flex-wrap: wrap;
             padding-bottom: 10px;
-            justify-content: center;
             border-bottom: 1px solid var(--primary-color);
+            justify-content: center;
+          }
+
+          .main-container vaadin-split-layout .left-side-container .header-container-expanded {
+            border-bottom: 0px solid var(--primary-color);
+          }
+
+          .main-container vaadin-split-layout .left-side-container .top-container {
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--primary-color);
+            max-height: 0%;
+            transition: all 0.4s ease-in-out;
+          }
+
+          .main-container vaadin-split-layout .left-side-container .top-container-expanded {
+            max-height: 200%; /* Martelada: some moacs don't have 100% max-height */
           }
 
           .main-container vaadin-split-layout .left-side-container .header-container.header-container--responsive {
@@ -117,7 +176,6 @@ export const CasperMoacStylesMixin = superClass => {
             display: flex;
             flex-grow: 1;
             flex-direction: column;
-            height: 70px;
             padding: 0 10px;
             text-align: center;
             position: relative;
@@ -153,7 +211,7 @@ export const CasperMoacStylesMixin = superClass => {
             color: var(--dark-primary-color);
           }
 
-          .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters {
+          .main-container vaadin-split-layout .left-side-container .display-all-filters-btn {
             margin: 0;
             width: 100%;
             height: 35px;
@@ -166,11 +224,11 @@ export const CasperMoacStylesMixin = superClass => {
             transition: background-color 100ms linear;
           }
 
-          .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters:hover {
+          .main-container vaadin-split-layout .left-side-container .display-all-filters-btn:hover {
             background-color: rgba(var(--primary-color-rgb), 0.2);
           }
 
-          .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters casper-icon {
+          .main-container vaadin-split-layout .left-side-container .display-all-filters-btn casper-icon {
             width: 15px;
             height: 15px;
             margin-left: 5px;
@@ -178,8 +236,12 @@ export const CasperMoacStylesMixin = superClass => {
             color: var(--primary-color);
           }
 
-          .main-container vaadin-split-layout .left-side-container .header-container .generic-filter-container #displayAllFilters casper-icon[rotate] {
+          .main-container vaadin-split-layout .left-side-container .display-all-filters-btn casper-icon[rotate] {
             transform: rotate(180deg);
+          }
+
+          .main-container vaadin-split-layout .left-side-container .display-all-filters-hide {
+            background-color: rgba(var(--primary-color-rgb), 0.2);
           }
 
           /* Active filters summary */
@@ -242,8 +304,29 @@ export const CasperMoacStylesMixin = superClass => {
             padding: 10px;
             grid-row-gap: 10px;
             grid-column-gap: 10px;
-            border-bottom: 1px solid var(--primary-color);
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          }
+
+          .main-container vaadin-split-layout .left-side-container .filters-container casper-select {
+            --casper-select-single-paper-input-container-label: { font-size: 14px; };
+            --casper-select-single-paper-input-container-input: { font-size: 14px; };
+          }
+
+          .main-container vaadin-split-layout .left-side-container .filters-container casper-select[multi-selection] {
+            --paper-input-container-label: { font-size: 14px; };
+          }
+
+          .main-container vaadin-split-layout .left-side-container .filters-container paper-input {
+            --paper-input-container-label: { font-size: 14px; };
+            --paper-input-container-input: { font-size: 14px; };
+          }
+
+          /* Casper tabs container inside the filters container */
+          .main-container vaadin-split-layout .left-side-container .filters-container .casper-tabs-container {
+            grid-column: 1 / -1;
+            display: inline-flex;
+            justify-content: center;
+            margin-bottom: -10px;
           }
 
           .main-container vaadin-split-layout .left-side-container .filters-container .filter-container-invisible {
@@ -338,8 +421,6 @@ export const CasperMoacStylesMixin = superClass => {
             overflow: hidden;
             padding: 10px;
             align-items: center;
-            border-top-left-radius: 5px;
-            border-top-right-radius: 5px;
             background-color: #1A39601A;
             justify-content: space-between;
             transition: height 100ms linear;
@@ -395,6 +476,8 @@ export const CasperMoacStylesMixin = superClass => {
           }
 
           .main-container vaadin-split-layout .left-side-container .grid-container vaadin-grid {
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
             overflow: hidden;
           }
 
@@ -403,6 +486,11 @@ export const CasperMoacStylesMixin = superClass => {
             height: 100%;
             overflow: hidden;
           }
+
+          .epaper-transition-class {
+            transition: width 700ms ease-in-out;
+          }
+
         </style>
       `;
     }

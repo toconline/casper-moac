@@ -95,7 +95,26 @@ export const CasperMoacGridMixin = superClass => {
       const keyCode = event.key || event.code;
 
       // Ignore the event if there are no items, the user is typing in the filter input or it's not an arrow key event.
-      if (this.displayedItems.length === 0 || !['ArrowUp', 'ArrowDown'].includes(keyCode)) return;
+      if (this.displayedItems.length === 0 || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyCode)) return;
+
+      if (['ArrowLeft', 'ArrowRight'].includes(keyCode) && this.socketLazyLoad && this.activeItem && this.activeItem.id && this.activeItem[this.parentColumn] !== undefined) {
+        if (keyCode === 'ArrowLeft' && this.activeItem.expanded) {
+          // Collapse
+          this.dispatchEvent(new CustomEvent('casper-moac-tree-column-collapse', {
+            bubbles: true,
+            composed: true,
+            detail: { id: this.activeItem.id, parent_id: this.activeItem[this.parentColumn] }
+          }));
+        } else if (keyCode === 'ArrowRight' && !this.activeItem.expanded && this.activeItem.has_children) {
+          // Expand
+          this.dispatchEvent(new CustomEvent('casper-moac-tree-column-expand', {
+            bubbles: true,
+            composed: true,
+            detail: { id: this.activeItem.id, parent_id: this.activeItem[this.parentColumn] }
+          }));
+        }
+        return;
+      }
 
       // If the user is navigating in the grid, activate the row in which the user currently is.
       if (this.shadowRoot.activeElement === this.grid) {

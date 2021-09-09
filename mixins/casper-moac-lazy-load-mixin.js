@@ -520,6 +520,9 @@ export const CasperMoacLazyLoadMixin = superClass => {
         `${this.resourcePageSizeParam}=${this.resourcePageSize}`
       ];
 
+      // TODO: this might be wrong
+      if (this.socketLazyLoad) resourceUrlParams = [];
+
       // Limit the fields that are requested from the JSON API.
       if (this.resourceListAttributes && this.resourceListAttributes.length > 0) {
         resourceUrlParams.push(`fields[${this.resourceName}]=${this.resourceListAttributes.join(',')}`);

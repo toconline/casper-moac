@@ -169,9 +169,13 @@ export const CasperMoacFiltersMixin = superClass => {
       });
 
       // Since we already have all the values ready, filter the items.
-      !this.lazyLoad
-        ? this.__filterItems()
-        : this.__filterLazyLoadItems();
+      if (this.lazyLoad) {
+        this.__filterLazyLoadItems();
+      } else if (this.socketLazyLoad) {
+        this._filterSocketItems();
+      } else {
+        this.__filterItems();
+      }
 
       if (Object.keys(filtersValueOrigins).length > 0) {
         this.dispatchEvent(new CustomEvent('filters-initialized', {
@@ -226,7 +230,11 @@ export const CasperMoacFiltersMixin = superClass => {
         this.__displayResetFiltersButton = true;
 
         // Force the re-fetch of items if one the filter changes.
-        if (this.lazyLoad) this.refreshItems();
+        if (this.lazyLoad) {
+          this.refreshItems();
+        } else if (this.socketLazyLoad) {
+          this._filterSocketItems();
+        }
 
         this.__renderActiveFilters();
         this.__updateUrlWithCurrentFilters();
@@ -406,6 +414,12 @@ export const CasperMoacFiltersMixin = superClass => {
           this.__displayAllFiltersButtonSpan.innerHTML = 'Ver todos os filtros';
         }
       });
+
+      // The first time that this function runs, another one is called to insert casper tabs (categories for the filters)
+      if (this.__firstTimeDisplayingFilters) {
+        this.__firstTimeDisplayingFilters = false;
+        this.__createFiltersTabs();
+      }
     }
 
     /**
@@ -417,7 +431,7 @@ export const CasperMoacFiltersMixin = superClass => {
         : this.$.filterInputIcon.icon = 'fa-regular:search';
 
       // When the component is lazily loaded, ignore the changes if the developer didn't specify no filter attributes or an URL parameter.
-      if (this.lazyLoad && !this.resourceFilterParam && (!this.resourceFilterAttributes || this.resourceFilterAttributes.length === 0)) return;
+      if ((this.lazyLoad || this.socketLazyLoad) && !this.resourceFilterParam && (!this.resourceFilterAttributes || this.resourceFilterAttributes.length === 0)) return;
 
       this.__debounce('__freeFilterChangedDebouncer', () => {
         // Do not re-filter the items if the current value matches the last one.
@@ -425,9 +439,14 @@ export const CasperMoacFiltersMixin = superClass => {
         this.freeFilterValue = this.$.filterInput.value.trim();
 
         this.__updateUrlWithCurrentFilters();
-        !this.lazyLoad
-          ? this.__filterItems()
-          : this.__filterLazyLoadItems();
+
+        if (this.lazyLoad) {
+          this.__filterLazyLoadItems();
+        } else if (this.socketLazyLoad) {
+          this._filterSocketItems();
+        } else {
+          this.__filterItems()
+        }
       });
     }
 
@@ -479,6 +498,9 @@ export const CasperMoacFiltersMixin = superClass => {
       if (this.lazyLoad) {
         this.refreshItems();
         this.__dispatchFilterResetted(Object.keys(resetFiltersValue));
+      } else if (this.socketLazyLoad) {
+        this._filterSocketItems();
+        this.__dispatchFilterChangedEvent(Object.keys(resetFiltersValue));
       } else {
         this.__dispatchFilterChangedEvent(Object.keys(resetFiltersValue));
       }
@@ -501,19 +523,125 @@ export const CasperMoacFiltersMixin = superClass => {
             : filterComponent.openDropdown(this.$.activeFilters);
           break;
         case CasperMoacFilterTypes.CASPER_DATE_PICKER:
-          this.__displayAllFilters = true;
+          if (this.__displayAllFilters === false) this.__toggleDisplayAllFilters();
           filterComponent.open();
           break;
         case CasperMoacFilterTypes.CASPER_DATE_RANGE:
-          this.__displayAllFilters = true;
+          if (this.__displayAllFilters === false) this.__toggleDisplayAllFilters();
           filterComponent.openStartDatePicker();
           break;
         case CasperMoacFilterTypes.PAPER_INPUT:
         case CasperMoacFilterTypes.PAPER_CHECKBOX:
-          this.__displayAllFilters = true;
+          if (this.__displayAllFilters === false) this.__toggleDisplayAllFilters();
           filterComponent.focus();
           break;
       }
     }
+
+    /**
+     * This function is responsible for creating the filters tabs.
+     *
+     */
+    __createFiltersTabs () {
+      // First we need to check if any of the filters has a key 'tab'. If not, then we return
+      for (const obj of this.__filters) {
+        if (obj.filter.tab) {
+          this.__hasTabs = true;
+          break;
+        }
+      }
+      if (!this.__hasTabs) return;
+
+      const casperTabsContainer = this.$.casperTabsContainer;
+      casperTabsContainer.classList.add('casper-tabs-container');
+
+      let casperTabsHtml = '<casper-tabs id="casperTabs">';
+
+      for (const obj of this.__filters) {
+        if (obj.filter.tab) {
+          const tabName = obj.filter.tab;
+
+          // If the tab already exists, we skip this one
+          if (casperTabsHtml.includes(`data-type="${tabName}"`)) {
+            continue;
+          } else {
+            casperTabsHtml += `<casper-tab data-type="${tabName}">${tabName}</casper-tab>`;
+          }
+        // If no tab was specified for the filter, then we create a "others" tab and insert it there
+        } else {
+          obj.filter.tab = 'others';
+
+          if (casperTabsHtml.includes('data-type="others"')) {
+            continue;
+          } else {
+            casperTabsHtml += `<casper-tab data-type="others">Outros filtros</casper-tab>`;
+          }
+        }
+      }
+
+      casperTabsHtml += '</casper-tabs>';
+      casperTabsContainer.innerHTML = casperTabsHtml;
+
+      const casperTabs = casperTabsContainer.querySelector('#casperTabs');
+      casperTabs.addEventListener('selected-index-changed', event => this.__tabFiltersChanged(event));
+      this.changeFiltersTab(0);
+    }
+
+    /**
+     * This function fires when the filters selected tab changes.
+     * It is responsible for identifying the filters that should be hidden / displayed for the selected tab.
+     *
+     * @param {Object} event The event's object.
+     */
+    __tabFiltersChanged (event) {
+      if (event && event.currentTarget && event.currentTarget.id === 'casperTabs' && event.detail && event.detail.value !== undefined) {
+        const tabIndex = event.detail.value;
+        const casperTabs = event.currentTarget;
+        const selectedTab = casperTabs.shadowRoot.querySelector('slot').assignedElements()[tabIndex];
+        const selectedTabType = selectedTab.dataset.type;
+
+        const filterElements = this.$.filtersContainer.querySelectorAll('.filter-container');
+
+        for (const filterEl of filterElements) {
+          let currentFilterName;
+
+          // We need to go inside the current filter element and get the filter's name
+          for (let i = 0; i < filterEl.childElementCount; i++) {
+            if (filterEl.children[i].tagName !== 'DOM-IF' && filterEl.children[i].dataset && filterEl.children[i].dataset.filter) {
+              currentFilterName = filterEl.children[i].dataset.filter;
+              break;
+            }
+          }
+
+          // Next we need to check the filter objects to find out if the current filter belongs to the selected tab or not
+          for (const obj of this.__filters) {
+            if (currentFilterName === obj.filterKey) {
+              const currentFilterTab = obj.filter.tab;
+
+              if (currentFilterTab !== selectedTabType) {
+                filterEl.hidden = true;
+              } else {
+                filterEl.hidden = false;
+              }
+
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    /**
+     * Public function to change the active tab in the filters.
+     *
+     * @param {Number} tabIndex The index of the tab that will be selected.
+     */
+    changeFiltersTab (tabIndex) {
+      if (isNaN(tabIndex) || +tabIndex < 0 || !this.__hasTabs) return;
+
+      const casperTabs = this.$.casperTabsContainer.querySelector('#casperTabs');
+      casperTabs.selectedIndex = tabIndex;
+    }
+
   }
 };

@@ -64,9 +64,14 @@ export const CasperMoacSortingMixin = superClass => {
           });
 
           this.__hasActiveSorters = this.__activeSorters.length > 0;
-          !this.lazyLoad
-            ? this.__filterItems()
-            : this.__filterLazyLoadItems();
+
+          if (this.lazyLoad) {
+            this.__filterLazyLoadItems();
+          } else if (this.socketLazyLoad) {
+            this._filterSocketItems();
+          } else {
+            this.__filterItems()
+          }
         });
       });
     }
