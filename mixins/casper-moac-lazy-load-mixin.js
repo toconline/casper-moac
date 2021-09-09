@@ -701,9 +701,20 @@ export const CasperMoacLazyLoadMixin = superClass => {
     __buildResourceUrlForAddOrUpdate (items, filters = []) {
       if (filters.constructor.name !== 'Array') filters = [filters];
 
-      const resourceFilterParameter = items.constructor.name !== 'Array'
-        ? `filter="${this.idExternalProperty}::TEXT = '${items}'::TEXT"`
-        : `filter="${this.idExternalProperty}::TEXT IN (${items.map(item => `'${item}'::TEXT`).join(',')})"`;
+      // Fix what has been transformed into an array, even when it wasn't.
+      if (items.constructor.name == 'Array' && items.length == 1) items = items[0];
+
+      let resourceFilterParameter;
+
+      if (this.useBracketNotationForApiRequests) {
+        resourceFilterParameter = items.constructor.name !== 'Array'
+        ? `filter[p_${this.idExternalProperty}]='${items}'`
+        : `filter[p_${this.idExternalProperty}]=${items.map(item => `'${item}'`).join(',')}`;
+      } else {
+        resourceFilterParameter = items.constructor.name !== 'Array'
+          ? `filter="${this.idExternalProperty}::TEXT = '${items}'::TEXT"`
+          : `filter="${this.idExternalProperty}::TEXT IN (${items.map(item => `'${item}'::TEXT`).join(',')})"`;
+      }
 
       let resourceUrl = this.resourceName.includes('?')
         ? `${this.resourceName}&${resourceFilterParameter}`
