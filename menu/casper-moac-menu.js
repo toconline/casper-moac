@@ -188,6 +188,7 @@ class CasperMoacMenu extends PolymerElement {
 
       document.removeEventListener('keydown', this.__boundCloseOnEscapePress);
     } else {
+      this.__menuBackgroundDimensions = Math.max(500, Math.max(this.$['menu-items'].scrollHeight, this.$['menu-items'].scrollWidth) * 2);
       this.$['menu-trigger'].icon = this.closeIcon;
       this.$['circle-background'].style.width = `${this.__menuBackgroundDimensions}px`;
       this.$['circle-background'].style.height = `${this.__menuBackgroundDimensions}px`;
