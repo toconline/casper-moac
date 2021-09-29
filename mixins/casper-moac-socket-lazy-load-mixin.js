@@ -279,6 +279,7 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
         this.setFiltersValue(resetedVals, false, true);
         this.__clearFilterInput();
         this._debounceFetchSocketItems();
+        this.__dispatchFilterResetted(resetedVals);
       }
     }
 
