@@ -312,6 +312,17 @@ export const CasperMoacProperties = superClass => {
           value: 'id'
         },
         /**
+         * Wether to use bracket notation with ("p_${idExternalProperty}") for the api requests or free filter
+         * Why are you setting this to false? This was just left here as a temporary save for unexpected crashes.
+         * Dont. Use. It.
+         *
+         * @type {Boolean}
+         */
+        useBracketNotationForApiRequests: {
+          type: Boolean,
+          value: true
+        },
+        /**
          * The internal identifier property that will be used when painting the active row.
          *
          * @type {String}
