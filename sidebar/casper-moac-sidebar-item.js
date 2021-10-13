@@ -89,6 +89,7 @@ class CasperMoacSidebarItem extends PolymerElement {
           color: #3C3C3C;
           margin-right: 15px;
           transition: transform 200ms linear;
+          flex-shrink: 0;
         }
 
         .sidebar-item-header #header-dropdown-icon[rotate] {
