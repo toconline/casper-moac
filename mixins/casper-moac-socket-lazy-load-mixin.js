@@ -345,7 +345,7 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
           }
 
         } else {
-          // this._newActiveItemId = undefined;
+          this._newActiveItemId = undefined;
           try {
             const url = this.resourceName.includes('?')
             ? `${this.resourceName}&${this.buildResourceUrl()}`
