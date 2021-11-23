@@ -426,6 +426,12 @@ export const CasperMoacLazyLoadMixin = superClass => {
       this.__resourceTotal = socketResponse.meta.total;
       this.__resourceGrandTotal = socketResponse.meta['grand-total'];
 
+      this.dispatchEvent(new CustomEvent('meta-changed', {
+        bubbles: true,
+        composed: true,
+        detail: { meta: socketResponse.meta }
+      }));
+
       // Disable the scroll event listeners when there are no more items.
       this.__ignoreScrollEvents = this.displayedItems.length === parseInt(socketResponse.meta.total);
 
