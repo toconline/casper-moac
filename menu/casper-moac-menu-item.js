@@ -43,7 +43,7 @@ export class CasperMoacMenuItem extends PolymerElement {
         }
 
         #container:hover casper-icon-button {
-          background-color: white;
+          background-color: var(--light-primary-color);
           color: var(--primary-color);
         }
 
