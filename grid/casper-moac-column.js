@@ -17,7 +17,7 @@ class CasperMoacColumn extends GridColumnElement {
   static get template () {
     return html`
       <template>
-        <div class="casper-moac-column" tooltip$="[[tooltip]]">[[header]]</div>
+        <div class="casper-moac-column" tooltip$="[[tooltip]]" inner-h-t-m-l="[[header]]">/div>
       </template>
     `;
   }

@@ -48,6 +48,8 @@ class CasperMoacSortColumn extends GridColumnElement {
     }
   }
 
+
+
   static get template () {
     return html`
       <template class="header">
@@ -56,7 +58,7 @@ class CasperMoacSortColumn extends GridColumnElement {
           on-click="__toggleDirection"
           class="casper-moac-sort-column"
           style="[[__getHeaderContainerAlignment()]]">
-          <span class="header-title">[[header]]</span>
+          <span class="header-title" inner-h-t-m-l="[[header]]"></span>
 
           <div class="header-sort">
             <casper-icon icon="[[__getIcon(direction)]]" style="[[__getIconOpacity(direction)]]"></casper-icon>
