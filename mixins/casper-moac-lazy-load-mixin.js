@@ -418,13 +418,13 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       // Check if the totals are different which means something changed in the server's dataset.
       if (!this.__staleDataset && (
-        (this.__resourceTotal && this.__resourceTotal !== socketResponse.meta.total) ||
-        (this.__resourceGrandTotal && this.__resourceGrandTotal !== socketResponse.meta['grand-total']))) {
+        (this.__resourceTotal && this.__resourceTotal !== socketResponse?.meta?.total) ||
+        (this.__resourceGrandTotal && this.__resourceGrandTotal !== socketResponse.meta && socketResponse.meta['grand-total']))) {
         this.__staleDataset = true;
       }
 
-      this.__resourceTotal = socketResponse.meta.total;
-      this.__resourceGrandTotal = socketResponse.meta['grand-total'];
+      this.__resourceTotal = socketResponse?.meta?.total;
+      this.__resourceGrandTotal = socketResponse.meta && socketResponse.meta['grand-total'];
 
       this.dispatchEvent(new CustomEvent('meta-changed', {
         bubbles: true,
@@ -433,12 +433,12 @@ export const CasperMoacLazyLoadMixin = superClass => {
       }));
 
       // Disable the scroll event listeners when there are no more items.
-      this.__ignoreScrollEvents = this.displayedItems.length === parseInt(socketResponse.meta.total);
+      this.__ignoreScrollEvents = this.displayedItems.length === parseInt(socketResponse?.meta?.total);
 
       // Update the paging information.
-      this.__numberOfResults = socketResponse.meta.total === socketResponse.meta['grand-total']
-        ? `${socketResponse.meta.total} ${this.multiSelectionLabel}`
-        : `${socketResponse.meta.total} de ${socketResponse.meta['grand-total']} ${this.multiSelectionLabel}`;
+      this.__numberOfResults = socketResponse?.meta?.total === (socketResponse.meta && socketResponse.meta['grand-total'])
+        ? `${socketResponse?.meta?.total} ${this.multiSelectionLabel}`
+        : `${socketResponse?.meta?.total} de ${socketResponse.meta && socketResponse.meta['grand-total']} ${this.multiSelectionLabel}`;
     }
 
     /**
