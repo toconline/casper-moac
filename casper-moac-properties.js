@@ -239,6 +239,15 @@ export const CasperMoacProperties = superClass => {
           value: false
         },
         /**
+         * Boolean that when set to true select the row just by clicked on them
+         *
+         * @type {Boolean}
+         */
+         autoSelection: {
+          type: Boolean,
+          value: false
+        },
+        /**
          * A reference to the vaadin-grid so that the page using casper-moac can
          * use its methods.
          *
@@ -292,6 +301,15 @@ export const CasperMoacProperties = superClass => {
         headerBackgroundColor: {
           type: String,
           observer: '__headerBackgroundColorChanged'
+        },
+        /**
+         * This property changes the header container.
+         *
+         * @type {String}
+         */
+         disabledHeader: {
+          type: Boolean,
+          value: false
         },
         /**
          * Whether to display or not the number of results on the top-right corner of the filters.
@@ -372,6 +390,15 @@ export const CasperMoacProperties = superClass => {
         leftSideMinimumWidth: {
           type: Number,
           value: 25
+        },
+        /**
+         * The padding for left-side container.
+         *
+         * @type {Number}
+         */
+         leftSidePadding: {
+          type: Number,
+          value: 15
         },
         /**
          * Boolean that toggles the paper-spinner when the grid is loading items. This was required since the vaadin-grid one

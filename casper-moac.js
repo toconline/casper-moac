@@ -61,7 +61,8 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
       <div class="main-container">
         <vaadin-split-layout id="splitLayout">
           <div class="left-side-container" style="[[__leftSideStyling()]]">
-            <div class="header-container">
+
+            <div class="header-container" hidden$="[[disabledHeader]]">
               <div class="header-left-side-container">
                 <!--Casper-moac-menu-->
                 <slot name="menu"></slot>
@@ -237,7 +238,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
                 <slot name="grid-before"></slot>
 
                 <template is="dom-if" if="[[!disableSelection]]">
-                  <vaadin-grid-selection-column width="45px" flex-grow="0" frozen$="[[freezeSelectionColumn]]"></vaadin-grid-selection-column>
+                  <vaadin-grid-selection-column width="45px" flex-grow="0" auto-select$=[[autoSelection]] frozen$="[[freezeSelectionColumn]]"></vaadin-grid-selection-column>
                 </template>
 
                 <slot name="grid"></slot>
@@ -1172,7 +1173,9 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     const maximumWidth = this.leftSideMaximumWidth ? `max-width: ${this.leftSideMaximumWidth}%` : null;
     const minimumWidth = this.leftSideMinimumWidth ? `min-width: ${this.leftSideMinimumWidth}%` : null;
 
-    return [width, maximumWidth, minimumWidth].filter(cssRule => !!cssRule).join(';');
+    const padding = this.leftSidePadding || this.leftSidePadding === 0 ? `padding: ${this.leftSidePadding}` : null;
+
+    return [width, maximumWidth, minimumWidth, padding].filter(cssRule => !!cssRule).join(';');
   }
 
   /**
