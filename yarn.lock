@@ -14,16 +14,16 @@
     "@vaadin/vaadin-progress-bar" "^1.x"
 
 "@cloudware-casper/casper-date-picker@^2.x":
-  version "2.0.0"
-  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-date-picker/2.0.0/fa1399bb770f7aff7d3fef8f8a20da8b73005739584ca9c72e6522b765d932cd#6facc7e64f9a72ecbe39a810d44b438c130a39ed"
-  integrity sha512-L8AznwDgDSY+Hvl+n/GssGVnxjzrXnuZHE3hk5zhJEeObUZJTLqVTq6bRPjvwPlFpt4g+7Kricmm9klrToNrrA==
+  version "2.0.4"
+  resolved "https://npm.pkg.github.com/download/@cloudware-casper/casper-date-picker/2.0.4/b0a024354e81c751d86a3a5fc41b13c8429ae754dadccd62478e256eee1777b3#42da2cc9c99213d8111199b5b3b701bc744eccd3"
+  integrity sha512-SlpPR4yHP3wkbfot04WK8T8yFlb0ZAk9VCg80Ms/aYZ3+KJIfdudd1LKpPqK8YTww1YMC7tEf3JAhdPKdd/O5w==
   dependencies:
     "@cloudware-casper/casper-icons" "^3.x"
     "@cloudware-casper/casper-overlay-behavior" "^1.x"
     "@polymer/paper-input" "^3.x"
     "@polymer/polymer" "^3.x"
     "@vaadin/vaadin-date-picker" "^4.x"
-    moment "^2.24.0"
+    moment "^2.x"
 
 "@cloudware-casper/casper-epaper@^3.x":
   version "3.1.7"
@@ -410,9 +410,9 @@
     "@polymer/polymer" "^3.0.0"
 
 "@vaadin/vaadin-control-state-mixin@^2.2.1", "@vaadin/vaadin-control-state-mixin@^2.2.2":
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-control-state-mixin/-/vaadin-control-state-mixin-2.2.4.tgz#9c3779228ada8a9062ad18356e6a9a4317b8a162"
-  integrity sha512-oGsNaWbM6RisY1LkyWYtwnw+DtSRSpkFDbemEOtkYezj+Hhsd9+07LqILaUU4pB0zPaRq+uq+2tKba/TL3t23g==
+  version "2.2.6"
+  resolved "https://registry.yarnpkg.com/@vaadin/vaadin-control-state-mixin/-/vaadin-control-state-mixin-2.2.6.tgz#b568b63096211f132d4ba47d2ab045ee43f4f48d"
+  integrity sha512-3edQSooBoHVC3RexL6hi3/26HMGvG1jlxLq6ffH9c+GapuZ9zh6E2KyZa/Sz1jmLZwfZII7exgwkHhEYUZZrJA==
   dependencies:
     "@polymer/polymer" "^3.0.0"
 
@@ -631,7 +631,7 @@ lit@^2.0.0-rc.2:
     lit-element "^3.0.0-rc.2"
     lit-html "^2.0.0-rc.4"
 
-moment@^2.24.0:
-  version "2.29.1"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.1.tgz#b2be769fa31940be9eeea6469c075e35006fa3d3"
-  integrity sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==
+moment@^2.x:
+  version "2.29.3"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.3.tgz#edd47411c322413999f7a5940d526de183c031f3"
+  integrity sha512-c6YRvhEo//6T2Jz/vVtYzqBzwvPT95JBQ+smCytzf7c50oMZRsR/a4w88aD34I+/QVSfnoAnSBFPJHItlOMJVw==
