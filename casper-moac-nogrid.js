@@ -557,6 +557,15 @@ export class CasperMoacNogrid extends CasperMoacLazyLoadMixin(
     }
   }
 
+
+   /**
+   * This method forces the vaadin-grid to redraw all its rows.
+   */
+    forceGridRedraw () {
+      // this.$.grid?.clearCache();
+      // this.__paintGridRows();
+    }
+
   _expandCollapseEpaper (event) {
     if (this.hasEpaperButton) {
       let leftWidth = 40;
@@ -793,11 +802,10 @@ export class CasperMoacNogrid extends CasperMoacLazyLoadMixin(
     // Use spread operator to avoid messing with the original dataset by sorting.
     let originalItems = [...(this.items || [])];
     let displayedItems = [...(this.items || [])];
-
-    if (this.$.filterInput.value.trim() && originalItems.length > 0) {
+    if (this.$.filterInput.value.trim()) {
       // Either retrieve the list of filter attributes from the properties or from the first item's existing keys.
       let filterAttributes = this.resourceFilterAttributes;
-      if (!filterAttributes || filterAttributes.length === 0) filterAttributes = Object.keys(originalItems[0]);
+      // if (!filterAttributes || filterAttributes.length === 0) filterAttributes = Object.keys(originalItems[0]);
 
       if (filterAttributes) {
         const filterTerm = this.__normalizeVariable(this.$.filterInput.value);

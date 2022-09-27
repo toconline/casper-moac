@@ -402,13 +402,17 @@ export const CasperMoacFiltersMixin = superClass => {
 
         if (this.__displayAllFilters) {
           // This fix is required for smaller screens where the vaadin-grid has no height with the filters visible.
-          this.$.grid.style.flex = '';
+          if ( this.querySelector("#grid") ) {
+            this.$.grid.style.flex = '';
+          }
 
           this.__displayAllFiltersButtonIcon.setAttribute('rotate', true);
           this.__displayAllFiltersButtonSpan.innerHTML = 'Esconder todos os filtros';
         } else {
           // This fix is required for smaller screens where the vaadin-grid has no height with the filters visible.
-          this.$.grid.style.flex = 1;
+          if ( this.querySelector("#grid") ) {
+            this.$.grid.style.flex = 1;
+          }
 
           this.__displayAllFiltersButtonIcon.removeAttribute('rotate');
           this.__displayAllFiltersButtonSpan.innerHTML = 'Ver todos os filtros';
@@ -447,6 +451,12 @@ export const CasperMoacFiltersMixin = superClass => {
         } else {
           this.__filterItems()
         }
+
+        this.dispatchEvent(new CustomEvent('free-filter-changed', {
+          bubbles: true,
+          composed: true,
+          detail: { filter: { freeFilter: this.freeFilterValue } }
+        }));
       });
     }
 
