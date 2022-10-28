@@ -63,6 +63,9 @@ export const CasperMoacContextMenuMixin = superClass => {
         this.hoveringRow = row;
         this.hoveringRowItem = row._item;
 
+        // Check if the row should hide the floating icon
+        if (this.hoveringRowItem.hideFloatingIcon) return;
+
         // Check if the row is totally visible.
         if (this.__isRowTotallyInView(row)) {
           this.__floatingContextMenu.style.display = 'flex';
