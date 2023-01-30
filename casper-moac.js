@@ -747,9 +747,10 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
     const rowBoundingRect = row.getBoundingClientRect();
     const gridBoundingRect = this.shadowRoot.querySelector('.grid-container').getBoundingClientRect();
     const gridHeaderBoundingRect = this.$.grid.shadowRoot.querySelector('thead').getBoundingClientRect();
+    const rowHeightMargin = 35/2;
 
     return parseInt(rowBoundingRect.bottom) <= parseInt(gridBoundingRect.bottom) &&
-      parseInt(rowBoundingRect.top) >= parseInt(gridBoundingRect.top + gridHeaderBoundingRect.height);
+      (parseInt(rowBoundingRect.top) + rowHeightMargin) >= parseInt(gridBoundingRect.top + gridHeaderBoundingRect.height);
   }
 
   __isFilterPaperInput (itemType) { return itemType === CasperMoacFilterTypes.PAPER_INPUT; }
