@@ -85,27 +85,33 @@ export class CasperMoacNogrid extends CasperMoacLazyLoadMixin(
                       </casper-icon>
                     </template>
 
-                    <!--Reset filters button-->
-                    <template is="dom-if" if="[[!socketLazyLoad]]">
-                      <casper-icon-button
-                        reverse
-                        hidden$=[[!__displayResetFiltersButton]]
-                        text="Repor filtros"
-                        icon="fa-light:times"
-                        on-click="__resetFilters"></casper-icon-button>
-                      <strong hidden$=[[__displayResetFiltersButton]]>Filtros ativos:</strong>
+                    <template is="dom-if" if="[[__theresAnyFilter()]]">
+
+                      <!--Reset filters button-->
+                      <template is="dom-if" if="[[!socketLazyLoad]]">
+                        <casper-icon-button
+                          reverse
+                          hidden$=[[!__displayResetFiltersButton]]
+                          text="Repor filtros"
+                          icon="fa-light:times"
+                          on-click="__resetFilters"></casper-icon-button>
+                        <strong hidden$=[[__displayResetFiltersButton]]>Filtros ativos:</strong>
+                      </template>
+
+                      <!--Clear filters button-->
+                      <template is="dom-if" if="[[socketLazyLoad]]">
+                        <casper-icon-button
+                          reverse
+                          text="Limpar pesquisa"
+                          icon="fa-light:times"
+                          hidden$=[[!__displayClearFilter(treeView)]]
+                          on-click="showTreeView"></casper-icon-button>
+                        <strong hidden$=[[__displayClearFilter(treeView)]]>Filtros ativos:</strong>
+                      </template>
+
+
                     </template>
 
-                    <!--Clear filters button-->
-                    <template is="dom-if" if="[[socketLazyLoad]]">
-                      <casper-icon-button
-                        reverse
-                        text="Limpar pesquisa"
-                        icon="fa-light:times"
-                        hidden$=[[!__displayClearFilter(treeView)]]
-                        on-click="showTreeView"></casper-icon-button>
-                      <strong hidden$=[[__displayClearFilter(treeView)]]>Filtros ativos:</strong>
-                    </template>
                   </div>
 
                   <template is="dom-if" if="[[!hideNumberResults]]">
@@ -263,6 +269,9 @@ export class CasperMoacNogrid extends CasperMoacLazyLoadMixin(
           this.$.epaperButton.positionTarget = this.$.splitLayout.$.splitter;
           this.$.epaperButton.open();
 
+
+
+
           let checkExpansion = true;
           this.$.splitLayout.addEventListener('iron-resize', (event) => {
             // this.$.epaperButton.refit();
@@ -302,6 +311,10 @@ export class CasperMoacNogrid extends CasperMoacLazyLoadMixin(
     if (!this.hasFlippingEpaper) return;
 
     this.__displayGridOrEpaper(this.__rightSideContainer, this.__leftSideContainer);
+  }
+
+  __theresAnyFilter () {
+    return this.filters != ''
   }
 
   /**
