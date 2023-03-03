@@ -70,9 +70,16 @@ class CasperMoacToggleColumn extends GridColumnElement {
     if (event && event.currentTarget && event.currentTarget.id) {
       const targetId = event.currentTarget.id;
       const initialClass = 'toggle-button';
+      let firstButton;
+      let secondButton;
 
-      const firstButton = this.parentElement.shadowRoot.getElementById('first-button');
-      const secondButton = this.parentElement.shadowRoot.getElementById('second-button');
+      if (this.parentElement.tagName === 'VAADIN-GRID') {
+        firstButton = this.parentElement.querySelector('#first-button');
+        secondButton = this.parentElement.querySelector('#second-button');
+      } else {
+        firstButton = this.parentElement.shadowRoot.getElementById('first-button');
+        secondButton = this.parentElement.shadowRoot.getElementById('second-button');
+      }
 
       if (targetId === 'first-button') {
         firstButton.classList.add('selected-toggle-button');
