@@ -398,7 +398,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
       if (!socketResponse) return;
 
       // Format the elements returned by the JSON API.
-      if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter.call(this.page || {}, item));
+      if (this.resourceFormatter) socketResponse.data.forEach(item => this.resourceFormatter.call(this.page || {}, item, socketResponse.included));
 
       if (this.__currentPage !== 1) {
         this.displayedItems = this.__addInternalIdentifierToItems([...this.displayedItems, ...socketResponse.data]);
@@ -474,7 +474,7 @@ export const CasperMoacLazyLoadMixin = superClass => {
 
       // Format the elements returned by the JSON API.
       if (this.resourceFormatter) {
-        socketResponse.data.forEach(item => this.resourceFormatter.call(this.page || {}, item));
+        socketResponse.data.forEach(item => this.resourceFormatter.call(this.page || {}, item, socketResponse.included));
       }
 
       this.__resourceChildrenCache[parentId] = {
