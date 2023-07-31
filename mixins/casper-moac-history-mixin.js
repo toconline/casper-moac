@@ -48,6 +48,10 @@ export const CasperMoacHistoryMixin = superClass => {
       !searchParamsText
         ? history.replaceState({}, '', window.location.pathname)
         : history.replaceState({}, '', `${window.location.pathname}?${searchParamsText}`);
+
+      !!this.$.filterInput.value.trim()
+        ? this.$.filterInputIcon.icon = 'fa-regular:times'
+        : this.$.filterInputIcon.icon = 'fa-regular:search';
     }
 
     /**
