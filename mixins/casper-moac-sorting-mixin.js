@@ -105,6 +105,7 @@ export const CasperMoacSortingMixin = superClass => {
      * @param {Array} items The items that will be sorted.
      */
     __sortItems (items) {
+      if (!this.__activeSorters) return items;
       if (this.__activeSorters && this.__activeSorters.length === 0) return items;
 
       return items.sort((previousItem, nextItem) => {
