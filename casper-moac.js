@@ -918,6 +918,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
    * Observer that fires when the selectedItems property changes.
    */
   __selectedItemsChanged () {
+    this.dispatchEvent(new CustomEvent('casper-moac-selected-items-changed'));
     if (this.shadowRoot.querySelector('slot[name="multi-selection"]').assignedElements().length === 0) return;
 
     if (!this.selectedItems || this.selectedItems.length === 0) {
