@@ -394,8 +394,8 @@ export const CasperMoacStylesMixin = superClass => {
             border-radius: var(--no-grid--icon--border-radius);
             border: var(--no-grid--icon--border);
 
-            width: 100px;
-            height: 100px;
+            width: var(--no-grid--icon--width, '100px');
+            height: var(--no-grid--icon--height, '100px');
             margin-bottom: 25px;
             color: var(--no-grid--icon--color, var(--status-gray));
           }
