@@ -385,14 +385,19 @@ export const CasperMoacStylesMixin = superClass => {
             flex-direction: column;
             justify-content: center;
             color: var(--status-gray);
-            background: rgba(0, 0, 0, 0.1);
+            background: var(--no-grid--background-color, rgba(0, 0, 0, 0.1));
           }
 
           .main-container vaadin-split-layout .left-side-container .grid-no-items casper-icon {
+            background: var(--no-grid--icon--background-color);
+            padding: var(--no-grid--icon--padding);
+            border-radius: var(--no-grid--icon--border-radius);
+            border: var(--no-grid--icon--border);
+
             width: 100px;
             height: 100px;
             margin-bottom: 25px;
-            color: var(--status-gray);
+            color: var(--no-grid--icon--color, var(--status-gray));
           }
 
           .main-container vaadin-split-layout .left-side-container #spinner {

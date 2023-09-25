@@ -427,7 +427,7 @@ export const CasperMoacProperties = superClass => {
          */
         noItemsIcon: {
           type: String,
-          value: 'fa-light:clipboard'
+          value: 'custom/empty-state'
         },
         /**
          * Text that will be used when the vaadin-grid has no items to display.
