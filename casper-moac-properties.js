@@ -121,6 +121,15 @@ export const CasperMoacProperties = superClass => {
           notify: true
         },
         /**
+         * Flag that if passed we must use the new epaper-lit
+         *
+         * @type {Boolean}
+         */
+        epaperLit: {
+          type: Boolean,
+          value: false
+        },
+        /**
          * The atatchment that is being currently displayed in the epaper component.
          *
          * @type {Object}

@@ -4,6 +4,7 @@ import '@vaadin/vaadin-grid/vaadin-grid-selection-column.js';
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
 import '@cloudware-casper/casper-icons/casper-icon.js';
 import '@cloudware-casper/casper-epaper/casper-epaper.js';
+import '@cloudware-casper/casper-epaper-lit/casper-epaper-lit.js';
 import '@cloudware-casper/casper-select/casper-select.js';
 import '@cloudware-casper/casper-date-range/casper-date-range.js';
 import '@cloudware-casper/casper-date-picker/casper-date-picker.js';
@@ -268,18 +269,34 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
             <template is="dom-if" if="[[__hasEpaperComponent(hasEpaper, hasFlippingEpaper)]]">
               <div class="epaper-container">
                 <slot name="right"></slot>
-                <casper-epaper
-                  app="[[app]]"
-                  zoom="[[epaperZoom]]"
-                  current-attachment="{{epaperCurrentAttachment}}"
-                  sticky-maximum-height="[[epaperStickyMaximumHeight]]"
-                  disable-sticky-animation="[[epaperDisableStickyAnimation]]">
-                  <slot name="casper-epaper-tabs" slot="casper-epaper-tabs"></slot>
-                  <slot name="casper-epaper-actions" slot="casper-epaper-actions"></slot>
-                  <slot name="casper-epaper-line-menu" slot="casper-epaper-line-menu"></slot>
-                  <slot name="casper-epaper-context-menu" slot="casper-epaper-context-menu"></slot>
-                  <slot name="casper-cta-button" slot="casper-cta-button"></slot>
-                </casper-epaper>
+                <template is="dom-if" if="[[epaperLit]]">
+                  <casper-epaper-lit
+                    app="[[app]]"
+                    zoom="[[epaperZoom]]"
+                    current-attachment="{{epaperCurrentAttachment}}"
+                    sticky-maximum-height="[[epaperStickyMaximumHeight]]"
+                    disable-sticky-animation="[[epaperDisableStickyAnimation]]">
+                    <slot name="casper-epaper-tabs" slot="casper-epaper-tabs"></slot>
+                    <slot name="casper-epaper-actions" slot="casper-epaper-actions"></slot>
+                    <slot name="casper-epaper-line-menu" slot="casper-epaper-line-menu"></slot>
+                    <slot name="casper-epaper-context-menu" slot="casper-epaper-context-menu"></slot>
+                    <slot name="casper-cta-button" slot="casper-cta-button"></slot>
+                  </casper-epaper-lit>
+                </template>
+                <template is="dom-if" if="[[!epaperLit]]">
+                  <casper-epaper
+                    app="[[app]]"
+                    zoom="[[epaperZoom]]"
+                    current-attachment="{{epaperCurrentAttachment}}"
+                    sticky-maximum-height="[[epaperStickyMaximumHeight]]"
+                    disable-sticky-animation="[[epaperDisableStickyAnimation]]">
+                    <slot name="casper-epaper-tabs" slot="casper-epaper-tabs"></slot>
+                    <slot name="casper-epaper-actions" slot="casper-epaper-actions"></slot>
+                    <slot name="casper-epaper-line-menu" slot="casper-epaper-line-menu"></slot>
+                    <slot name="casper-epaper-context-menu" slot="casper-epaper-context-menu"></slot>
+                    <slot name="casper-cta-button" slot="casper-cta-button"></slot>
+                  </casper-epaper>
+                </template>
               </div>
             </template>
             <casper-expand-epaper-button
@@ -307,7 +324,7 @@ export class CasperMoac extends CasperMoacLazyLoadMixin(
 
     if (this.__hasEpaperComponent()) {
       // Save the epaper in a notifiable property so it can be used outside.
-      afterNextRender(this, () => this.epaper = this.shadowRoot.querySelector('casper-epaper'));
+      afterNextRender(this, () => this.epaper = this.epaperLit ? this.shadowRoot.querySelector('casper-epaper-lit') : this.shadowRoot.querySelector('casper-epaper'));
 
       if (this.hasEpaperButton) {
         this.__leftSideContainer.classList.add('epaper-transition-class');
