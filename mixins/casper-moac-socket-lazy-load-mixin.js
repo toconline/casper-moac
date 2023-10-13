@@ -200,7 +200,10 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
     }
 
     // Public method to reload the items in the tree grid
-    refreshSocketItems () {
+    refreshSocketItems (activeItemId) {
+
+      if (activeItemId) this._selectedItemId = activeItemId;
+
       this._debounceFetchSocketItems();
     }
 
@@ -537,7 +540,10 @@ export const CasperMoacSocketLazyLoadMixin = superClass => {
         }
         this._responseIncluded = undefined;
 
-        if (this._newActiveItemId) {
+        if (this._selectedItemId) {
+          this.setItems(this._renderedArray, this._selectedItemId);
+          this._selectedItemId = undefined;
+        } else if (this._newActiveItemId) {
           this.setItems(this._renderedArray, this._newActiveItemId);
         } else {
           this.setItems(this._renderedArray);
