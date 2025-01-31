@@ -16,14 +16,14 @@
  */
 
 import '@vaadin/vaadin-split-layout/vaadin-split-layout.js';
-import '@cloudware-casper/casper-icons/casper-icon.js';
-import '@cloudware-casper/casper-epaper/casper-epaper.js';
-import '@cloudware-casper/casper-select/casper-select.js';
-import '@cloudware-casper/casper-date-range/casper-date-range.js';
-import '@cloudware-casper/casper-date-picker/casper-date-picker.js';
-import '@cloudware-casper/casper-tabs/casper-tabs.js';
-import '@cloudware-casper/casper-tabs/casper-tab.js';
-import '@cloudware-casper/casper-icons/casper-icon.js';
+import '@toconline/casper-icons/casper-icon.js';
+import '@toconline/casper-epaper/casper-epaper.js';
+import '@toconline/casper-select/casper-select.js';
+import '@toconline/casper-date-range/casper-date-range.js';
+import '@toconline/casper-date-picker/casper-date-picker.js';
+import '@toconline/casper-tabs/casper-tabs.js';
+import '@toconline/casper-tabs/casper-tab.js';
+import '@toconline/casper-icons/casper-icon.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';

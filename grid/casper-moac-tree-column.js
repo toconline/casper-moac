@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import '@cloudware-casper/casper-icons/casper-icon.js';
+import '@toconline/casper-icons/casper-icon.js';
 import { LitElement, html } from 'lit-element';
 import { render } from 'lit-html';
 import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js';

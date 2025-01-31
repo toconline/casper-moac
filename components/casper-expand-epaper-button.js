@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import '@cloudware-casper/casper-icons/casper-icon.js';
+import '@toconline/casper-icons/casper-icon.js';
 import { IronFitBehavior } from '@polymer/iron-fit-behavior/iron-fit-behavior.js';
 import { IronOverlayBehavior } from '@polymer/iron-overlay-behavior/iron-overlay-behavior.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';

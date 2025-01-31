@@ -16,8 +16,8 @@
  */
 
 import './casper-moac-menu-item';
-import '@cloudware-casper/casper-icons/casper-icon.js';
-import '@cloudware-casper/casper-icons/casper-icon-button.js';
+import '@toconline/casper-icons/casper-icon.js';
+import '@toconline/casper-icons/casper-icon-button.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
