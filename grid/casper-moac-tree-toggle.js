@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import '@cloudware-casper/casper-icons/casper-icon.js';
+import '@toconline/casper-icons/casper-icon.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
 class CasperMoacTreeToggle extends PolymerElement {

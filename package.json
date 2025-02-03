@@ -1,16 +1,16 @@
 {
   "description": "Mother of all containers to easily display JSON API resources.",
-  "name": "@cloudware-casper/casper-moac",
+  "name": "@toconline/casper-moac",
   "version": "3.1.14",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
   "main": "casper-moac.js",
   "dependencies": {
-    "@cloudware-casper/casper-date-picker": "^2.x",
-    "@cloudware-casper/casper-epaper": "^3.x",
-    "@cloudware-casper/casper-icons": "^3.x",
-    "@cloudware-casper/casper-select": "^3.x",
+    "@toconline/casper-date-picker": "^2.x",
+    "@toconline/casper-epaper": "^3.x",
+    "@toconline/casper-icons": "^3.x",
+    "@toconline/casper-select": "^3.x",
     "@polymer/iron-input": "^3.x",
     "@polymer/paper-input": "^3.x",
     "@polymer/polymer": "^3.x",

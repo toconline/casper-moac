@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import '@cloudware-casper/casper-icons/casper-icon.js';
+import '@toconline/casper-icons/casper-icon.js';
 import { html } from '@polymer/polymer/polymer-element.js';
 import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js';
 import { CasperMoacSortTypes, CasperMoacSortDirections } from '../casper-moac-constants';

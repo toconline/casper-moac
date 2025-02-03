@@ -15,8 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import '@cloudware-casper/casper-icons/casper-icon.js';
-import '@cloudware-casper/casper-icons/casper-icon-button.js';
+import '@toconline/casper-icons/casper-icon.js';
+import '@toconline/casper-icons/casper-icon-button.js';
 import '@polymer/paper-button/paper-button.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
