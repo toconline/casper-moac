@@ -447,6 +447,9 @@ export const CasperMoacFiltersMixin = superClass => {
      * Debounce the items filtering after the search input's value changes.
      */
     __freeFilterChanged () {
+      // Delay filter dispatch by this amount after the search input's value changes
+      const debounceMilliseconds = 800
+
       !!this.$.filterInput.value.trim()
         ? this.$.filterInputIcon.icon = 'fa-regular:times'
         : this.$.filterInputIcon.icon = 'fa-regular:search';
@@ -474,7 +477,7 @@ export const CasperMoacFiltersMixin = superClass => {
           composed: true,
           detail: { filter: { freeFilter: this.freeFilterValue } }
         }));
-      });
+      }, debounceMilliseconds);
     }
 
     /**

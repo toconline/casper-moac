@@ -1,7 +1,7 @@
 {
   "description": "Mother of all containers to easily display JSON API resources.",
   "name": "@toconline/casper-moac",
-  "version": "3.1.14",
+  "version": "3.1.16",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
